@@ -1,9 +1,14 @@
 /* eslint-disable camelcase */
+import { CUSTOM_MODEL_ID } from '../constants'
 import { getSettings } from '../utils'
 import { AbstractOpenAI } from './abstract-openai'
 import { IModel } from './interfaces'
 
 export class Azure extends AbstractOpenAI {
+    supportCustomModel(): boolean {
+        return true
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listModels(apiKey_: string | undefined): Promise<IModel[]> {
         return [
@@ -36,6 +41,9 @@ export class Azure extends AbstractOpenAI {
 
     async getAPIModel(): Promise<string> {
         const settings = await getSettings()
+        if (settings.azureAPIModel === CUSTOM_MODEL_ID) {
+            return settings.azureCustomModelName ?? ''
+        }
         return settings.azureAPIModel
     }
 
