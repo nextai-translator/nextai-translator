@@ -54,7 +54,7 @@ import {
 import useSWR from 'swr'
 import { Markdown } from './Markdown'
 import { open } from '@tauri-apps/plugin-shell'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
 import { trackEvent } from '@aptabase/tauri'
 import { Skeleton } from 'baseui-sd/skeleton'
@@ -1440,7 +1440,7 @@ export function InnerSettings({
             return undefined
         }
         let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 refetchPromotions()
@@ -1697,7 +1697,7 @@ export function InnerSettings({
         } else {
             choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)
             if (isTauri) {
-                const appWindow = getCurrent()
+                const appWindow = WebviewWindow.getCurrent()
                 appWindow
                     .listen('tauri://focus', () => {
                         choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)
@@ -1721,7 +1721,7 @@ export function InnerSettings({
         } else {
             choicePromotionItem(promotions?.settings_header).then(setHeaderPromotion)
             if (isTauri) {
-                const appWindow = getCurrent()
+                const appWindow = WebviewWindow.getCurrent()
                 appWindow
                     .listen('tauri://focus', () => {
                         choicePromotionItem(promotions?.settings_header).then(setHeaderPromotion)

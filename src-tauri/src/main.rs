@@ -39,6 +39,7 @@ use crate::windows::{
 use crate::writing::{finish_writing, write_to_input, writing_command};
 
 use mouce::Mouse;
+use mouce::MouseActions;
 use once_cell::sync::OnceCell;
 use tauri::{AppHandle, LogicalPosition, LogicalSize};
 use tauri::{Manager, PhysicalPosition, PhysicalSize};
@@ -287,43 +288,41 @@ fn main() {
         *CPU_VENDOR.lock() = vendor_id;
     }
 
-    let (invoke_handler, register_events) = {
-        let builder = tauri_specta::ts::builder()
-            .commands(tauri_specta::collect_commands![
-                get_config_content,
-                get_update_result,
-                clear_config_cache,
-                show_translator_window_command,
-                show_translator_window_with_selected_text_command,
-                show_action_manager_window,
-                get_translator_window_always_on_top,
-                fetch_stream,
-                writing_command,
-                write_to_input,
-                finish_writing,
-                detect_lang,
-                screenshot,
-                hide_translator_window,
-                start_ocr,
-                finish_ocr,
-                cut_image,
-            ])
-            .events(tauri_specta::collect_events![
-                CheckUpdateEvent,
-                CheckUpdateResultEvent,
-                PinnedFromWindowEvent,
-                PinnedFromTrayEvent,
-                ConfigUpdatedEvent
-            ])
-            .config(specta::ts::ExportConfig::default().formatter(specta::ts::formatter::prettier));
+    let builder = tauri_specta::Builder::new()
+        .commands(tauri_specta::collect_commands![
+            get_config_content,
+            get_update_result,
+            clear_config_cache,
+            show_translator_window_command,
+            show_translator_window_with_selected_text_command,
+            show_action_manager_window,
+            get_translator_window_always_on_top,
+            fetch_stream,
+            writing_command,
+            write_to_input,
+            finish_writing,
+            detect_lang,
+            screenshot,
+            hide_translator_window,
+            start_ocr,
+            finish_ocr,
+            cut_image,
+        ])
+        .events(tauri_specta::collect_events![
+            CheckUpdateEvent,
+            CheckUpdateResultEvent,
+            PinnedFromWindowEvent,
+            PinnedFromTrayEvent,
+            ConfigUpdatedEvent
+        ]);
 
-        #[cfg(debug_assertions)]
-        let builder = builder.path("../src/tauri/bindings.ts");
+    #[cfg(debug_assertions)]
+    builder
+        .export(specta_typescript::Typescript::default(), "../src/tauri/bindings.ts")
+        .expect("Failed to export typescript bindings");
 
-        builder.build().unwrap()
-    };
-
-    let mut app = tauri::Builder::default()
+    let app = tauri::Builder::default()
+        .invoke_handler(builder.invoke_handler())
         .plugin(
             tauri_plugin_aptabase::Builder::new("A-US-9856842764")
                 .with_panic_hook(Box::new(|client, info, msg| {
@@ -435,7 +434,7 @@ fn main() {
                     }
                 }
             });
-            register_events(app);
+            builder.mount_events(app);
 
             let handle = app_handle.clone();
             PinnedFromWindowEvent::listen_any(app_handle, move |event| {
@@ -451,7 +450,6 @@ fn main() {
             });
             Ok(())
         })
-        .invoke_handler(invoke_handler)
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 

@@ -11,7 +11,11 @@ use crate::{ALWAYS_ON_TOP, UPDATE_RESULT};
 use serde::{Deserialize, Serialize};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
-    tray::ClickType,
+    tray::{
+        TrayIconEvent, 
+        MouseButton,
+        MouseButtonState
+    },
     Manager, Runtime,
 };
 use tauri_specta::Event;
@@ -108,8 +112,12 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
         "quit" => app.exit(0),
         _ => {}
     });
-    tray.on_tray_icon_event(|tray, event| {
-        if event.click_type == ClickType::Left {
+    tray.on_tray_icon_event(|_tray, event| {
+        if let TrayIconEvent::Click { 
+            button: MouseButton::Left,
+            button_state: MouseButtonState::Up,
+            ..
+        } = event {
             crate::windows::show_translator_window(false, false, true);
         }
     });

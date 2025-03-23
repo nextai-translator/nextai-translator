@@ -11,7 +11,7 @@ import { useSettings } from '../../common/hooks/useSettings'
 import { setupAnalysis } from '../../common/analysis'
 import { Window } from '../components/Window'
 import { setExternalOriginalText } from '../../common/store'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { usePinned } from '../../common/hooks/usePinned'
 import { useMemoWindow } from '../../common/hooks/useMemoWindow'
 import { isMacOS } from '@/common/utils'
@@ -169,7 +169,7 @@ export function TranslatorWindow() {
     const { pinned } = usePinned()
 
     useEffect(() => {
-        const appWindow = getCurrent()
+        const appWindow = WebviewWindow.getCurrent()
         let unlisten: (() => void) | undefined = undefined
         let timer: number | undefined = undefined
         appWindow
