@@ -47,23 +47,29 @@ function SidePanel() {
         ) => {
             log('Sidepanel received message', { type: message.type })
 
-            if (message.type === MessageType.TRANSLATION_RESULT_UPDATED) {
-                log('Received updated translation', { result: message.payload })
-                if (message.payload.success) {
-                    setTranslation(message.payload.text ?? null)
-                    setError(null)
-                    setLastUpdated(new Date(message.payload.timestamp || Date.now()))
-                    // 显示通知
-                    setShowNotification(true)
-                    setTimeout(() => setShowNotification(false), 3000)
-                } else {
-                    setError(message.payload.error ?? '翻译失败')
-                    setTranslation(null)
+            try {
+                if (message.type === MessageType.TRANSLATION_RESULT_UPDATED) {
+                    log('Received updated translation', { result: message.payload })
+                    if (message.payload.success) {
+                        setTranslation(message.payload.text ?? null)
+                        setError(null)
+                        setLastUpdated(new Date(message.payload.timestamp || Date.now()))
+                        // 显示通知
+                        setShowNotification(true)
+                        setTimeout(() => setShowNotification(false), 3000)
+                    } else {
+                        setError(message.payload.error ?? '翻译失败')
+                        setTranslation(null)
+                    }
+                    sendResponse({ received: true })
+                } else if (message.type === MessageType.PING) {
+                    log('Received PING', { from: sender.tab ? 'content script' : 'extension' })
+                    sendResponse({ pong: true })
                 }
-                sendResponse({ received: true })
-            } else if (message.type === MessageType.PING) {
-                log('Received PING', { from: sender.tab ? 'content script' : 'extension' })
-                sendResponse({ pong: true })
+            } catch (err) {
+                log('Error handling message', { error: err })
+                // 出错时也尝试发送响应，避免消息挂起
+                sendResponse({ error: err instanceof Error ? err.message : String(err) })
             }
         }
 
@@ -82,35 +88,53 @@ function SidePanel() {
         log('Sidepanel loaded, requesting last translation...')
         setLoading(true)
 
-        chrome.runtime.sendMessage({ type: MessageType.GET_LAST_TRANSLATION }, (response) => {
-            setLoading(false)
-            log('Received response for GET_LAST_TRANSLATION', response)
+        try {
+            chrome.runtime.sendMessage({ type: MessageType.GET_LAST_TRANSLATION }, (response) => {
+                try {
+                    setLoading(false)
+                    log('Received response for GET_LAST_TRANSLATION', response)
 
-            if (chrome.runtime.lastError) {
-                log('Error in GET_LAST_TRANSLATION', { error: chrome.runtime.lastError.message })
-                setError(`获取翻译结果时出错: ${chrome.runtime.lastError.message}`)
-                return
-            }
+                    if (chrome.runtime.lastError) {
+                        log('Error in GET_LAST_TRANSLATION', { error: chrome.runtime.lastError.message })
+                        setError(`获取翻译结果时出错: ${chrome.runtime.lastError.message}`)
+                        return
+                    }
 
-            if (response && typeof response === 'object') {
-                if (response.success) {
-                    log('Setting translation from response', { timestamp: response.timestamp })
-                    setTranslation(response.text ?? null)
-                    setLastUpdated(response.timestamp ? new Date(response.timestamp) : new Date())
-                    setError(null)
-                } else if (!response.success && response.error) {
-                    log('Setting error from response', { error: response.error })
-                    setError(response.error)
-                    setTranslation(null)
-                } else {
-                    log('Unexpected response structure', response)
-                    setError('收到无效的响应结构')
+                    if (!response) {
+                        log('Received empty response')
+                        setError('收到空响应')
+                        return
+                    }
+
+                    if (response && typeof response === 'object') {
+                        if (response.success) {
+                            log('Setting translation from response', { timestamp: response.timestamp })
+                            setTranslation(response.text ?? null)
+                            setLastUpdated(response.timestamp ? new Date(response.timestamp) : new Date())
+                            setError(null)
+                        } else if (!response.success && response.error) {
+                            log('Setting error from response', { error: response.error })
+                            setError(response.error)
+                            setTranslation(null)
+                        } else {
+                            log('Unexpected response structure', response)
+                            setError('收到无效的响应结构')
+                        }
+                    } else {
+                        log('Non-object response', { response })
+                        setError('收到非对象响应')
+                    }
+                } catch (err) {
+                    log('Error processing response', { error: err })
+                    setError(`处理响应时出错: ${err instanceof Error ? err.message : String(err)}`)
+                    setLoading(false)
                 }
-            } else {
-                log('Non-object response', { response })
-                setError('收到非对象响应')
-            }
-        })
+            })
+        } catch (err) {
+            log('Error sending GET_LAST_TRANSLATION message', { error: err })
+            setError(`发送消息时出错: ${err instanceof Error ? err.message : String(err)}`)
+            setLoading(false)
+        }
     }, [])
 
     // 格式化上次更新时间
