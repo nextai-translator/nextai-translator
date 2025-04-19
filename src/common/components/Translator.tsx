@@ -851,11 +851,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             isTranslate &&
                             (!stopAutomaticallyChangeTargetLang.current || newSourceLang === targetLang_)
                         ) {
-                            return (
-                                (newSourceLang === 'zh-Hans' || newSourceLang === 'zh-Hant'
-                                    ? 'en'
-                                    : (settings?.defaultTargetLanguage as LangCode | undefined)) ?? 'en'
-                            )
+                            return (settings?.defaultTargetLanguage as LangCode | undefined) ?? 'en'
                         }
                         if (!targetLang_) {
                             if (settings?.defaultTargetLanguage) {
