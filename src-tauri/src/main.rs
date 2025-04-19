@@ -318,7 +318,10 @@ fn main() {
 
     #[cfg(debug_assertions)]
     builder
-        .export(specta_typescript::Typescript::default(), "../src/tauri/bindings.ts")
+        .export(
+            specta_typescript::Typescript::default(),
+            "../src/tauri/bindings.ts",
+        )
         .expect("Failed to export typescript bindings");
 
     let app = tauri::Builder::default()
