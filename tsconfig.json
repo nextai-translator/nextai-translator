@@ -12,7 +12,7 @@
         "sourceMap": false,
         "rootDir": ".",
         "outDir": "dist/js",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "noEmit": true,
         "noEmitOnError": true,
         "jsx": "react-jsx",
