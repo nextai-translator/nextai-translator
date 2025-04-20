@@ -324,7 +324,7 @@ fn main() {
         )
         .expect("Failed to export typescript bindings");
 
-    let app = tauri::Builder::default()
+    let mut app = tauri::Builder::default()
         .invoke_handler(builder.invoke_handler())
         .plugin(
             tauri_plugin_aptabase::Builder::new("A-US-9856842764")
