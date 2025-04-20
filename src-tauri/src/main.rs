@@ -278,7 +278,8 @@ fn bind_mouse_hook() {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let silently = env::args().any(|arg| arg == "--silently");
 
     let mut sys = System::new();

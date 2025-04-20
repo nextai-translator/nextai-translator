@@ -2413,6 +2413,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "hyper-tls"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70206fc6890eaca9fde8a0bf71caa2ddfc9fe045ac9e5c70df101a7dbde866e0"
+dependencies = [
+ "bytes",
+ "http-body-util",
+ "hyper 1.6.0",
+ "hyper-util",
+ "native-tls",
+ "tokio",
+ "tokio-native-tls",
+ "tower-service",
+]
+
+[[package]]
 name = "hyper-util"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4386,7 +4402,7 @@ dependencies = [
  "http 0.2.12",
  "http-body 0.4.6",
  "hyper 0.14.32",
- "hyper-tls",
+ "hyper-tls 0.5.0",
  "ipnet",
  "js-sys",
  "log",
@@ -4432,11 +4448,13 @@ dependencies = [
  "http-body-util",
  "hyper 1.6.0",
  "hyper-rustls",
+ "hyper-tls 0.6.0",
  "hyper-util",
  "ipnet",
  "js-sys",
  "log",
  "mime",
+ "native-tls",
  "once_cell",
  "percent-encoding",
  "pin-project-lite",
@@ -4450,6 +4468,7 @@ dependencies = [
  "sync_wrapper 1.0.2",
  "system-configuration 0.6.1",
  "tokio",
+ "tokio-native-tls",
  "tokio-rustls",
  "tokio-util",
  "tower",
@@ -4892,9 +4911,9 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "signal-hook-registry"
-version = "1.4.4"
+version = "1.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1ee1aca2bc74ef9589efa7ccaa0f3752751399940356209b3fd80c078149b5e"
+checksum = "9203b8055f63a2a00e2f593bb0510367fe707d7ff1e5c872de2f537b339e5410"
 dependencies = [
  "libc",
 ]
@@ -5429,23 +5448,22 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-aptabase"
-version = "0.5.1"
-source = "git+https://github.com/aptabase/tauri-plugin-aptabase?rev=4e2422a6ad3f73d0ba7b9696b9f3f64beb13295b#4e2422a6ad3f73d0ba7b9696b9f3f64beb13295b"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "075ebe083b5f311bdfbf436f8383d316dfb12267be5fd977b57d7701bdb99987"
 dependencies = [
  "futures",
  "log",
  "os_info",
- "rand 0.8.5",
- "reqwest 0.11.27",
+ "rand 0.9.1",
+ "reqwest 0.12.15",
  "serde",
  "serde_json",
  "sys-locale",
  "tauri",
  "tauri-plugin",
- "thiserror 1.0.69",
  "time",
  "tokio",
- "uuid",
 ]
 
 [[package]]

@@ -48,7 +48,7 @@ active-win-pos-rs = "0.8"
 reqwest = { version = "0.11.24", features = [ "json", "stream" ] }
 tokio = { version = "1", features = [ "full" ] }
 futures-util = "0.3.29"
-tauri-plugin-aptabase = { git = "https://github.com/aptabase/tauri-plugin-aptabase", rev = "4e2422a6ad3f73d0ba7b9696b9f3f64beb13295b" }
+tauri-plugin-aptabase = "1.0.0"
 screenshots = "0.7.2"
 image = "0.24.7"
 get-selected-text = "0.1.6"

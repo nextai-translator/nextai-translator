@@ -37,7 +37,7 @@
     "url": "https://github.com/openai-translator/openai-translator.git"
   },
   "dependencies": {
-    "@aptabase/tauri": "^0.4.1",
+    "@aptabase/tauri": "github:aptabase/tauri-plugin-aptabase#1.0.0",
     "@floating-ui/dom": "^1.6.13",
     "@sentry/react": "^7.120.3",
     "@tauri-apps/api": "^2.5.0",
