@@ -138,6 +138,11 @@ export interface ISettings {
     chatglmRefreshToken: string
     cohereAPIKey: string
     cohereAPIModel: string
+    grokAPIKey?: string
+    grokAPIURL?: string
+    grokAPIModel?: string
+    grokCustomModelName?: string
+    grokAPIURLPath?: string
     fontSize: number
     uiFontSize: number
     iconSize: number

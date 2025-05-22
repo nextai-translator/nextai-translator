@@ -1748,7 +1748,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                     autoFocus={false}
                                     triggerType='hover'
                                     showArrow
-                                    placement='bottom'
+                                    placement='bottomRight'
                                     content={
                                         <StatefulMenu
                                             initialState={{
@@ -1888,6 +1888,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                             </div>
                                         )}
                                         <Textarea
+                                            readOnly
                                             inputRef={editorRef}
                                             autoFocus={autoFocus}
                                             overrides={{
@@ -1899,18 +1900,25 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                         background: settings.enableBackgroundBlur
                                                             ? 'transparent !important'
                                                             : undefined,
-                                                        borderWidth: settings.enableBackgroundBlur ? '1px' : undefined,
+                                                        // Remove all borders from Root
+                                                        borderWidth: '0px',
                                                     },
                                                 },
                                                 InputContainer: {
-                                                    style: settings.enableBackgroundBlur
-                                                        ? ({ $theme, $isFocused }) => ({
-                                                              background:
-                                                                  ($isFocused
-                                                                      ? $theme.colors.backgroundSecondary
-                                                                      : $theme.colors.backgroundTertiary) + '80',
-                                                          })
-                                                        : null,
+                                                    style: ({ $theme, $isFocused }) => {
+                                                        const finalStyles: React.CSSProperties = {
+                                                            borderWidth: '0px', // Remove border
+                                                            boxShadow: 'none', // Remove focus shadow
+                                                        }
+
+                                                        if (settings.enableBackgroundBlur) {
+                                                            finalStyles.background =
+                                                                ($isFocused
+                                                                    ? $theme.colors.backgroundSecondary
+                                                                    : $theme.colors.backgroundTertiary) + '80'
+                                                        }
+                                                        return finalStyles
+                                                    },
                                                 },
                                                 Input: {
                                                     style: {
@@ -1924,31 +1932,31 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                             currentTranslateMode === 'explain-code'
                                                                 ? 'monospace'
                                                                 : 'inherit',
-                                                        textalign: 'start',
+                                                        textAlign: 'start',
                                                     },
                                                 },
                                             }}
                                             value={editableText}
                                             size='mini'
-                                            resize='vertical'
+                                            resize='none'
                                             rows={
                                                 props.editorRows
                                                     ? props.editorRows
                                                     : Math.min(Math.max(editableText.split('\n').length, 3), 12)
                                             }
-                                            onChange={(e) => setEditableText(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                e.stopPropagation()
-                                            }}
-                                            onKeyUp={(e) => {
-                                                e.stopPropagation()
-                                            }}
-                                            onKeyPress={(e) => {
-                                                e.stopPropagation()
-                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                    handleSubmit(e)
-                                                }
-                                            }}
+                                            // onChange={(e) => setEditableText(e.target.value)}
+                                            // onKeyDown={(e) => {
+                                            //     e.stopPropagation()
+                                            // }}
+                                            // onKeyUp={(e) => {
+                                            //     e.stopPropagation()
+                                            // }}
+                                            // onKeyPress={(e) => {
+                                            //     e.stopPropagation()
+                                            //     if (e.key === 'Enter' && !e.shiftKey) {
+                                            //         handleSubmit(e)
+                                            //     }
+                                            // }}
                                         />
                                         <div
                                             style={{
@@ -2002,7 +2010,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             </Dropzone>
                             <div className={styles.actionButtonsContainer}>
                                 <>
-                                    <Tooltip content={t('Upload an image for OCR translation')} placement='bottom'>
+                                    <Tooltip content={t('Upload an image for OCR translation')} placement='bottomLeft'>
                                         <div className={styles.actionButton}>
                                             <Dropzone onDrop={onDrop}>
                                                 {({ getRootProps, getInputProps }) => (
@@ -2025,7 +2033,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 />
                                             }
                                             showArrow
-                                            placement='top'
+                                            placement='bottomLeft'
                                         >
                                             <div
                                                 className={styles.actionButton}
@@ -2089,12 +2097,12 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 />
                                             </div>
                                         </Tooltip>
-                                        <Tooltip content={t('Copy to clipboard')} placement='bottom'>
+                                        <Tooltip content={t('Copy to clipboard')} placement='bottomRight'>
                                             <div className={styles.actionButton}>
                                                 <CopyButton text={editableText} styles={styles}></CopyButton>
                                             </div>
                                         </Tooltip>
-                                        <Tooltip content={t('Clear input')} placement='bottom'>
+                                        <Tooltip content={t('Clear input')} placement='bottomRight'>
                                             <div
                                                 className={styles.actionButton}
                                                 onClick={() => {
@@ -2302,7 +2310,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                         </div>
                                                     </Tooltip>
                                                 )}
-                                                <Tooltip content={t('Copy to clipboard')} placement='bottom'>
+                                                <Tooltip content={t('Copy to clipboard')} placement='bottomRight'>
                                                     <div className={styles.actionButton}>
                                                         <CopyButton text={translatedText} styles={styles}></CopyButton>
                                                     </div>

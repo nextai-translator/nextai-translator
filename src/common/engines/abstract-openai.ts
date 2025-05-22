@@ -97,14 +97,15 @@ export abstract class AbstractOpenAI extends AbstractEngine {
             model,
             temperature: 0,
             top_p: 1,
-            frequency_penalty: 1,
-            presence_penalty: 1,
+            // frequency_penalty: 1,
+            // presence_penalty: 1,
             stream: true,
         }
     }
 
     async sendMessage(req: IMessageRequest): Promise<void> {
         const url = urlJoin(await this.getAPIURL(), await this.getAPIURLPath())
+
         const headers = await this.getHeaders()
         const isChatAPI = await this.isChatAPI()
         const body = await this.getBaseRequestBody()
@@ -130,12 +131,15 @@ export abstract class AbstractOpenAI extends AbstractEngine {
             body['messages'] = messages
         }
         let finished = false // finished can be called twice because event.data is 1. "finish_reason":"stop"; 2. [DONE]
+        console.log(78787878, body)
+
         await fetchSSE(url, {
             method: 'POST',
             headers,
             body: JSON.stringify(body),
             signal: req.signal,
             onMessage: async (msg) => {
+                console.log(45644545, msg)
                 if (finished) return
                 let resp
                 try {
@@ -184,6 +188,8 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 }
             },
             onError: (err) => {
+                console.log(151525, err)
+
                 if (err instanceof Error) {
                     req.onError(err.message)
                     return

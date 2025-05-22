@@ -1339,6 +1339,7 @@ function ProviderSelector({ value, onChange, hasPromotion }: IProviderSelectorPr
               { label: 'Moonshot', id: 'Moonshot' },
               { label: 'Groq', id: 'Groq' },
               { label: 'DeepSeek', id: 'DeepSeek' },
+              { label: 'Grok', id: 'Grok' },
           ] as {
               label: string
               id: Provider
@@ -1356,6 +1357,7 @@ function ProviderSelector({ value, onChange, hasPromotion }: IProviderSelectorPr
               { label: 'Moonshot', id: 'Moonshot' },
               { label: 'Groq', id: 'Groq' },
               { label: 'DeepSeek', id: 'DeepSeek' },
+              { label: 'Grok', id: 'Grok' },
           ] as {
               label: string
               id: Provider
@@ -2464,6 +2466,64 @@ export function InnerSettings({
                                     apiKey={values.deepSeekAPIKey}
                                     onBlur={onBlur}
                                 />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'Grok' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'Grok'}
+                                name='grokAPIKey'
+                                label='Grok API Key'
+                                caption={
+                                    <div>
+                                        {/* TODO: Update with actual link once xAI provides one */}
+                                        {t('Refer to xAI documentation to get your API Key.')}
+                                    </div>
+                                }
+                            >
+                                <Input autoFocus type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem name='grokAPIModel' label={t('API Model')} required={values.provider === 'Grok'}>
+                                <APIModelSelector
+                                    provider='Grok'
+                                    currentProvider={values.provider}
+                                    apiKey={values.grokAPIKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                            <div
+                                style={{
+                                    display: values.grokAPIModel === CUSTOM_MODEL_ID ? 'block' : 'none',
+                                }}
+                            >
+                                <FormItem
+                                    name='grokCustomModelName'
+                                    label={t('Custom Model Name')}
+                                    required={values.provider === 'Grok' && values.grokAPIModel === CUSTOM_MODEL_ID}
+                                >
+                                    <Input autoComplete='off' size='compact' />
+                                </FormItem>
+                            </div>
+                            <FormItem
+                                name='grokAPIURL'
+                                label={t('API URL')}
+                                caption={t(
+                                    'Generally, there is no need to modify this item if using the official xAI API.'
+                                )}
+                            >
+                                <Input size='compact' onBlur={onBlur} placeholder='e.g. https://api.x.ai/v1' />
+                            </FormItem>
+                            <FormItem
+                                name='grokAPIURLPath'
+                                label={t('API URL Path')}
+                                caption={t(
+                                    'Default is /v1/chat/completions. Modify only if using a custom proxy or endpoint.'
+                                )}
+                            >
+                                <Input size='compact' onBlur={onBlur} placeholder='/v1/chat/completions' />
                             </FormItem>
                         </div>
                         <div

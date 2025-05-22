@@ -15,6 +15,7 @@ export const defaultAPIModel = 'gpt-3.5-turbo'
 export const defaultChatGPTAPIAuthSessionAPIURL = 'https://chat.openai.com/api/auth/session'
 export const defaultChatGPTWebAPI = 'https://chat.openai.com/backend-api'
 export const defaultGeminiAPIURL = 'https://generativelanguage.googleapis.com'
+export const defaultGrokAPIURL = 'https://api.x.ai/v1'
 export const defaultChatGPTModel = 'text-davinci-002-render-sha'
 
 export const defaultAutoTranslate = false
@@ -106,6 +107,11 @@ const settingKeys: Record<keyof ISettings, number> = {
     chatglmRefreshToken: 1,
     cohereAPIKey: 1,
     cohereAPIModel: 1,
+    grokAPIKey: 1,
+    grokAPIURL: 1,
+    grokAPIModel: 1,
+    grokCustomModelName: 1,
+    grokAPIURLPath: 1,
     deepSeekAPIKey: 1,
     deepSeekAPIModel: 1,
     fontSize: 1,
@@ -250,6 +256,21 @@ export async function getSettings(): Promise<ISettings> {
     }
     if (settings.ollamaModelLifetimeInMemory === undefined || settings.ollamaModelLifetimeInMemory === null) {
         settings.ollamaModelLifetimeInMemory = '5m'
+    }
+    if (settings.grokAPIKey === undefined) {
+        settings.grokAPIKey = ''
+    }
+    if (settings.grokAPIURL === undefined) {
+        settings.grokAPIURL = defaultGrokAPIURL // Or a hypothetical default like 'https://api.x.ai/v1'
+    }
+    if (settings.grokAPIModel === undefined) {
+        settings.grokAPIModel = 'grok-1' // Default model
+    }
+    if (settings.grokCustomModelName === undefined) {
+        settings.grokCustomModelName = ''
+    }
+    if (settings.grokAPIURLPath === undefined) {
+        settings.grokAPIURLPath = '/chat/completions' // Default OpenAI-compatible path
     }
     return settings
 }
