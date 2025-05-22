@@ -1338,6 +1338,7 @@ function ProviderSelector({ value, onChange, hasPromotion }: IProviderSelectorPr
               { label: 'MiniMax', id: 'MiniMax' },
               { label: 'Moonshot', id: 'Moonshot' },
               { label: 'Groq', id: 'Groq' },
+              { label: 'Grok (xAI)', id: 'Grok' }, // Updated label for Grok
               { label: 'DeepSeek', id: 'DeepSeek' },
           ] as {
               label: string
@@ -1355,6 +1356,7 @@ function ProviderSelector({ value, onChange, hasPromotion }: IProviderSelectorPr
               { label: 'MiniMax', id: 'MiniMax' },
               { label: 'Moonshot', id: 'Moonshot' },
               { label: 'Groq', id: 'Groq' },
+              { label: 'Grok (xAI)', id: 'Grok' }, // Updated label for Grok
               { label: 'DeepSeek', id: 'DeepSeek' },
           ] as {
               label: string
@@ -2166,6 +2168,96 @@ export function InnerSettings({
                                 <Input size='compact' onBlur={onBlur} />
                             </FormItem>
                         </div>
+                        {/* Grok (xAI) Settings Section Start */}
+                        <div
+                            style={{
+                                display: values.provider === 'Grok' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'Grok'}
+                                name='grokApiKey'
+                                label={t('Grok (xAI) API Key')} {/* Updated Label */}
+                                caption={
+                                    <div>
+                                        {t('Go to the')}{' '}
+                                        <a
+                                            target='_blank'
+                                            href='https://console.x.ai/' {/* Updated Link */}
+                                            rel='noreferrer'
+                                            style={linkStyle}
+                                        >
+                                            xAI Console
+                                        </a>{' '}
+                                        {t('to get your API Key.')}
+                                    </div>
+                                }
+                            >
+                                <Input autoFocus type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='grokApiModel'
+                                label={t('API Model')}
+                                required={values.provider === 'Grok'}
+                            >
+                                <APIModelSelector
+                                    provider='Grok'
+                                    currentProvider={values.provider}
+                                    apiKey={values.grokApiKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                            <FormItem
+                                name='grokTemperature'
+                                label={t('Temperature')}
+                                caption={t('Controls randomness. Lower is more deterministic. Default: 0.7')}
+                            >
+                                <Slider
+                                    min={0}
+                                    max={1}
+                                    step={0.1}
+                                    value={values.grokTemperature !== undefined ? [values.grokTemperature] : [0.7]}
+                                    onChange={(params) => {
+                                        // This will be handled by Form's onValuesChange
+                                        // but if direct update is needed for slider's visual state:
+                                        // setValues(v => ({ ...v, grokTemperature: params.value[0] }))
+                                        // For Form context, ensure the name prop correctly updates the form state.
+                                        // The form's onValuesChange should pick up the 'grokTemperature' change.
+                                    }}
+                                    onBlur={onBlur}
+                                    overrides={{
+                                        ThumbValue: ({ $value }) => (
+                                            <div
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: `-${theme.sizing.scale800}`,
+                                                    ...theme.typography.font200,
+                                                    backgroundColor: 'transparent',
+                                                }}
+                                            >
+                                                {$value}
+                                            </div>
+                                        ),
+                                        TickBar: ({ $min, $max }) => (
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    paddingRight: theme.sizing.scale600,
+                                                    paddingLeft: theme.sizing.scale600,
+                                                    paddingBottom: theme.sizing.scale400,
+                                                }}
+                                            >
+                                                <div style={{ ...theme.typography.font200 }}>{$min}</div>
+                                                <div style={{ ...theme.typography.font200 }}>{$max}</div>
+                                            </div>
+                                        ),
+                                    }}
+                                />
+                            </FormItem>
+                        </div>
+                        {/* Grok (xAI) Settings Section End */}
                         <div
                             style={{
                                 display: values.provider === 'Claude' ? 'block' : 'none',
