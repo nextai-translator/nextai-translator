@@ -102,24 +102,24 @@ What began as a translation tool has now evolved to include surprisingly effecti
 
 ### Troubleshooting
 
--   "OpenAI Translator" can’t be opened because the developer cannot be verified.
+-   "LinguaLearn" can’t be opened because the developer cannot be verified.
  
     <p align="center">
       <img width="300" src="https://user-images.githubusercontent.com/1206493/223916804-45ce3f34-6a4a-4baf-a0c1-4ab5c54c521f.png" />
     </p>
  
-    -   Click the `Cancel` button, then go to the `Settings` -> `Privacy and Security` page, click the `Still Open` button, and then click the `Open` button in the pop-up window. After that, there will be no more pop-up warnings when opening `OpenAI Translator`. 🎉
+    -   Click the `Cancel` button, then go to the `Settings` -> `Privacy and Security` page, click the `Still Open` button, and then click the `Open` button in the pop-up window. After that, there will be no more pop-up warnings when opening `LinguaLearn`. 🎉
         <p align="center">
           <img width="500" src="https://user-images.githubusercontent.com/1206493/223916970-9c99f15e-cf61-4770-b92d-4a78f980bb26.png" /> <img width="200" src="https://user-images.githubusercontent.com/1206493/223917449-ed1ac19f-c43d-4b13-9888-79ba46ceb862.png" />
         </p>
  
-    -   If you cannot find the above options in `Privacy & Security`, or get error prompts such as broken files with Apple Silicon machines. Open `Terminal.app` and enter the following command (you may need to enter a password halfway through), then restart `OpenAI Translator`:
+    -   If you cannot find the above options in `Privacy & Security`, or get error prompts such as broken files with Apple Silicon machines. Open `Terminal.app` and enter the following command (you may need to enter a password halfway through), then restart `LinguaLearn`:
 
         ```sh
         sudo xattr -d com.apple.quarantine /Applications/OpenAI\ Translator.app
         ```
 
--   If you encounter a permission prompt every time you open it, or if you cannot perform a shortcut translation, please go to `Settings` -> `Privacy & Security` -> `Supporting Features` to remove OpenAI Translator, and then re-add OpenAI Translator.
+-   If you encounter a permission prompt every time you open it, or if you cannot perform a shortcut translation, please go to `Settings` -> `Privacy & Security` -> `Supporting Features` to remove LinguaLearn, and then re-add LinguaLearn.
 
     <p align="center">
       <img width="500" src="https://user-images.githubusercontent.com/1206493/224536148-eec559bf-4d99-48c1-bbd3-2cc105aff084.png" />
@@ -147,7 +147,7 @@ For details, see [Desktop Clip Extension](./CLIP-EXTENSIONS.md)
      </a>
    </p>
 
-2. Click on the OpenAI Translator icon in the browser plugin list, and enter the obtained API KEY into the configuration interface that pops up from this plugin.
+2. Click on the LinguaLearn icon in the browser plugin list, and enter the obtained API KEY into the configuration interface that pops up from this plugin.
  
    <p align="center">
      <img width="600" src="https://user-images.githubusercontent.com/1206493/222958165-159719b4-28a5-44a4-b700-567786df7f03.png" />

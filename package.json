@@ -165,7 +165,7 @@
   },
   "build": {
     "appId": "xyz.yetone.apps",
-    "productName": "OpenAI Translator",
+    "productName": "LinguaLearn",
     "extraMetadata": {
       "name": "openai-translator",
       "main": "main.js"

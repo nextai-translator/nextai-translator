@@ -46,7 +46,7 @@ body:
     attributes:
       label: 你是否愿意提交一份 PR？Are you willing to submit a PR?
       description: >
-        我们期待开发人员和用户的帮助，以解决在 OpenAI Translator 中发现的任何问题。 如果您愿意通过提交 PR 来解决此问题，请勾选。We eagerly anticipate developers' and users' support and collaboration in resolving any issues found in OpenAI Translator. If you are willing to offer a solution by submitting a PR to fix this matter, kindly mark the checkbox provided.
+        我们期待开发人员和用户的帮助，以解决在 LinguaLearn 中发现的任何问题。 如果您愿意通过提交 PR 来解决此问题，请勾选。We eagerly anticipate developers' and users' support and collaboration in resolving any issues found in LinguaLearn. If you are willing to offer a solution by submitting a PR to fix this matter, kindly mark the checkbox provided.
       options:
         - label: 我愿意提供 PR! I'm willing to submit a PR!
   - type: markdown

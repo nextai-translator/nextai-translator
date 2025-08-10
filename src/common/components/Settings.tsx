@@ -1818,7 +1818,7 @@ export function InnerSettings({
                             gap: 6,
                         }}
                     >
-                        OpenAI Translator
+                        Lingua Learn
                         {AppConfig?.version ? (
                             <a
                                 href='https://github.com/yetone/openai-translator/releases'
@@ -1959,7 +1959,7 @@ export function InnerSettings({
                     }}
                 >
                     {t(
-                        'It is recommended to download the desktop application of OpenAI Translator to enjoy the wonderful experience of word translation in all software!'
+                        'It is recommended to download the desktop application of LinguaLearn to enjoy the wonderful experience of word translation in all software!'
                     )}{' '}
                     <a
                         target='_blank'

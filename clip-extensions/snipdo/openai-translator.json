@@ -1,10 +1,10 @@
 {
-    "name": "OpenAI Translator",
+    "name": "LinguaLearn",
     "identifier": "xyz.yetone.apps.openai-translator.clip-extensions.snipdo",
     "icon": "icon.png",
     "actions": [
         {
-            "title": "OpenAI Translator",
+            "title": "LinguaLearn",
             "icon": "icon.png",
             "powershellFile": "openai-translator.ps1"
         }
