@@ -13,8 +13,8 @@
 		38F6A1202A2512B800DE2801 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 38F6A11E2A2512B800DE2801 /* Main.storyboard */; };
 		38F6A1292A2512B800DE2801 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F6A1282A2512B800DE2801 /* AppDelegate.swift */; };
 		38F6A12C2A2512B800DE2801 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 38F6A12A2A2512B800DE2801 /* Main.storyboard */; };
-		38F6A1342A2512B800DE2801 /* OpenAI Translator Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 38F6A1332A2512B800DE2801 /* OpenAI Translator Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		38F6A13E2A2512B800DE2801 /* OpenAI Translator Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 38F6A13D2A2512B800DE2801 /* OpenAI Translator Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		38F6A1342A2512B800DE2801 /* LinguaLearn Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 38F6A1332A2512B800DE2801 /* LinguaLearn Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		38F6A13E2A2512B800DE2801 /* LinguaLearn Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 38F6A13D2A2512B800DE2801 /* LinguaLearn Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		38F6A1442A2512B800DE2801 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 38F6A1072A2512B600DE2801 /* Main.html */; };
 		38F6A1452A2512B800DE2801 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 38F6A1072A2512B600DE2801 /* Main.html */; };
 		38F6A1462A2512B800DE2801 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 38F6A1092A2512B600DE2801 /* Icon.png */; };
@@ -55,14 +55,14 @@
 			containerPortal = 38F6A1012A2512B600DE2801 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 38F6A1322A2512B800DE2801;
-			remoteInfo = "OpenAI Translator Extension (iOS)";
+			remoteInfo = "LinguaLearn Extension (iOS)";
 		};
 		38F6A13F2A2512B800DE2801 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 38F6A1012A2512B600DE2801 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 38F6A13C2A2512B800DE2801;
-			remoteInfo = "OpenAI Translator Extension (macOS)";
+			remoteInfo = "LinguaLearn Extension (macOS)";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -73,7 +73,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				38F6A1342A2512B800DE2801 /* OpenAI Translator Extension.appex in Embed Foundation Extensions */,
+				38F6A1342A2512B800DE2801 /* LinguaLearn Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,7 +84,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				38F6A13E2A2512B800DE2801 /* OpenAI Translator Extension.appex in Embed Foundation Extensions */,
+				38F6A13E2A2512B800DE2801 /* LinguaLearn Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,22 +99,22 @@
 		38F6A10C2A2512B600DE2801 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		38F6A10D2A2512B800DE2801 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		38F6A10F2A2512B800DE2801 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
-		38F6A1142A2512B800DE2801 /* OpenAI Translator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OpenAI Translator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		38F6A1142A2512B800DE2801 /* LinguaLearn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LinguaLearn.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		38F6A1172A2512B800DE2801 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		38F6A1192A2512B800DE2801 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		38F6A11C2A2512B800DE2801 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		38F6A11F2A2512B800DE2801 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		38F6A1212A2512B800DE2801 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		38F6A1262A2512B800DE2801 /* OpenAI Translator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OpenAI Translator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		38F6A1262A2512B800DE2801 /* LinguaLearn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LinguaLearn.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		38F6A1282A2512B800DE2801 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		38F6A12B2A2512B800DE2801 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		38F6A12D2A2512B800DE2801 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		38F6A12E2A2512B800DE2801 /* OpenAI Translator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "OpenAI Translator.entitlements"; sourceTree = "<group>"; };
-		38F6A1332A2512B800DE2801 /* OpenAI Translator Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "OpenAI Translator Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		38F6A12E2A2512B800DE2801 /* LinguaLearn.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "LinguaLearn.entitlements"; sourceTree = "<group>"; };
+		38F6A1332A2512B800DE2801 /* LinguaLearn Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "LinguaLearn Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		38F6A1382A2512B800DE2801 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		38F6A13D2A2512B800DE2801 /* OpenAI Translator Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "OpenAI Translator Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		38F6A13D2A2512B800DE2801 /* LinguaLearn Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "LinguaLearn Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		38F6A1422A2512B800DE2801 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		38F6A1432A2512B800DE2801 /* OpenAI Translator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "OpenAI Translator.entitlements"; sourceTree = "<group>"; };
+		38F6A1432A2512B800DE2801 /* LinguaLearn.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "LinguaLearn.entitlements"; sourceTree = "<group>"; };
 		38F6A1632A2512B800DE2801 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = "../../dist/browser-extension/chromium/icon.png"; sourceTree = "<group>"; };
 		38F6A1642A2512B800DE2801 /* userscript.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = userscript.js; path = "../../dist/browser-extension/chromium/userscript.js"; sourceTree = "<group>"; };
 		38F6A1652A2512B800DE2801 /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; name = public; path = "../../dist/browser-extension/chromium/public"; sourceTree = "<group>"; };
@@ -204,10 +204,10 @@
 		38F6A1152A2512B800DE2801 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				38F6A1142A2512B800DE2801 /* OpenAI Translator.app */,
-				38F6A1262A2512B800DE2801 /* OpenAI Translator.app */,
-				38F6A1332A2512B800DE2801 /* OpenAI Translator Extension.appex */,
-				38F6A13D2A2512B800DE2801 /* OpenAI Translator Extension.appex */,
+				38F6A1142A2512B800DE2801 /* LinguaLearn.app */,
+				38F6A1262A2512B800DE2801 /* LinguaLearn.app */,
+				38F6A1332A2512B800DE2801 /* LinguaLearn Extension.appex */,
+				38F6A13D2A2512B800DE2801 /* LinguaLearn Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -230,7 +230,7 @@
 				38F6A1282A2512B800DE2801 /* AppDelegate.swift */,
 				38F6A12A2A2512B800DE2801 /* Main.storyboard */,
 				38F6A12D2A2512B800DE2801 /* Info.plist */,
-				38F6A12E2A2512B800DE2801 /* OpenAI Translator.entitlements */,
+				38F6A12E2A2512B800DE2801 /* LinguaLearn.entitlements */,
 			);
 			path = "macOS (App)";
 			sourceTree = "<group>";
@@ -247,7 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				38F6A1422A2512B800DE2801 /* Info.plist */,
-				38F6A1432A2512B800DE2801 /* OpenAI Translator.entitlements */,
+				38F6A1432A2512B800DE2801 /* LinguaLearn.entitlements */,
 			);
 			path = "macOS (Extension)";
 			sourceTree = "<group>";
@@ -272,9 +272,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		38F6A1132A2512B800DE2801 /* OpenAI Translator (iOS) */ = {
+		38F6A1132A2512B800DE2801 /* LinguaLearn (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 38F6A1582A2512B800DE2801 /* Build configuration list for PBXNativeTarget "OpenAI Translator (iOS)" */;
+			buildConfigurationList = 38F6A1582A2512B800DE2801 /* Build configuration list for PBXNativeTarget "LinguaLearn (iOS)" */;
 			buildPhases = (
 				38F6A1102A2512B800DE2801 /* Sources */,
 				38F6A1112A2512B800DE2801 /* Frameworks */,
@@ -286,14 +286,14 @@
 			dependencies = (
 				38F6A1362A2512B800DE2801 /* PBXTargetDependency */,
 			);
-			name = "OpenAI Translator (iOS)";
-			productName = "OpenAI Translator (iOS)";
-			productReference = 38F6A1142A2512B800DE2801 /* OpenAI Translator.app */;
+			name = "LinguaLearn (iOS)";
+			productName = "LinguaLearn (iOS)";
+			productReference = 38F6A1142A2512B800DE2801 /* LinguaLearn.app */;
 			productType = "com.apple.product-type.application";
 		};
-		38F6A1252A2512B800DE2801 /* OpenAI Translator (macOS) */ = {
+		38F6A1252A2512B800DE2801 /* LinguaLearn (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 38F6A15F2A2512B800DE2801 /* Build configuration list for PBXNativeTarget "OpenAI Translator (macOS)" */;
+			buildConfigurationList = 38F6A15F2A2512B800DE2801 /* Build configuration list for PBXNativeTarget "LinguaLearn (macOS)" */;
 			buildPhases = (
 				38F6A1222A2512B800DE2801 /* Sources */,
 				38F6A1232A2512B800DE2801 /* Frameworks */,
@@ -305,14 +305,14 @@
 			dependencies = (
 				38F6A1402A2512B800DE2801 /* PBXTargetDependency */,
 			);
-			name = "OpenAI Translator (macOS)";
-			productName = "OpenAI Translator (macOS)";
-			productReference = 38F6A1262A2512B800DE2801 /* OpenAI Translator.app */;
+			name = "LinguaLearn (macOS)";
+			productName = "LinguaLearn (macOS)";
+			productReference = 38F6A1262A2512B800DE2801 /* LinguaLearn.app */;
 			productType = "com.apple.product-type.application";
 		};
-		38F6A1322A2512B800DE2801 /* OpenAI Translator Extension (iOS) */ = {
+		38F6A1322A2512B800DE2801 /* LinguaLearn Extension (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 38F6A1542A2512B800DE2801 /* Build configuration list for PBXNativeTarget "OpenAI Translator Extension (iOS)" */;
+			buildConfigurationList = 38F6A1542A2512B800DE2801 /* Build configuration list for PBXNativeTarget "LinguaLearn Extension (iOS)" */;
 			buildPhases = (
 				38F6A12F2A2512B800DE2801 /* Sources */,
 				38F6A1302A2512B800DE2801 /* Frameworks */,
@@ -322,14 +322,14 @@
 			);
 			dependencies = (
 			);
-			name = "OpenAI Translator Extension (iOS)";
-			productName = "OpenAI Translator Extension (iOS)";
-			productReference = 38F6A1332A2512B800DE2801 /* OpenAI Translator Extension.appex */;
+			name = "LinguaLearn Extension (iOS)";
+			productName = "LinguaLearn Extension (iOS)";
+			productReference = 38F6A1332A2512B800DE2801 /* LinguaLearn Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		38F6A13C2A2512B800DE2801 /* OpenAI Translator Extension (macOS) */ = {
+		38F6A13C2A2512B800DE2801 /* LinguaLearn Extension (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 38F6A15B2A2512B800DE2801 /* Build configuration list for PBXNativeTarget "OpenAI Translator Extension (macOS)" */;
+			buildConfigurationList = 38F6A15B2A2512B800DE2801 /* Build configuration list for PBXNativeTarget "LinguaLearn Extension (macOS)" */;
 			buildPhases = (
 				38F6A1392A2512B800DE2801 /* Sources */,
 				38F6A13A2A2512B800DE2801 /* Frameworks */,
@@ -339,9 +339,9 @@
 			);
 			dependencies = (
 			);
-			name = "OpenAI Translator Extension (macOS)";
-			productName = "OpenAI Translator Extension (macOS)";
-			productReference = 38F6A13D2A2512B800DE2801 /* OpenAI Translator Extension.appex */;
+			name = "LinguaLearn Extension (macOS)";
+			productName = "LinguaLearn Extension (macOS)";
+			productReference = 38F6A13D2A2512B800DE2801 /* LinguaLearn Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -368,7 +368,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 38F6A1042A2512B600DE2801 /* Build configuration list for PBXProject "OpenAI Translator" */;
+			buildConfigurationList = 38F6A1042A2512B600DE2801 /* Build configuration list for PBXProject "LinguaLearn" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -381,10 +381,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				38F6A1132A2512B800DE2801 /* OpenAI Translator (iOS) */,
-				38F6A1252A2512B800DE2801 /* OpenAI Translator (macOS) */,
-				38F6A1322A2512B800DE2801 /* OpenAI Translator Extension (iOS) */,
-				38F6A13C2A2512B800DE2801 /* OpenAI Translator Extension (macOS) */,
+				38F6A1132A2512B800DE2801 /* LinguaLearn (iOS) */,
+				38F6A1252A2512B800DE2801 /* LinguaLearn (macOS) */,
+				38F6A1322A2512B800DE2801 /* LinguaLearn Extension (iOS) */,
+				38F6A13C2A2512B800DE2801 /* LinguaLearn Extension (macOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -492,12 +492,12 @@
 /* Begin PBXTargetDependency section */
 		38F6A1362A2512B800DE2801 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 38F6A1322A2512B800DE2801 /* OpenAI Translator Extension (iOS) */;
+			target = 38F6A1322A2512B800DE2801 /* LinguaLearn Extension (iOS) */;
 			targetProxy = 38F6A1352A2512B800DE2801 /* PBXContainerItemProxy */;
 		};
 		38F6A1402A2512B800DE2801 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 38F6A13C2A2512B800DE2801 /* OpenAI Translator Extension (macOS) */;
+			target = 38F6A13C2A2512B800DE2801 /* LinguaLearn Extension (macOS) */;
 			targetProxy = 38F6A13F2A2512B800DE2801 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -654,7 +654,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "OpenAI Translator Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "LinguaLearn Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -667,8 +667,8 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.OpenAI-Translator.Extension";
-				PRODUCT_NAME = "OpenAI Translator Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.LinguaLearn.Extension";
+				PRODUCT_NAME = "LinguaLearn Extension";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -684,7 +684,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "OpenAI Translator Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "LinguaLearn Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -697,8 +697,8 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.OpenAI-Translator.Extension";
-				PRODUCT_NAME = "OpenAI Translator Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.LinguaLearn.Extension";
+				PRODUCT_NAME = "LinguaLearn Extension";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -718,7 +718,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "OpenAI Translator";
+				INFOPLIST_KEY_CFBundleDisplayName = "LinguaLearn";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -736,8 +736,8 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.OpenAI-Translator";
-				PRODUCT_NAME = "OpenAI Translator";
+				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.LinguaLearn";
+				PRODUCT_NAME = "LinguaLearn";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -755,7 +755,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "OpenAI Translator";
+				INFOPLIST_KEY_CFBundleDisplayName = "LinguaLearn";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -773,8 +773,8 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.OpenAI-Translator";
-				PRODUCT_NAME = "OpenAI Translator";
+				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.LinguaLearn";
+				PRODUCT_NAME = "LinguaLearn";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -786,13 +786,13 @@
 		38F6A15C2A2512B800DE2801 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/OpenAI Translator.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/LinguaLearn.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "OpenAI Translator Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "LinguaLearn Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -805,8 +805,8 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.OpenAI-Translator.Extension";
-				PRODUCT_NAME = "OpenAI Translator Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.LinguaLearn.Extension";
+				PRODUCT_NAME = "LinguaLearn Extension";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -817,13 +817,13 @@
 		38F6A15D2A2512B800DE2801 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/OpenAI Translator.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/LinguaLearn.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "OpenAI Translator Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "LinguaLearn Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -836,8 +836,8 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.OpenAI-Translator.Extension";
-				PRODUCT_NAME = "OpenAI Translator Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.LinguaLearn.Extension";
+				PRODUCT_NAME = "LinguaLearn Extension";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -851,13 +851,13 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "macOS (App)/OpenAI Translator.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "macOS (App)/LinguaLearn.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "OpenAI Translator";
+				INFOPLIST_KEY_CFBundleDisplayName = "LinguaLearn";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -872,8 +872,8 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.OpenAI-Translator";
-				PRODUCT_NAME = "OpenAI Translator";
+				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.LinguaLearn";
+				PRODUCT_NAME = "LinguaLearn";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -886,13 +886,13 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "macOS (App)/OpenAI Translator.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "macOS (App)/LinguaLearn.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "OpenAI Translator";
+				INFOPLIST_KEY_CFBundleDisplayName = "LinguaLearn";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -907,8 +907,8 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.OpenAI-Translator";
-				PRODUCT_NAME = "OpenAI Translator";
+				PRODUCT_BUNDLE_IDENTIFIER = "xyz.yetone.LinguaLearn";
+				PRODUCT_NAME = "LinguaLearn";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -918,7 +918,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		38F6A1042A2512B600DE2801 /* Build configuration list for PBXProject "OpenAI Translator" */ = {
+		38F6A1042A2512B600DE2801 /* Build configuration list for PBXProject "LinguaLearn" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				38F6A1522A2512B800DE2801 /* Debug */,
@@ -927,7 +927,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		38F6A1542A2512B800DE2801 /* Build configuration list for PBXNativeTarget "OpenAI Translator Extension (iOS)" */ = {
+		38F6A1542A2512B800DE2801 /* Build configuration list for PBXNativeTarget "LinguaLearn Extension (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				38F6A1552A2512B800DE2801 /* Debug */,
@@ -936,7 +936,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		38F6A1582A2512B800DE2801 /* Build configuration list for PBXNativeTarget "OpenAI Translator (iOS)" */ = {
+		38F6A1582A2512B800DE2801 /* Build configuration list for PBXNativeTarget "LinguaLearn (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				38F6A1592A2512B800DE2801 /* Debug */,
@@ -945,7 +945,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		38F6A15B2A2512B800DE2801 /* Build configuration list for PBXNativeTarget "OpenAI Translator Extension (macOS)" */ = {
+		38F6A15B2A2512B800DE2801 /* Build configuration list for PBXNativeTarget "LinguaLearn Extension (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				38F6A15C2A2512B800DE2801 /* Debug */,
@@ -954,7 +954,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		38F6A15F2A2512B800DE2801 /* Build configuration list for PBXNativeTarget "OpenAI Translator (macOS)" */ = {
+		38F6A15F2A2512B800DE2801 /* Build configuration list for PBXNativeTarget "LinguaLearn (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				38F6A1602A2512B800DE2801 /* Debug */,

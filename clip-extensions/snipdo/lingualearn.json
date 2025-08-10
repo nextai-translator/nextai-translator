@@ -1,0 +1,12 @@
+{
+    "name": "LinguaLearn",
+    "identifier": "xyz.yetone.apps.lingualearn.clip-extensions.snipdo",
+    "icon": "icon.png",
+    "actions": [
+        {
+            "title": "LinguaLearn",
+            "icon": "icon.png",
+            "powershellFile": "lingualearn.ps1"
+        }
+    ]
+}

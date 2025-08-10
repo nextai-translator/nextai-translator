@@ -1818,10 +1818,10 @@ export function InnerSettings({
                             gap: 6,
                         }}
                     >
-                        OpenAI Translator
+                        Lingua Learn
                         {AppConfig?.version ? (
                             <a
-                                href='https://github.com/yetone/openai-translator/releases'
+                                href='https://github.com/andersan/lingualearn/releases'
                                 target='_blank'
                                 rel='noreferrer'
                                 style={linkStyle}
@@ -1959,14 +1959,14 @@ export function InnerSettings({
                     }}
                 >
                     {t(
-                        'It is recommended to download the desktop application of OpenAI Translator to enjoy the wonderful experience of word translation in all software!'
+                        'It is recommended to download the desktop application of LinguaLearn to enjoy the wonderful experience of word translation in all software!'
                     )}{' '}
                     <a
                         target='_blank'
                         href={
                             values?.i18n?.toLowerCase().includes('zh')
-                                ? 'https://github.com/openai-translator/openai-translator/blob/main/README-CN.md#%E5%AE%89%E8%A3%85'
-                                : 'https://github.com/openai-translator/openai-translator#installation'
+                                ? 'https://github.com/andersan/lingualearn/blob/main/README-CN.md#%E5%AE%89%E8%A3%85'
+                                : 'https://github.com/andersan/lingualearn#installation'
                         }
                         rel='noreferrer'
                         style={{
@@ -2250,8 +2250,8 @@ export function InnerSettings({
                                             target='_blank'
                                             href={
                                                 values?.i18n?.toLowerCase().includes('zh')
-                                                    ? 'https://github.com/openai-translator/openai-translator/blob/main/docs/kimi-cn.md'
-                                                    : 'https://github.com/openai-translator/openai-translator/blob/main/docs/kimi.md'
+                                                    ? 'https://github.com/andersan/lingualearn/blob/main/docs/kimi-cn.md'
+                                                    : 'https://github.com/andersan/lingualearn/blob/main/docs/kimi.md'
                                             }
                                             rel='noreferrer'
                                             style={linkStyle}
@@ -2275,8 +2275,8 @@ export function InnerSettings({
                                             target='_blank'
                                             href={
                                                 values?.i18n?.toLowerCase().includes('zh')
-                                                    ? 'https://github.com/openai-translator/openai-translator/blob/main/docs/kimi-cn.md'
-                                                    : 'https://github.com/openai-translator/openai-translator/blob/main/docs/kimi.md'
+                                                    ? 'https://github.com/andersan/lingualearn/blob/main/docs/kimi-cn.md'
+                                                    : 'https://github.com/andersan/lingualearn/blob/main/docs/kimi.md'
                                             }
                                             rel='noreferrer'
                                             style={linkStyle}
@@ -2306,8 +2306,8 @@ export function InnerSettings({
                                             target='_blank'
                                             href={
                                                 values?.i18n?.toLowerCase().includes('zh')
-                                                    ? 'https://github.com/openai-translator/openai-translator/blob/main/docs/chatglm-cn.md'
-                                                    : 'https://github.com/openai-translator/openai-translator/blob/main/docs/chatglm.md'
+                                                    ? 'https://github.com/andersan/lingualearn/blob/main/docs/chatglm-cn.md'
+                                                    : 'https://github.com/andersan/lingualearn/blob/main/docs/chatglm.md'
                                             }
                                             rel='noreferrer'
                                             style={linkStyle}
@@ -2331,8 +2331,8 @@ export function InnerSettings({
                                             target='_blank'
                                             href={
                                                 values?.i18n?.toLowerCase().includes('zh')
-                                                    ? 'https://github.com/openai-translator/openai-translator/blob/main/docs/chatglm-cn.md'
-                                                    : 'https://github.com/openai-translator/openai-translator/blob/main/docs/chatglm.md'
+                                                    ? 'https://github.com/andersan/lingualearn/blob/main/docs/chatglm-cn.md'
+                                                    : 'https://github.com/andersan/lingualearn/blob/main/docs/chatglm.md'
                                             }
                                             rel='noreferrer'
                                             style={linkStyle}
@@ -2800,7 +2800,7 @@ export function InnerSettings({
                                             'It is highly recommended to disable this feature and use the Clip Extension'
                                         )}
                                         <a
-                                            href='https://github.com/openai-translator/openai-translator/blob/main/CLIP-EXTENSIONS.md'
+                                            href='https://github.com/andersan/lingualearn/blob/main/CLIP-EXTENSIONS.md'
                                             target='_blank'
                                             rel='noreferrer'
                                             style={linkStyle}

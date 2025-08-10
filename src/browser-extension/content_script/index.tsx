@@ -114,7 +114,7 @@ async function showPopupCard(reference: ReferenceElement, text: string, autoFocu
     root.render(
         <React.StrictMode>
             <GlobalSuspense>
-                <JSS jss={jss} generateId={generateId} classNamePrefix='__yetone-openai-translator-jss-'>
+                <JSS jss={jss} generateId={generateId} classNamePrefix='__yetone-lingualearn-jss-'>
                     <InnerContainer reference={reference}>
                         <TitleBar pinned={settings.pinned} onClose={hidePopupCard} engine={engine} />
                         <Translator
@@ -220,7 +220,7 @@ async function main() {
     document.addEventListener('touchend', mouseUpHandler)
 
     browser.runtime.onMessage.addListener(function (request) {
-        if (request.type === 'open-translator') {
+        if (request.type === 'lingua-learn') {
             if (window !== window.top) return
             const text = request.info.selectionText ?? ''
             const x = lastMouseEvent ? getClientX(lastMouseEvent) : 0

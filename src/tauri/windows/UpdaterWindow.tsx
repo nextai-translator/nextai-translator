@@ -102,7 +102,7 @@ export function UpdaterWindow() {
                     data-tauri-drag-region
                 >
                     <img className={styles.icon} src={getAssetUrl(icon)} />
-                    OpenAI Translator {t('Updater')}
+                    LinguaLearn {t('Updater')}
                 </div>
                 <div
                     style={{

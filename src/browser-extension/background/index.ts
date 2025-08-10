@@ -12,9 +12,9 @@ import { keyChatGLMAccessToken } from '@/common/engines/chatglm'
 
 browser.contextMenus?.create(
     {
-        id: 'open-translator',
+        id: 'lingua-learn',
         type: 'normal',
-        title: 'OpenAI Translator',
+        title: 'Lingua Learn Tutor',
         contexts: ['page', 'selection'],
     },
     () => {
@@ -26,7 +26,7 @@ browser.contextMenus?.onClicked.addListener(async function (info) {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true })
     tab.id &&
         browser.tabs.sendMessage(tab.id, {
-            type: 'open-translator',
+            type: 'lingua-learn',
             info,
         })
 })

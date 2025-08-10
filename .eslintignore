@@ -1,3 +1,10 @@
 public
 dist
 src/tauri/bindings.ts
+
+# Ignore Safari native extension project (not part of TS project include set)
+src-safari/
+
+# Common ignores
+node_modules/
+.eslintcache
