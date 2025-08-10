@@ -220,7 +220,7 @@ async function main() {
     document.addEventListener('touchend', mouseUpHandler)
 
     browser.runtime.onMessage.addListener(function (request) {
-        if (request.type === 'open-translator') {
+        if (request.type === 'lingua-learn') {
             if (window !== window.top) return
             const text = request.info.selectionText ?? ''
             const x = lastMouseEvent ? getClientX(lastMouseEvent) : 0
