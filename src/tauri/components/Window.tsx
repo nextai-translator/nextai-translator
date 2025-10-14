@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { Effect } from '@tauri-apps/api/window'
 import { useTheme } from '../../common/hooks/useTheme'
 import { Provider as StyletronProvider } from 'styletron-react'
@@ -133,7 +133,7 @@ export function InnerWindow(props: IWindowProps) {
 
     const [backgroundBlur, setBackgroundBlur] = useState(false)
     useEffect(() => {
-        const appWindow = getCurrent()
+        const appWindow = WebviewWindow.getCurrent()
         if (settings.enableBackgroundBlur) {
             //  TODO: It currently seems that the light/dark mode of the mica cannot be manually adjusted.
             // link: https://beta.tauri.app/references/v2/js/core/namespacewindow/#mica
@@ -173,7 +173,7 @@ export function InnerWindow(props: IWindowProps) {
         (e: React.MouseEvent<HTMLDivElement>) => {
             e.preventDefault()
             e.stopPropagation()
-            const appWindow = getCurrent()
+            const appWindow = WebviewWindow.getCurrent()
             setPinned((prev) => {
                 const isPinned_ = !prev
                 appWindow.setAlwaysOnTop(isPinned_)

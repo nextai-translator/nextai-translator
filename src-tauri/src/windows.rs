@@ -11,7 +11,7 @@ use get_selected_text::get_selected_text;
 use mouse_position::mouse_position::Mouse;
 use serde_json::json;
 use std::sync::atomic::Ordering;
-use tauri::{LogicalPosition, Manager, PhysicalPosition};
+use tauri::{Emitter, Listener, LogicalPosition, Manager, PhysicalPosition};
 use tauri_plugin_updater::UpdaterExt;
 use tauri_specta::Event;
 

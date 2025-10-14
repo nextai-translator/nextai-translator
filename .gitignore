@@ -17,3 +17,4 @@ npm-error.log
 /test-results/
 /playwright-report/
 /playwright/.cache/
+/src-tauri/gen/schemas/

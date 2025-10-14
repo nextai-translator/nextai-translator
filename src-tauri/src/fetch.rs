@@ -8,7 +8,8 @@ use reqwest::{
     Client,
 };
 use serde::{Deserialize, Serialize};
-use tauri::Manager;
+use tauri::Emitter;
+use tauri::Listener;
 
 use crate::config::{get_config, ProxyProtocol};
 use crate::APP_HANDLE;

@@ -74,7 +74,7 @@ import { useLazyEffect } from '../usehooks'
 import LogoWithText, { type LogoWithTextRef } from './LogoWithText'
 import Toaster from './Toaster'
 import { readFile } from '@tauri-apps/plugin-fs'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDeepCompareCallback } from 'use-deep-compare'
 import { useTranslatorStore } from '../store'
 import useSWR from 'swr'
@@ -605,7 +605,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             return undefined
         }
         let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 const editor = editorRef.current
@@ -1502,7 +1502,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             return undefined
         }
         let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 refetchPromotions()
@@ -1531,7 +1531,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             }
         }
         let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)

@@ -1,5 +1,5 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "OpenAI Translator",
   "version": "0.1.0",
   "identifier": "xyz.yetone.apps.openai-translator",
@@ -9,16 +9,6 @@
     "frontendDist": "../dist/tauri"
   },
   "plugins": {
-    "fs": {
-      "scope": {
-        "allow": [
-          "**",
-          "$CONFIG/*/**",
-          "$APPCONFIG/**",
-          "$APPCACHE/**"
-        ]
-      }
-    },
     "shell": {
       "open": true
     },
@@ -35,6 +25,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "linux": {
       "deb": {
         "depends": [
@@ -67,7 +58,7 @@
       "resources/*"
     ],
     "shortDescription": "",
-    "targets": ["deb", "appimage", "nsis", "app", "dmg", "updater"],
+    "targets": ["deb", "appimage", "nsis", "app", "dmg"],
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",

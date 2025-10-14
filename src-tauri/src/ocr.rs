@@ -78,7 +78,6 @@ pub fn do_ocr() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(target_os = "windows")]
 pub fn do_ocr_with_cut_file_path(image_file_path: &Path) {
     use windows::core::HSTRING;
-    use windows::Globalization::Language;
     use windows::Graphics::Imaging::BitmapDecoder;
     use windows::Media::Ocr::OcrEngine;
     use windows::Storage::{FileAccessMode, StorageFile};
