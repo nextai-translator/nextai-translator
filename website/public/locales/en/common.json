@@ -1,0 +1,115 @@
+{
+  "site": {
+    "title": "NextAI Translator - AI-Powered Translation Tool",
+    "description": "The translator that does more than translation. Supporting 55+ languages with 13+ AI providers including OpenAI, Claude, Gemini, Ollama, and more."
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "download": "Download",
+    "documentation": "Documentation",
+    "github": "GitHub"
+  },
+  "hero": {
+    "title": "The Translator That Does More Than Translation",
+    "subtitle": "Supporting 55+ languages with 13+ AI providers",
+    "description": "NextAI Translator is a powerful, multi-platform translation tool that leverages cutting-edge AI providers including OpenAI, Azure, Claude, Gemini, Ollama, and more. Available as a browser extension, desktop app, and userscript.",
+    "ctaPrimary": "Download Now",
+    "ctaSecondary": "View on GitHub",
+    "stats": {
+      "languages": "55+ Languages",
+      "providers": "13+ AI Providers",
+      "platforms": "Multi-Platform Support"
+    }
+  },
+  "features": {
+    "title": "Powerful Features",
+    "subtitle": "Everything you need for professional translation",
+    "translation": {
+      "title": "AI Translation",
+      "description": "Advanced translation powered by 13+ AI providers including OpenAI, Azure OpenAI, Claude, Gemini, Ollama, ChatGLM, DeepSeek, Cohere, Groq, Moonshot, Kimi, MiniMax, and ChatGPT."
+    },
+    "polishing": {
+      "title": "Text Polishing",
+      "description": "Refine and improve your text with AI-powered suggestions for better clarity and style."
+    },
+    "summarization": {
+      "title": "Text Summarization",
+      "description": "Quickly extract key points and generate concise summaries of lengthy content."
+    },
+    "streaming": {
+      "title": "Streaming Responses",
+      "description": "See translations appear in real-time with streaming API responses for immediate feedback."
+    },
+    "ocr": {
+      "title": "Screenshot Translation",
+      "description": "Translate text from images and screenshots using advanced OCR powered by tesseract.js."
+    },
+    "vocabulary": {
+      "title": "Vocabulary Books",
+      "description": "Save and organize words with persistent storage powered by Dexie for offline access."
+    },
+    "tts": {
+      "title": "Text-to-Speech",
+      "description": "Listen to translations with integrated TTS functionality for pronunciation practice."
+    },
+    "detection": {
+      "title": "Multi-Engine Detection",
+      "description": "Accurate language detection using multiple engines: Google, Baidu, Bing, and Local algorithms."
+    }
+  },
+  "download": {
+    "title": "Download for Your Platform",
+    "subtitle": "Available on desktop, browser extensions, and more",
+    "recommended": "Recommended for your system",
+    "chrome": {
+      "title": "Chrome Extension",
+      "description": "Manifest V3 compatible. Available on Chrome Web Store.",
+      "requirements": "Chrome 88+"
+    },
+    "firefox": {
+      "title": "Firefox Add-on",
+      "description": "Manifest V2 compatible. Available on Firefox Add-ons.",
+      "requirements": "Firefox 78+"
+    },
+    "safari": {
+      "title": "Safari Extension",
+      "description": "Native iOS/macOS extension with Xcode integration.",
+      "requirements": "Safari 14+"
+    },
+    "windows": {
+      "title": "Windows Desktop",
+      "description": "Native desktop app powered by Tauri.",
+      "requirements": "Windows 10+"
+    },
+    "macos": {
+      "title": "macOS Desktop",
+      "description": "Native desktop app powered by Tauri.",
+      "requirements": "macOS 10.15+"
+    },
+    "linux": {
+      "title": "Linux Desktop",
+      "description": "Native desktop app powered by Tauri.",
+      "requirements": "Modern Linux"
+    },
+    "userscript": {
+      "title": "Userscript",
+      "description": "Compatible with Tampermonkey and Greasemonkey.",
+      "requirements": "Any browser with userscript support"
+    },
+    "downloadButton": "Download",
+    "viewOnStore": "View on Store"
+  },
+  "providers": {
+    "title": "Powered by Leading AI Providers",
+    "subtitle": "Choose from 13+ AI engines for translation"
+  },
+  "footer": {
+    "about": "About",
+    "documentation": "Documentation",
+    "support": "Support",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© 2025 NextAI Translator. Open source project."
+  }
+}

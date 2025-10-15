@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Next.js Framework Selection",
+    "content": "Chose Next.js 14.x with static export capability for optimal SEO performance, server-side generation, and excellent React ecosystem integration. This aligns with the technical design specification requirements for a fast, SEO-friendly static site that can be easily deployed to CDN networks like Vercel or Netlify.",
+    "path": "website/next.config.js",
+    "line_range": [1, 14]
+  },
+  {
+    "title": "Tailwind CSS for Styling",
+    "content": "Selected Tailwind CSS over BaseUI for the marketing website to achieve smaller bundle sizes and faster load times. While the main application uses BaseUI, the website prioritizes performance with utility-first CSS. Tailwind allows rapid development while keeping the final CSS bundle under 20KB through aggressive purging of unused styles.",
+    "path": "website/tailwind.config.js",
+    "line_range": [1, 38]
+  },
+  {
+    "title": "next-i18next for Internationalization",
+    "content": "Implemented next-i18next for seamless Next.js integration with i18n support. This provides server-side rendering support, automatic language detection, and consistent translation management across English, Simplified Chinese, and Traditional Chinese. The configuration supports browser language preference detection and localStorage persistence.",
+    "path": "website/next-i18next.config.js",
+    "line_range": [1, 13]
+  },
+  {
+    "title": "Component-Based Architecture",
+    "content": "Organized code into reusable React components (Header, Footer, Layout, HeroSection, FeaturesSection, etc.) for maintainability and consistency. This modular approach makes it easy to update individual sections without affecting the entire codebase and enables better code reuse across pages.",
+    "path": "website/src/components/Layout.tsx",
+    "line_range": [1, 46]
+  },
+  {
+    "title": "Platform Auto-Detection",
+    "content": "Implemented client-side platform detection in the DownloadSection component using navigator.userAgent and navigator.platform to automatically highlight the recommended download option for the user's operating system and browser. This reduces user friction and improves conversion rates by making the correct download immediately obvious.",
+    "path": "website/src/components/DownloadSection.tsx",
+    "line_range": [20, 42]
+  },
+  {
+    "title": "Accessibility-First Design",
+    "content": "Implemented WCAG 2.1 AA compliance with semantic HTML, ARIA labels, keyboard navigation support, and focus indicators on all interactive elements. The Header component includes proper aria-labels, aria-expanded attributes for the mobile menu, and keyboard-accessible navigation for screen reader users.",
+    "path": "website/src/components/Header.tsx",
+    "line_range": [1, 181]
+  },
+  {
+    "title": "SEO Optimization",
+    "content": "Added comprehensive SEO meta tags in the Layout component including Open Graph tags for social sharing, Twitter Card support, and descriptive meta descriptions. Each page can override the default title and description for optimal search engine visibility.",
+    "path": "website/src/components/Layout.tsx",
+    "line_range": [15, 31]
+  },
+  {
+    "title": "Responsive Mobile-First Design",
+    "content": "Implemented mobile-first responsive design using Tailwind's breakpoint system (sm, md, lg) throughout all components. The Header includes a hamburger menu for mobile devices, and all sections adapt their layout from single-column on mobile to multi-column grids on larger screens.",
+    "path": "website/src/components/Header.tsx",
+    "line_range": [62, 129]
+  },
+  {
+    "title": "Translation File Organization",
+    "content": "Structured translation files with hierarchical JSON organization for easy maintenance and expansion. Common translations are grouped by section (site, nav, hero, features, download, etc.) making it simple for non-technical team members to add or update translations without touching code.",
+    "path": "website/public/locales/en/common.json",
+    "line_range": [1, 115]
+  },
+  {
+    "title": "Comprehensive Documentation Pages",
+    "content": "Created detailed documentation, privacy policy, terms of service, and about pages to provide users with essential information. The documentation page includes step-by-step installation guides for all platforms and API configuration instructions for all 13+ supported AI providers.",
+    "path": "website/src/pages/documentation.tsx",
+    "line_range": [1, 160]
+  },
+  {
+    "title": "Features Showcase with Icons",
+    "content": "Implemented the FeaturesSection component with React Icons to visually represent each feature (translation, polishing, summarization, OCR, vocabulary, TTS, etc.). The grid layout with hover effects and animations makes the features engaging and easy to scan.",
+    "path": "website/src/components/FeaturesSection.tsx",
+    "line_range": [1, 100]
+  },
+  {
+    "title": "AI Providers Section",
+    "content": "Created a dedicated section showcasing all 13+ supported AI providers (OpenAI, Azure, Claude, Gemini, Ollama, ChatGLM, DeepSeek, Cohere, Groq, Moonshot, Kimi, MiniMax, ChatGPT) to highlight the multi-provider flexibility as a key differentiator from competitors.",
+    "path": "website/src/components/ProvidersSection.tsx",
+    "line_range": [1, 58]
+  },
+  {
+    "title": "Hero Section with Statistics",
+    "content": "Designed an impactful hero section with clear value proposition, prominent CTA buttons, and key statistics (55+ languages, 13+ providers, multi-platform support) to immediately communicate product value within the first 10 seconds of page load.",
+    "path": "website/src/components/HeroSection.tsx",
+    "line_range": [1, 72]
+  },
+  {
+    "title": "TypeScript for Type Safety",
+    "content": "Used TypeScript throughout the project with strict type checking enabled to catch errors during development and provide better IDE support. Interface definitions for components ensure prop consistency and make the codebase more maintainable.",
+    "path": "website/tsconfig.json",
+    "line_range": [1, 28]
+  },
+  {
+    "title": "Static Export Configuration",
+    "content": "Configured Next.js for static export (output: 'export') to enable deployment on any static hosting platform without requiring a Node.js server. This improves performance, reduces hosting costs, and simplifies the deployment pipeline.",
+    "path": "website/next.config.js",
+    "line_range": [6, 7]
+  }
+]

@@ -1,0 +1,115 @@
+{
+  "site": {
+    "title": "NextAI 翻译器 - AI 驱动的翻译工具",
+    "description": "不仅仅是翻译的翻译器。支持 55+ 种语言和 13+ 个 AI 提供商，包括 OpenAI、Claude、Gemini、Ollama 等。"
+  },
+  "nav": {
+    "home": "首页",
+    "features": "功能",
+    "download": "下载",
+    "documentation": "文档",
+    "github": "GitHub"
+  },
+  "hero": {
+    "title": "不仅仅是翻译的翻译器",
+    "subtitle": "支持 55+ 种语言和 13+ 个 AI 提供商",
+    "description": "NextAI Translator 是一款强大的多平台翻译工具，利用尖端的 AI 提供商，包括 OpenAI、Azure、Claude、Gemini、Ollama 等。可作为浏览器扩展、桌面应用和用户脚本使用。",
+    "ctaPrimary": "立即下载",
+    "ctaSecondary": "在 GitHub 上查看",
+    "stats": {
+      "languages": "55+ 种语言",
+      "providers": "13+ 个 AI 提供商",
+      "platforms": "多平台支持"
+    }
+  },
+  "features": {
+    "title": "强大功能",
+    "subtitle": "专业翻译所需的一切",
+    "translation": {
+      "title": "AI 翻译",
+      "description": "由 13+ 个 AI 提供商提供支持的高级翻译，包括 OpenAI、Azure OpenAI、Claude、Gemini、Ollama、ChatGLM、DeepSeek、Cohere、Groq、Moonshot、Kimi、MiniMax 和 ChatGPT。"
+    },
+    "polishing": {
+      "title": "文本润色",
+      "description": "使用 AI 驱动的建议来完善和改进您的文本，提高清晰度和风格。"
+    },
+    "summarization": {
+      "title": "文本摘要",
+      "description": "快速提取关键点并生成冗长内容的简洁摘要。"
+    },
+    "streaming": {
+      "title": "流式响应",
+      "description": "通过流式 API 响应实时查看翻译内容，获得即时反馈。"
+    },
+    "ocr": {
+      "title": "截图翻译",
+      "description": "使用 tesseract.js 提供支持的高级 OCR 从图像和截图中翻译文本。"
+    },
+    "vocabulary": {
+      "title": "词汇本",
+      "description": "使用 Dexie 提供支持的持久存储保存和组织单词，支持离线访问。"
+    },
+    "tts": {
+      "title": "文本转语音",
+      "description": "使用集成的 TTS 功能收听翻译，进行发音练习。"
+    },
+    "detection": {
+      "title": "多引擎检测",
+      "description": "使用多个引擎进行准确的语言检测：Google、Baidu、Bing 和本地算法。"
+    }
+  },
+  "download": {
+    "title": "为您的平台下载",
+    "subtitle": "可用于桌面、浏览器扩展等",
+    "recommended": "推荐用于您的系统",
+    "chrome": {
+      "title": "Chrome 扩展",
+      "description": "Manifest V3 兼容。可在 Chrome 网上应用店获取。",
+      "requirements": "Chrome 88+"
+    },
+    "firefox": {
+      "title": "Firefox 附加组件",
+      "description": "Manifest V2 兼容。可在 Firefox 附加组件获取。",
+      "requirements": "Firefox 78+"
+    },
+    "safari": {
+      "title": "Safari 扩展",
+      "description": "原生 iOS/macOS 扩展，集成 Xcode。",
+      "requirements": "Safari 14+"
+    },
+    "windows": {
+      "title": "Windows 桌面",
+      "description": "由 Tauri 提供支持的原生桌面应用。",
+      "requirements": "Windows 10+"
+    },
+    "macos": {
+      "title": "macOS 桌面",
+      "description": "由 Tauri 提供支持的原生桌面应用。",
+      "requirements": "macOS 10.15+"
+    },
+    "linux": {
+      "title": "Linux 桌面",
+      "description": "由 Tauri 提供支持的原生桌面应用。",
+      "requirements": "现代 Linux"
+    },
+    "userscript": {
+      "title": "用户脚本",
+      "description": "与 Tampermonkey 和 Greasemonkey 兼容。",
+      "requirements": "任何支持用户脚本的浏览器"
+    },
+    "downloadButton": "下载",
+    "viewOnStore": "在商店查看"
+  },
+  "providers": {
+    "title": "由领先的 AI 提供商提供支持",
+    "subtitle": "从 13+ 个 AI 引擎中选择进行翻译"
+  },
+  "footer": {
+    "about": "关于",
+    "documentation": "文档",
+    "support": "支持",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "copyright": "© 2025 NextAI Translator. 开源项目。"
+  }
+}

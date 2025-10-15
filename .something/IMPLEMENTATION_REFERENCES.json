@@ -1,0 +1,142 @@
+[
+  {
+    "title": "Next.js Documentation - Static Export",
+    "content": "Official Next.js documentation for static HTML export, used to configure the website for static site generation without requiring a Node.js server. This enables deployment on CDN platforms like Vercel, Netlify, or Cloudflare Pages.",
+    "path": "website/next.config.js",
+    "line_range": [6, 7],
+    "url": "https://nextjs.org/docs/app/building-your-application/deploying/static-exports"
+  },
+  {
+    "title": "next-i18next Documentation",
+    "content": "Official next-i18next library documentation for implementing internationalization in Next.js applications. Used to set up language detection, translation file management, and locale routing for English, Simplified Chinese, and Traditional Chinese support.",
+    "path": "website/next-i18next.config.js",
+    "line_range": [1, 13],
+    "url": "https://github.com/i18next/next-i18next"
+  },
+  {
+    "title": "Tailwind CSS Documentation",
+    "content": "Official Tailwind CSS documentation for utility-first CSS framework configuration, responsive design breakpoints, and dark mode support. Used throughout the website for rapid styling and optimal bundle size.",
+    "path": "website/tailwind.config.js",
+    "line_range": [1, 38],
+    "url": "https://tailwindcss.com/docs"
+  },
+  {
+    "title": "React Icons Library",
+    "content": "React Icons library providing popular icon sets (FontAwesome, Material Design, etc.) as React components. Used extensively in Header, Footer, HeroSection, and FeaturesSection components for visual enhancement.",
+    "path": "website/src/components/FeaturesSection.tsx",
+    "line_range": [2, 9],
+    "url": "https://react-icons.github.io/react-icons/"
+  },
+  {
+    "title": "WCAG 2.1 Accessibility Guidelines",
+    "content": "Web Content Accessibility Guidelines Level AA compliance requirements referenced in implementation of semantic HTML, ARIA labels, keyboard navigation, and focus indicators throughout all components.",
+    "path": "website/src/components/Header.tsx",
+    "line_range": [86, 88],
+    "url": "https://www.w3.org/WAI/WCAG21/quickref/?versions=2.1&levels=aa"
+  },
+  {
+    "title": "PRD - Product Requirements Document",
+    "content": "The Product Requirements Document for the NextAI Translator website project, which defined the functional requirements, user stories, and success criteria that guided the implementation.",
+    "path": "website/src/pages/index.tsx",
+    "line_range": [1, 29],
+    "knowledge_uuid": "prd-2025-10-15"
+  },
+  {
+    "title": "Tech Design - Technical Specification",
+    "content": "The Technical Design specification that defined the technology stack, architecture decisions, and implementation phases for the website. Key decisions included Next.js framework, Tailwind CSS, and next-i18next.",
+    "path": "website/next.config.js",
+    "line_range": [1, 14],
+    "knowledge_uuid": "tech-design-2025-10-15"
+  },
+  {
+    "title": "Build Configuration Knowledge",
+    "content": "Internal knowledge base article about the project's build configuration strategy, Vite setup, and deployment pipelines. Referenced for understanding the existing project's dependency management with pnpm.",
+    "path": "website/package.json",
+    "line_range": [1, 32],
+    "knowledge_uuid": "e8284f29-2223-4d70-84fd-883cd64ae882"
+  },
+  {
+    "title": "Dependency Management Knowledge",
+    "content": "Internal knowledge base article about dependency management, package selection, and library architecture. Referenced for selecting React 18.2.0, TypeScript 5.x, and other dependencies consistent with the main application.",
+    "path": "website/package.json",
+    "line_range": [10, 25],
+    "knowledge_uuid": "808dcd08-7c64-4880-8267-c2a85c735715"
+  },
+  {
+    "title": "GitHub Openai-Translator Repository",
+    "content": "The main GitHub repository for the openai-translator project, referenced throughout the website for download links, issue reporting, and community engagement.",
+    "path": "website/src/components/Footer.tsx",
+    "line_range": [29, 36],
+    "url": "https://github.com/openai-translator/openai-translator"
+  },
+  {
+    "title": "Navigator API - Platform Detection",
+    "content": "MDN documentation for the Navigator API (userAgent, platform) used to implement platform auto-detection in the DownloadSection component for highlighting the recommended download option.",
+    "path": "website/src/components/DownloadSection.tsx",
+    "line_range": [20, 42],
+    "url": "https://developer.mozilla.org/en-US/docs/Web/API/Navigator"
+  },
+  {
+    "title": "Open Graph Protocol",
+    "content": "Open Graph protocol specification for social media meta tags, implemented in the Layout component to control how links appear when shared on Facebook, Twitter, LinkedIn, etc.",
+    "path": "website/src/components/Layout.tsx",
+    "line_range": [20, 24],
+    "url": "https://ogp.me/"
+  },
+  {
+    "title": "TypeScript Configuration Reference",
+    "content": "Official TypeScript compiler options reference used to configure strict type checking, path aliases (@/* imports), and JSX support for the Next.js project.",
+    "path": "website/tsconfig.json",
+    "line_range": [1, 28],
+    "url": "https://www.typescriptlang.org/tsconfig"
+  },
+  {
+    "title": "Next.js Image Optimization",
+    "content": "Next.js Image component documentation for automatic image optimization, responsive images, and WebP/AVIF format conversion. Note: Disabled for static export but referenced in implementation plans.",
+    "path": "website/next.config.js",
+    "line_range": [7, 9],
+    "url": "https://nextjs.org/docs/app/api-reference/components/image"
+  },
+  {
+    "title": "OpenAI Platform Documentation",
+    "content": "OpenAI API platform documentation referenced in the documentation page for users to create API keys and configure the NextAI Translator application.",
+    "path": "website/src/pages/documentation.tsx",
+    "line_range": [39, 48],
+    "url": "https://platform.openai.com/docs"
+  },
+  {
+    "title": "Anthropic Claude Console",
+    "content": "Anthropic Claude API console documentation referenced in the documentation page for Claude API key generation and configuration instructions.",
+    "path": "website/src/pages/documentation.tsx",
+    "line_range": [50, 57],
+    "url": "https://console.anthropic.com"
+  },
+  {
+    "title": "Ollama Local AI Platform",
+    "content": "Ollama documentation for running local AI models, referenced in the documentation page as a privacy-focused alternative to cloud-based AI providers.",
+    "path": "website/src/pages/documentation.tsx",
+    "line_range": [59, 68],
+    "url": "https://ollama.ai"
+  },
+  {
+    "title": "Chrome Web Store",
+    "content": "Chrome Web Store platform referenced in download links for the Chrome extension distribution.",
+    "path": "website/src/components/DownloadSection.tsx",
+    "line_range": [47, 54],
+    "url": "https://chrome.google.com/webstore"
+  },
+  {
+    "title": "Firefox Add-ons Platform",
+    "content": "Mozilla Firefox Add-ons platform referenced in download links for the Firefox extension distribution.",
+    "path": "website/src/components/DownloadSection.tsx",
+    "line_range": [56, 63],
+    "url": "https://addons.mozilla.org/firefox/"
+  },
+  {
+    "title": "AGPL-3.0 License",
+    "content": "GNU Affero General Public License v3.0 referenced in the Terms of Service page, explaining the open-source license under which NextAI Translator is distributed.",
+    "path": "website/src/pages/terms.tsx",
+    "line_range": [22, 35],
+    "url": "https://www.gnu.org/licenses/agpl-3.0.html"
+  }
+]
