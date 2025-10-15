@@ -1,21 +1,21 @@
 [
   {
-    "title": "Next.js Framework Selection",
-    "content": "Chose Next.js 14.x with static export capability for optimal SEO performance, server-side generation, and excellent React ecosystem integration. This aligns with the technical design specification requirements for a fast, SEO-friendly static site that can be easily deployed to CDN networks like Vercel or Netlify.",
+    "title": "Next.js Framework Selection with Static Export",
+    "content": "Chose Next.js 14.x with static export capability (output: 'export') for optimal SEO performance and excellent React ecosystem integration. Static export was necessary to enable deployment on any CDN without requiring a Node.js server, which simplifies hosting and reduces costs while improving global performance.",
     "path": "website/next.config.js",
-    "line_range": [1, 14]
+    "line_range": [1, 12]
+  },
+  {
+    "title": "Client-Side i18n for Static Export Compatibility",
+    "content": "Refactored from next-i18next (server-side) to client-side react-i18next because Next.js does not support the i18n configuration option when using static export (output: 'export'). Created a custom i18n utility (src/utils/i18n.ts) that uses i18next-browser-languagedetector for automatic language detection and localStorage for persistence. This maintains full internationalization functionality (English, Simplified Chinese, Traditional Chinese) while enabling static deployment.",
+    "path": "website/src/utils/i18n.ts",
+    "line_range": [1, 38]
   },
   {
     "title": "Tailwind CSS for Styling",
     "content": "Selected Tailwind CSS over BaseUI for the marketing website to achieve smaller bundle sizes and faster load times. While the main application uses BaseUI, the website prioritizes performance with utility-first CSS. Tailwind allows rapid development while keeping the final CSS bundle under 20KB through aggressive purging of unused styles.",
     "path": "website/tailwind.config.js",
     "line_range": [1, 38]
-  },
-  {
-    "title": "next-i18next for Internationalization",
-    "content": "Implemented next-i18next for seamless Next.js integration with i18n support. This provides server-side rendering support, automatic language detection, and consistent translation management across English, Simplified Chinese, and Traditional Chinese. The configuration supports browser language preference detection and localStorage persistence.",
-    "path": "website/next-i18next.config.js",
-    "line_range": [1, 13]
   },
   {
     "title": "Component-Based Architecture",
@@ -27,7 +27,7 @@
     "title": "Platform Auto-Detection",
     "content": "Implemented client-side platform detection in the DownloadSection component using navigator.userAgent and navigator.platform to automatically highlight the recommended download option for the user's operating system and browser. This reduces user friction and improves conversion rates by making the correct download immediately obvious.",
     "path": "website/src/components/DownloadSection.tsx",
-    "line_range": [20, 42]
+    "line_range": [29, 49]
   },
   {
     "title": "Accessibility-First Design",
@@ -57,7 +57,7 @@
     "title": "Comprehensive Documentation Pages",
     "content": "Created detailed documentation, privacy policy, terms of service, and about pages to provide users with essential information. The documentation page includes step-by-step installation guides for all platforms and API configuration instructions for all 13+ supported AI providers.",
     "path": "website/src/pages/documentation.tsx",
-    "line_range": [1, 160]
+    "line_range": [1, 152]
   },
   {
     "title": "Features Showcase with Icons",
@@ -84,9 +84,15 @@
     "line_range": [1, 28]
   },
   {
-    "title": "Static Export Configuration",
-    "content": "Configured Next.js for static export (output: 'export') to enable deployment on any static hosting platform without requiring a Node.js server. This improves performance, reduces hosting costs, and simplifies the deployment pipeline.",
-    "path": "website/next.config.js",
-    "line_range": [6, 7]
+    "title": "I18nextProvider Integration in _app.tsx",
+    "content": "Updated the App component to use I18nextProvider with the custom i18n configuration instead of next-i18next's appWithTranslation HOC. This enables client-side internationalization that works with Next.js static export while maintaining full translation capabilities including language detection and persistence.",
+    "path": "website/src/pages/_app.tsx",
+    "line_range": [1, 21]
+  },
+  {
+    "title": "Language Switcher Implementation",
+    "content": "Implemented language switching using i18n.changeLanguage() instead of Next.js router-based language switching. The current language is accessed via i18n.language instead of router.locale. This approach works seamlessly with static export while providing instant language switching without page reloads.",
+    "path": "website/src/components/Header.tsx",
+    "line_range": [7, 12]
   }
 ]

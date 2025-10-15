@@ -3,15 +3,29 @@
     "title": "Next.js Documentation - Static Export",
     "content": "Official Next.js documentation for static HTML export, used to configure the website for static site generation without requiring a Node.js server. This enables deployment on CDN platforms like Vercel, Netlify, or Cloudflare Pages.",
     "path": "website/next.config.js",
-    "line_range": [6, 7],
+    "line_range": [1, 12],
     "url": "https://nextjs.org/docs/app/building-your-application/deploying/static-exports"
   },
   {
-    "title": "next-i18next Documentation",
-    "content": "Official next-i18next library documentation for implementing internationalization in Next.js applications. Used to set up language detection, translation file management, and locale routing for English, Simplified Chinese, and Traditional Chinese support.",
-    "path": "website/next-i18next.config.js",
-    "line_range": [1, 13],
-    "url": "https://github.com/i18next/next-i18next"
+    "title": "Next.js i18n Limitations with Static Export",
+    "content": "Next.js documentation explaining that the i18n configuration is not supported when using static export (output: 'export'). This limitation led to the refactoring from next-i18next server-side approach to client-side react-i18next implementation.",
+    "path": "website/src/utils/i18n.ts",
+    "line_range": [1, 38],
+    "url": "https://nextjs.org/docs/messages/export-no-i18n"
+  },
+  {
+    "title": "react-i18next Documentation",
+    "content": "Official react-i18next documentation for client-side internationalization in React applications. Used to implement language detection, translation management, and locale switching without server-side routing.",
+    "path": "website/src/utils/i18n.ts",
+    "line_range": [1, 38],
+    "url": "https://react.i18next.com/"
+  },
+  {
+    "title": "i18next-browser-languagedetector",
+    "content": "Browser language detection plugin for i18next, used to automatically detect user's preferred language from browser settings and localStorage. Enables seamless language preference persistence across sessions.",
+    "path": "website/src/utils/i18n.ts",
+    "line_range": [3, 3],
+    "url": "https://github.com/i18next/i18next-browser-languageDetector"
   },
   {
     "title": "Tailwind CSS Documentation",
@@ -36,31 +50,31 @@
   },
   {
     "title": "PRD - Product Requirements Document",
-    "content": "The Product Requirements Document for the NextAI Translator website project, which defined the functional requirements, user stories, and success criteria that guided the implementation.",
+    "content": "The Product Requirements Document for the NextAI Translator website project, which defined the functional requirements (REQ-1 to REQ-8), user stories, and success criteria that guided the implementation.",
     "path": "website/src/pages/index.tsx",
-    "line_range": [1, 29],
+    "line_range": [1, 19],
     "knowledge_uuid": "prd-2025-10-15"
   },
   {
     "title": "Tech Design - Technical Specification",
-    "content": "The Technical Design specification that defined the technology stack, architecture decisions, and implementation phases for the website. Key decisions included Next.js framework, Tailwind CSS, and next-i18next.",
+    "content": "The Technical Design specification that defined the technology stack, architecture decisions (Next.js, Tailwind CSS, i18n), and implementation phases for the website. The specification recommended next-i18next but static export requirements necessitated refactoring to client-side react-i18next.",
     "path": "website/next.config.js",
-    "line_range": [1, 14],
+    "line_range": [1, 12],
     "knowledge_uuid": "tech-design-2025-10-15"
   },
   {
+    "title": "UI Components Design System Knowledge",
+    "content": "Internal knowledge base article about the project's UI component patterns, BaseUI design system, and theming approach. Referenced to maintain consistency between main application and marketing website (e.g., icon library choice, responsive design patterns).",
+    "path": "website/src/components/Layout.tsx",
+    "line_range": [1, 46],
+    "knowledge_uuid": "d0a92cd5-ee3a-4159-a5b5-c8c0eaf2a633"
+  },
+  {
     "title": "Build Configuration Knowledge",
-    "content": "Internal knowledge base article about the project's build configuration strategy, Vite setup, and deployment pipelines. Referenced for understanding the existing project's dependency management with pnpm.",
+    "content": "Internal knowledge base article about the project's build configuration strategy, Vite setup, and deployment pipelines. Referenced for understanding the existing project's dependency management with pnpm and ensuring consistency.",
     "path": "website/package.json",
     "line_range": [1, 32],
     "knowledge_uuid": "e8284f29-2223-4d70-84fd-883cd64ae882"
-  },
-  {
-    "title": "Dependency Management Knowledge",
-    "content": "Internal knowledge base article about dependency management, package selection, and library architecture. Referenced for selecting React 18.2.0, TypeScript 5.x, and other dependencies consistent with the main application.",
-    "path": "website/package.json",
-    "line_range": [10, 25],
-    "knowledge_uuid": "808dcd08-7c64-4880-8267-c2a85c735715"
   },
   {
     "title": "GitHub Openai-Translator Repository",
@@ -73,7 +87,7 @@
     "title": "Navigator API - Platform Detection",
     "content": "MDN documentation for the Navigator API (userAgent, platform) used to implement platform auto-detection in the DownloadSection component for highlighting the recommended download option.",
     "path": "website/src/components/DownloadSection.tsx",
-    "line_range": [20, 42],
+    "line_range": [29, 49],
     "url": "https://developer.mozilla.org/en-US/docs/Web/API/Navigator"
   },
   {
@@ -92,51 +106,51 @@
   },
   {
     "title": "Next.js Image Optimization",
-    "content": "Next.js Image component documentation for automatic image optimization, responsive images, and WebP/AVIF format conversion. Note: Disabled for static export but referenced in implementation plans.",
+    "content": "Next.js Image component documentation for automatic image optimization. Set to 'unoptimized: true' for static export compatibility but can be used with external image optimization services if needed.",
     "path": "website/next.config.js",
-    "line_range": [7, 9],
+    "line_range": [5, 7],
     "url": "https://nextjs.org/docs/app/api-reference/components/image"
   },
   {
     "title": "OpenAI Platform Documentation",
     "content": "OpenAI API platform documentation referenced in the documentation page for users to create API keys and configure the NextAI Translator application.",
     "path": "website/src/pages/documentation.tsx",
-    "line_range": [39, 48],
+    "line_range": [68, 78],
     "url": "https://platform.openai.com/docs"
   },
   {
     "title": "Anthropic Claude Console",
     "content": "Anthropic Claude API console documentation referenced in the documentation page for Claude API key generation and configuration instructions.",
     "path": "website/src/pages/documentation.tsx",
-    "line_range": [50, 57],
+    "line_range": [80, 89],
     "url": "https://console.anthropic.com"
   },
   {
     "title": "Ollama Local AI Platform",
     "content": "Ollama documentation for running local AI models, referenced in the documentation page as a privacy-focused alternative to cloud-based AI providers.",
     "path": "website/src/pages/documentation.tsx",
-    "line_range": [59, 68],
+    "line_range": [91, 100],
     "url": "https://ollama.ai"
   },
   {
     "title": "Chrome Web Store",
     "content": "Chrome Web Store platform referenced in download links for the Chrome extension distribution.",
     "path": "website/src/components/DownloadSection.tsx",
-    "line_range": [47, 54],
+    "line_range": [51, 60],
     "url": "https://chrome.google.com/webstore"
   },
   {
     "title": "Firefox Add-ons Platform",
     "content": "Mozilla Firefox Add-ons platform referenced in download links for the Firefox extension distribution.",
     "path": "website/src/components/DownloadSection.tsx",
-    "line_range": [56, 63],
+    "line_range": [61, 69],
     "url": "https://addons.mozilla.org/firefox/"
   },
   {
     "title": "AGPL-3.0 License",
-    "content": "GNU Affero General Public License v3.0 referenced in the Terms of Service page, explaining the open-source license under which NextAI Translator is distributed.",
-    "path": "website/src/pages/terms.tsx",
-    "line_range": [22, 35],
+    "content": "GNU Affero General Public License v3.0 referenced in the About and Terms pages, explaining the open-source license under which NextAI Translator is distributed.",
+    "path": "website/src/pages/about.tsx",
+    "line_range": [95, 96],
     "url": "https://www.gnu.org/licenses/agpl-3.0.html"
   }
 ]

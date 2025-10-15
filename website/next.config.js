@@ -1,14 +1,12 @@
 /** @type {import('next').NextConfig} */
-const { i18n } = require('./next-i18next.config');
-
 const nextConfig = {
   reactStrictMode: true,
-  i18n,
   output: 'export',
   images: {
     unoptimized: true, // Required for static export
   },
   trailingSlash: true,
+  // i18n is handled client-side for static export compatibility
 };
 
 module.exports = nextConfig;

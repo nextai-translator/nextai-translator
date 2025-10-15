@@ -1,17 +1,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
+import { useTranslation } from 'react-i18next';
 import { FaBars, FaTimes, FaGithub } from 'react-icons/fa';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { t } = useTranslation('common');
-  const router = useRouter();
-  const { pathname, asPath, query, locale } = router;
+  const { t, i18n } = useTranslation('common');
 
   const changeLanguage = (newLocale: string) => {
-    router.push({ pathname, query }, asPath, { locale: newLocale });
+    i18n.changeLanguage(newLocale);
   };
 
   const navLinks = [
@@ -49,7 +46,7 @@ export default function Header() {
               <button
                 onClick={() => changeLanguage('en')}
                 className={`px-2 py-1 rounded ${
-                  locale === 'en'
+                  i18n.language === 'en'
                     ? 'bg-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                 }`}
@@ -60,7 +57,7 @@ export default function Header() {
               <button
                 onClick={() => changeLanguage('zh-CN')}
                 className={`px-2 py-1 rounded ${
-                  locale === 'zh-CN'
+                  i18n.language === 'zh-CN'
                     ? 'bg-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                 }`}
@@ -71,7 +68,7 @@ export default function Header() {
               <button
                 onClick={() => changeLanguage('zh-TW')}
                 className={`px-2 py-1 rounded ${
-                  locale === 'zh-TW'
+                  i18n.language === 'zh-TW'
                     ? 'bg-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                 }`}
@@ -127,7 +124,7 @@ export default function Header() {
                   setIsMenuOpen(false);
                 }}
                 className={`px-3 py-1 rounded ${
-                  locale === 'en'
+                  i18n.language === 'en'
                     ? 'bg-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                 }`}
@@ -140,7 +137,7 @@ export default function Header() {
                   setIsMenuOpen(false);
                 }}
                 className={`px-3 py-1 rounded ${
-                  locale === 'zh-CN'
+                  i18n.language === 'zh-CN'
                     ? 'bg-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                 }`}
@@ -153,7 +150,7 @@ export default function Header() {
                   setIsMenuOpen(false);
                 }}
                 className={`px-3 py-1 rounded ${
-                  locale === 'zh-TW'
+                  i18n.language === 'zh-TW'
                     ? 'bg-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                 }`}

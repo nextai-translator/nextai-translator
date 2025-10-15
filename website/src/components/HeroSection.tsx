@@ -1,4 +1,4 @@
-import { useTranslation } from 'next-i18next';
+import { useTranslation } from 'react-i18next';
 import { FaGithub, FaDownload } from 'react-icons/fa';
 
 export default function HeroSection() {

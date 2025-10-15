@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useTranslation } from 'next-i18next';
+import { useTranslation } from 'react-i18next';
 import { FaGithub, FaTwitter, FaDiscord } from 'react-icons/fa';
 
 export default function Footer() {
