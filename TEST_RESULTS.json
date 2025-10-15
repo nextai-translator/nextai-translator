@@ -1,0 +1,356 @@
+{
+  "project": "Add website",
+  "test_phase": "TDD Red Phase",
+  "run": {
+    "command": "Tests not executed - TDD red phase with no implementation",
+    "passed": false,
+    "duration_ms": 0,
+    "timestamp": "2025-10-15T03:09:00Z",
+    "output": "Test scaffolding created for TDD red phase. No implementation exists yet, so tests cannot be run. All tests are designed to fail until website implementation begins."
+  },
+  "summary": {
+    "total_tests": 36,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "not_implemented": 36,
+    "status": "not_implemented"
+  },
+  "test_files": [
+    {
+      "file": "website-tests/unit/hero-section.test.ts",
+      "status": "not_implemented",
+      "tests": [
+        {
+          "name": "should render the main value proposition heading",
+          "status": "not_implemented",
+          "scenario_id": 1
+        },
+        {
+          "name": "should display key statistics (55+ languages, 13+ AI providers)",
+          "status": "not_implemented",
+          "scenario_id": 1
+        },
+        {
+          "name": "should render primary CTA buttons",
+          "status": "not_implemented",
+          "scenario_id": 1
+        },
+        {
+          "name": "should display product screenshot or demo video",
+          "status": "not_implemented",
+          "scenario_id": 1
+        },
+        {
+          "name": "should be responsive on mobile viewports",
+          "status": "not_implemented",
+          "scenario_id": 1
+        }
+      ]
+    },
+    {
+      "file": "website-tests/unit/language-switcher.test.ts",
+      "status": "not_implemented",
+      "tests": [
+        {
+          "name": "should render language toggle button",
+          "status": "not_implemented",
+          "scenario_id": 3
+        },
+        {
+          "name": "should switch language when clicked",
+          "status": "not_implemented",
+          "scenario_id": 3
+        },
+        {
+          "name": "should persist language preference to localStorage",
+          "status": "not_implemented",
+          "scenario_id": 3
+        },
+        {
+          "name": "should detect browser language on first visit",
+          "status": "not_implemented",
+          "scenario_id": 3
+        },
+        {
+          "name": "should support Traditional and Simplified Chinese variants",
+          "status": "not_implemented",
+          "scenario_id": 3
+        }
+      ]
+    },
+    {
+      "file": "website-tests/unit/platform-card.test.ts",
+      "status": "not_implemented",
+      "tests": [
+        {
+          "name": "should render platform name and icon",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should display version number",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should show system requirements",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should render download button with correct link",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should highlight when platform is detected as user platform",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should support all 7 platforms",
+          "status": "not_implemented",
+          "scenario_id": 2
+        }
+      ]
+    },
+    {
+      "file": "website-tests/integration/github-api.test.ts",
+      "status": "not_implemented",
+      "tests": [
+        {
+          "name": "should fetch latest release version from GitHub API",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should parse version number from API response",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should handle API rate limiting gracefully",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should cache API response for 15 minutes",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should extract download URLs for different platforms",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should fallback to manual version on network error",
+          "status": "not_implemented",
+          "scenario_id": 2
+        }
+      ]
+    },
+    {
+      "file": "website-tests/integration/platform-detection.test.ts",
+      "status": "not_implemented",
+      "tests": [
+        {
+          "name": "should detect Windows from user agent",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should detect macOS from user agent",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should detect Linux from user agent",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should detect Chrome browser",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should detect Firefox browser",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should detect Safari browser",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should recommend appropriate platform combination",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should fallback to generic recommendation on unknown platform",
+          "status": "not_implemented",
+          "scenario_id": 2
+        }
+      ]
+    },
+    {
+      "file": "website-tests/e2e/homepage.spec.ts",
+      "status": "not_implemented",
+      "tests": [
+        {
+          "name": "should display hero section with value proposition",
+          "status": "not_implemented",
+          "scenario_id": 1
+        },
+        {
+          "name": "should show key statistics (55+ languages, 13+ providers)",
+          "status": "not_implemented",
+          "scenario_id": 1
+        },
+        {
+          "name": "should display primary CTA buttons",
+          "status": "not_implemented",
+          "scenario_id": 1
+        },
+        {
+          "name": "should be responsive on mobile viewport",
+          "status": "not_implemented",
+          "scenario_id": 5
+        },
+        {
+          "name": "should load within 2 seconds",
+          "status": "not_implemented",
+          "scenario_id": 7
+        }
+      ]
+    },
+    {
+      "file": "website-tests/e2e/download.spec.ts",
+      "status": "not_implemented",
+      "tests": [
+        {
+          "name": "should display all 7 platform options",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should highlight recommended platform based on user agent",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should display version numbers from GitHub API",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should have functional download links",
+          "status": "not_implemented",
+          "scenario_id": 2
+        },
+        {
+          "name": "should display system requirements for each platform",
+          "status": "not_implemented",
+          "scenario_id": 2
+        }
+      ]
+    },
+    {
+      "file": "website-tests/e2e/i18n.spec.ts",
+      "status": "not_implemented",
+      "tests": [
+        {
+          "name": "should detect and display browser language on first visit",
+          "status": "not_implemented",
+          "scenario_id": 3
+        },
+        {
+          "name": "should display language switcher in navigation",
+          "status": "not_implemented",
+          "scenario_id": 3
+        },
+        {
+          "name": "should switch all content when language is changed",
+          "status": "not_implemented",
+          "scenario_id": 3
+        },
+        {
+          "name": "should persist language preference across page reloads",
+          "status": "not_implemented",
+          "scenario_id": 3
+        },
+        {
+          "name": "should update URL to reflect current language",
+          "status": "not_implemented",
+          "scenario_id": 3
+        }
+      ]
+    }
+  ],
+  "scenario_mapping": {
+    "1": {
+      "name": "Homepage Hero Section Display",
+      "test_files": [
+        "website-tests/unit/hero-section.test.ts",
+        "website-tests/e2e/homepage.spec.ts"
+      ],
+      "status": "not_implemented"
+    },
+    "2": {
+      "name": "Multi-Platform Download Section",
+      "test_files": [
+        "website-tests/unit/platform-card.test.ts",
+        "website-tests/integration/github-api.test.ts",
+        "website-tests/integration/platform-detection.test.ts",
+        "website-tests/e2e/download.spec.ts"
+      ],
+      "status": "not_implemented"
+    },
+    "3": {
+      "name": "Multi-Language Support (i18n)",
+      "test_files": [
+        "website-tests/unit/language-switcher.test.ts",
+        "website-tests/e2e/i18n.spec.ts"
+      ],
+      "status": "not_implemented"
+    },
+    "5": {
+      "name": "Responsive Design and Mobile Experience",
+      "test_files": [
+        "website-tests/e2e/homepage.spec.ts"
+      ],
+      "status": "not_implemented"
+    },
+    "7": {
+      "name": "Performance Optimization",
+      "test_files": [
+        "website-tests/e2e/homepage.spec.ts"
+      ],
+      "status": "not_implemented"
+    }
+  },
+  "notes": [
+    "TDD red phase: Test scaffolding created but no implementation exists",
+    "All 36 tests are marked as 'not_implemented' because the website code doesn't exist yet",
+    "Tests cover scenarios 1-3, 5, and 7 from SCENARIOS_TO_BUILD.json",
+    "Additional test files needed for scenarios 4, 6, 8-12 (features, SEO, accessibility, documentation, analytics, footer, deployment)",
+    "Once implementation begins, run 'pnpm test' for unit/integration tests and 'pnpm test:e2e' for E2E tests",
+    "Tests are designed to fail with expect(true).toBe(false) until real implementation is added",
+    "Update E2E test URLs from localhost:3000 to production domain when deployed"
+  ],
+  "next_steps": [
+    "Initialize Next.js project in website/ directory",
+    "Set up Tailwind CSS and react-i18next",
+    "Implement hero section component - run unit tests",
+    "Build platform card component - run unit tests",
+    "Create GitHub API integration - run integration tests",
+    "Implement platform detection - run integration tests",
+    "Deploy to Vercel/Netlify staging - run E2E tests",
+    "Iterate until all tests pass (green phase)",
+    "Refactor and optimize while keeping tests green"
+  ]
+}
