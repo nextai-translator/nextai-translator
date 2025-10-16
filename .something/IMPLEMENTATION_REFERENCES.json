@@ -1,0 +1,406 @@
+{
+  "project_name": "Tauri v2 Stable Upgrade Documentation References",
+  "official_documentation": {
+    "tauri_v2_release": {
+      "title": "Tauri 2.0 Release Announcement",
+      "url": "https://v2.tauri.app/blog/tauri-20/",
+      "description": "Official announcement of Tauri 2.0 stable release with highlights of new features, improvements, and breaking changes",
+      "relevant_sections": [
+        "What's New in Tauri 2.0",
+        "Performance Improvements",
+        "Security Enhancements",
+        "Plugin System Overhaul",
+        "Breaking Changes from Beta"
+      ]
+    },
+    "migration_guide": {
+      "title": "Migrating from Tauri 2.0 Beta to Stable",
+      "url": "https://v2.tauri.app/start/migrate/from-tauri-2-beta/",
+      "description": "Comprehensive guide for upgrading from Tauri 2.0 beta versions to stable release",
+      "relevant_sections": [
+        "Dependency Updates",
+        "Configuration Changes (tauri.conf.json)",
+        "API Changes and Deprecations",
+        "Plugin Migration (git → registry)",
+        "Breaking Changes in Window Management",
+        "IPC Command Updates",
+        "Build System Changes"
+      ],
+      "key_changes": [
+        "All @tauri-apps/* packages now available on npm as stable ^2.0.0",
+        "All tauri-plugin-* crates published to crates.io with version 2.0",
+        "Removed deprecated APIs from beta period",
+        "Updated security defaults and CSP handling",
+        "Improved plugin initialization patterns"
+      ]
+    },
+    "api_reference": {
+      "title": "Tauri 2.0 API Reference",
+      "url": "https://v2.tauri.app/reference/",
+      "description": "Complete API documentation for Tauri 2.0 stable",
+      "subsections": {
+        "javascript_api": {
+          "url": "https://v2.tauri.app/reference/javascript/",
+          "description": "TypeScript/JavaScript API documentation for @tauri-apps/api package",
+          "important_modules": [
+            "core (invoke, convertFileSrc)",
+            "event (emit, listen)",
+            "webviewWindow (WebviewWindow class)",
+            "window (getCurrentWebviewWindow)",
+            "path (appConfigDir, appDataDir)",
+            "app (getVersion, getName)"
+          ]
+        },
+        "rust_api": {
+          "url": "https://v2.tauri.app/reference/rust/",
+          "description": "Rust API documentation for tauri crate",
+          "important_modules": [
+            "tauri::Builder (application setup)",
+            "tauri::Window (window management)",
+            "tauri::Manager (runtime management)",
+            "tauri::State (state management)",
+            "tauri::command (command macro)"
+          ]
+        },
+        "configuration": {
+          "url": "https://v2.tauri.app/reference/config/",
+          "description": "Complete tauri.conf.json schema reference",
+          "key_sections": [
+            "app.security (CSP, asset protocol)",
+            "plugins.fs (scope configuration)",
+            "plugins.shell (allowed commands)",
+            "plugins.updater (endpoints, pubkey)",
+            "bundle (targets, resources, icons)"
+          ]
+        }
+      }
+    },
+    "plugin_documentation": {
+      "title": "Official Tauri Plugins",
+      "url": "https://v2.tauri.app/plugin/",
+      "description": "Documentation for all official Tauri plugins",
+      "plugins_used_in_project": {
+        "fs": {
+          "url": "https://v2.tauri.app/plugin/fs/",
+          "npm": "@tauri-apps/plugin-fs",
+          "crate": "tauri-plugin-fs",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "File system access with scoped permissions",
+          "key_features": [
+            "Read/write files within configured scope",
+            "Directory operations (create, list, remove)",
+            "Path resolution for app directories",
+            "Scoped access for security"
+          ]
+        },
+        "shell": {
+          "url": "https://v2.tauri.app/plugin/shell/",
+          "npm": "@tauri-apps/plugin-shell",
+          "crate": "tauri-plugin-shell",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "Execute external commands and open URLs",
+          "key_features": [
+            "Open URLs in default browser",
+            "Execute shell commands with allowlist",
+            "Spawn processes with stdio access",
+            "Platform-specific command handling"
+          ]
+        },
+        "http": {
+          "url": "https://v2.tauri.app/plugin/http/",
+          "npm": "@tauri-apps/plugin-http",
+          "crate": "tauri-plugin-http",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "HTTP client with proxy support",
+          "key_features": [
+            "HTTP/HTTPS requests with full header control",
+            "Proxy configuration support",
+            "Request/response streaming",
+            "CORS handling"
+          ]
+        },
+        "notification": {
+          "url": "https://v2.tauri.app/plugin/notification/",
+          "npm": "@tauri-apps/plugin-notification",
+          "crate": "tauri-plugin-notification",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "Native system notifications",
+          "key_features": [
+            "Cross-platform notification API",
+            "Notification actions and callbacks",
+            "Icon and sound customization",
+            "Permission handling"
+          ]
+        },
+        "global_shortcut": {
+          "url": "https://v2.tauri.app/plugin/global-shortcut/",
+          "npm": "@tauri-apps/plugin-global-shortcut",
+          "crate": "tauri-plugin-global-shortcut",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "System-wide keyboard shortcuts",
+          "key_features": [
+            "Register global hotkeys",
+            "Cross-platform shortcut handling",
+            "Conflict detection and resolution",
+            "Modifier key support"
+          ]
+        },
+        "updater": {
+          "url": "https://v2.tauri.app/plugin/updater/",
+          "npm": "@tauri-apps/plugin-updater",
+          "crate": "tauri-plugin-updater",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "Application auto-update functionality",
+          "key_features": [
+            "Check for updates from configured endpoints",
+            "Download and install updates",
+            "Signature verification with public key",
+            "Update progress tracking"
+          ]
+        },
+        "autostart": {
+          "url": "https://v2.tauri.app/plugin/autostart/",
+          "npm": "@tauri-apps/plugin-autostart",
+          "crate": "tauri-plugin-autostart",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "Launch application on system startup",
+          "key_features": [
+            "Enable/disable autostart",
+            "Platform-specific implementation (registry/plist/autostart)",
+            "Check current autostart status",
+            "Configurable launch arguments"
+          ]
+        },
+        "process": {
+          "url": "https://v2.tauri.app/plugin/process/",
+          "npm": "@tauri-apps/plugin-process",
+          "crate": "tauri-plugin-process",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "Process management and lifecycle",
+          "key_features": [
+            "Exit application programmatically",
+            "Restart application",
+            "Get process information",
+            "Platform-specific process handling"
+          ]
+        },
+        "os": {
+          "url": "https://v2.tauri.app/plugin/os/",
+          "npm": "@tauri-apps/plugin-os",
+          "crate": "tauri-plugin-os",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "Operating system information",
+          "key_features": [
+            "Get OS type and version",
+            "Architecture detection",
+            "Platform-specific information",
+            "Hostname and locale"
+          ]
+        },
+        "single_instance": {
+          "url": "https://v2.tauri.app/plugin/single-instance/",
+          "npm": "@tauri-apps/plugin-single-instance",
+          "crate": "tauri-plugin-single-instance",
+          "version": "^2.0.0 (npm) / 2.0 (cargo)",
+          "description": "Prevent multiple application instances",
+          "key_features": [
+            "Ensure only one instance runs",
+            "Bring existing instance to focus",
+            "Pass arguments to existing instance",
+            "Cross-platform implementation"
+          ]
+        }
+      }
+    },
+    "build_configuration": {
+      "title": "Tauri Build Configuration",
+      "url": "https://v2.tauri.app/reference/config/#build",
+      "description": "Build system configuration and optimization",
+      "relevant_topics": [
+        "Build scripts (beforeBuildCommand, beforeDevCommand)",
+        "Dev server configuration (devUrl, frontendDist)",
+        "Build optimization (features, dependencies)",
+        "Platform-specific builds"
+      ]
+    },
+    "security_documentation": {
+      "title": "Tauri Security Best Practices",
+      "url": "https://v2.tauri.app/security/",
+      "description": "Security guidelines and best practices for Tauri applications",
+      "key_topics": [
+        "Content Security Policy (CSP) configuration",
+        "File system access scoping",
+        "IPC command validation and authorization",
+        "Asset protocol security",
+        "Secure storage for sensitive data",
+        "Code signing for production builds"
+      ]
+    }
+  },
+  "dependency_registries": {
+    "npm_packages": {
+      "registry": "https://www.npmjs.com",
+      "tauri_core_api": {
+        "package": "@tauri-apps/api",
+        "url": "https://www.npmjs.com/package/@tauri-apps/api",
+        "version": "^2.0.0",
+        "description": "Core JavaScript/TypeScript API for Tauri applications"
+      },
+      "tauri_cli": {
+        "package": "@tauri-apps/cli",
+        "url": "https://www.npmjs.com/package/@tauri-apps/cli",
+        "version": "^2.0.0",
+        "description": "Tauri CLI for building and developing applications"
+      },
+      "plugin_packages": {
+        "fs": "https://www.npmjs.com/package/@tauri-apps/plugin-fs",
+        "shell": "https://www.npmjs.com/package/@tauri-apps/plugin-shell",
+        "http": "https://www.npmjs.com/package/@tauri-apps/plugin-http",
+        "notification": "https://www.npmjs.com/package/@tauri-apps/plugin-notification",
+        "global_shortcut": "https://www.npmjs.com/package/@tauri-apps/plugin-global-shortcut",
+        "updater": "https://www.npmjs.com/package/@tauri-apps/plugin-updater",
+        "autostart": "https://www.npmjs.com/package/@tauri-apps/plugin-autostart",
+        "process": "https://www.npmjs.com/package/@tauri-apps/plugin-process",
+        "os": "https://www.npmjs.com/package/@tauri-apps/plugin-os"
+      }
+    },
+    "cargo_crates": {
+      "registry": "https://crates.io",
+      "tauri_core": {
+        "crate": "tauri",
+        "url": "https://crates.io/crates/tauri",
+        "version": "2.0",
+        "description": "Core Tauri runtime and application framework"
+      },
+      "tauri_build": {
+        "crate": "tauri-build",
+        "url": "https://crates.io/crates/tauri-build",
+        "version": "2.0",
+        "description": "Build-time configuration and resource bundling"
+      },
+      "tauri_utils": {
+        "crate": "tauri-utils",
+        "url": "https://crates.io/crates/tauri-utils",
+        "version": "2.0",
+        "description": "Utility functions for Tauri applications"
+      },
+      "plugin_crates": {
+        "fs": "https://crates.io/crates/tauri-plugin-fs",
+        "shell": "https://crates.io/crates/tauri-plugin-shell",
+        "http": "https://crates.io/crates/tauri-plugin-http",
+        "notification": "https://crates.io/crates/tauri-plugin-notification",
+        "global_shortcut": "https://crates.io/crates/tauri-plugin-global-shortcut",
+        "updater": "https://crates.io/crates/tauri-plugin-updater",
+        "autostart": "https://crates.io/crates/tauri-plugin-autostart",
+        "process": "https://crates.io/crates/tauri-plugin-process",
+        "os": "https://crates.io/crates/tauri-plugin-os",
+        "single_instance": "https://crates.io/crates/tauri-plugin-single-instance"
+      },
+      "specta": {
+        "crate": "specta",
+        "url": "https://crates.io/crates/specta",
+        "version": "^2.0.0",
+        "description": "Type-safe serialization library for Rust"
+      },
+      "tauri_specta": {
+        "crate": "tauri-specta",
+        "url": "https://crates.io/crates/tauri-specta",
+        "version": "^2.0.0",
+        "description": "TypeScript bindings generator for Tauri commands"
+      }
+    }
+  },
+  "type_safety_tools": {
+    "specta": {
+      "title": "Specta - Type-Safe Serialization",
+      "url": "https://docs.rs/specta/latest/specta/",
+      "github": "https://github.com/specta-rs/specta",
+      "description": "Rust library for generating TypeScript types from Rust types",
+      "key_features": [
+        "Derive macros for automatic type generation",
+        "Support for complex Rust types (enums, generics, tuples)",
+        "Integration with serde for serialization",
+        "TypeScript type definition generation"
+      ]
+    },
+    "tauri_specta": {
+      "title": "Tauri Specta - TypeScript Bindings",
+      "url": "https://docs.rs/tauri-specta/latest/tauri_specta/",
+      "github": "https://github.com/specta-rs/tauri-specta",
+      "description": "Generate TypeScript bindings for Tauri commands",
+      "key_features": [
+        "Automatic bindings generation during build",
+        "Type-safe command invocation from TypeScript",
+        "Support for all Tauri command patterns",
+        "Integration with @tauri-apps/api invoke function"
+      ]
+    }
+  },
+  "version_control": {
+    "semantic_versioning": {
+      "title": "Semantic Versioning 2.0.0",
+      "url": "https://semver.org/",
+      "description": "Versioning scheme used by Tauri and its ecosystem",
+      "key_concepts": [
+        "Major version (2.x.x): Breaking changes",
+        "Minor version (x.1.x): New features, backward compatible",
+        "Patch version (x.x.1): Bug fixes, backward compatible",
+        "Caret (^2.0.0): Allows minor and patch updates",
+        "Tilde (~2.0.0): Allows only patch updates"
+      ]
+    },
+    "cargo_versioning": {
+      "title": "Cargo Version Specifications",
+      "url": "https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-cratesio",
+      "description": "How Cargo interprets version requirements",
+      "key_patterns": [
+        "2.0: Equivalent to ^2.0.0 (allows 2.x.x)",
+        "=2.0.0: Exact version (not recommended)",
+        "^2.0.0: Allows 2.x.x, prevents 3.0.0",
+        "~2.0.0: Allows 2.0.x, prevents 2.1.0"
+      ]
+    }
+  },
+  "community_resources": {
+    "tauri_discord": {
+      "title": "Tauri Discord Community",
+      "url": "https://discord.gg/tauri",
+      "description": "Official Discord server for Tauri community support"
+    },
+    "tauri_github": {
+      "title": "Tauri GitHub Repository",
+      "url": "https://github.com/tauri-apps/tauri",
+      "description": "Source code, issue tracker, and discussions"
+    },
+    "awesome_tauri": {
+      "title": "Awesome Tauri",
+      "url": "https://github.com/tauri-apps/awesome-tauri",
+      "description": "Curated list of Tauri resources, plugins, and examples"
+    }
+  },
+  "implementation_checklist": {
+    "before_upgrade": [
+      "Review Tauri 2.0 release announcement and breaking changes",
+      "Read migration guide from beta to stable",
+      "Check plugin documentation for API changes",
+      "Backup current application state and configuration",
+      "Establish performance baselines for comparison"
+    ],
+    "during_upgrade": [
+      "Update package.json with stable npm versions (^2.0.0)",
+      "Update Cargo.toml with stable crate versions (2.0)",
+      "Remove git/github dependency references",
+      "Run pnpm install and cargo build to verify resolution",
+      "Regenerate TypeScript bindings with updated specta",
+      "Update import statements if API paths changed"
+    ],
+    "after_upgrade": [
+      "Run full test suite to verify no regressions",
+      "Test all plugin functionality",
+      "Verify window management and IPC work correctly",
+      "Build application bundles for all target platforms",
+      "Compare performance metrics to baseline",
+      "Update documentation with new version numbers"
+    ]
+  }
+}
