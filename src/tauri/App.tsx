@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { TranslatorWindow } from './windows/TranslatorWindow'
 import { SettingsWindow } from './windows/SettingsWindow'
 import { ActionManagerWindow } from './windows/ActionManagerWindow'
@@ -17,6 +17,6 @@ const windowsMap: Record<string, typeof TranslatorWindow> = {
 }
 
 export function App() {
-    const appWindow = getCurrent()
+    const appWindow = getCurrentWebviewWindow()
     return <>{windowsMap[appWindow.label]()}</>
 }

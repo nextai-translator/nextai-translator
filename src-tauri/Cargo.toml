@@ -12,32 +12,32 @@ rust-version = "1.59"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "=2.0.0-beta.15", features = [] }
+tauri-build = { version = "2.0", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = [ "derive" ] }
-tauri = { version = "=2.0.0-beta.19", features = [ "macos-private-api", "protocol-asset", "tray-icon" ] }
+tauri = { version = "2.0", features = [ "macos-private-api", "protocol-asset", "tray-icon" ] }
 once_cell = "1.17.1"
 clipboard = "0.5.0"
 enigo = { version = "0.2.0", features = [ "xdo" ] }
 mouse_position = "0.1.3"
 rdev = "0.5.2"
-tauri-utils = { version = "=2.0.0-beta.15", features = [] }
-tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
-tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
+tauri-utils = { version = "2.0", features = [] }
+tauri-plugin-single-instance = "2.0"
+tauri-plugin-autostart = "2.0"
 cpuid = "0.1.1"
 sysinfo = "0.28.3"
 parking_lot = "0.12.1"
 mouce = "0.2.41"
-tauri-plugin-notification = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
-tauri-plugin-http = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
-tauri-plugin-global-shortcut = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "7fc29c326bc463d59c7e2ee04052b5d81796e407" }
-tauri-plugin-updater = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
-tauri-plugin-process = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
-tauri-plugin-fs = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
-tauri-plugin-shell = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
-tauri-plugin-os = { git = "https://github.com/tauri-apps/plugins-workspace", rev = "723b9f7fa85116efdc63b04b444a60e76a950ab7" }
+tauri-plugin-notification = "2.0"
+tauri-plugin-http = "2.0"
+tauri-plugin-global-shortcut = "2.0"
+tauri-plugin-updater = "2.0"
+tauri-plugin-process = "2.0"
+tauri-plugin-fs = "2.0"
+tauri-plugin-shell = "2.0"
+tauri-plugin-os = "2.0"
 whatlang = "0.16.2"
 arboard = "3.2.0"
 tiny_http = "0.12.0"
@@ -52,8 +52,8 @@ tauri-plugin-aptabase = { git = "https://github.com/aptabase/tauri-plugin-aptaba
 screenshots = "0.7.2"
 image = "0.24.7"
 get-selected-text = "0.1.6"
-specta = "=2.0.0-rc.12"
-tauri-specta = { version = "2.0.0-rc.10", features = ["javascript", "typescript"] }
+specta = "2.0"
+tauri-specta = { version = "2.0", features = ["javascript", "typescript"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.24"

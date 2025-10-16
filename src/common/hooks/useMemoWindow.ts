@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { PhysicalPosition, PhysicalSize } from '@tauri-apps/api/window'
 import { useEffect } from 'react'
 
@@ -17,7 +17,7 @@ export type WindowMemoProps = {
  */
 export const useMemoWindow = (props: WindowMemoProps) => {
     useEffect(() => {
-        const appWindow = getCurrent()
+        const appWindow = getCurrentWebviewWindow()
         const initWindow = async () => {
             try {
                 if (props.position) {
@@ -60,7 +60,7 @@ export const useMemoWindow = (props: WindowMemoProps) => {
     }, [props.position, props.size, props.show])
 
     useEffect(() => {
-        const appWindow = getCurrent()
+        const appWindow = getCurrentWebviewWindow()
         let unListenMove: (() => void) | undefined
         let unListenResize: (() => void) | undefined
         appWindow

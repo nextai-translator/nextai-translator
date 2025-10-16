@@ -12,7 +12,7 @@ import { createUseStyles } from 'react-jss'
 import { MdBrowserUpdated } from 'react-icons/md'
 import { IoIosCloseCircleOutline } from 'react-icons/io'
 import { useTranslation } from 'react-i18next'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { trackEvent } from '@aptabase/tauri'
 import { UpdateResult, commands, events } from '../bindings'
 
@@ -246,7 +246,7 @@ export function UpdaterWindow() {
                             onClick={async (e) => {
                                 e.stopPropagation()
                                 e.preventDefault()
-                                const appWindow = getCurrent()
+                                const appWindow = getCurrentWebviewWindow()
                                 await appWindow.hide()
                                 setTimeout(() => {
                                     appWindow.close()

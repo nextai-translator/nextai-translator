@@ -1,7 +1,7 @@
 import { trackEvent } from '@aptabase/tauri'
 import { appCacheDir, join } from '@tauri-apps/api/path'
 import { convertFileSrc } from '@tauri-apps/api/core'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { currentMonitor } from '@tauri-apps/api/window'
 import { useEffect, useRef, useState } from 'react'
 import { createUseStyles } from 'react-jss'
@@ -25,7 +25,7 @@ export function ScreenshotWindow() {
     const [mouseMoveX, setMouseMoveX] = useState(0)
     const [mouseMoveY, setMouseMoveY] = useState(0)
     const imgRef = useRef<HTMLImageElement>(null)
-    const appWindow = getCurrent()
+    const appWindow = getCurrentWebviewWindow()
 
     useEffect(() => {
         trackEvent('screen_view', { name: 'Screenshot' })
