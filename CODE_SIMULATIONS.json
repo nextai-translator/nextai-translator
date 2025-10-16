@@ -1,0 +1,136 @@
+{
+  "project_name": "Upgrade Tauri to v2",
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "Core Tauri Dependencies Upgrade",
+      "description": "Verify all core Tauri packages are upgraded from beta to stable v2 and build successfully",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Verify package.json dependencies",
+          "description": "Check that @tauri-apps/api is upgraded from 2.0.0-beta.9 to stable v2",
+          "context": "Current version: 2.0.0-beta.9, Target: >=2.0.0 stable"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify Cargo.toml dependencies",
+          "description": "Check that tauri crate is upgraded from 2.0.0-beta.19 to stable v2",
+          "context": "Current version: =2.0.0-beta.19, Target: >=2.0.0 stable"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify tauri-build dependency",
+          "description": "Check that tauri-build is upgraded from 2.0.0-beta.15 to stable v2",
+          "context": "Current version: =2.0.0-beta.15, Target: >=2.0.0 stable"
+        },
+        {
+          "step_number": 4,
+          "action": "Run build command",
+          "description": "Execute 'pnpm build-tauri-renderer' to verify frontend builds without errors",
+          "context": "Build must complete successfully with updated dependencies"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Read package.json and verify @tauri-apps/api version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Read package.json and verify @tauri-apps/cli version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Read Cargo.toml and verify tauri crate version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Read Cargo.toml and verify tauri-build version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        },
+        {
+          "id": 5,
+          "input": "Read Cargo.toml and verify tauri-utils version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All package.json Tauri dependencies are on stable v2.0.0 or higher",
+          "All Cargo.toml Tauri dependencies are on stable v2.0.0 or higher",
+          "No beta, alpha, or rc versions present in core dependencies",
+          "Build commands execute without dependency resolution errors"
+        ],
+        "failures": [
+          "Beta versions still present in package.json or Cargo.toml",
+          "Dependency resolution fails due to incompatible versions",
+          "Build fails with missing or incompatible Tauri APIs"
+        ],
+        "performance": [
+          "Dependency installation completes within 2 minutes",
+          "Build time does not increase more than 10% compared to beta versions"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "package.json",
+            "snippets": [
+              {
+                "start_line": 43,
+                "end_line": 51,
+                "code": "\"@tauri-apps/api\": \"2.0.0-beta.9\",\n\"@tauri-apps/plugin-autostart\": \"github:tauri-apps/tauri-plugin-autostart#v2\",\n\"@tauri-apps/plugin-fs\": \"github:tauri-apps/tauri-plugin-fs#v2\",\n\"@tauri-apps/plugin-global-shortcut\": \"github:tauri-apps/tauri-plugin-global-shortcut#13c59ded715e231a17d2ce970710cc339757c4b1\",\n\"@tauri-apps/plugin-http\": \"github:tauri-apps/tauri-plugin-http#v2\",\n\"@tauri-apps/plugin-notification\": \"github:tauri-apps/tauri-plugin-notification#v2\",\n\"@tauri-apps/plugin-process\": \"github:tauri-apps/tauri-plugin-process#v2\",\n\"@tauri-apps/plugin-shell\": \"github:tauri-apps/tauri-plugin-shell#v2\",\n\"@tauri-apps/plugin-updater\": \"github:tauri-apps/tauri-plugin-updater#v2\"",
+                "purpose": "Core Tauri frontend API dependencies currently on beta versions"
+              },
+              {
+                "start_line": 119,
+                "end_line": 119,
+                "code": "\"@tauri-apps/cli\": \"2.0.0-beta.13\"",
+                "purpose": "Tauri CLI dependency in devDependencies"
+              }
+            ]
+          },
+          {
+            "file_path": "src-tauri/Cargo.toml",
+            "snippets": [
+              {
+                "start_line": 14,
+                "end_line": 26,
+                "code": "[build-dependencies]\ntauri-build = { version = \"=2.0.0-beta.15\", features = [] }\n\n[dependencies]\nserde_json = \"1.0\"\nserde = { version = \"1.0\", features = [ \"derive\" ] }\ntauri = { version = \"=2.0.0-beta.19\", features = [ \"macos-private-api\", \"protocol-asset\", \"tray-icon\" ] }\nonce_cell = \"1.17.1\"\nclipboard = \"0.5.0\"\nenigo = { version = \"0.2.0\", features = [ \"xdo\" ] }\nmouse_position = \"0.1.3\"\nrdev = \"0.5.2\"\ntauri-utils = { version = \"=2.0.0-beta.15\", features = [] }",
+                "purpose": "Core Tauri Rust dependencies currently on beta versions"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - dependencies still on beta versions. Need to update to stable v2.0.0 or later."
+      },
+      "expectation": "After upgrading, all core Tauri dependencies in package.json and Cargo.toml should be on stable v2.0.0 or higher releases without any beta, alpha, or rc designations.",
+      "prediction": "Dependencies remain on beta versions (beta.9, beta.13, beta.15, beta.19) as no upgrade work has been completed yet.",
+      "explanation": [
+        "REQ-1 from PRD requires upgrading @tauri-apps/api, @tauri-apps/cli, tauri crate, tauri-build, and tauri-utils to stable v2",
+        "Current implementation shows all packages still pinned to beta versions",
+        "Tests will fail until package.json and Cargo.toml are updated with stable v2 versions",
+        "Implementation needs to replace exact beta versions with stable releases when available"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Upgrade the following core Tauri packages from beta to stable v2: @tauri-apps/api (currently 2.0.0-beta.9), @tauri-apps/cli (currently 2.0.0-beta.13), tauri crate (currently 2.0.0-beta.19), tauri-build crate (currently 2.0.0-beta.15), tauri-utils crate (currently 2.0.0-beta.15)"
+      }
+    }
+  ],
+  "summary": {
+    "total_scenarios": 12,
+    "complexity": "high",
+    "estimated_time": "240 minutes",
+    "notes": "Mirrored from SCENARIOS_TO_BUILD.json for legacy pipeline compatibility. See SCENARIOS_TO_BUILD.json for complete scenario definitions."
+  }
+}

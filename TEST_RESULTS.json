@@ -1,0 +1,79 @@
+{
+  "phase": "TDD_RED",
+  "run": {
+    "command": "cargo test --manifest-path=src-tauri/Cargo.toml && pnpm test",
+    "executed": false,
+    "reason": "TDD red phase - tests created before implementation",
+    "passed": false,
+    "duration_ms": 0,
+    "output": "Tests not yet executed. This is the TDD red phase where tests are written before implementation. All tests are expected to fail until the Tauri v2 upgrade is implemented."
+  },
+  "test_files_created": [
+    "src-tauri/tests/tauri_upgrade_test.rs",
+    "tests/integration/build_test.ts",
+    "tests/integration/config_schema_test.ts",
+    "tests/integration/window_management_test.ts",
+    "tests/integration/ipc_commands_test.ts",
+    "tests/integration/plugin_init_test.ts"
+  ],
+  "expected_failures": [
+    {
+      "test": "test_core_dependencies_upgraded_to_stable_v2",
+      "file": "src-tauri/tests/tauri_upgrade_test.rs",
+      "reason": "Core Tauri dependencies still on beta versions",
+      "scenario_ids": [1]
+    },
+    {
+      "test": "test_plugins_upgraded_to_stable_versions",
+      "file": "src-tauri/tests/tauri_upgrade_test.rs",
+      "reason": "Plugins still use git dependencies, not stable crates.io/npm versions",
+      "scenario_ids": [2]
+    },
+    {
+      "test": "test_binding_generators_on_stable_versions",
+      "file": "src-tauri/tests/tauri_upgrade_test.rs",
+      "reason": "specta and tauri-specta still on rc versions",
+      "scenario_ids": [3]
+    },
+    {
+      "test": "should have required build scripts defined",
+      "file": "tests/integration/build_test.ts",
+      "reason": "Build scripts exist but will fail with stable v2 until dependencies upgraded",
+      "scenario_ids": [4]
+    },
+    {
+      "test": "should have valid tauri.conf.json",
+      "file": "tests/integration/config_schema_test.ts",
+      "reason": "Configuration may need updates for stable v2 schema",
+      "scenario_ids": [10]
+    },
+    {
+      "test": "should use stable npm versions for plugins",
+      "file": "tests/integration/plugin_init_test.ts",
+      "reason": "Plugins currently use github references instead of npm versions",
+      "scenario_ids": [2, 7]
+    }
+  ],
+  "scenarios_status": {
+    "total": 12,
+    "not_implemented": 12,
+    "fail": 0,
+    "partial": 0,
+    "pass": 0
+  },
+  "next_steps": [
+    "Implement Tauri v2 stable upgrade by updating package.json and Cargo.toml",
+    "Replace git plugin dependencies with stable npm/crates.io versions",
+    "Regenerate TypeScript bindings with stable specta/tauri-specta",
+    "Update tauri.conf.json if schema changed in stable v2",
+    "Run tests and iterate until all pass (TDD green phase)",
+    "Verify cross-platform builds on Windows, macOS, and Linux"
+  ],
+  "notes": [
+    "This is a TDD red phase - tests are intentionally written to fail",
+    "Tests drive the implementation by defining expected behavior",
+    "Many tests are skipped (it.skip) as they require running Tauri application",
+    "Once dependencies are upgraded, run: cargo test && pnpm test",
+    "Expect initial failures, then fix implementation until tests pass"
+  ]
+}

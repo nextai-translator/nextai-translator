@@ -1,0 +1,1612 @@
+{
+  "project_name": "Upgrade Tauri to v2",
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "Core Tauri Dependencies Upgrade",
+      "description": "Verify all core Tauri packages are upgraded from beta to stable v2 and build successfully",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Verify package.json dependencies",
+          "description": "Check that @tauri-apps/api is upgraded from 2.0.0-beta.9 to stable v2",
+          "context": "Current version: 2.0.0-beta.9, Target: >=2.0.0 stable"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify Cargo.toml dependencies",
+          "description": "Check that tauri crate is upgraded from 2.0.0-beta.19 to stable v2",
+          "context": "Current version: =2.0.0-beta.19, Target: >=2.0.0 stable"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify tauri-build dependency",
+          "description": "Check that tauri-build is upgraded from 2.0.0-beta.15 to stable v2",
+          "context": "Current version: =2.0.0-beta.15, Target: >=2.0.0 stable"
+        },
+        {
+          "step_number": 4,
+          "action": "Run build command",
+          "description": "Execute 'pnpm build-tauri-renderer' to verify frontend builds without errors",
+          "context": "Build must complete successfully with updated dependencies"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Read package.json and verify @tauri-apps/api version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Read package.json and verify @tauri-apps/cli version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Read Cargo.toml and verify tauri crate version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Read Cargo.toml and verify tauri-build version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        },
+        {
+          "id": 5,
+          "input": "Read Cargo.toml and verify tauri-utils version",
+          "expected": "Version should be >=2.0.0 and not contain 'beta' or 'alpha'",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All package.json Tauri dependencies are on stable v2.0.0 or higher",
+          "All Cargo.toml Tauri dependencies are on stable v2.0.0 or higher",
+          "No beta, alpha, or rc versions present in core dependencies",
+          "Build commands execute without dependency resolution errors"
+        ],
+        "failures": [
+          "Beta versions still present in package.json or Cargo.toml",
+          "Dependency resolution fails due to incompatible versions",
+          "Build fails with missing or incompatible Tauri APIs"
+        ],
+        "performance": [
+          "Dependency installation completes within 2 minutes",
+          "Build time does not increase more than 10% compared to beta versions"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "package.json",
+            "snippets": [
+              {
+                "start_line": 43,
+                "end_line": 51,
+                "code": "\"@tauri-apps/api\": \"2.0.0-beta.9\",\n\"@tauri-apps/plugin-autostart\": \"github:tauri-apps/tauri-plugin-autostart#v2\",\n\"@tauri-apps/plugin-fs\": \"github:tauri-apps/tauri-plugin-fs#v2\",\n\"@tauri-apps/plugin-global-shortcut\": \"github:tauri-apps/tauri-plugin-global-shortcut#13c59ded715e231a17d2ce970710cc339757c4b1\",\n\"@tauri-apps/plugin-http\": \"github:tauri-apps/tauri-plugin-http#v2\",\n\"@tauri-apps/plugin-notification\": \"github:tauri-apps/tauri-plugin-notification#v2\",\n\"@tauri-apps/plugin-process\": \"github:tauri-apps/tauri-plugin-process#v2\",\n\"@tauri-apps/plugin-shell\": \"github:tauri-apps/tauri-plugin-shell#v2\",\n\"@tauri-apps/plugin-updater\": \"github:tauri-apps/tauri-plugin-updater#v2\"",
+                "purpose": "Core Tauri frontend API dependencies currently on beta versions"
+              },
+              {
+                "start_line": 119,
+                "end_line": 119,
+                "code": "\"@tauri-apps/cli\": \"2.0.0-beta.13\"",
+                "purpose": "Tauri CLI dependency in devDependencies"
+              }
+            ]
+          },
+          {
+            "file_path": "src-tauri/Cargo.toml",
+            "snippets": [
+              {
+                "start_line": 14,
+                "end_line": 26,
+                "code": "[build-dependencies]\ntauri-build = { version = \"=2.0.0-beta.15\", features = [] }\n\n[dependencies]\nserde_json = \"1.0\"\nserde = { version = \"1.0\", features = [ \"derive\" ] }\ntauri = { version = \"=2.0.0-beta.19\", features = [ \"macos-private-api\", \"protocol-asset\", \"tray-icon\" ] }\nonce_cell = \"1.17.1\"\nclipboard = \"0.5.0\"\nenigo = { version = \"0.2.0\", features = [ \"xdo\" ] }\nmouse_position = \"0.1.3\"\nrdev = \"0.5.2\"\ntauri-utils = { version = \"=2.0.0-beta.15\", features = [] }",
+                "purpose": "Core Tauri Rust dependencies currently on beta versions"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - dependencies still on beta versions. Need to update to stable v2.0.0 or later."
+      },
+      "expectation": "After upgrading, all core Tauri dependencies in package.json and Cargo.toml should be on stable v2.0.0 or higher releases without any beta, alpha, or rc designations.",
+      "prediction": "Dependencies remain on beta versions (beta.9, beta.13, beta.15, beta.19) as no upgrade work has been completed yet.",
+      "explanation": [
+        "REQ-1 from PRD requires upgrading @tauri-apps/api, @tauri-apps/cli, tauri crate, tauri-build, and tauri-utils to stable v2",
+        "Current implementation shows all packages still pinned to beta versions",
+        "Tests will fail until package.json and Cargo.toml are updated with stable v2 versions",
+        "Implementation needs to replace exact beta versions with stable releases when available"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Upgrade the following core Tauri packages from beta to stable v2: @tauri-apps/api (currently 2.0.0-beta.9), @tauri-apps/cli (currently 2.0.0-beta.13), tauri crate (currently 2.0.0-beta.19), tauri-build crate (currently 2.0.0-beta.15), tauri-utils crate (currently 2.0.0-beta.15)"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Tauri Plugins Upgrade",
+      "description": "Verify all Tauri plugins are upgraded from git dependencies to stable npm/crates.io versions",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Check plugin versions in package.json",
+          "description": "Verify all @tauri-apps/plugin-* dependencies are upgraded from github refs to stable npm versions",
+          "context": "Current: github:tauri-apps/tauri-plugin-*#v2, Target: stable npm versions"
+        },
+        {
+          "step_number": 2,
+          "action": "Check plugin versions in Cargo.toml",
+          "description": "Verify all tauri-plugin-* dependencies are upgraded from git to crates.io versions",
+          "context": "Current: git repos with rev hashes, Target: stable crates.io versions"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify plugin configuration compatibility",
+          "description": "Ensure tauri.conf.json plugin configurations are compatible with stable v2 APIs",
+          "context": "Configuration schema may have changed between beta and stable"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Check @tauri-apps/plugin-autostart in package.json",
+          "expected": "Should be stable npm version (e.g., ^2.0.0), not github reference",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Check @tauri-apps/plugin-fs in package.json",
+          "expected": "Should be stable npm version (e.g., ^2.0.0), not github reference",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Check @tauri-apps/plugin-global-shortcut in package.json",
+          "expected": "Should be stable npm version (e.g., ^2.0.0), not github reference",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Check @tauri-apps/plugin-http in package.json",
+          "expected": "Should be stable npm version (e.g., ^2.0.0), not github reference",
+          "type": "unit"
+        },
+        {
+          "id": 5,
+          "input": "Check tauri-plugin-single-instance in Cargo.toml",
+          "expected": "Should be crates.io version (e.g., 2.0.0), not git dependency",
+          "type": "unit"
+        },
+        {
+          "id": 6,
+          "input": "Check tauri-plugin-autostart in Cargo.toml",
+          "expected": "Should be crates.io version (e.g., 2.0.0), not git dependency",
+          "type": "unit"
+        },
+        {
+          "id": 7,
+          "input": "Check tauri-plugin-notification in Cargo.toml",
+          "expected": "Should be crates.io version (e.g., 2.0.0), not git dependency",
+          "type": "unit"
+        },
+        {
+          "id": 8,
+          "input": "Validate tauri.conf.json against stable v2 schema",
+          "expected": "Configuration file should be valid according to stable v2 schema",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All @tauri-apps/plugin-* packages in package.json are stable npm versions",
+          "All tauri-plugin-* crates in Cargo.toml are from crates.io",
+          "tauri.conf.json passes schema validation for stable v2",
+          "Plugin functionality works correctly with stable versions"
+        ],
+        "failures": [
+          "Plugins still reference github repositories",
+          "Configuration schema validation fails",
+          "Plugin APIs have breaking changes that break existing code"
+        ],
+        "performance": [
+          "Plugin initialization does not add significant startup time",
+          "Plugin operations maintain performance parity with beta versions"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "package.json",
+            "snippets": [
+              {
+                "start_line": 44,
+                "end_line": 51,
+                "code": "\"@tauri-apps/plugin-autostart\": \"github:tauri-apps/tauri-plugin-autostart#v2\",\n\"@tauri-apps/plugin-fs\": \"github:tauri-apps/tauri-plugin-fs#v2\",\n\"@tauri-apps/plugin-global-shortcut\": \"github:tauri-apps/tauri-plugin-global-shortcut#13c59ded715e231a17d2ce970710cc339757c4b1\",\n\"@tauri-apps/plugin-http\": \"github:tauri-apps/tauri-plugin-http#v2\",\n\"@tauri-apps/plugin-notification\": \"github:tauri-apps/tauri-plugin-notification#v2\",\n\"@tauri-apps/plugin-process\": \"github:tauri-apps/tauri-plugin-process#v2\",\n\"@tauri-apps/plugin-shell\": \"github:tauri-apps/tauri-plugin-shell#v2\",\n\"@tauri-apps/plugin-updater\": \"github:tauri-apps/tauri-plugin-updater#v2\"",
+                "purpose": "All Tauri plugins currently use github repository references"
+              }
+            ]
+          },
+          {
+            "file_path": "src-tauri/Cargo.toml",
+            "snippets": [
+              {
+                "start_line": 27,
+                "end_line": 40,
+                "code": "tauri-plugin-single-instance = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }\ntauri-plugin-autostart = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }\ntauri-plugin-notification = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }\ntauri-plugin-http = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }\ntauri-plugin-global-shortcut = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"7fc29c326bc463d59c7e2ee04052b5d81796e407\" }\ntauri-plugin-updater = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }\ntauri-plugin-process = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }\ntauri-plugin-fs = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }\ntauri-plugin-shell = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }\ntauri-plugin-os = { git = \"https://github.com/tauri-apps/plugins-workspace\", rev = \"723b9f7fa85116efdc63b04b444a60e76a950ab7\" }",
+                "purpose": "All Tauri plugins in Rust use git dependencies with specific revision hashes"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - all plugins still use git dependencies. Need to replace with stable crates.io and npm versions."
+      },
+      "expectation": "All Tauri plugins should be sourced from official package registries (npm for JavaScript, crates.io for Rust) with stable v2 semantic versions, not from git repositories.",
+      "prediction": "Plugins remain as git dependencies with revision hashes and github references, indicating no stable releases have been adopted yet.",
+      "explanation": [
+        "REQ-2 from PRD requires upgrading all Tauri plugins to stable v2 versions",
+        "Current implementation uses git dependencies with specific commit hashes",
+        "This indicates plugins were pulled from development branches before stable releases",
+        "Tests will fail until all plugins are replaced with stable npm/crates.io packages",
+        "May need to wait for official plugin ecosystem stable releases"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Upgrade all Tauri plugins to their stable v2 versions: tauri-plugin-single-instance, tauri-plugin-autostart, tauri-plugin-notification, tauri-plugin-http, tauri-plugin-global-shortcut, tauri-plugin-updater, tauri-plugin-process, tauri-plugin-fs, tauri-plugin-shell, tauri-plugin-os, tauri-plugin-aptabase (analytics)"
+      }
+    },
+    {
+      "id": 3,
+      "name": "TypeScript Bindings Regeneration",
+      "description": "Verify TypeScript bindings are regenerated using stable v2 specta and tauri-specta versions",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Check specta and tauri-specta versions",
+          "description": "Verify Cargo.toml uses stable v2 versions of specta and tauri-specta",
+          "context": "Current: specta =2.0.0-rc.12, tauri-specta 2.0.0-rc.10"
+        },
+        {
+          "step_number": 2,
+          "action": "Regenerate TypeScript bindings",
+          "description": "Run binding generation to create updated bindings.ts file",
+          "context": "Bindings must reflect any API changes in stable v2"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify bindings compile",
+          "description": "Ensure TypeScript compilation succeeds with new bindings",
+          "context": "No TypeScript errors should occur from binding changes"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Read Cargo.toml and check specta version",
+          "expected": "Version should be >=2.0.0 stable, not rc or beta",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Read Cargo.toml and check tauri-specta version",
+          "expected": "Version should be >=2.0.0 stable, not rc or beta",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Check bindings.ts file exists and is up-to-date",
+          "expected": "Bindings file should exist and match current Rust command signatures",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Run TypeScript compilation on files using bindings",
+          "expected": "tsc should complete without type errors related to bindings",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "specta is upgraded to stable v2.0.0 or higher",
+          "tauri-specta is upgraded to stable v2.0.0 or higher",
+          "bindings.ts file is regenerated successfully",
+          "TypeScript compilation passes without binding-related errors",
+          "Type safety maintained between Rust backend and TypeScript frontend"
+        ],
+        "failures": [
+          "Binding generation fails due to API incompatibilities",
+          "TypeScript compilation errors due to type mismatches",
+          "Rust command signatures not properly reflected in bindings"
+        ],
+        "performance": [
+          "Binding generation completes within 30 seconds",
+          "No runtime performance impact from binding changes"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src-tauri/Cargo.toml",
+            "snippets": [
+              {
+                "start_line": 55,
+                "end_line": 56,
+                "code": "specta = \"=2.0.0-rc.12\"\ntauri-specta = { version = \"2.0.0-rc.10\", features = [\"javascript\", \"typescript\"] }",
+                "purpose": "Type binding generation libraries currently on release candidate versions"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - specta and tauri-specta still on rc versions. Bindings may need regeneration after upgrade."
+      },
+      "expectation": "specta and tauri-specta should be upgraded to stable v2 releases, and bindings.ts should be regenerated to ensure type safety between the Rust backend and TypeScript frontend.",
+      "prediction": "specta remains on rc.12 and tauri-specta on rc.10, indicating bindings are generated with pre-release tooling and may be incompatible with stable v2.",
+      "explanation": [
+        "REQ-4 from PRD requires regenerating TypeScript bindings using stable v2 tooling",
+        "Current implementation uses release candidate (rc) versions of binding generators",
+        "These rc versions may generate different type signatures than stable releases",
+        "Tests will fail until specta/tauri-specta are upgraded and bindings regenerated",
+        "Type mismatches could cause runtime errors if not caught during compilation"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Regenerate TypeScript bindings (bindings.ts) using the stable v2 specta and tauri-specta versions to ensure type safety between Rust backend and TypeScript frontend."
+      }
+    },
+    {
+      "id": 4,
+      "name": "Build System Compatibility",
+      "description": "Verify all build scripts work correctly with stable Tauri v2",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Test development build",
+          "description": "Run 'pnpm dev-tauri-renderer' to verify development server starts",
+          "context": "Development workflow must work with stable v2"
+        },
+        {
+          "step_number": 2,
+          "action": "Test development with hot reload",
+          "description": "Run 'pnpm dev-tauri' to verify full development mode with hot reload",
+          "context": "Tauri dev server must function with stable CLI"
+        },
+        {
+          "step_number": 3,
+          "action": "Test production build",
+          "description": "Run 'pnpm build-tauri-renderer' to verify production frontend build",
+          "context": "Production build must complete successfully"
+        },
+        {
+          "step_number": 4,
+          "action": "Test full Tauri build",
+          "description": "Run 'pnpm build-tauri' to verify complete application build",
+          "context": "Full build including Rust compilation must succeed"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Execute 'pnpm dev-tauri-renderer' command",
+          "expected": "Development server starts on port 3333 without errors",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Execute 'pnpm dev-tauri' command",
+          "expected": "Tauri development window opens and application is functional",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Execute 'pnpm build-tauri-renderer' command",
+          "expected": "Production build creates dist/tauri directory with built assets",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Execute 'pnpm build-tauri' command",
+          "expected": "Complete build succeeds and creates platform-specific bundle in src-tauri/target/release",
+          "type": "e2e"
+        },
+        {
+          "id": 5,
+          "input": "Check build artifact sizes",
+          "expected": "Bundle size should not increase more than 15% compared to beta version",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All npm scripts execute without errors",
+          "Development mode starts and hot reload works",
+          "Production build completes successfully",
+          "Build artifacts are created in expected locations",
+          "Build times remain comparable to beta versions"
+        ],
+        "failures": [
+          "Build commands fail with CLI incompatibility errors",
+          "Vite configuration incompatible with stable CLI",
+          "Rust compilation fails due to API changes",
+          "Build artifacts missing or corrupted"
+        ],
+        "performance": [
+          "Development server starts within 10 seconds",
+          "Hot reload responds within 2 seconds",
+          "Production build completes within 5 minutes",
+          "Full Tauri build completes within 10 minutes"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "package.json",
+            "snippets": [
+              {
+                "start_line": 7,
+                "end_line": 12,
+                "code": "\"scripts\": {\n  \"prepare\": \"pnpm exec simple-git-hooks\",\n  \"build-tauri-renderer\": \"tsc && vite build -c vite.config.tauri.ts\",\n  \"dev-tauri-renderer\": \"vite -c vite.config.tauri.ts --force\",\n  \"build-tauri\": \"npm run build-tauri-renderer && tauri build\",\n  \"dev-tauri\": \"tauri dev\"",
+                "purpose": "Build scripts that must work with stable v2 CLI"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - build scripts need testing with stable v2 CLI to ensure compatibility."
+      },
+      "expectation": "All build scripts should execute successfully with the stable Tauri v2 CLI, producing functional development environments and production builds.",
+      "prediction": "Build scripts will likely fail or produce errors when attempting to use stable v2 features with beta dependencies still in place.",
+      "explanation": [
+        "REQ-6 from PRD requires ensuring build system compatibility with stable v2",
+        "Build scripts depend on CLI, API, and Rust crate versions being aligned",
+        "Mixing stable CLI with beta dependencies could cause incompatibilities",
+        "Tests will fail until all dependencies are upgraded consistently",
+        "Vite configuration may need updates for stable v2 compatibility"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Ensure build scripts and commands work with stable v2: pnpm dev-tauri-renderer (development), pnpm dev-tauri (development with hot reload), pnpm build-tauri-renderer (production build), pnpm build-tauri (full production build including Rust)"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Window Management API Migration",
+      "description": "Verify window management code works with stable v2 window APIs",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Review src-tauri/src/windows.rs",
+          "description": "Identify window API usage that may have changed in stable v2",
+          "context": "File is 21KB with extensive window management logic"
+        },
+        {
+          "step_number": 2,
+          "action": "Test window creation",
+          "description": "Verify main window, settings window, and other windows can be created",
+          "context": "Application uses multiple windows (main, settings, screenshot, action manager)"
+        },
+        {
+          "step_number": 3,
+          "action": "Test window lifecycle",
+          "description": "Verify window show/hide, focus, and close operations work correctly",
+          "context": "Window state management is critical for user experience"
+        },
+        {
+          "step_number": 4,
+          "action": "Test multi-window coordination",
+          "description": "Verify windows communicate correctly via IPC",
+          "context": "Multiple windows need to coordinate state"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Create main translation window using stable v2 API",
+          "expected": "Window should be created with correct size, position, and decorations",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Show and hide window programmatically",
+          "expected": "Window visibility should change correctly without errors",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Focus window from background",
+          "expected": "Window should come to foreground and receive focus",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Send IPC message between windows",
+          "expected": "Message should be received correctly by target window",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Close window gracefully",
+          "expected": "Window should close and cleanup resources without errors",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All window creation calls succeed with stable v2 API",
+          "Window lifecycle methods work correctly",
+          "Multi-window coordination functions properly",
+          "No window-related crashes or errors occur"
+        ],
+        "failures": [
+          "Window API methods not found (breaking changes)",
+          "Window creation fails with runtime errors",
+          "IPC communication between windows broken",
+          "Memory leaks from improper window cleanup"
+        ],
+        "performance": [
+          "Window creation takes less than 500ms",
+          "Window show/hide responds within 100ms",
+          "IPC messages delivered within 50ms"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src-tauri/src/windows.rs",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 50,
+                "code": "// Window management implementation (21KB file)\n// Contains window creation, lifecycle, and coordination logic\n// Must be updated for stable v2 window APIs",
+                "purpose": "Core window management requiring stable v2 API migration"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - windows.rs needs review and potential updates for stable v2 window API changes."
+      },
+      "expectation": "All window management code should work seamlessly with stable v2 window APIs, creating, managing, and coordinating multiple windows without errors.",
+      "prediction": "Window management code may fail at runtime if stable v2 introduced breaking changes to window APIs that are not yet handled.",
+      "explanation": [
+        "REQ-5 from PRD requires identifying and fixing breaking changes in window APIs",
+        "windows.rs is a large file (21KB) with extensive window management logic",
+        "Beta to stable transition may include window API refinements",
+        "Tests will fail if window creation, lifecycle, or IPC methods changed",
+        "Must verify window show/hide, focus, positioning, and event handling"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Identify and fix any breaking changes between beta and stable v2 releases: Update Rust command invocations if API signatures changed, Update JavaScript/TypeScript API calls if methods changed, Adjust window management code if APIs evolved, Update plugin initialization if required"
+      }
+    },
+    {
+      "id": 6,
+      "name": "IPC Command Migration",
+      "description": "Verify all Tauri commands and IPC communication work with stable v2",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Audit all #[tauri::command] functions",
+          "description": "Review main.rs and other Rust files for command definitions",
+          "context": "Commands are the primary IPC mechanism between frontend and backend"
+        },
+        {
+          "step_number": 2,
+          "action": "Test command invocation from frontend",
+          "description": "Verify JavaScript can invoke Rust commands using stable v2 API",
+          "context": "Frontend uses @tauri-apps/api to invoke commands"
+        },
+        {
+          "step_number": 3,
+          "action": "Test command error handling",
+          "description": "Verify errors from Rust commands propagate correctly to frontend",
+          "context": "Error handling may have changed in stable v2"
+        },
+        {
+          "step_number": 4,
+          "action": "Test command with complex types",
+          "description": "Verify serialization/deserialization of complex data structures",
+          "context": "Bindings ensure type safety across boundary"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Invoke simple Rust command from TypeScript",
+          "expected": "Command should execute and return result without errors",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Invoke command with string parameters",
+          "expected": "Parameters should be received correctly in Rust",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Invoke command with complex object parameters",
+          "expected": "Object should deserialize correctly in Rust",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Trigger Rust command error and catch in TypeScript",
+          "expected": "Error should propagate to frontend with correct message",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Invoke command that returns complex object",
+          "expected": "Return value should be properly typed and accessible in TypeScript",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All Tauri commands callable from frontend",
+          "Command parameters serialize/deserialize correctly",
+          "Command return values accessible with proper types",
+          "Error handling works as expected",
+          "Type safety maintained across IPC boundary"
+        ],
+        "failures": [
+          "Commands not found or not registered",
+          "Serialization errors for parameters or return values",
+          "Type mismatches between Rust and TypeScript",
+          "IPC errors or timeouts"
+        ],
+        "performance": [
+          "Simple commands respond within 10ms",
+          "Complex commands with data processing complete within 100ms",
+          "No memory leaks from repeated command invocations"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src-tauri/src/main.rs",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 30,
+                "code": "// main.rs contains command registration (22KB file)\n// Uses #[tauri::command] macro for IPC functions\n// Commands must be compatible with stable v2 IPC",
+                "purpose": "Command registration and initialization requiring stable v2 compatibility"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - all Tauri commands need verification with stable v2 IPC. Bindings regeneration required."
+      },
+      "expectation": "All Tauri commands should work correctly with stable v2 IPC, allowing seamless communication between the TypeScript frontend and Rust backend.",
+      "prediction": "Commands may fail to register or execute if stable v2 changed the command macro or IPC protocol in incompatible ways.",
+      "explanation": [
+        "REQ-5 from PRD requires updating Rust command invocations if API signatures changed",
+        "main.rs (22KB) contains numerous command definitions and registrations",
+        "IPC protocol changes between beta and stable could break command invocation",
+        "Tests will fail if command registration, serialization, or error handling changed",
+        "Bindings must be regenerated to match any command signature changes"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Identify and fix any breaking changes between beta and stable v2 releases: Update Rust command invocations if API signatures changed, Update JavaScript/TypeScript API calls if methods changed"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Plugin Initialization Migration",
+      "description": "Verify all plugins initialize correctly with stable v2",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Review main.rs plugin setup",
+          "description": "Check how plugins are initialized in the application setup",
+          "context": "Plugins must be registered with the Tauri builder"
+        },
+        {
+          "step_number": 2,
+          "action": "Test single-instance plugin",
+          "description": "Verify only one instance of application can run",
+          "context": "Critical for preventing multiple instances"
+        },
+        {
+          "step_number": 3,
+          "action": "Test autostart plugin",
+          "description": "Verify application can be configured to start on system boot",
+          "context": "User setting for auto-starting application"
+        },
+        {
+          "step_number": 4,
+          "action": "Test notification plugin",
+          "description": "Verify system notifications can be shown",
+          "context": "Used for update notifications and alerts"
+        },
+        {
+          "step_number": 5,
+          "action": "Test HTTP plugin",
+          "description": "Verify HTTP requests work with proxy support",
+          "context": "Critical for API communication"
+        },
+        {
+          "step_number": 6,
+          "action": "Test global shortcut plugin",
+          "description": "Verify global keyboard shortcuts can be registered",
+          "context": "Core feature for quick access"
+        },
+        {
+          "step_number": 7,
+          "action": "Test updater plugin",
+          "description": "Verify application can check for and install updates",
+          "context": "Important for keeping users up-to-date"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Initialize application with all plugins registered",
+          "expected": "Application starts without plugin initialization errors",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Start second instance of application",
+          "expected": "Single instance plugin should prevent second instance or bring existing to focus",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Toggle autostart setting",
+          "expected": "Autostart plugin should update system registry/login items",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Send system notification",
+          "expected": "Notification should appear in system notification area",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Make HTTP request through plugin",
+          "expected": "Request should complete successfully, respecting proxy settings",
+          "type": "integration"
+        },
+        {
+          "id": 6,
+          "input": "Register global keyboard shortcut",
+          "expected": "Shortcut should trigger application action even when app not focused",
+          "type": "e2e"
+        },
+        {
+          "id": 7,
+          "input": "Check for application updates",
+          "expected": "Updater should check remote endpoint and report update availability",
+          "type": "integration"
+        },
+        {
+          "id": 8,
+          "input": "Read file using fs plugin",
+          "expected": "File operations should work within configured scope",
+          "type": "integration"
+        },
+        {
+          "id": 9,
+          "input": "Execute shell command using shell plugin",
+          "expected": "Allowed shell commands should execute successfully",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All plugins initialize without errors",
+          "Plugin functionality works as expected",
+          "Plugin configuration from tauri.conf.json is respected",
+          "No conflicts between plugins",
+          "Plugin performance is acceptable"
+        ],
+        "failures": [
+          "Plugin initialization fails with API errors",
+          "Plugin functionality broken due to API changes",
+          "Configuration schema incompatibilities",
+          "Runtime crashes from plugin interactions"
+        ],
+        "performance": [
+          "Plugin initialization adds less than 500ms to startup time",
+          "Plugin operations respond within expected timeframes",
+          "No memory leaks from plugin usage"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src-tauri/src/main.rs",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 50,
+                "code": "// main.rs plugin initialization (22KB file)\n// Registers all plugins with tauri::Builder\n// Must be updated for stable v2 plugin APIs",
+                "purpose": "Plugin registration and initialization code"
+              }
+            ]
+          },
+          {
+            "file_path": "src-tauri/tauri.conf.json",
+            "snippets": [
+              {
+                "start_line": 11,
+                "end_line": 34,
+                "code": "\"plugins\": {\n  \"fs\": {\n    \"scope\": {\n      \"allow\": [\n        \"**\",\n        \"$CONFIG/*/**\",\n        \"$APPCONFIG/**\",\n        \"$APPCACHE/**\"\n      ]\n    }\n  },\n  \"shell\": {\n    \"open\": true\n  },\n  \"updater\": {\n    \"endpoints\": [\n      \"https://github.com/yetone/openai-translator/releases/latest/download/latest.json\"\n    ],\n    \"active\": true,\n    \"windows\": {\n      \"installMode\": \"passive\"\n    },\n    \"pubkey\": \"dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDM3MzdGN0RCQjhGMkVENDEKUldSQjdmSzQyL2MzTjFaY0dIKzQzVnJYSjFwMlhFZmhjWmU5emZoVUt2OWExcVorbDRkK0NBaDMK\"\n  }\n}",
+                "purpose": "Plugin configuration that may need updates for stable v2"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - plugin initialization needs review for stable v2 API changes. Configuration schema may need updates."
+      },
+      "expectation": "All plugins should initialize successfully with stable v2, maintaining their functionality as configured in tauri.conf.json.",
+      "prediction": "Plugin initialization may fail if stable v2 changed plugin registration APIs or configuration schemas in breaking ways.",
+      "explanation": [
+        "REQ-2 and REQ-5 from PRD require upgrading plugins and updating initialization if needed",
+        "main.rs contains plugin registration that may need updates",
+        "Plugin APIs may have changed between beta and stable",
+        "Configuration schema in tauri.conf.json may be incompatible",
+        "Tests will fail if plugin registration methods or configuration format changed",
+        "Each plugin needs individual functional testing"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Update plugin initialization if required. Update tauri.conf.json configuration to match any changes in the stable v2 plugin APIs or configuration schema."
+      }
+    },
+    {
+      "id": 8,
+      "name": "Cross-Platform Build Validation",
+      "description": "Verify application builds and runs correctly on all supported platforms with stable v2",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Build for Windows",
+          "description": "Execute full build on Windows platform",
+          "context": "Target: Windows 10 and 11"
+        },
+        {
+          "step_number": 2,
+          "action": "Build for macOS Intel",
+          "description": "Execute full build on macOS with Intel processor",
+          "context": "Target: macOS 11+ (Intel)"
+        },
+        {
+          "step_number": 3,
+          "action": "Build for macOS Apple Silicon",
+          "description": "Execute full build on macOS with Apple Silicon (M1/M2)",
+          "context": "Target: macOS 11+ (ARM64)"
+        },
+        {
+          "step_number": 4,
+          "action": "Build for Linux",
+          "description": "Execute full build on Linux (Ubuntu/Debian)",
+          "context": "Target: deb and AppImage packages"
+        },
+        {
+          "step_number": 5,
+          "action": "Test platform-specific features",
+          "description": "Verify platform-specific functionality works correctly",
+          "context": "Each platform has unique features and requirements"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Build on Windows 11 x64",
+          "expected": "Build succeeds and creates NSIS installer and updater artifacts",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Run Windows build and test OCR functionality",
+          "expected": "Windows.Media.Ocr should work for screenshot translation",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Build on macOS Intel",
+          "expected": "Build succeeds and creates DMG and app bundle",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Build on macOS Apple Silicon",
+          "expected": "Build succeeds and creates ARM64 DMG and app bundle",
+          "type": "e2e"
+        },
+        {
+          "id": 5,
+          "input": "Test macOS accessibility permissions",
+          "expected": "Application should request and handle accessibility permissions correctly",
+          "type": "e2e"
+        },
+        {
+          "id": 6,
+          "input": "Build on Ubuntu 22.04",
+          "expected": "Build succeeds and creates deb and AppImage packages",
+          "type": "e2e"
+        },
+        {
+          "id": 7,
+          "input": "Run Linux build and verify xdotool dependency",
+          "expected": "Application should detect and use xdotool for text input",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Build succeeds on all three platforms",
+          "Platform-specific bundles created correctly",
+          "Platform-specific features function properly",
+          "No platform-specific crashes or errors",
+          "Bundle sizes remain comparable to beta versions"
+        ],
+        "failures": [
+          "Build fails on specific platform due to dependency issues",
+          "Platform-specific APIs broken in stable v2",
+          "Code signing fails on macOS or Windows",
+          "Linux dependencies (xdotool) not handled correctly"
+        ],
+        "performance": [
+          "Windows build completes within 10 minutes",
+          "macOS builds complete within 12 minutes",
+          "Linux builds complete within 10 minutes",
+          "Bundle sizes under 100MB for all platforms"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src-tauri/tauri.conf.json",
+            "snippets": [
+              {
+                "start_line": 36,
+                "end_line": 78,
+                "code": "\"bundle\": {\n  \"active\": true,\n  \"linux\": {\n    \"deb\": {\n      \"depends\": [\n        \"xdotool\"\n      ]\n    },\n    \"appimage\": {\n      \"bundleMediaFramework\": true\n    }\n  },\n  \"category\": \"DeveloperTool\",\n  \"targets\": [\"deb\", \"appimage\", \"nsis\", \"app\", \"dmg\", \"updater\"],\n  \"windows\": {\n    \"webviewInstallMode\": {\n      \"type\": \"embedBootstrapper\"\n    }\n  }\n}",
+                "purpose": "Platform-specific build configuration"
+              }
+            ]
+          },
+          {
+            "file_path": "src-tauri/Cargo.toml",
+            "snippets": [
+              {
+                "start_line": 58,
+                "end_line": 68,
+                "code": "[target.'cfg(target_os = \"macos\")'.dependencies]\ncocoa = \"0.24\"\nobjc = \"0.2.7\"\nmacos-accessibility-client = \"0.0.1\"\n\n[target.'cfg(windows)'.dependencies]\nwindows = { version = \"0.56.0\", features = [ \"Win32_UI_WindowsAndMessaging\", \"Win32_Foundation\", \"Graphics_Imaging\", \"Media_Ocr\" ] }",
+                "purpose": "Platform-specific dependencies"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - cross-platform builds need testing with stable v2. Platform-specific features may have changed."
+      },
+      "expectation": "The application should build successfully and function correctly on Windows, macOS (Intel and Apple Silicon), and Linux with stable Tauri v2.",
+      "prediction": "Platform builds may fail due to platform-specific API changes or dependency incompatibilities introduced in stable v2.",
+      "explanation": [
+        "REQ-7 from PRD requires platform testing on Windows, macOS, and Linux",
+        "Platform-specific code exists in Cargo.toml for macOS and Windows",
+        "Linux requires xdotool dependency for text input simulation",
+        "macOS uses private APIs for accessibility features",
+        "Windows uses Windows.Media.Ocr for screenshot translation",
+        "Tests will fail until builds succeed on all platforms with stable v2"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Verify the upgraded application functions correctly on all supported platforms: Windows (10, 11), macOS (Intel and Apple Silicon), Linux (Ubuntu/Debian, AppImage)"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Feature Regression Testing",
+      "description": "Verify all existing desktop features continue to work after upgrade to stable v2",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Test main translation window",
+          "description": "Verify translation interface displays and functions correctly",
+          "context": "Core feature - must work perfectly"
+        },
+        {
+          "step_number": 2,
+          "action": "Test settings management",
+          "description": "Verify settings window opens and preferences can be changed",
+          "context": "User configuration is critical"
+        },
+        {
+          "step_number": 3,
+          "action": "Test screenshot OCR",
+          "description": "Verify screenshot capture and text recognition works",
+          "context": "Popular feature for translating images"
+        },
+        {
+          "step_number": 4,
+          "action": "Test global shortcuts",
+          "description": "Verify keyboard shortcuts trigger actions correctly",
+          "context": "Primary interaction method for many users"
+        },
+        {
+          "step_number": 5,
+          "action": "Test system tray",
+          "description": "Verify tray icon appears and menu functions",
+          "context": "Required for background operation"
+        },
+        {
+          "step_number": 6,
+          "action": "Test clipboard integration",
+          "description": "Verify clipboard reading and writing works",
+          "context": "Used for text selection and copying results"
+        },
+        {
+          "step_number": 7,
+          "action": "Test auto-start",
+          "description": "Verify application can start with system",
+          "context": "User preference for convenience"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Open main translation window and enter text to translate",
+          "expected": "Window opens, text can be entered, translation request succeeds",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Open settings window and change language preference",
+          "expected": "Settings window opens, preference changes persist after restart",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Trigger screenshot OCR via shortcut",
+          "expected": "Screen capture starts, user can select region, OCR extracts text",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Press global shortcut for quick translate",
+          "expected": "Shortcut triggers translation window to appear",
+          "type": "e2e"
+        },
+        {
+          "id": 5,
+          "input": "Click system tray icon",
+          "expected": "Tray menu appears with correct options",
+          "type": "integration"
+        },
+        {
+          "id": 6,
+          "input": "Select text and use clipboard translate feature",
+          "expected": "Selected text is captured and translation window appears",
+          "type": "e2e"
+        },
+        {
+          "id": 7,
+          "input": "Enable auto-start in settings",
+          "expected": "Application registers with system to start on boot",
+          "type": "integration"
+        },
+        {
+          "id": 8,
+          "input": "Test HTTP requests with proxy configured",
+          "expected": "Translation API requests respect proxy settings",
+          "type": "integration"
+        },
+        {
+          "id": 9,
+          "input": "Test file system operations for saving preferences",
+          "expected": "Configuration files saved and loaded correctly",
+          "type": "integration"
+        },
+        {
+          "id": 10,
+          "input": "Check for updates via updater plugin",
+          "expected": "Update check completes without errors",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All listed features function correctly",
+          "No regressions in user-facing functionality",
+          "User experience matches or exceeds beta version",
+          "Performance is comparable or better",
+          "No data loss or corruption"
+        ],
+        "failures": [
+          "Critical features broken by API changes",
+          "Performance regressions affecting user experience",
+          "UI rendering issues",
+          "Data persistence problems",
+          "Crashes during normal usage"
+        ],
+        "performance": [
+          "Translation requests complete within 2 seconds",
+          "Window operations respond within 100ms",
+          "OCR processing completes within 3 seconds",
+          "Clipboard operations complete within 50ms"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src-tauri/src/windows.rs",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 20,
+                "code": "// Window management for translation, settings, screenshot windows (21KB)",
+                "purpose": "Manages multiple window types and coordination"
+              }
+            ]
+          },
+          {
+            "file_path": "src-tauri/src/writing.rs",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 20,
+                "code": "// Writing assistance and text manipulation features (17KB)",
+                "purpose": "Text selection, clipboard integration, and writing features"
+              }
+            ]
+          },
+          {
+            "file_path": "src-tauri/src/ocr.rs",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 20,
+                "code": "// OCR and screenshot functionality (5.7KB)",
+                "purpose": "Screenshot capture and text recognition"
+              }
+            ]
+          },
+          {
+            "file_path": "src-tauri/src/tray.rs",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 20,
+                "code": "// System tray integration (3.7KB)",
+                "purpose": "Tray icon and menu management"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - all features need comprehensive testing with stable v2 to ensure no regressions."
+      },
+      "expectation": "All existing features should continue to work without regressions after upgrading to stable Tauri v2, maintaining the same quality of user experience.",
+      "prediction": "Feature testing will likely reveal broken functionality due to unhandled API changes between beta and stable v2.",
+      "explanation": [
+        "REQ-8 from PRD requires validating all existing desktop features work after upgrade",
+        "Multiple backend modules (windows.rs, writing.rs, ocr.rs, tray.rs) implement features",
+        "Each feature depends on various Tauri APIs and plugins",
+        "Tests will fail for any features broken by stable v2 API changes",
+        "Comprehensive manual and automated testing required",
+        "Must verify main window, settings, OCR, shortcuts, tray, clipboard, autostart, HTTP, file ops"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Validate all existing desktop features work after upgrade: Main translation window, Settings window, Screenshot translation (OCR), Action manager window, Update notifications, Thumbnail/preview window, System tray integration, Global keyboard shortcuts, Auto-start functionality, HTTP requests with proxy support, File system operations, Clipboard integration, Text selection and writing assistance"
+      }
+    },
+    {
+      "id": 10,
+      "name": "Configuration Schema Migration",
+      "description": "Verify tauri.conf.json is compatible with stable v2 configuration schema",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Validate configuration against stable v2 schema",
+          "description": "Use Tauri CLI to validate tauri.conf.json",
+          "context": "Configuration schema may have changed in stable release"
+        },
+        {
+          "step_number": 2,
+          "action": "Check for deprecated configuration options",
+          "description": "Identify any configuration keys that are deprecated in stable v2",
+          "context": "Deprecated options should be migrated to new equivalents"
+        },
+        {
+          "step_number": 3,
+          "action": "Test configuration loading",
+          "description": "Verify application loads and respects all configuration settings",
+          "context": "Configuration must be parsed correctly at runtime"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Run tauri.conf.json validation with stable v2 CLI",
+          "expected": "Validation should pass without errors or warnings",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Check fs plugin scope configuration",
+          "expected": "File system scope should be valid and enforced correctly",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Check shell plugin configuration",
+          "expected": "Shell open configuration should work as expected",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Check updater plugin configuration",
+          "expected": "Updater endpoints and settings should be valid",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Check bundle configuration",
+          "expected": "Bundle targets and platform settings should be valid",
+          "type": "integration"
+        },
+        {
+          "id": 6,
+          "input": "Check security configuration (CSP, asset protocol)",
+          "expected": "Security settings should be enforced correctly",
+          "type": "integration"
+        },
+        {
+          "id": 7,
+          "input": "Check tray icon configuration",
+          "expected": "Tray icon should appear with configured settings",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "tauri.conf.json validates successfully against stable v2 schema",
+          "No deprecated configuration options present",
+          "All configuration settings respected at runtime",
+          "Security settings enforced correctly"
+        ],
+        "failures": [
+          "Schema validation fails due to incompatible options",
+          "Deprecated configuration causes warnings or errors",
+          "Configuration not loaded or applied correctly",
+          "Security settings not enforced"
+        ],
+        "performance": [
+          "Configuration loading adds negligible overhead to startup",
+          "No runtime performance impact from configuration changes"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src-tauri/tauri.conf.json",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 99,
+                "code": "{\n  \"$schema\": \"../node_modules/@tauri-apps/cli/schema.json\",\n  \"productName\": \"OpenAI Translator\",\n  \"version\": \"0.1.0\",\n  \"identifier\": \"xyz.yetone.apps.openai-translator\",\n  \"build\": { ... },\n  \"plugins\": { ... },\n  \"bundle\": { ... },\n  \"app\": { ... }\n}",
+                "purpose": "Complete Tauri configuration requiring stable v2 schema compatibility"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - tauri.conf.json needs validation and potential updates for stable v2 schema."
+      },
+      "expectation": "tauri.conf.json should be fully compatible with the stable v2 configuration schema, with all settings validated and applied correctly.",
+      "prediction": "Configuration validation may fail or produce warnings if stable v2 introduced schema changes that are incompatible with the current configuration structure.",
+      "explanation": [
+        "REQ-3 from PRD requires updating tauri.conf.json for stable v2 compatibility",
+        "Configuration schema may have evolved from beta to stable",
+        "Schema reference points to @tauri-apps/cli/schema.json which will change with stable CLI",
+        "Tests will fail if configuration structure is incompatible with stable v2",
+        "May need to update plugin configurations, security settings, or bundle options",
+        "Must ensure all paths, scopes, and security settings remain properly configured"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Update tauri.conf.json configuration to match any changes in the stable v2 plugin APIs or configuration schema."
+      }
+    },
+    {
+      "id": 11,
+      "name": "Performance Benchmarking",
+      "description": "Verify application performance meets or exceeds beta version performance",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Measure startup time",
+          "description": "Record time from launch to first interactive window",
+          "context": "NFR-2 requires performance parity with beta"
+        },
+        {
+          "step_number": 2,
+          "action": "Measure window rendering time",
+          "description": "Record time to create and render each window type",
+          "context": "Window operations must be responsive"
+        },
+        {
+          "step_number": 3,
+          "action": "Measure translation response time",
+          "description": "Record time for translation requests to complete",
+          "context": "Core feature performance critical"
+        },
+        {
+          "step_number": 4,
+          "action": "Measure bundle size",
+          "description": "Compare bundle sizes with beta version",
+          "context": "NFR-4 requires bundle size not increase more than 15%"
+        },
+        {
+          "step_number": 5,
+          "action": "Measure build time",
+          "description": "Record compilation time for development and production builds",
+          "context": "NFR-3 requires build time not increase more than 10%"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Launch application and measure startup time",
+          "expected": "Startup time should be <= beta version startup time",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Create main window and measure rendering time",
+          "expected": "Window should render in less than 500ms",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Submit translation request and measure response time",
+          "expected": "Response time should be <= beta version (excluding network latency)",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Build application and measure final bundle size",
+          "expected": "Bundle size should not increase more than 15% vs beta",
+          "type": "e2e"
+        },
+        {
+          "id": 5,
+          "input": "Measure development build time",
+          "expected": "Build time should not increase more than 10% vs beta",
+          "type": "integration"
+        },
+        {
+          "id": 6,
+          "input": "Measure production build time",
+          "expected": "Build time should not increase more than 10% vs beta",
+          "type": "e2e"
+        },
+        {
+          "id": 7,
+          "input": "Monitor memory usage during normal operation",
+          "expected": "Memory usage should be comparable to beta version",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Startup time equal or faster than beta",
+          "Window rendering time acceptable (< 500ms)",
+          "Translation response time unchanged",
+          "Bundle size increase under 15%",
+          "Build time increase under 10%",
+          "Memory usage comparable to beta"
+        ],
+        "failures": [
+          "Significant performance regressions",
+          "Startup time notably slower",
+          "Bundle size increased significantly",
+          "Build time increased significantly",
+          "Memory leaks detected"
+        ],
+        "performance": [
+          "Startup time: < 3 seconds on modern hardware",
+          "Window creation: < 500ms",
+          "Translation processing: < 100ms (excluding API call)",
+          "Bundle size: < 100MB per platform",
+          "Development build: < 60 seconds",
+          "Production build: < 10 minutes"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "Implementation pending - performance benchmarks need to be established and measured after upgrade to stable v2."
+      },
+      "expectation": "Application performance should meet or exceed beta version performance across all metrics including startup time, rendering, response time, bundle size, and build time.",
+      "prediction": "Performance testing will likely reveal some variations from beta, requiring investigation to ensure they meet acceptance criteria.",
+      "explanation": [
+        "NFR-2 from PRD requires performance parity with beta version",
+        "NFR-3 requires build time not increase more than 10%",
+        "NFR-4 requires bundle size not increase more than 15%",
+        "Tests will fail if any performance metric exceeds acceptable thresholds",
+        "Need baseline measurements from beta version for comparison",
+        "Must test startup, rendering, translation, memory usage, build time, and bundle size"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Application startup time, window rendering, and translation responsiveness must be equal to or better than the current beta version. No performance regressions are acceptable. Compilation time for development and production builds should not increase significantly (acceptable increase: <10% compared to beta versions). The final application bundle size should remain comparable or smaller. Significant size increases (>15%) require investigation and justification."
+      }
+    },
+    {
+      "id": 12,
+      "name": "Data Migration and Backward Compatibility",
+      "description": "Verify user data and settings migrate correctly from beta to stable v2",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Test settings migration",
+          "description": "Verify existing user preferences persist after upgrade",
+          "context": "NFR-1 requires backward compatibility for user data"
+        },
+        {
+          "step_number": 2,
+          "action": "Test API key persistence",
+          "description": "Verify stored API keys remain accessible and valid",
+          "context": "Critical user data that must not be lost"
+        },
+        {
+          "step_number": 3,
+          "action": "Test vocabulary data migration",
+          "description": "Verify custom vocabulary and user data migrates correctly",
+          "context": "User-created content must be preserved"
+        },
+        {
+          "step_number": 4,
+          "action": "Test configuration file compatibility",
+          "description": "Verify application can read configuration files from beta version",
+          "context": "File format compatibility required"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Upgrade from beta with existing settings",
+          "expected": "All user preferences should be preserved and functional",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Launch stable v2 with beta API key storage",
+          "expected": "API keys should be accessible and used correctly",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Load vocabulary data from beta version",
+          "expected": "Custom vocabulary should load without errors",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Read configuration files created by beta",
+          "expected": "Configuration should parse correctly",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Test downgrade scenario (stable to beta)",
+          "expected": "Should provide clear guidance if downgrade attempted",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All user settings preserved across upgrade",
+          "API keys remain secure and accessible",
+          "Vocabulary data migrates without loss",
+          "Configuration files compatible",
+          "No manual migration steps required"
+        ],
+        "failures": [
+          "User settings lost or reset to defaults",
+          "API keys inaccessible after upgrade",
+          "Vocabulary data corrupted or lost",
+          "Configuration parsing errors",
+          "Manual migration required"
+        ],
+        "performance": [
+          "Migration completes automatically on first launch",
+          "Migration adds less than 5 seconds to first startup",
+          "No user intervention required"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src-tauri/src/config.rs",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 20,
+                "code": "// Configuration management (3.3KB)\n// Handles reading and writing user configuration",
+                "purpose": "Configuration loading and persistence logic"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - data migration logic needs to be implemented and tested to ensure backward compatibility."
+      },
+      "expectation": "All user data including settings, API keys, and vocabulary should migrate seamlessly from beta to stable v2 without any user intervention or data loss.",
+      "prediction": "Data migration may encounter issues if file formats or storage locations changed between beta and stable v2.",
+      "explanation": [
+        "NFR-1 from PRD requires backward compatibility for user data",
+        "User settings, API keys, and vocabulary must migrate seamlessly",
+        "config.rs (3.3KB) handles configuration management",
+        "Tests will fail if any user data is lost or corrupted during migration",
+        "May need migration code to handle format changes",
+        "Must test with real beta user data to ensure compatibility"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The upgraded application must maintain compatibility with existing user configurations and data. User settings, API keys, and vocabulary data must migrate seamlessly without manual intervention."
+      }
+    }
+  ],
+  "test_mapping": {
+    "description": "Mapping of test files to scenarios validated",
+    "mappings": [
+      {
+        "test_file": "src-tauri/tests/tauri_upgrade_test.rs",
+        "scenarios": [1, 2, 3],
+        "description": "Tests for core dependency upgrades, plugin upgrades, and bindings"
+      },
+      {
+        "test_file": "tests/integration/build_test.ts",
+        "scenarios": [4, 11],
+        "description": "Tests for build system compatibility and performance benchmarks"
+      },
+      {
+        "test_file": "tests/integration/window_management_test.ts",
+        "scenarios": [5],
+        "description": "Tests for window management API migration"
+      },
+      {
+        "test_file": "tests/integration/ipc_commands_test.ts",
+        "scenarios": [6],
+        "description": "Tests for IPC command migration"
+      },
+      {
+        "test_file": "tests/integration/plugin_init_test.ts",
+        "scenarios": [7],
+        "description": "Tests for plugin initialization"
+      },
+      {
+        "test_file": "tests/e2e/platform_builds_test.ts",
+        "scenarios": [8],
+        "description": "Tests for cross-platform build validation"
+      },
+      {
+        "test_file": "tests/e2e/feature_regression_test.ts",
+        "scenarios": [9],
+        "description": "Tests for feature regression testing"
+      },
+      {
+        "test_file": "tests/integration/config_schema_test.ts",
+        "scenarios": [10],
+        "description": "Tests for configuration schema migration"
+      },
+      {
+        "test_file": "tests/integration/data_migration_test.ts",
+        "scenarios": [12],
+        "description": "Tests for data migration and backward compatibility"
+      }
+    ]
+  },
+  "summary": {
+    "total_scenarios": 12,
+    "complexity": "high",
+    "estimated_time": "240 minutes",
+    "notes": "This is a TDD red phase - no implementation exists yet. All scenarios are marked as not_implemented. Tests will drive the upgrade implementation work."
+  }
+}
