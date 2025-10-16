@@ -1,0 +1,132 @@
+{
+  "run": {
+    "command": "pnpm test",
+    "passed": false,
+    "duration_ms": 5780,
+    "output": "Test Files: 1 failed | 4 passed | 1 skipped (6 total)\nTests: 1 failed | 23 passed | 43 skipped (67 total)\n\nFailed test:\n- tests/integration/plugin_init_test.ts > Plugin Initialization - Scenario 7 > should use stable npm versions for plugins\n  AssertionError: expected true to be false\n  Plugin versions still use 'github:' references instead of stable npm versions\n\nPassed tests:\n- tests/integration/config_schema_test.ts (10 tests)\n- tests/integration/build_test.ts (1 test, 9 skipped)\n- tests/integration/ipc_commands_test.ts (1 test, 12 skipped)\n- src/common/__tests__/translate.test.ts (10 tests)\n- tests/integration/plugin_init_test.ts (1 test, 13 skipped)\n\nNote: Rust tests could not run (cargo not available in environment)"
+  },
+  "test_results": [
+    {
+      "file": "tests/integration/plugin_init_test.ts",
+      "test_name": "should use stable npm versions for plugins",
+      "status": "failed",
+      "error": "AssertionError: expected true to be false. Plugin dependencies still use 'github:' references. Found: @tauri-apps/plugin-fs: github:tauri-apps/tauri-plugin-fs#v2",
+      "scenario_ids": [2]
+    },
+    {
+      "file": "tests/integration/plugin_init_test.ts",
+      "test_name": "should have plugin packages available",
+      "status": "passed",
+      "scenario_ids": [2, 7]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should have valid tauri.conf.json",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should use stable v2 schema reference",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should have valid fs plugin scope configuration",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should have valid shell plugin configuration",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should have valid updater plugin configuration",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should have valid bundle configuration",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should have valid security configuration",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should have valid tray icon configuration",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should not contain deprecated configuration options",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/config_schema_test.ts",
+      "test_name": "should have valid build configuration",
+      "status": "passed",
+      "scenario_ids": [10]
+    },
+    {
+      "file": "tests/integration/build_test.ts",
+      "test_name": "should have required build scripts defined",
+      "status": "passed",
+      "scenario_ids": [4]
+    },
+    {
+      "file": "tests/integration/ipc_commands_test.ts",
+      "test_name": "should use correct import path for invoke",
+      "status": "passed",
+      "note": "Expected to fail in red phase, but passes as test structure validated",
+      "scenario_ids": [6]
+    },
+    {
+      "file": "src/common/__tests__/translate.test.ts",
+      "test_name": "various translation tests",
+      "status": "passed",
+      "note": "Existing tests unrelated to Tauri upgrade",
+      "scenario_ids": []
+    },
+    {
+      "file": "src-tauri/tests/tauri_upgrade_test.rs",
+      "test_name": "test_core_dependencies_upgraded_to_stable_v2",
+      "status": "not_run",
+      "note": "Cargo not available in environment - would fail as dependencies still on beta",
+      "scenario_ids": [1]
+    },
+    {
+      "file": "src-tauri/tests/tauri_upgrade_test.rs",
+      "test_name": "test_plugins_upgraded_to_stable_versions",
+      "status": "not_run",
+      "note": "Cargo not available - would fail as plugins use git dependencies",
+      "scenario_ids": [2]
+    },
+    {
+      "file": "src-tauri/tests/tauri_upgrade_test.rs",
+      "test_name": "test_binding_generators_on_stable_versions",
+      "status": "not_run",
+      "note": "Cargo not available - would fail as specta/tauri-specta still on rc versions",
+      "scenario_ids": [3]
+    }
+  ],
+  "summary": {
+    "total_tests_run": 24,
+    "passed": 23,
+    "failed": 1,
+    "skipped": 43,
+    "not_run": 3,
+    "reason_for_failures": "Plugin dependencies still use git/github references instead of stable npm/crates.io versions. Core Tauri dependencies still on beta versions. This is expected in TDD red phase - upgrade not yet implemented."
+  }
+}
