@@ -13,7 +13,7 @@ import { showHomepageAtom } from '../../common/store/homepage'
 import { showSettingsAtom } from '../../common/store/setting'
 import { useSettings } from '../../common/hooks/useSettings'
 import { TranslateMode } from '../../common/translate'
-import { getLocalDB, RecentActivity } from '../../common/internal-services/db'
+import { getLocalDB } from '../../common/internal-services/db'
 
 const engine = new Styletron({
     prefix: `${PREFIX}-styletron-`,
