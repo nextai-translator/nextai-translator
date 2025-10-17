@@ -1,0 +1,1876 @@
+{
+  "project_name": "Add Homepage",
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "Homepage Landing Interface Display",
+      "description": "Verify that the homepage displays correctly as the default/initial view with all required elements",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Launch the application (Tauri desktop or browser extension)",
+          "description": "Open the nextai translator application",
+          "context": "Application should be installed and ready to launch"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify homepage is displayed as default view",
+          "description": "Check that the homepage component renders immediately",
+          "context": "No navigation should be required to see the homepage"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify all homepage elements are present",
+          "description": "Confirm presence of: branding/logo, capabilities description, quick action buttons (translate, polish, summarize), navigation menu (Settings, Vocabulary, About)",
+          "context": "All elements must be visible and accessible"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render HomePage component",
+          "expected": "Component renders with logo, description text, and three quick action buttons",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Check for navigation links",
+          "expected": "Settings, Vocabulary, and About navigation links are present and clickable",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Launch application and wait for initial view",
+          "expected": "Homepage is displayed within 1 second",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Homepage renders without errors",
+          "All UI elements are visible and positioned correctly",
+          "Branding and logo display properly",
+          "Navigation menu is accessible"
+        ],
+        "failures": [
+          "Component fails to render",
+          "Missing UI elements",
+          "Broken navigation links",
+          "Logo or branding assets not found"
+        ],
+        "performance": [
+          "Initial render completes within 1 second",
+          "No blocking operations during render"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 50,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// export const HomePage: React.FC = () => {\n//   return (\n//     <div>\n//       <LogoWithText />\n//       <Description />\n//       <QuickActionButtons />\n//       <NavigationMenu />\n//     </div>\n//   )\n// }",
+                "purpose": "Main homepage component structure"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - component file does not exist yet"
+      },
+      "expectation": "When the user launches the application, they should immediately see a welcoming homepage with clear branding, a brief description of capabilities, quick action buttons for translation/polishing/summarization, and navigation links to settings and vocabulary features.",
+      "prediction": "Currently fails because HomePage.tsx does not exist in src/common/components/. The application will not have a homepage entry point.",
+      "explanation": [
+        "Component file src/common/components/HomePage.tsx needs to be created",
+        "Integration with Tauri app entry point required in src/tauri/",
+        "Integration with browser extension popup required in src/browser-extension/popup/",
+        "BaseUI components and Styletron styling must be used for consistency"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The application shall display a homepage as the default/initial view when opened, featuring: Application branding and logo, Brief description of capabilities, Quick action buttons for translation, polishing, and summarization, Navigation menu or links to other sections (Settings, Vocabulary, About)"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Quick Action Cards - Translation",
+      "description": "Test the translation quick action card functionality from the homepage",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to homepage",
+          "description": "Ensure homepage is loaded and visible",
+          "context": "User is on the homepage view"
+        },
+        {
+          "step_number": 2,
+          "action": "Click 'Translate' quick action button",
+          "description": "Interact with the translation quick action card",
+          "context": "Button should be clearly visible and clickable"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify text input field appears",
+          "description": "Check that a text input field becomes available for entering source text",
+          "context": "Input should be ready to accept text immediately"
+        },
+        {
+          "step_number": 4,
+          "action": "Select target language",
+          "description": "Choose a target language from the language selector",
+          "context": "Language selector should show available languages"
+        },
+        {
+          "step_number": 5,
+          "action": "Enter text and initiate translation",
+          "description": "Type source text and click translate button",
+          "context": "Translation should start without leaving homepage context"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render QuickActionCard component with type='translate'",
+          "expected": "Card displays with translate icon and label",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Click translate quick action card",
+          "expected": "Text input field and language selector appear",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Enter 'Hello' and select 'Spanish' as target language, click translate",
+          "expected": "Translation is initiated and result displays on homepage",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Test quick action card keyboard accessibility",
+          "expected": "Card can be focused and activated using keyboard (Tab, Enter)",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Quick action card is interactive and responds to clicks",
+          "Text input field appears inline on homepage",
+          "Language selector functions correctly",
+          "Translation can be initiated from homepage",
+          "User does not need to navigate away"
+        ],
+        "failures": [
+          "Card is not clickable",
+          "Input field does not appear",
+          "Language selector missing or broken",
+          "Translation requires navigation to separate page",
+          "API errors not handled gracefully"
+        ],
+        "performance": [
+          "Card interaction is smooth (<100ms response)",
+          "Input field appears without delay"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/QuickActionCard.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 40,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// interface QuickActionCardProps {\n//   type: 'translate' | 'polish' | 'summarize'\n//   onAction: (text: string, targetLang: string) => void\n// }\n// export const QuickActionCard: React.FC<QuickActionCardProps> = ({ type, onAction }) => {\n//   // Render card with icon, input, language selector\n// }",
+                "purpose": "Reusable quick action card component"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - QuickActionCard.tsx does not exist"
+      },
+      "expectation": "Regular users should be able to click the Translate quick action button on the homepage, immediately see a text input field and language selector, enter text, and start translation without navigating to a separate page.",
+      "prediction": "Currently fails because QuickActionCard.tsx component does not exist. There is no quick action interface on the homepage.",
+      "explanation": [
+        "Component file src/common/components/QuickActionCard.tsx must be created",
+        "Integration with existing translation service in src/common/translate.ts required",
+        "State management for inline translation needs to be implemented using Jotai",
+        "Language selector should reuse existing language selection components",
+        "Must follow REQ-2 functional requirements from PRD"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage shall provide interactive quick-action cards that: Allow users to immediately start a translation without navigating away, Support text input directly from the homepage, Display target language selection, Launch the respective feature interface (translate/polish/summarize)"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Quick Action Cards - Polish",
+      "description": "Test the text polishing quick action card functionality",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to homepage",
+          "description": "Ensure homepage is loaded",
+          "context": "User is on the homepage view"
+        },
+        {
+          "step_number": 2,
+          "action": "Click 'Polish' quick action button",
+          "description": "Interact with the polish quick action card",
+          "context": "Button should be visible alongside translate and summarize"
+        },
+        {
+          "step_number": 3,
+          "action": "Enter text to be polished",
+          "description": "Input text that needs polishing/improvement",
+          "context": "Text input should accept multi-line text"
+        },
+        {
+          "step_number": 4,
+          "action": "Initiate polishing action",
+          "description": "Click the polish button to start text improvement",
+          "context": "Should work with existing polishing service"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render QuickActionCard component with type='polish'",
+          "expected": "Card displays with polish icon and label",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Click polish quick action card",
+          "expected": "Text input field appears for polishing",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Enter 'me go store buy thing' and click polish",
+          "expected": "Polishing operation is initiated",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Polish quick action card is functional",
+          "Text input field appears for polishing",
+          "Polishing can be initiated from homepage"
+        ],
+        "failures": [
+          "Card does not respond to interaction",
+          "Input field missing",
+          "Polishing service not connected"
+        ],
+        "performance": [
+          "Card responds immediately to clicks",
+          "Input field appears without delay"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/QuickActionCard.tsx",
+            "snippets": [
+              {
+                "start_line": 50,
+                "end_line": 80,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Polish action variant of QuickActionCard",
+                "purpose": "Polish-specific quick action handling"
+              }
+            ]
+          }
+        ],
+        "notes": "Shares implementation with QuickActionCard but with polish-specific behavior"
+      },
+      "expectation": "Users should be able to click the Polish quick action button and immediately enter text to be improved without navigating away from the homepage.",
+      "prediction": "Currently fails because the QuickActionCard component does not exist and cannot handle polish actions.",
+      "explanation": [
+        "QuickActionCard must support 'polish' type alongside 'translate'",
+        "Integration with existing polishing/action manager required",
+        "Should reuse existing action execution logic from ActionManager.tsx"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage shall provide interactive quick-action cards that: Allow users to immediately start a translation without navigating away, Support text input directly from the homepage, Display target language selection, Launch the respective feature interface (translate/polish/summarize)"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Quick Action Cards - Summarize",
+      "description": "Test the summarization quick action card functionality",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to homepage",
+          "description": "Ensure homepage is loaded",
+          "context": "User is on the homepage view"
+        },
+        {
+          "step_number": 2,
+          "action": "Click 'Summarize' quick action button",
+          "description": "Interact with the summarize quick action card",
+          "context": "Button should be visible as third quick action"
+        },
+        {
+          "step_number": 3,
+          "action": "Enter text to be summarized",
+          "description": "Input longer text that needs summarization",
+          "context": "Should accept large text blocks"
+        },
+        {
+          "step_number": 4,
+          "action": "Initiate summarization",
+          "description": "Click summarize button",
+          "context": "Should work with existing summarization service"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render QuickActionCard component with type='summarize'",
+          "expected": "Card displays with summarize icon and label",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Click summarize quick action card",
+          "expected": "Text input field appears for summarization",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Enter long text and click summarize",
+          "expected": "Summarization operation is initiated",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Summarize quick action card is functional",
+          "Text input field appears",
+          "Summarization can be initiated from homepage"
+        ],
+        "failures": [
+          "Card does not respond",
+          "Input field missing",
+          "Summarization service not connected"
+        ],
+        "performance": [
+          "Card responds immediately",
+          "Large text input is handled smoothly"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/QuickActionCard.tsx",
+            "snippets": [
+              {
+                "start_line": 90,
+                "end_line": 120,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Summarize action variant of QuickActionCard",
+                "purpose": "Summarize-specific quick action handling"
+              }
+            ]
+          }
+        ],
+        "notes": "Shares implementation with QuickActionCard but with summarize-specific behavior"
+      },
+      "expectation": "Users should be able to click the Summarize quick action button and immediately enter text to be summarized without leaving the homepage.",
+      "prediction": "Currently fails because the QuickActionCard component does not exist and cannot handle summarize actions.",
+      "explanation": [
+        "QuickActionCard must support 'summarize' type",
+        "Integration with existing summarization service required",
+        "Should handle longer text inputs efficiently"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage shall provide interactive quick-action cards that: Allow users to immediately start a translation without navigating away, Support text input directly from the homepage, Display target language selection, Launch the respective feature interface (translate/polish/summarize)"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Recent Activity Section Display",
+      "description": "Verify recent translation history display on homepage",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Complete 3-5 translation/polishing/summarization operations",
+          "description": "Perform several operations to populate history",
+          "context": "User has previous activity in the system"
+        },
+        {
+          "step_number": 2,
+          "action": "Navigate to homepage",
+          "description": "Return to or refresh homepage",
+          "context": "Recent activity data should be persisted"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify recent activity section displays",
+          "description": "Check that recent activity list shows last 3-5 items",
+          "context": "Section should be visible below quick actions"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify activity details",
+          "description": "Confirm each item shows source/target language and preview text",
+          "context": "Information should be clearly readable"
+        },
+        {
+          "step_number": 5,
+          "action": "Click on a recent activity item",
+          "description": "Interact with a history item",
+          "context": "Should navigate to full details or re-translate"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render RecentActivityList component with 5 mock history items",
+          "expected": "List displays with all 5 items showing language pairs and text preview",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Render RecentActivityList with empty history",
+          "expected": "Component displays 'No recent activity' message or is hidden",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Click on a recent activity item",
+          "expected": "Navigation to full details or re-execution of action",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Verify recent activity persists across app restarts",
+          "expected": "History is loaded from storage on app launch",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Recent activity section displays on homepage",
+          "Last 3-5 activities are shown",
+          "Each item shows language pair and text preview",
+          "Items are clickable for full details",
+          "History persists across sessions"
+        ],
+        "failures": [
+          "Recent activity section missing",
+          "No history items displayed",
+          "Incomplete item information",
+          "Click handlers not working",
+          "History not persisted"
+        ],
+        "performance": [
+          "History loads without blocking initial render",
+          "List rendering is performant even with many items"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/RecentActivityList.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 60,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// interface ActivityItem {\n//   id: string\n//   type: 'translate' | 'polish' | 'summarize'\n//   sourceText: string\n//   resultText: string\n//   sourceLang?: string\n//   targetLang?: string\n//   timestamp: number\n// }\n// export const RecentActivityList: React.FC = () => {\n//   const activities = useRecentActivities(5)\n//   return (\n//     <div>\n//       {activities.map(activity => (\n//         <ActivityItem key={activity.id} {...activity} />\n//       ))}\n//     </div>\n//   )\n// }",
+                "purpose": "Component for displaying recent translation history"
+              }
+            ]
+          }
+        ],
+        "notes": "Implementation pending - needs storage integration and activity tracking"
+      },
+      "expectation": "Regular users who have performed translations should see their last 3-5 activities displayed on the homepage, with each showing source/target languages and text previews, allowing quick access to previous work.",
+      "prediction": "Currently fails because RecentActivityList.tsx does not exist and there is no activity tracking/storage system integrated with the homepage.",
+      "explanation": [
+        "Component file src/common/components/RecentActivityList.tsx must be created",
+        "Activity tracking system needs to be implemented to capture translation/polish/summarize operations",
+        "Storage integration required using Dexie (browser) or Tauri storage (desktop)",
+        "Jotai atoms or Zustand store needed for state management",
+        "Lazy loading implementation to prevent blocking initial render (NFR-1)"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage shall optionally display recent translation history: Show last 3-5 translation/polishing/summarization activities, Display source and target language, Allow clicking to view full details or re-translate, Include option to clear history"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Recent Activity - Clear History",
+      "description": "Test the clear history functionality in recent activity section",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to homepage with existing history",
+          "description": "Ensure recent activity section has items",
+          "context": "User has translation history"
+        },
+        {
+          "step_number": 2,
+          "action": "Locate 'Clear History' button or option",
+          "description": "Find the clear history control",
+          "context": "Should be clearly visible near recent activity"
+        },
+        {
+          "step_number": 3,
+          "action": "Click clear history",
+          "description": "Execute clear history action",
+          "context": "May show confirmation dialog"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify history is cleared",
+          "description": "Check that recent activity section is now empty",
+          "context": "Changes should be persisted"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Click clear history button with 5 items in history",
+          "expected": "History is cleared and section shows empty state",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Verify clear history persists after app restart",
+          "expected": "History remains cleared after relaunching app",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Click clear history with empty history",
+          "expected": "No error occurs, button may be disabled",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Clear history button is available",
+          "Clicking clears all history items",
+          "Empty state is displayed after clearing",
+          "Clear action persists to storage"
+        ],
+        "failures": [
+          "Clear button missing or not functional",
+          "History not actually cleared from storage",
+          "Errors during clear operation"
+        ],
+        "performance": [
+          "Clear operation completes quickly",
+          "No UI lag during clearing"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/RecentActivityList.tsx",
+            "snippets": [
+              {
+                "start_line": 70,
+                "end_line": 90,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const handleClearHistory = async () => {\n//   await clearActivityHistory()\n//   setActivities([])\n// }",
+                "purpose": "Clear history handler"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires storage API integration for clearing persisted history"
+      },
+      "expectation": "Users should be able to clear their recent activity history with a single click, and the history should remain cleared even after restarting the application.",
+      "prediction": "Currently fails because RecentActivityList component and associated storage/clear functionality do not exist.",
+      "explanation": [
+        "Clear history button needs to be added to RecentActivityList component",
+        "Storage clear operation must be implemented for both browser (Dexie) and desktop (Tauri)",
+        "State management needs to reflect cleared history immediately",
+        "Optional confirmation dialog may be needed for user experience"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage shall optionally display recent translation history: Show last 3-5 translation/polishing/summarization activities, Display source and target language, Allow clicking to view full details or re-translate, Include option to clear history"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Settings Navigation from Homepage",
+      "description": "Test navigation to settings from homepage",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to homepage",
+          "description": "Ensure homepage is loaded",
+          "context": "User is on homepage view"
+        },
+        {
+          "step_number": 2,
+          "action": "Locate Settings navigation link/button",
+          "description": "Find the settings access point",
+          "context": "Should be clearly labeled and visible"
+        },
+        {
+          "step_number": 3,
+          "action": "Click Settings link",
+          "description": "Navigate to settings interface",
+          "context": "Should transition to settings view"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify settings interface loads",
+          "description": "Confirm settings page displays",
+          "context": "Should show API keys, language prefs, LLM providers, themes"
+        },
+        {
+          "step_number": 5,
+          "action": "Return to homepage",
+          "description": "Navigate back to homepage",
+          "context": "Back navigation should be available"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render HomePage with settings navigation link",
+          "expected": "Settings link is visible and properly labeled",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Click settings link from homepage",
+          "expected": "Navigation occurs to settings view",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Navigate to settings and back to homepage",
+          "expected": "Round-trip navigation works without errors",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Test keyboard navigation to settings link",
+          "expected": "Can Tab to settings link and activate with Enter",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Settings navigation link is visible on homepage",
+          "Link is clearly labeled",
+          "Clicking navigates to settings",
+          "Settings interface loads correctly",
+          "Back navigation to homepage works"
+        ],
+        "failures": [
+          "Settings link missing or hidden",
+          "Link not clickable",
+          "Navigation does not occur",
+          "Settings page fails to load",
+          "Cannot return to homepage"
+        ],
+        "performance": [
+          "Navigation is smooth with no delay",
+          "Settings page loads quickly"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 60,
+                "end_line": 80,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// <NavigationMenu>\n//   <NavLink to=\"/settings\">Settings</NavLink>\n//   <NavLink to=\"/vocabulary\">Vocabulary</NavLink>\n//   <NavLink to=\"/about\">About</NavLink>\n// </NavigationMenu>",
+                "purpose": "Navigation menu with settings link"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires routing integration with existing settings component"
+      },
+      "expectation": "Power users should be able to quickly access settings from the homepage by clicking a clearly labeled settings link, and should be able to return to the homepage easily.",
+      "prediction": "Currently fails because HomePage component does not exist and therefore has no settings navigation link.",
+      "explanation": [
+        "HomePage component needs navigation menu with settings link",
+        "Routing logic must be implemented to navigate between homepage and settings",
+        "Integration with existing Settings.tsx component at src/common/components/Settings.tsx",
+        "Both Tauri and browser extension routing must be handled"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage shall provide clear navigation to: API key configuration, Language preferences, LLM provider selection, Theme and UI customization"
+      }
+    },
+    {
+      "id": 8,
+      "name": "Vocabulary Navigation from Homepage",
+      "description": "Test navigation to vocabulary features from homepage",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to homepage",
+          "description": "Ensure homepage is loaded",
+          "context": "User is on homepage view"
+        },
+        {
+          "step_number": 2,
+          "action": "Locate Vocabulary navigation link",
+          "description": "Find the vocabulary access point",
+          "context": "Should be in navigation menu"
+        },
+        {
+          "step_number": 3,
+          "action": "Click Vocabulary link",
+          "description": "Navigate to vocabulary interface",
+          "context": "Should transition to vocabulary view"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify vocabulary interface loads",
+          "description": "Confirm vocabulary management page displays",
+          "context": "Should show saved vocabulary items"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render HomePage with vocabulary navigation link",
+          "expected": "Vocabulary link is visible and properly labeled",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Click vocabulary link from homepage",
+          "expected": "Navigation occurs to vocabulary view",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Navigate to vocabulary and verify existing Vocabulary component loads",
+          "expected": "Vocabulary.tsx component renders successfully",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Vocabulary navigation link is visible",
+          "Link is clearly labeled",
+          "Clicking navigates to vocabulary",
+          "Vocabulary interface loads correctly"
+        ],
+        "failures": [
+          "Vocabulary link missing",
+          "Link not functional",
+          "Navigation fails",
+          "Vocabulary page does not load"
+        ],
+        "performance": [
+          "Navigation is smooth",
+          "Vocabulary page loads quickly"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 85,
+                "end_line": 95,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// <NavLink to=\"/vocabulary\">Vocabulary</NavLink>",
+                "purpose": "Navigation link to vocabulary"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires routing integration with existing Vocabulary.tsx component"
+      },
+      "expectation": "Users should be able to navigate from the homepage to the vocabulary management interface by clicking a vocabulary link in the navigation menu.",
+      "prediction": "Currently fails because HomePage component does not exist and cannot provide vocabulary navigation.",
+      "explanation": [
+        "HomePage navigation menu needs vocabulary link",
+        "Routing to existing Vocabulary.tsx component required",
+        "Must work consistently across Tauri and browser extension platforms"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage shall provide clear navigation to: API key configuration, Language preferences, LLM provider selection, Theme and UI customization"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Multi-Platform Support - Tauri Desktop",
+      "description": "Verify homepage works correctly in Tauri desktop application",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Build and launch Tauri desktop app",
+          "description": "Start the application in desktop mode",
+          "context": "Testing on Windows, macOS, or Linux"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify homepage displays as default view",
+          "description": "Confirm homepage is the initial view",
+          "context": "Desktop window should open showing homepage"
+        },
+        {
+          "step_number": 3,
+          "action": "Test all homepage features in desktop mode",
+          "description": "Verify quick actions, navigation, recent activity all work",
+          "context": "All features should function identically to browser version"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Launch Tauri desktop app",
+          "expected": "Homepage displays as initial view",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Test quick action cards in Tauri app",
+          "expected": "All quick actions function correctly",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Test recent activity with Tauri storage backend",
+          "expected": "History persists using Tauri storage mechanisms",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Homepage displays correctly in Tauri app",
+          "All UI elements render properly",
+          "Quick actions work as expected",
+          "Navigation functions correctly",
+          "Storage integration works with Tauri backend"
+        ],
+        "failures": [
+          "Homepage does not load in Tauri",
+          "UI elements missing or broken",
+          "Features not functional",
+          "Storage integration fails"
+        ],
+        "performance": [
+          "Desktop app launches and shows homepage within 1 second",
+          "No performance degradation compared to browser"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/tauri/App.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 30,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { HomePage } from '@/common/components/HomePage'\n// \n// function App() {\n//   return (\n//     <Router>\n//       <Route path=\"/\" element={<HomePage />} />\n//       <Route path=\"/settings\" element={<Settings />} />\n//       {/* other routes */}\n//     </Router>\n//   )\n// }",
+                "purpose": "Tauri app integration with homepage routing"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires integration at Tauri app entry point"
+      },
+      "expectation": "Users running the Tauri desktop application should see and interact with the homepage identically to the browser extension version.",
+      "prediction": "Currently fails because HomePage component is not implemented and not integrated into the Tauri app entry point.",
+      "explanation": [
+        "HomePage component must be created in shared layer (src/common/components/)",
+        "Integration required in src/tauri/App.tsx or relevant routing file",
+        "Tauri storage mechanisms must be used for recent activity persistence",
+        "Must work across Windows, macOS, and Linux platforms"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage implementation shall work consistently across: Tauri desktop application (Windows, macOS, Linux), Browser extensions (Chrome, Firefox)"
+      }
+    },
+    {
+      "id": 10,
+      "name": "Multi-Platform Support - Browser Extension",
+      "description": "Verify homepage works correctly in browser extensions (Chrome, Firefox)",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Install browser extension",
+          "description": "Install in Chrome or Firefox",
+          "context": "Testing browser extension version"
+        },
+        {
+          "step_number": 2,
+          "action": "Open extension popup or dedicated tab",
+          "description": "Access the extension interface",
+          "context": "Homepage should display"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify homepage displays",
+          "description": "Confirm homepage is shown in extension",
+          "context": "Should match desktop appearance"
+        },
+        {
+          "step_number": 4,
+          "action": "Test all homepage features in browser",
+          "description": "Verify quick actions, navigation work in extension",
+          "context": "All features should function correctly"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Open browser extension popup",
+          "expected": "Homepage displays in popup or opens in tab",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Test quick action cards in browser extension",
+          "expected": "All quick actions function correctly",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Test recent activity with Chrome storage API",
+          "expected": "History persists using browser storage",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Test in both Chrome and Firefox",
+          "expected": "Homepage works identically in both browsers",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Homepage displays in browser extension",
+          "UI adapts to popup or tab context",
+          "All features work correctly",
+          "Storage uses browser APIs (Chrome storage, IndexedDB)",
+          "Works in both Chrome and Firefox"
+        ],
+        "failures": [
+          "Homepage does not display in extension",
+          "UI broken in popup context",
+          "Features not functional",
+          "Storage integration fails",
+          "Cross-browser compatibility issues"
+        ],
+        "performance": [
+          "Extension popup opens and shows homepage quickly",
+          "No performance issues in browser context"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/browser-extension/popup/index.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 25,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { HomePage } from '@/common/components/HomePage'\n// \n// function Popup() {\n//   return <HomePage />\n// }",
+                "purpose": "Browser extension popup integration"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires integration in browser extension popup entry point"
+      },
+      "expectation": "Users running the browser extension should see the homepage when opening the extension popup or dedicated tab, with all features working identically to the desktop version.",
+      "prediction": "Currently fails because HomePage component is not implemented and not integrated into the browser extension popup.",
+      "explanation": [
+        "HomePage component must be integrated into src/browser-extension/popup/index.tsx",
+        "Browser storage APIs (Chrome storage, Dexie) must be used for persistence",
+        "Must work in both Chrome and Firefox with appropriate polyfills",
+        "UI may need adjustments for popup size constraints"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage implementation shall work consistently across: Tauri desktop application (Windows, macOS, Linux), Browser extensions (Chrome, Firefox)"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Responsive Design - Various Window Sizes",
+      "description": "Test homepage responsiveness across different window sizes",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Open application at 800x600 resolution",
+          "description": "Test minimum supported window size",
+          "context": "Minimum resolution per NFR-6"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify all elements are visible and usable",
+          "description": "Check that nothing is cut off or unusable",
+          "context": "UI should adapt gracefully"
+        },
+        {
+          "step_number": 3,
+          "action": "Test at 1920x1080 resolution",
+          "description": "Test at larger, common desktop resolution",
+          "context": "Should make good use of space"
+        },
+        {
+          "step_number": 4,
+          "action": "Resize window dynamically",
+          "description": "Drag window edges to resize",
+          "context": "UI should adapt smoothly"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render HomePage with viewport width 800px",
+          "expected": "All elements fit and are usable",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Render HomePage with viewport width 1920px",
+          "expected": "Layout scales appropriately, no excessive whitespace",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Dynamically resize window from 800px to 1920px",
+          "expected": "Layout adapts smoothly without breaking",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Test on mobile viewport (if applicable)",
+          "expected": "Mobile-friendly layout or graceful degradation",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Homepage is fully usable at 800x600",
+          "Layout adapts to larger resolutions",
+          "Dynamic resizing works smoothly",
+          "No horizontal scrolling required",
+          "All interactive elements remain accessible"
+        ],
+        "failures": [
+          "Elements cut off at small sizes",
+          "Layout breaks at certain sizes",
+          "Horizontal scrolling required",
+          "Interactive elements become inaccessible",
+          "Poor use of space at large sizes"
+        ],
+        "performance": [
+          "Resize operations are smooth",
+          "No layout thrashing during resize"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 100,
+                "end_line": 130,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const styles = {\n//   container: {\n//     display: 'flex',\n//     flexDirection: 'column',\n//     minWidth: '800px',\n//     '@media (max-width: 1024px)': {\n//       // Responsive adjustments\n//     }\n//   }\n// }",
+                "purpose": "Responsive layout styling with Styletron"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires responsive CSS/Styletron implementation"
+      },
+      "expectation": "The homepage interface should adapt to different window sizes, maintaining usability at the minimum 800x600 resolution and making good use of space at larger resolutions.",
+      "prediction": "Currently fails because HomePage component does not exist and has no responsive layout implementation.",
+      "explanation": [
+        "HomePage must be implemented with responsive layout using Styletron",
+        "Media queries or flexible layouts needed for different viewport sizes",
+        "BaseUI components should provide some responsive behavior out of the box",
+        "Testing required across multiple resolutions and aspect ratios"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage interface shall: Adapt to different window sizes, Maintain usability on smaller screens (min 800x600), Follow existing BaseUI styling patterns"
+      }
+    },
+    {
+      "id": 12,
+      "name": "Performance - Homepage Load Time",
+      "description": "Verify homepage loads within 1 second performance requirement",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Launch application with performance monitoring",
+          "description": "Start app with timing measurements",
+          "context": "Cold start scenario"
+        },
+        {
+          "step_number": 2,
+          "action": "Measure time to homepage display",
+          "description": "Record time from launch to homepage visible",
+          "context": "Must be under 1 second per NFR-1"
+        },
+        {
+          "step_number": 3,
+          "action": "Test with recent activity present",
+          "description": "Measure load time with history data",
+          "context": "History should lazy load to not block render"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Measure HomePage component render time",
+          "expected": "Component renders in under 100ms",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Measure full app load to homepage display",
+          "expected": "Total time from launch to homepage visible is under 1 second",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Load homepage with 50 recent activity items",
+          "expected": "Recent activity lazy loads, does not block initial render",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Test homepage load on low-end hardware simulation",
+          "expected": "Still loads within acceptable time (1.5s max)",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Homepage displays within 1 second",
+          "No blocking operations during render",
+          "Recent activity lazy loads",
+          "Smooth, responsive UI immediately",
+          "Performance budget maintained"
+        ],
+        "failures": [
+          "Load time exceeds 1 second",
+          "Blocking operations delay render",
+          "Recent activity blocks initial display",
+          "Sluggish or unresponsive initial UI"
+        ],
+        "performance": [
+          "Initial render under 1 second (must)",
+          "Component render under 100ms (target)",
+          "Lazy loading implemented for heavy operations"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 140,
+                "end_line": 160,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const HomePage: React.FC = () => {\n//   // Lazy load recent activity\n//   const activities = useDeferredValue(useRecentActivities())\n//   \n//   return (\n//     <Suspense fallback={<Spinner />}>\n//       <HomePageContent />\n//       <RecentActivityList activities={activities} />\n//     </Suspense>\n//   )\n// }",
+                "purpose": "Performance optimization with lazy loading"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires React Suspense, lazy loading, and memoization"
+      },
+      "expectation": "The homepage must load and display within 1 second on standard hardware, with no blocking operations during initial render, and heavy operations like recent activity loading should be lazy loaded.",
+      "prediction": "Currently fails because HomePage component does not exist and performance optimizations are not implemented.",
+      "explanation": [
+        "HomePage implementation must use React.lazy() or code splitting",
+        "Recent activity must use lazy loading to avoid blocking render",
+        "Memoization needed for expensive components (React.memo, useMemo)",
+        "Performance testing required to validate 1 second budget",
+        "May need to preload critical assets during app startup"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Homepage must load within 1 second on standard hardware, Smooth transitions between homepage and feature views, No blocking operations during initial render"
+      }
+    },
+    {
+      "id": 13,
+      "name": "Accessibility - Keyboard Navigation",
+      "description": "Verify homepage supports full keyboard navigation",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Open homepage",
+          "description": "Load homepage in application",
+          "context": "Testing keyboard-only interaction"
+        },
+        {
+          "step_number": 2,
+          "action": "Use Tab key to navigate through elements",
+          "description": "Tab through all interactive elements",
+          "context": "All buttons, links, inputs should be tabbable"
+        },
+        {
+          "step_number": 3,
+          "action": "Activate elements with Enter/Space",
+          "description": "Test keyboard activation of buttons and links",
+          "context": "Should work without mouse"
+        },
+        {
+          "step_number": 4,
+          "action": "Test Escape key for closing/canceling",
+          "description": "Verify Escape key handling",
+          "context": "Should close modals or cancel actions"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Navigate homepage using only Tab key",
+          "expected": "All interactive elements are reachable and have visible focus indicators",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Activate quick action card using Enter key",
+          "expected": "Card activates and shows input field",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Navigate to and activate settings link with keyboard",
+          "expected": "Navigation occurs using only keyboard",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Test screen reader announces for all elements",
+          "expected": "ARIA labels and semantic HTML provide clear announcements",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All interactive elements keyboard accessible",
+          "Visible focus indicators on all focusable elements",
+          "Logical tab order",
+          "Enter/Space activate buttons and links",
+          "Escape key handling where appropriate"
+        ],
+        "failures": [
+          "Elements not reachable via keyboard",
+          "Missing or unclear focus indicators",
+          "Illogical tab order",
+          "Keyboard activation not working",
+          "Keyboard traps"
+        ],
+        "performance": [
+          "Keyboard navigation is responsive",
+          "No lag when tabbing between elements"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 170,
+                "end_line": 190,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// <button\n//   aria-label=\"Translate text\"\n//   tabIndex={0}\n//   onKeyDown={(e) => {\n//     if (e.key === 'Enter' || e.key === ' ') {\n//       handleTranslate()\n//     }\n//   }}\n// >\n//   Translate\n// </button>",
+                "purpose": "Keyboard accessibility implementation"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires ARIA attributes, proper tabIndex, keyboard event handlers"
+      },
+      "expectation": "Users should be able to navigate and interact with all homepage features using only the keyboard, with clear focus indicators and logical tab order meeting WCAG 2.1 AA standards.",
+      "prediction": "Currently fails because HomePage component does not exist and keyboard accessibility features are not implemented.",
+      "explanation": [
+        "All interactive elements need proper tabIndex and focus management",
+        "ARIA labels and roles required for screen reader support",
+        "Keyboard event handlers needed for Enter/Space activation",
+        "Focus indicators must be visible and clear",
+        "Tab order must be logical and predictable"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Support keyboard navigation for all interactive elements, Maintain WCAG 2.1 AA compliance for text contrast and sizing, Screen reader compatibility for key navigation elements"
+      }
+    },
+    {
+      "id": 14,
+      "name": "Internationalization - Homepage Text",
+      "description": "Verify all homepage text is internationalized using i18next",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Open homepage with default language",
+          "description": "Load homepage with system language",
+          "context": "Should show text in user's language"
+        },
+        {
+          "step_number": 2,
+          "action": "Change language in settings",
+          "description": "Switch to a different language (e.g., Spanish, Chinese)",
+          "context": "Testing language switching"
+        },
+        {
+          "step_number": 3,
+          "action": "Return to homepage",
+          "description": "Verify homepage text updates to new language",
+          "context": "All text should be translated"
+        },
+        {
+          "step_number": 4,
+          "action": "Test multiple languages",
+          "description": "Cycle through several languages",
+          "context": "Should support all 55+ languages"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render HomePage with language set to 'en'",
+          "expected": "All text displays in English",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Render HomePage with language set to 'es'",
+          "expected": "All text displays in Spanish",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Change language from English to Chinese and reload homepage",
+          "expected": "All homepage text updates to Chinese",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Check for hardcoded strings in HomePage component",
+          "expected": "No hardcoded user-facing strings, all use i18next",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All homepage text is internationalized",
+          "Language switching works correctly",
+          "Translations load for all supported languages",
+          "No hardcoded strings visible to users",
+          "Layout adapts to text length variations"
+        ],
+        "failures": [
+          "Hardcoded English strings present",
+          "Missing translations for some languages",
+          "Language switching does not update homepage",
+          "Layout breaks with long translations",
+          "Translation keys displayed instead of text"
+        ],
+        "performance": [
+          "Language switching is instant",
+          "Translation loading does not block UI"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 200,
+                "end_line": 220,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { useTranslation } from 'react-i18next'\n// \n// const HomePage: React.FC = () => {\n//   const { t } = useTranslation()\n//   \n//   return (\n//     <div>\n//       <h1>{t('homepage.title')}</h1>\n//       <p>{t('homepage.description')}</p>\n//       <button>{t('homepage.actions.translate')}</button>\n//     </div>\n//   )\n// }",
+                "purpose": "i18next integration for internationalization"
+              }
+            ]
+          },
+          {
+            "file_path": "src/common/i18n/locales/en.json",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 15,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// {\n//   \"homepage\": {\n//     \"title\": \"Welcome to NextAI Translator\",\n//     \"description\": \"Translate, polish, and summarize text with AI\",\n//     \"actions\": {\n//       \"translate\": \"Translate\",\n//       \"polish\": \"Polish\",\n//       \"summarize\": \"Summarize\"\n//     }\n//   }\n// }",
+                "purpose": "Translation strings for English"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires translation files for all 55+ supported languages"
+      },
+      "expectation": "All homepage text should be internationalized using the existing i18next framework, supporting all 55+ languages available in the application, with no hardcoded strings.",
+      "prediction": "Currently fails because HomePage component does not exist and has no i18next integration or translation strings defined.",
+      "explanation": [
+        "HomePage must use useTranslation() hook from react-i18next",
+        "Translation keys must be added to all language files in src/common/i18n/locales/",
+        "No hardcoded user-facing strings allowed",
+        "Layout must handle varying text lengths across languages",
+        "All 55+ languages must have translations added"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "All homepage text must be internationalized using existing i18next framework, Support all 55+ languages currently available in the application"
+      }
+    },
+    {
+      "id": 15,
+      "name": "State Management - Navigation State Persistence",
+      "description": "Verify homepage state is maintained when navigating between views",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Open homepage and expand a quick action card",
+          "description": "Enter text in a quick action input field",
+          "context": "User has partially completed an action"
+        },
+        {
+          "step_number": 2,
+          "action": "Navigate to settings",
+          "description": "Click settings link",
+          "context": "Navigate away from homepage"
+        },
+        {
+          "step_number": 3,
+          "action": "Return to homepage",
+          "description": "Navigate back to homepage",
+          "context": "Testing state persistence"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify quick action card state",
+          "description": "Check if previously entered text is still present",
+          "context": "State should be preserved or appropriately reset"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Enter text in translate quick action, navigate away, return",
+          "expected": "State is either preserved or cleanly reset based on UX decision",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Test user preferences (show/hide recent activity) persistence",
+          "expected": "Preferences saved and restored on app restart",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Change default language on homepage, navigate away, return",
+          "expected": "Default language preference is maintained",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "State management integrated with Jotai/Zustand",
+          "User preferences persist across sessions",
+          "Navigation state is consistent",
+          "No state leaks or memory issues"
+        ],
+        "failures": [
+          "State lost on navigation",
+          "Preferences not persisted",
+          "State conflicts between views",
+          "Memory leaks from state management"
+        ],
+        "performance": [
+          "State updates are immediate",
+          "No lag when navigating between views"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/stores/homepageStore.ts",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 30,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { atom } from 'jotai'\n// import { atomWithStorage } from 'jotai/utils'\n// \n// export const showRecentActivityAtom = atomWithStorage(\n//   'homepage.showRecentActivity',\n//   true\n// )\n// \n// export const defaultTargetLanguageAtom = atomWithStorage(\n//   'homepage.defaultTargetLanguage',\n//   'en'\n// )",
+                "purpose": "Jotai atoms for homepage state management"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires Jotai atoms with storage persistence"
+      },
+      "expectation": "User preferences such as default language and show/hide recent activity should persist across sessions, and navigation state should be maintained when moving between homepage and other views.",
+      "prediction": "Currently fails because no homepage state management implementation exists.",
+      "explanation": [
+        "Jotai atoms need to be created for homepage state (e.g., showRecentActivityAtom)",
+        "atomWithStorage from jotai/utils should be used for persistence",
+        "Integration with existing state management patterns required",
+        "State should persist to appropriate storage (Tauri or browser)",
+        "Navigation state should be properly managed during view transitions"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Integrate with existing Jotai/Zustand state management, Persist user preferences (e.g., default language, show/hide recent activity), Maintain state when navigating between homepage and other views"
+      }
+    },
+    {
+      "id": 16,
+      "name": "UI Consistency - BaseUI Styling",
+      "description": "Verify homepage follows existing design patterns with BaseUI and Styletron",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Open homepage",
+          "description": "Load homepage interface",
+          "context": "Visual design consistency check"
+        },
+        {
+          "step_number": 2,
+          "action": "Compare with Settings component styling",
+          "description": "Verify visual consistency with existing views",
+          "context": "Should use same color scheme, typography, spacing"
+        },
+        {
+          "step_number": 3,
+          "action": "Test theme switching (light/dark mode)",
+          "description": "Switch between themes and verify homepage adapts",
+          "context": "Should support existing theme system"
+        },
+        {
+          "step_number": 4,
+          "action": "Inspect component usage",
+          "description": "Verify BaseUI components are used (not custom recreations)",
+          "context": "Should use Card, Button, Input from BaseUI"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Render HomePage and check for BaseUI components",
+          "expected": "Uses BaseUI Card, Button, Input, etc.",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Compare HomePage styles with Settings component",
+          "expected": "Consistent color scheme, typography, spacing",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Switch theme from light to dark mode",
+          "expected": "HomePage adapts to theme without visual issues",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Check for Styletron usage in HomePage",
+          "expected": "Styling uses Styletron, not plain CSS",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "BaseUI components used consistently",
+          "Styletron used for all styling",
+          "Visual consistency with existing views",
+          "Theme switching works correctly",
+          "No custom component duplicates"
+        ],
+        "failures": [
+          "Custom components instead of BaseUI",
+          "Plain CSS or inline styles used",
+          "Visual inconsistency with other views",
+          "Theme switching broken",
+          "Color scheme does not match"
+        ],
+        "performance": [
+          "Styletron styling is performant",
+          "No style recalculation issues"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 230,
+                "end_line": 260,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { Card, Button, Input } from 'baseui-sd'\n// import { useStyletron } from 'styletron-react'\n// \n// const HomePage: React.FC = () => {\n//   const [css, theme] = useStyletron()\n//   \n//   return (\n//     <div className={css({\n//       backgroundColor: theme.colors.backgroundPrimary,\n//       padding: theme.sizing.scale600\n//     })}>\n//       <Card>\n//         <Button>Translate</Button>\n//       </Card>\n//     </div>\n//   )\n// }",
+                "purpose": "BaseUI and Styletron usage for consistent styling"
+              }
+            ]
+          }
+        ],
+        "notes": "Must follow existing design system patterns"
+      },
+      "expectation": "The homepage should follow existing design patterns using BaseUI components and Styletron styling, maintaining visual consistency with Settings and Translator windows, supporting the existing theme system.",
+      "prediction": "Currently fails because HomePage component does not exist and cannot use BaseUI/Styletron.",
+      "explanation": [
+        "HomePage must import and use BaseUI components (Card, Button, Input, etc.)",
+        "Styletron useStyletron hook must be used for all styling",
+        "Theme values must be referenced from Styletron theme object",
+        "Visual design should match Settings.tsx and Translator.tsx patterns",
+        "Light/dark theme support required"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Follow existing design patterns from BaseUI + Styletron, Maintain visual consistency with existing Settings and Translator windows, Use existing color schemes and typography"
+      }
+    },
+    {
+      "id": 17,
+      "name": "Error Handling - Quick Action Failures",
+      "description": "Test error handling when quick actions fail",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Open homepage and access translate quick action",
+          "description": "Prepare to test translation",
+          "context": "Testing error scenarios"
+        },
+        {
+          "step_number": 2,
+          "action": "Simulate API failure (no API key or network error)",
+          "description": "Trigger translation with invalid configuration",
+          "context": "Should handle error gracefully"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify error message displays",
+          "description": "Check that user sees clear error feedback",
+          "context": "Should not crash or hang"
+        },
+        {
+          "step_number": 4,
+          "action": "Test recovery",
+          "description": "Fix configuration and retry operation",
+          "context": "Should allow retry without refresh"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Attempt translation with no API key configured",
+          "expected": "Clear error message displayed, guidance to configure API key",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Attempt translation with network error",
+          "expected": "Network error message displayed, retry option available",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Attempt polishing with invalid LLM provider",
+          "expected": "Configuration error message, guidance to settings",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Submit empty text to quick action",
+          "expected": "Validation error, input highlighted",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Errors handled gracefully without crashes",
+          "Clear error messages displayed",
+          "Guidance provided for fixing issues",
+          "Retry mechanisms available",
+          "UI remains functional after errors"
+        ],
+        "failures": [
+          "Application crashes on error",
+          "No error feedback to user",
+          "Cryptic error messages",
+          "Cannot retry after error",
+          "UI becomes unresponsive"
+        ],
+        "performance": [
+          "Error handling is fast",
+          "No hanging or freezing on errors"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/QuickActionCard.tsx",
+            "snippets": [
+              {
+                "start_line": 130,
+                "end_line": 160,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const handleAction = async () => {\n//   try {\n//     await executeAction(text, targetLang)\n//   } catch (error) {\n//     if (error.code === 'NO_API_KEY') {\n//       showError(t('errors.noApiKey'), {\n//         action: () => navigate('/settings')\n//       })\n//     } else if (error.code === 'NETWORK_ERROR') {\n//       showError(t('errors.networkError'), {\n//         action: () => handleRetry()\n//       })\n//     }\n//   }\n// }",
+                "purpose": "Error handling for quick action failures"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires comprehensive error handling and user feedback"
+      },
+      "expectation": "When quick actions fail due to API errors, network issues, or configuration problems, the homepage should display clear error messages with guidance on how to resolve the issue, and allow users to retry without crashing or becoming unresponsive.",
+      "prediction": "Currently fails because QuickActionCard component does not exist and has no error handling implementation.",
+      "explanation": [
+        "Try-catch blocks needed around all async operations in QuickActionCard",
+        "Error messages must be internationalized and user-friendly",
+        "Integration with existing Toaster component for error display",
+        "Specific error handling for: no API key, network errors, invalid config",
+        "Retry mechanisms should be implemented for transient failures"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The homepage shall provide interactive quick-action cards that: Allow users to immediately start a translation without navigating away, Support text input directly from the homepage, Display target language selection, Launch the respective feature interface (translate/polish/summarize)"
+      }
+    },
+    {
+      "id": 18,
+      "name": "Integration Test - Full Homepage Workflow",
+      "description": "End-to-end test of complete homepage user workflow",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Launch application as new user",
+          "description": "First-time user experience",
+          "context": "Clean state, no history"
+        },
+        {
+          "step_number": 2,
+          "action": "View homepage and explore features",
+          "description": "User discovers quick actions and navigation",
+          "context": "Onboarding scenario"
+        },
+        {
+          "step_number": 3,
+          "action": "Use translate quick action",
+          "description": "Translate text from homepage",
+          "context": "Primary use case"
+        },
+        {
+          "step_number": 4,
+          "action": "Navigate to settings and configure preferences",
+          "description": "Change language preferences",
+          "context": "Configuration workflow"
+        },
+        {
+          "step_number": 5,
+          "action": "Return to homepage and verify recent activity",
+          "description": "Check that previous translation appears in history",
+          "context": "History tracking verification"
+        },
+        {
+          "step_number": 6,
+          "action": "Use polish and summarize quick actions",
+          "description": "Test other quick action types",
+          "context": "Feature variety"
+        },
+        {
+          "step_number": 7,
+          "action": "Restart application",
+          "description": "Close and reopen app",
+          "context": "Persistence check"
+        },
+        {
+          "step_number": 8,
+          "action": "Verify state persisted",
+          "description": "Check recent activity and preferences maintained",
+          "context": "State persistence validation"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Execute full workflow: launch → translate → settings → return → verify history",
+          "expected": "All steps complete successfully, history tracked correctly",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Execute workflow across app restart",
+          "expected": "State and history persist across sessions",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Test workflow in both Tauri and browser extension",
+          "expected": "Identical behavior on both platforms",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Complete workflow executes without errors",
+          "All features work together cohesively",
+          "Navigation flows are intuitive",
+          "State persists appropriately",
+          "Cross-platform consistency maintained"
+        ],
+        "failures": [
+          "Workflow breaks at any step",
+          "Integration issues between features",
+          "Navigation problems",
+          "State not persisted",
+          "Platform-specific issues"
+        ],
+        "performance": [
+          "Workflow completes smoothly",
+          "No lag or delays between steps",
+          "App restart is fast"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "src/common/components/HomePage.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 300,
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Full HomePage component integrating all features",
+                "purpose": "Complete homepage implementation with all features"
+              }
+            ]
+          }
+        ],
+        "notes": "Requires all components and integrations to be complete"
+      },
+      "expectation": "A complete user workflow from launching the app, discovering and using homepage features, navigating to settings, and having all state persist should work seamlessly across platforms.",
+      "prediction": "Currently fails because no homepage components exist and the full integration is not implemented.",
+      "explanation": [
+        "All homepage components (HomePage, QuickActionCard, RecentActivityList) must be implemented",
+        "Integration with existing services (translate, settings, storage) required",
+        "Both Tauri and browser extension entry points must be updated",
+        "E2E tests need to be written for full workflow validation",
+        "This is the final integration test confirming all requirements are met"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "The application shall display a homepage as the default/initial view when opened, featuring: Application branding and logo, Brief description of capabilities, Quick action buttons for translation, polishing, and summarization, Navigation menu or links to other sections (Settings, Vocabulary, About)"
+      }
+    }
+  ],
+  "summary": {
+    "total_scenarios": 18,
+    "complexity": "high",
+    "estimated_time": "4-6 hours for full implementation and testing"
+  }
+}
