@@ -50,7 +50,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
     return (
         <div
-            data-testid="homepage-container"
+            data-testid='homepage-container'
             className={css({
                 display: 'flex',
                 flexDirection: 'column',
@@ -70,7 +70,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     gap: theme.sizing.scale400,
                 })}
             >
-                <div data-testid="homepage-logo">
+                <div data-testid='homepage-logo'>
                     <LogoWithText />
                 </div>
 
@@ -124,21 +124,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                     marginBottom: theme.sizing.scale800,
                 })}
             >
-                <QuickActionCard
-                    type="translate"
-                    icon={<RiTranslate />}
-                    onAction={handleQuickAction('translate')}
-                />
-                <QuickActionCard
-                    type="polishing"
-                    icon={<RiQuillPenLine />}
-                    onAction={handleQuickAction('polishing')}
-                />
-                <QuickActionCard
-                    type="summarize"
-                    icon={<RiArticleLine />}
-                    onAction={handleQuickAction('summarize')}
-                />
+                <QuickActionCard type='translate' icon={<RiTranslate />} onAction={handleQuickAction('translate')} />
+                <QuickActionCard type='polishing' icon={<RiQuillPenLine />} onAction={handleQuickAction('polishing')} />
+                <QuickActionCard type='summarize' icon={<RiArticleLine />} onAction={handleQuickAction('summarize')} />
             </div>
 
             {/* Recent Activity Section */}

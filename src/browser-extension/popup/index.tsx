@@ -55,7 +55,10 @@ function App() {
             // Keep max 50 items
             const count = await db.recentActivity.count()
             if (count > 50) {
-                const oldestItems = await db.recentActivity.orderBy('timestamp').limit(count - 50).toArray()
+                const oldestItems = await db.recentActivity
+                    .orderBy('timestamp')
+                    .limit(count - 50)
+                    .toArray()
                 await db.recentActivity.bulkDelete(oldestItems.map((item) => item.id!))
             }
         } catch (error) {
@@ -76,7 +79,7 @@ function App() {
         console.log('Navigate to vocabulary')
     }
 
-    const handleActivityClick = (activity: RecentActivity) => {
+    const handleActivityClick = () => {
         // Navigate to translator with activity data
         setShowHomepage(false)
         // TODO: Pass activity data to translator

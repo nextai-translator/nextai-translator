@@ -5,7 +5,7 @@ import { showHomepageAtom } from '@/common/store/homepage'
 import { TranslatorWindow } from './TranslatorWindow'
 import { SettingsWindow } from './SettingsWindow'
 import { TranslateMode } from '@/common/translate'
-import { RecentActivity, getLocalDB } from '@/common/internal-services/db'
+import { getLocalDB } from '@/common/internal-services/db'
 
 export function HomeWindow() {
     const [showSettings, setShowSettings] = useAtom(showSettingsAtom)
@@ -37,7 +37,10 @@ export function HomeWindow() {
             // Keep max 50 items
             const count = await db.recentActivity.count()
             if (count > 50) {
-                const oldestItems = await db.recentActivity.orderBy('timestamp').limit(count - 50).toArray()
+                const oldestItems = await db.recentActivity
+                    .orderBy('timestamp')
+                    .limit(count - 50)
+                    .toArray()
                 await db.recentActivity.bulkDelete(oldestItems.map((item) => item.id!))
             }
         } catch (error) {
@@ -58,7 +61,7 @@ export function HomeWindow() {
         console.log('Navigate to vocabulary')
     }
 
-    const handleActivityClick = (activity: RecentActivity) => {
+    const handleActivityClick = () => {
         // Navigate to translator with the activity data
         setShowHomepage(false)
         // TODO: Pass the activity data to translator

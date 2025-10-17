@@ -61,7 +61,7 @@ const RecentActivityListContent: React.FC<RecentActivityListProps> = ({ onActivi
 
     return (
         <div
-            data-testid="recent-activity-list"
+            data-testid='recent-activity-list'
             className={css({
                 display: 'flex',
                 flexDirection: 'column',
@@ -92,11 +92,11 @@ const RecentActivityListContent: React.FC<RecentActivityListProps> = ({ onActivi
                     <div
                         key={activity.id}
                         className={css({
-                            padding: theme.sizing.scale400,
-                            backgroundColor: theme.colors.backgroundSecondary,
-                            borderRadius: theme.borders.radius300,
-                            cursor: onActivityClick ? 'pointer' : 'default',
-                            transition: 'background-color 0.2s ease',
+                            'padding': theme.sizing.scale400,
+                            'backgroundColor': theme.colors.backgroundSecondary,
+                            'borderRadius': theme.borders.radius300,
+                            'cursor': onActivityClick ? 'pointer' : 'default',
+                            'transition': 'background-color 0.2s ease',
                             ':hover': onActivityClick
                                 ? {
                                       backgroundColor: theme.colors.backgroundTertiary,

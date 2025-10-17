@@ -73,9 +73,9 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({ type, icon, on
             overrides={{
                 Root: {
                     style: {
-                        width: '100%',
-                        cursor: expanded ? 'default' : 'pointer',
-                        transition: 'all 0.3s ease',
+                        'width': '100%',
+                        'cursor': expanded ? 'default' : 'pointer',
+                        'transition': 'all 0.3s ease',
                         ':hover': {
                             boxShadow: theme.lighting.shadow600,
                         },
@@ -174,11 +174,7 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({ type, icon, on
                             <Button size={SIZE.compact} kind={KIND.secondary} onClick={() => setExpanded(false)}>
                                 {t('Cancel')}
                             </Button>
-                            <Button
-                                size={SIZE.compact}
-                                onClick={handleSubmit}
-                                disabled={!text.trim()}
-                            >
+                            <Button size={SIZE.compact} onClick={handleSubmit} disabled={!text.trim()}>
                                 {t('Submit')}
                             </Button>
                         </div>
