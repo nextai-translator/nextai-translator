@@ -180,8 +180,8 @@ fn bind_mouse_hook() {
                 }
                 let mouse_distance =
                     (((x - prev_release_x).pow(2) + (y - prev_release_y).pow(2)) as f64).sqrt();
-                let mut previous_press_time = 0;
-                let mut previous_release_time = 0;
+                let previous_press_time: u128;
+                let previous_release_time: u128;
                 {
                     let previous_press_time_lock = PREVIOUS_PRESS_TIME.lock();
                     let mut previous_release_time_lock = PREVIOUS_RELEASE_TIME.lock();
@@ -360,6 +360,7 @@ fn main() {
 
     let specta_builder_setup = specta_builder.clone();
 
+    #[cfg_attr(not(target_os = "macos"), allow(unused_mut))]
     let mut app = tauri::Builder::default()
         .plugin(
             tauri_plugin_aptabase::Builder::new("A-US-9856842764")

@@ -7,7 +7,11 @@ use parking_lot::Mutex;
 #[cfg(target_os = "macos")]
 use std::mem::MaybeUninit;
 use std::{thread, time::Duration};
-use tauri::{path::BaseDirectory, Emitter, Manager};
+#[cfg(target_os = "macos")]
+use tauri::path::BaseDirectory;
+use tauri::Emitter;
+#[cfg(target_os = "macos")]
+use tauri::Manager;
 
 use crate::APP_HANDLE;
 
@@ -30,7 +34,7 @@ pub fn select_all(enigo: &mut Enigo) {
 
 #[allow(dead_code)]
 #[cfg(target_os = "macos")]
-pub fn select_all(enigo: &mut Enigo) {
+pub fn select_all(_enigo: &mut Enigo) {
     let _guard = SELECT_ALL.lock();
 
     let apple_script = APP_HANDLE
@@ -60,7 +64,7 @@ pub fn left_arrow_click(enigo: &mut Enigo, n: usize) {
 }
 
 #[cfg(target_os = "macos")]
-pub fn left_arrow_click(enigo: &mut Enigo, n: usize) {
+pub fn left_arrow_click(_enigo: &mut Enigo, n: usize) {
     let _guard = INPUT_LOCK.lock();
 
     let apple_script = APP_HANDLE
@@ -89,7 +93,7 @@ pub fn right_arrow_click(enigo: &mut Enigo, n: usize) {
 }
 
 #[cfg(target_os = "macos")]
-pub fn right_arrow_click(enigo: &mut Enigo, n: usize) {
+pub fn right_arrow_click(_enigo: &mut Enigo, n: usize) {
     let _guard = INPUT_LOCK.lock();
 
     let apple_script = APP_HANDLE
@@ -118,7 +122,7 @@ pub fn backspace_click(enigo: &mut Enigo, n: usize) {
 }
 
 #[cfg(target_os = "macos")]
-pub fn backspace_click(enigo: &mut Enigo, n: usize) {
+pub fn backspace_click(_enigo: &mut Enigo, n: usize) {
     let _guard = INPUT_LOCK.lock();
 
     let apple_script = APP_HANDLE
@@ -178,7 +182,7 @@ pub fn copy(enigo: &mut Enigo) {
 
 #[allow(dead_code)]
 #[cfg(target_os = "macos")]
-pub fn copy(enigo: &mut Enigo) {
+pub fn copy(_enigo: &mut Enigo) {
     let _guard = COPY_PASTE.lock();
 
     let apple_script = APP_HANDLE
@@ -213,7 +217,7 @@ pub fn paste(enigo: &mut Enigo) {
 
 #[allow(dead_code)]
 #[cfg(target_os = "macos")]
-pub fn paste(enigo: &mut Enigo) {
+pub fn paste(_enigo: &mut Enigo) {
     let _guard = COPY_PASTE.lock();
 
     let apple_script = APP_HANDLE
@@ -300,6 +304,7 @@ pub fn get_selected_text_by_clipboard(
     }
 }
 
+#[allow(dead_code)]
 #[cfg(target_os = "macos")]
 unsafe fn ax_call<F, V>(f: F) -> Result<V, AXError>
 where
@@ -369,38 +374,36 @@ pub fn is_valid_selected_frame() -> Result<bool, Box<dyn std::error::Error>> {
     use core_graphics::geometry::{CGPoint, CGSize};
     use debug_print::debug_println;
 
-    unsafe {
-        match get_selected_text_frame_by_ax() {
-            Ok(selected_frame) => {
-                if selected_frame.size.width == 0.0 && selected_frame.size.height == 0.0 {
-                    debug_println!("Selected frame is empty");
-                    return Ok(true);
-                }
+    match get_selected_text_frame_by_ax() {
+        Ok(selected_frame) => {
+            if selected_frame.size.width == 0.0 && selected_frame.size.height == 0.0 {
+                debug_println!("Selected frame is empty");
+                return Ok(true);
+            }
 
-                let expand_value = 40.0;
-                let origin = CGPoint::new(
-                    selected_frame.origin.x - expand_value,
-                    selected_frame.origin.y - expand_value,
-                );
-                let size = CGSize::new(
-                    selected_frame.size.width + expand_value * 2.0,
-                    selected_frame.size.height + expand_value * 2.0,
-                );
-                let expanded_selected_text_frame = CGRect::new(&origin, &size);
-                let (mouse_x, mouse_y) = get_mouse_location()?;
-                let mouse_position_point = CGPoint::new(mouse_x as f64, mouse_y as f64);
-                debug_println!(
-                    "selected_frame: {:?}, expanded_selected_text_frame: {:?}, mouse_position_point: {:?}",
-                    selected_frame,
-                    expanded_selected_text_frame,
-                    mouse_position_point
-                );
-                Ok(expanded_selected_text_frame.contains(&mouse_position_point))
-            }
-            Err(err) => {
-                debug_println!("get_selected_text_frame_by_ax error: {}", err);
-                Err(err)
-            }
+            let expand_value = 40.0;
+            let origin = CGPoint::new(
+                selected_frame.origin.x - expand_value,
+                selected_frame.origin.y - expand_value,
+            );
+            let size = CGSize::new(
+                selected_frame.size.width + expand_value * 2.0,
+                selected_frame.size.height + expand_value * 2.0,
+            );
+            let expanded_selected_text_frame = CGRect::new(&origin, &size);
+            let (mouse_x, mouse_y) = get_mouse_location()?;
+            let mouse_position_point = CGPoint::new(mouse_x as f64, mouse_y as f64);
+            debug_println!(
+                "selected_frame: {:?}, expanded_selected_text_frame: {:?}, mouse_position_point: {:?}",
+                selected_frame,
+                expanded_selected_text_frame,
+                mouse_position_point
+            );
+            Ok(expanded_selected_text_frame.contains(&mouse_position_point))
+        }
+        Err(err) => {
+            debug_println!("get_selected_text_frame_by_ax error: {}", err);
+            Err(err)
         }
     }
 }
