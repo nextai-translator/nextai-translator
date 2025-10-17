@@ -71,7 +71,7 @@
               {
                 "start_line": 1,
                 "end_line": 50,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// export const HomePage: React.FC = () => {\n//   return (\n//     <div>\n//       <LogoWithText />\n//       <Description />\n//       <QuickActionButtons />\n//       <NavigationMenu />\n//     </div>\n//   )\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// export const HomePage: React.FC = () =\u003e {\n//   return (\n//     \u003cdiv\u003e\n//       \u003cLogoWithText /\u003e\n//       \u003cDescription /\u003e\n//       \u003cQuickActionButtons /\u003e\n//       \u003cNavigationMenu /\u003e\n//     \u003c/div\u003e\n//   )\n// }",
                 "purpose": "Main homepage component structure"
               }
             ]
@@ -170,7 +170,7 @@
           "API errors not handled gracefully"
         ],
         "performance": [
-          "Card interaction is smooth (<100ms response)",
+          "Card interaction is smooth (\u003c100ms response)",
           "Input field appears without delay"
         ]
       },
@@ -182,7 +182,7 @@
               {
                 "start_line": 1,
                 "end_line": 40,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// interface QuickActionCardProps {\n//   type: 'translate' | 'polish' | 'summarize'\n//   onAction: (text: string, targetLang: string) => void\n// }\n// export const QuickActionCard: React.FC<QuickActionCardProps> = ({ type, onAction }) => {\n//   // Render card with icon, input, language selector\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// interface QuickActionCardProps {\n//   type: 'translate' | 'polish' | 'summarize'\n//   onAction: (text: string, targetLang: string) =\u003e void\n// }\n// export const QuickActionCard: React.FC\u003cQuickActionCardProps\u003e = ({ type, onAction }) =\u003e {\n//   // Render card with icon, input, language selector\n// }",
                 "purpose": "Reusable quick action card component"
               }
             ]
@@ -482,7 +482,7 @@
               {
                 "start_line": 1,
                 "end_line": 60,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// interface ActivityItem {\n//   id: string\n//   type: 'translate' | 'polish' | 'summarize'\n//   sourceText: string\n//   resultText: string\n//   sourceLang?: string\n//   targetLang?: string\n//   timestamp: number\n// }\n// export const RecentActivityList: React.FC = () => {\n//   const activities = useRecentActivities(5)\n//   return (\n//     <div>\n//       {activities.map(activity => (\n//         <ActivityItem key={activity.id} {...activity} />\n//       ))}\n//     </div>\n//   )\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// Expected structure:\n// interface ActivityItem {\n//   id: string\n//   type: 'translate' | 'polish' | 'summarize'\n//   sourceText: string\n//   resultText: string\n//   sourceLang?: string\n//   targetLang?: string\n//   timestamp: number\n// }\n// export const RecentActivityList: React.FC = () =\u003e {\n//   const activities = useRecentActivities(5)\n//   return (\n//     \u003cdiv\u003e\n//       {activities.map(activity =\u003e (\n//         \u003cActivityItem key={activity.id} {...activity} /\u003e\n//       ))}\n//     \u003c/div\u003e\n//   )\n// }",
                 "purpose": "Component for displaying recent translation history"
               }
             ]
@@ -579,7 +579,7 @@
               {
                 "start_line": 70,
                 "end_line": 90,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const handleClearHistory = async () => {\n//   await clearActivityHistory()\n//   setActivities([])\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const handleClearHistory = async () =\u003e {\n//   await clearActivityHistory()\n//   setActivities([])\n// }",
                 "purpose": "Clear history handler"
               }
             ]
@@ -690,7 +690,7 @@
               {
                 "start_line": 60,
                 "end_line": 80,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// <NavigationMenu>\n//   <NavLink to=\"/settings\">Settings</NavLink>\n//   <NavLink to=\"/vocabulary\">Vocabulary</NavLink>\n//   <NavLink to=\"/about\">About</NavLink>\n// </NavigationMenu>",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// \u003cNavigationMenu\u003e\n//   \u003cNavLink to=\"/settings\"\u003eSettings\u003c/NavLink\u003e\n//   \u003cNavLink to=\"/vocabulary\"\u003eVocabulary\u003c/NavLink\u003e\n//   \u003cNavLink to=\"/about\"\u003eAbout\u003c/NavLink\u003e\n// \u003c/NavigationMenu\u003e",
                 "purpose": "Navigation menu with settings link"
               }
             ]
@@ -787,7 +787,7 @@
               {
                 "start_line": 85,
                 "end_line": 95,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// <NavLink to=\"/vocabulary\">Vocabulary</NavLink>",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// \u003cNavLink to=\"/vocabulary\"\u003eVocabulary\u003c/NavLink\u003e",
                 "purpose": "Navigation link to vocabulary"
               }
             ]
@@ -878,7 +878,7 @@
               {
                 "start_line": 1,
                 "end_line": 30,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { HomePage } from '@/common/components/HomePage'\n// \n// function App() {\n//   return (\n//     <Router>\n//       <Route path=\"/\" element={<HomePage />} />\n//       <Route path=\"/settings\" element={<Settings />} />\n//       {/* other routes */}\n//     </Router>\n//   )\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { HomePage } from '@/common/components/HomePage'\n// \n// function App() {\n//   return (\n//     \u003cRouter\u003e\n//       \u003cRoute path=\"/\" element={\u003cHomePage /\u003e} /\u003e\n//       \u003cRoute path=\"/settings\" element={\u003cSettings /\u003e} /\u003e\n//       {/* other routes */}\n//     \u003c/Router\u003e\n//   )\n// }",
                 "purpose": "Tauri app integration with homepage routing"
               }
             ]
@@ -983,7 +983,7 @@
               {
                 "start_line": 1,
                 "end_line": 25,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { HomePage } from '@/common/components/HomePage'\n// \n// function Popup() {\n//   return <HomePage />\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { HomePage } from '@/common/components/HomePage'\n// \n// function Popup() {\n//   return \u003cHomePage /\u003e\n// }",
                 "purpose": "Browser extension popup integration"
               }
             ]
@@ -1187,7 +1187,7 @@
               {
                 "start_line": 140,
                 "end_line": 160,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const HomePage: React.FC = () => {\n//   // Lazy load recent activity\n//   const activities = useDeferredValue(useRecentActivities())\n//   \n//   return (\n//     <Suspense fallback={<Spinner />}>\n//       <HomePageContent />\n//       <RecentActivityList activities={activities} />\n//     </Suspense>\n//   )\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const HomePage: React.FC = () =\u003e {\n//   // Lazy load recent activity\n//   const activities = useDeferredValue(useRecentActivities())\n//   \n//   return (\n//     \u003cSuspense fallback={\u003cSpinner /\u003e}\u003e\n//       \u003cHomePageContent /\u003e\n//       \u003cRecentActivityList activities={activities} /\u003e\n//     \u003c/Suspense\u003e\n//   )\n// }",
                 "purpose": "Performance optimization with lazy loading"
               }
             ]
@@ -1293,7 +1293,7 @@
               {
                 "start_line": 170,
                 "end_line": 190,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// <button\n//   aria-label=\"Translate text\"\n//   tabIndex={0}\n//   onKeyDown={(e) => {\n//     if (e.key === 'Enter' || e.key === ' ') {\n//       handleTranslate()\n//     }\n//   }}\n// >\n//   Translate\n// </button>",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// \u003cbutton\n//   aria-label=\"Translate text\"\n//   tabIndex={0}\n//   onKeyDown={(e) =\u003e {\n//     if (e.key === 'Enter' || e.key === ' ') {\n//       handleTranslate()\n//     }\n//   }}\n// \u003e\n//   Translate\n// \u003c/button\u003e",
                 "purpose": "Keyboard accessibility implementation"
               }
             ]
@@ -1399,7 +1399,7 @@
               {
                 "start_line": 200,
                 "end_line": 220,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { useTranslation } from 'react-i18next'\n// \n// const HomePage: React.FC = () => {\n//   const { t } = useTranslation()\n//   \n//   return (\n//     <div>\n//       <h1>{t('homepage.title')}</h1>\n//       <p>{t('homepage.description')}</p>\n//       <button>{t('homepage.actions.translate')}</button>\n//     </div>\n//   )\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { useTranslation } from 'react-i18next'\n// \n// const HomePage: React.FC = () =\u003e {\n//   const { t } = useTranslation()\n//   \n//   return (\n//     \u003cdiv\u003e\n//       \u003ch1\u003e{t('homepage.title')}\u003c/h1\u003e\n//       \u003cp\u003e{t('homepage.description')}\u003c/p\u003e\n//       \u003cbutton\u003e{t('homepage.actions.translate')}\u003c/button\u003e\n//     \u003c/div\u003e\n//   )\n// }",
                 "purpose": "i18next integration for internationalization"
               }
             ]
@@ -1614,7 +1614,7 @@
               {
                 "start_line": 230,
                 "end_line": 260,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { Card, Button, Input } from 'baseui-sd'\n// import { useStyletron } from 'styletron-react'\n// \n// const HomePage: React.FC = () => {\n//   const [css, theme] = useStyletron()\n//   \n//   return (\n//     <div className={css({\n//       backgroundColor: theme.colors.backgroundPrimary,\n//       padding: theme.sizing.scale600\n//     })}>\n//       <Card>\n//         <Button>Translate</Button>\n//       </Card>\n//     </div>\n//   )\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// import { Card, Button, Input } from 'baseui-sd'\n// import { useStyletron } from 'styletron-react'\n// \n// const HomePage: React.FC = () =\u003e {\n//   const [css, theme] = useStyletron()\n//   \n//   return (\n//     \u003cdiv className={css({\n//       backgroundColor: theme.colors.backgroundPrimary,\n//       padding: theme.sizing.scale600\n//     })}\u003e\n//       \u003cCard\u003e\n//         \u003cButton\u003eTranslate\u003c/Button\u003e\n//       \u003c/Card\u003e\n//     \u003c/div\u003e\n//   )\n// }",
                 "purpose": "BaseUI and Styletron usage for consistent styling"
               }
             ]
@@ -1720,7 +1720,7 @@
               {
                 "start_line": 130,
                 "end_line": 160,
-                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const handleAction = async () => {\n//   try {\n//     await executeAction(text, targetLang)\n//   } catch (error) {\n//     if (error.code === 'NO_API_KEY') {\n//       showError(t('errors.noApiKey'), {\n//         action: () => navigate('/settings')\n//       })\n//     } else if (error.code === 'NETWORK_ERROR') {\n//       showError(t('errors.networkError'), {\n//         action: () => handleRetry()\n//       })\n//     }\n//   }\n// }",
+                "code": "// NOT YET IMPLEMENTED - TDD RED PHASE\n// const handleAction = async () =\u003e {\n//   try {\n//     await executeAction(text, targetLang)\n//   } catch (error) {\n//     if (error.code === 'NO_API_KEY') {\n//       showError(t('errors.noApiKey'), {\n//         action: () =\u003e navigate('/settings')\n//       })\n//     } else if (error.code === 'NETWORK_ERROR') {\n//       showError(t('errors.networkError'), {\n//         action: () =\u003e handleRetry()\n//       })\n//     }\n//   }\n// }",
                 "purpose": "Error handling for quick action failures"
               }
             ]
