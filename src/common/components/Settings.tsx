@@ -54,7 +54,8 @@ import {
 import useSWR from 'swr'
 import { Markdown } from './Markdown'
 import { open } from '@tauri-apps/plugin-shell'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
+import type { UnlistenFn } from '@tauri-apps/api/event'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
 import { trackEvent } from '@aptabase/tauri'
 import { Skeleton } from 'baseui-sd/skeleton'
@@ -1439,13 +1440,13 @@ export function InnerSettings({
         if (!isTauri) {
             return undefined
         }
-        let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        let unlisten: UnlistenFn | undefined
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 refetchPromotions()
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
         return () => {
@@ -1691,18 +1692,18 @@ export function InnerSettings({
     const [openaiAPIKeyPromotion, setOpenaiAPIKeyPromotion] = useState<IPromotionItem>()
 
     useEffect(() => {
-        let unlisten: (() => void) | undefined = undefined
+        let unlisten: UnlistenFn | undefined
         if (openaiAPIKeyPromotionID) {
             setOpenaiAPIKeyPromotion(promotions?.openai_api_key?.find((item) => item.id === openaiAPIKeyPromotionID))
         } else {
             choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)
             if (isTauri) {
-                const appWindow = getCurrent()
+                const appWindow = WebviewWindow.getCurrent()
                 appWindow
                     .listen('tauri://focus', () => {
                         choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)
                     })
-                    .then((cb) => {
+                    .then((cb: UnlistenFn) => {
                         unlisten = cb
                     })
             }
@@ -1715,18 +1716,18 @@ export function InnerSettings({
     const [headerPromotion, setHeaderPromotion] = useState<IPromotionItem>()
 
     useEffect(() => {
-        let unlisten: (() => void) | undefined = undefined
+        let unlisten: UnlistenFn | undefined
         if (headerPromotionID) {
             setHeaderPromotion(promotions?.settings_header?.find((item) => item.id === headerPromotionID))
         } else {
             choicePromotionItem(promotions?.settings_header).then(setHeaderPromotion)
             if (isTauri) {
-                const appWindow = getCurrent()
+                const appWindow = WebviewWindow.getCurrent()
                 appWindow
                     .listen('tauri://focus', () => {
                         choicePromotionItem(promotions?.settings_header).then(setHeaderPromotion)
                     })
-                    .then((cb) => {
+                    .then((cb: UnlistenFn) => {
                         unlisten = cb
                     })
             }

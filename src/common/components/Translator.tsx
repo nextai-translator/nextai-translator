@@ -41,7 +41,7 @@ import { BsTextareaT } from 'react-icons/bs'
 import { FcIdea } from 'react-icons/fc'
 import rocket from '../assets/images/rocket.gif'
 import partyPopper from '../assets/images/party-popper.gif'
-import { listen, Event } from '@tauri-apps/api/event'
+import { listen, type Event, type UnlistenFn } from '@tauri-apps/api/event'
 import IpLocationNotification from '../components/IpLocationNotification'
 import { HighlightInTextarea } from '../highlight-in-textarea'
 import { LRUCache } from 'lru-cache'
@@ -74,7 +74,7 @@ import { useLazyEffect } from '../usehooks'
 import LogoWithText, { type LogoWithTextRef } from './LogoWithText'
 import Toaster from './Toaster'
 import { readFile } from '@tauri-apps/plugin-fs'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDeepCompareCallback } from 'use-deep-compare'
 import { useTranslatorStore } from '../store'
 import useSWR from 'swr'
@@ -520,10 +520,10 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         if (!isDesktopApp()) {
             return
         }
-        let unlisten: undefined | (() => void)
+        let unlisten: UnlistenFn | undefined
         listen('refresh-actions', () => {
             refreshActions()
-        }).then((cb) => {
+        }).then((cb: UnlistenFn) => {
             unlisten = cb
         })
         return () => {
@@ -604,8 +604,8 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         if (!isTauri()) {
             return undefined
         }
-        let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        let unlisten: UnlistenFn | undefined
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 const editor = editorRef.current
@@ -614,7 +614,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 }
                 editor.focus()
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
         return () => {
@@ -1501,13 +1501,13 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         if (!isTauri()) {
             return undefined
         }
-        let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        let unlisten: UnlistenFn | undefined
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 refetchPromotions()
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
         return () => {
@@ -1530,14 +1530,14 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 clearInterval(timer)
             }
         }
-        let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        let unlisten: UnlistenFn | undefined
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)
                 choicePromotionItem(promotions?.settings_header).then(setSettingsHeaderPromotion)
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
         return () => {

@@ -19,6 +19,7 @@ use parking_lot::Mutex;
 use serde_json::json;
 use std::env;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use sysinfo::{CpuExt, System, SystemExt};
 use tauri_plugin_aptabase::EventTracker;
 use tauri_plugin_autostart::MacosLauncher;
@@ -38,12 +39,17 @@ use crate::windows::{
 };
 use crate::writing::{finish_writing, write_to_input, writing_command};
 
-use mouce::Mouse;
+use mouce::{Mouse, MouseActions};
 use once_cell::sync::OnceCell;
+#[cfg(debug_assertions)]
+use specta_typescript::{formatter::prettier, Typescript};
 use tauri::{AppHandle, LogicalPosition, LogicalSize};
 use tauri::{Manager, PhysicalPosition, PhysicalSize};
 use tauri_plugin_notification::NotificationExt;
 use tiny_http::{Response as HttpResponse, Server};
+use tokio::runtime::{
+    Builder as TokioRuntimeBuilder, EnterGuard as TokioEnterGuard, Runtime as TokioRuntime,
+};
 
 pub static APP_HANDLE: OnceCell<AppHandle> = OnceCell::new();
 pub static ALWAYS_ON_TOP: AtomicBool = AtomicBool::new(false);
@@ -63,6 +69,31 @@ pub struct UpdateResult {
 }
 
 pub static UPDATE_RESULT: Mutex<Option<Option<UpdateResult>>> = Mutex::new(None);
+
+fn init_tokio_runtime() -> &'static TokioRuntime {
+    use std::sync::OnceLock;
+
+    static RUNTIME: OnceLock<&'static TokioRuntime> = OnceLock::new();
+    static ENTER_GUARD: OnceLock<&'static TokioEnterGuard<'static>> = OnceLock::new();
+    static SET_HANDLE: OnceLock<()> = OnceLock::new();
+
+    let runtime = RUNTIME.get_or_init(|| {
+        Box::leak(Box::new(
+            TokioRuntimeBuilder::new_multi_thread()
+                .enable_all()
+                .build()
+                .expect("failed to initialize Tokio runtime"),
+        ))
+    });
+
+    ENTER_GUARD.get_or_init(|| Box::leak(Box::new(runtime.enter())));
+
+    if SET_HANDLE.set(()).is_ok() {
+        tauri::async_runtime::set(runtime.handle().clone());
+    }
+
+    runtime
+}
 
 #[tauri::command]
 #[specta::specta]
@@ -278,6 +309,7 @@ fn bind_mouse_hook() {
 }
 
 fn main() {
+    let _ = init_tokio_runtime();
     let silently = env::args().any(|arg| arg == "--silently");
 
     let mut sys = System::new();
@@ -287,41 +319,46 @@ fn main() {
         *CPU_VENDOR.lock() = vendor_id;
     }
 
-    let (invoke_handler, register_events) = {
-        let builder = tauri_specta::ts::builder()
-            .commands(tauri_specta::collect_commands![
-                get_config_content,
-                get_update_result,
-                clear_config_cache,
-                show_translator_window_command,
-                show_translator_window_with_selected_text_command,
-                show_action_manager_window,
-                get_translator_window_always_on_top,
-                fetch_stream,
-                writing_command,
-                write_to_input,
-                finish_writing,
-                detect_lang,
-                screenshot,
-                hide_translator_window,
-                start_ocr,
-                finish_ocr,
-                cut_image,
-            ])
-            .events(tauri_specta::collect_events![
-                CheckUpdateEvent,
-                CheckUpdateResultEvent,
-                PinnedFromWindowEvent,
-                PinnedFromTrayEvent,
-                ConfigUpdatedEvent
-            ])
-            .config(specta::ts::ExportConfig::default().formatter(specta::ts::formatter::prettier));
+    let specta_builder = tauri_specta::Builder::<tauri::Wry>::new()
+        .commands(tauri_specta::collect_commands![
+            get_config_content,
+            get_update_result,
+            clear_config_cache,
+            show_translator_window_command,
+            show_translator_window_with_selected_text_command,
+            show_action_manager_window,
+            get_translator_window_always_on_top,
+            fetch_stream,
+            writing_command,
+            write_to_input,
+            finish_writing,
+            detect_lang,
+            screenshot,
+            hide_translator_window,
+            start_ocr,
+            finish_ocr,
+            cut_image,
+        ])
+        .events(tauri_specta::collect_events![
+            CheckUpdateEvent,
+            CheckUpdateResultEvent,
+            PinnedFromWindowEvent,
+            PinnedFromTrayEvent,
+            ConfigUpdatedEvent
+        ]);
 
-        #[cfg(debug_assertions)]
-        let builder = builder.path("../src/tauri/bindings.ts");
+    #[cfg(debug_assertions)]
+    specta_builder
+        .export(
+            Typescript::default().formatter(prettier),
+            "../src/tauri/bindings.ts",
+        )
+        .expect("Failed to export TypeScript bindings");
 
-        builder.build().unwrap()
-    };
+    let invoke_handler = specta_builder.invoke_handler();
+    let specta_builder = Arc::new(specta_builder);
+
+    let specta_builder_setup = specta_builder.clone();
 
     let mut app = tauri::Builder::default()
         .plugin(
@@ -332,7 +369,7 @@ fn main() {
                         .map(|loc| format!("{}:{}:{}", loc.file(), loc.line(), loc.column()))
                         .unwrap_or_else(|| "".to_string());
 
-                    client.track_event(
+                    let _ = client.track_event(
                         "panic",
                         Some(json!({
                             "info": format!("{} ({})", msg, location),
@@ -360,6 +397,7 @@ fn main() {
         ))
         .plugin(tauri_plugin_process::init())
         .setup(move |app| {
+            specta_builder_setup.mount_events(app);
             let app_handle = app.handle();
             APP_HANDLE.get_or_init(|| app.handle().clone());
             tray::create_tray(&app_handle)?;
@@ -435,8 +473,6 @@ fn main() {
                     }
                 }
             });
-            register_events(app);
-
             let handle = app_handle.clone();
             PinnedFromWindowEvent::listen_any(app_handle, move |event| {
                 let pinned = event.payload.pinned();
@@ -467,11 +503,11 @@ fn main() {
 
     app.run(|app, event| match event {
         tauri::RunEvent::Exit { .. } => {
-            app.track_event("app_exited", None);
+            let _ = app.track_event("app_exited", None);
             app.flush_events_blocking();
         }
         tauri::RunEvent::Ready => {
-            app.track_event("app_started", None);
+            let _ = app.track_event("app_started", None);
             bind_mouse_hook();
             let handle = app.clone();
             tauri::async_runtime::spawn(async move {

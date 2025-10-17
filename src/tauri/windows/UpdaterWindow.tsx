@@ -12,9 +12,10 @@ import { createUseStyles } from 'react-jss'
 import { MdBrowserUpdated } from 'react-icons/md'
 import { IoIosCloseCircleOutline } from 'react-icons/io'
 import { useTranslation } from 'react-i18next'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { trackEvent } from '@aptabase/tauri'
 import { UpdateResult, commands, events } from '../bindings'
+import type { UnlistenFn } from '@tauri-apps/api/event'
 
 const useStyles = createUseStyles({
     icon: {
@@ -52,13 +53,13 @@ export function UpdaterWindow() {
     }, [])
 
     useEffect(() => {
-        let unlisten: (() => void) | undefined = undefined
+        let unlisten: UnlistenFn | undefined
         events.checkUpdateResultEvent
             .once(async (event) => {
                 setCheckResult(event.payload)
                 setIsChecking(false)
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
 
@@ -246,7 +247,7 @@ export function UpdaterWindow() {
                             onClick={async (e) => {
                                 e.stopPropagation()
                                 e.preventDefault()
-                                const appWindow = getCurrent()
+                                const appWindow = WebviewWindow.getCurrent()
                                 await appWindow.hide()
                                 setTimeout(() => {
                                     appWindow.close()
