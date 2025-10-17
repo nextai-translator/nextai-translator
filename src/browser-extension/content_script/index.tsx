@@ -24,6 +24,63 @@ let root: Root | null = null
 const generateId = createGenerateId()
 const hidePopupThumbTimer: number | null = null
 
+// Variables moved to top-level scope
+let mousedownTarget: EventTarget | null = null
+let lastMouseEvent: UserEventType | undefined
+
+// Event handlers moved to top-level scope
+async function mouseUpHandler(event: UserEventType) {
+    lastMouseEvent = event
+    const settings = await utils.getSettings()
+    if (
+        (mousedownTarget instanceof HTMLInputElement || mousedownTarget instanceof HTMLTextAreaElement) &&
+        settings.selectInputElementsText === false
+    ) {
+        return
+    }
+    window.setTimeout(async () => {
+        const sel = window.getSelection()
+        let text = (sel?.toString() ?? '').trim()
+        if (!text) {
+            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+                const elem = event.target as HTMLInputElement | HTMLTextAreaElement
+                text = elem.value.substring(elem.selectionStart ?? 0, elem.selectionEnd ?? 0).trim()
+            }
+        } else {
+            if (settings.autoTranslate === true) {
+                const x = getClientX(event)
+                const y = getClientY(event)
+                showPopupCard(
+                    { getBoundingClientRect: () => new DOMRect(x, y, popupCardOffset, popupCardOffset) },
+                    text
+                )
+            } else if (settings.alwaysShowIcons === true && getCaretNodeType(event) === Node.TEXT_NODE) {
+                showPopupThumb(text, getPageX(event) + popupCardOffset, getPageY(event) + popupCardOffset)
+            }
+        }
+    })
+}
+
+async function mouseDownHandler(event: UserEventType) {
+    mousedownTarget = event.target
+    const settings = await utils.getSettings()
+    hidePopupThumb()
+    if (!settings.pinned) {
+        hidePopupCard()
+    }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function runtimeMessageHandler(request: any) {
+    if (request.type === 'open-translator') {
+        if (window !== window.top) return
+        const text = request.info.selectionText ?? ''
+        const x = lastMouseEvent ? getClientX(lastMouseEvent) : 0
+        const y = lastMouseEvent ? getClientY(lastMouseEvent) : 0
+        showPopupCard({ getBoundingClientRect: () => new DOMRect(x, y, popupCardOffset, popupCardOffset) }, text)
+    }
+}
+
 async function popupThumbClickHandler(event: UserEventType) {
     event.stopPropagation()
     event.preventDefault()
@@ -181,62 +238,12 @@ async function showPopupThumb(text: string, x: number, y: number) {
 
 async function main() {
     const browser = await utils.getBrowser()
-    let mousedownTarget: EventTarget | null
-    let lastMouseEvent: UserEventType | undefined
-
-    const mouseUpHandler = async (event: UserEventType) => {
-        lastMouseEvent = event
-        const settings = await utils.getSettings()
-        if (
-            (mousedownTarget instanceof HTMLInputElement || mousedownTarget instanceof HTMLTextAreaElement) &&
-            settings.selectInputElementsText === false
-        ) {
-            return
-        }
-        window.setTimeout(async () => {
-            const sel = window.getSelection()
-            let text = (sel?.toString() ?? '').trim()
-            if (!text) {
-                if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-                    const elem = event.target
-                    text = elem.value.substring(elem.selectionStart ?? 0, elem.selectionEnd ?? 0).trim()
-                }
-            } else {
-                if (settings.autoTranslate === true) {
-                    const x = getClientX(event)
-                    const y = getClientY(event)
-                    showPopupCard(
-                        { getBoundingClientRect: () => new DOMRect(x, y, popupCardOffset, popupCardOffset) },
-                        text
-                    )
-                } else if (settings.alwaysShowIcons === true && getCaretNodeType(event) === Node.TEXT_NODE) {
-                    showPopupThumb(text, getPageX(event) + popupCardOffset, getPageY(event) + popupCardOffset)
-                }
-            }
-        })
-    }
 
     document.addEventListener('mouseup', mouseUpHandler)
     document.addEventListener('touchend', mouseUpHandler)
 
-    browser.runtime.onMessage.addListener(function (request) {
-        if (request.type === 'open-translator') {
-            if (window !== window.top) return
-            const text = request.info.selectionText ?? ''
-            const x = lastMouseEvent ? getClientX(lastMouseEvent) : 0
-            const y = lastMouseEvent ? getClientY(lastMouseEvent) : 0
-            showPopupCard({ getBoundingClientRect: () => new DOMRect(x, y, popupCardOffset, popupCardOffset) }, text)
-        }
-    })
+    browser.runtime.onMessage.addListener(runtimeMessageHandler)
 
-    const mouseDownHandler = async (event: UserEventType) => {
-        mousedownTarget = event.target
-        const settings = await utils.getSettings()
-        hidePopupThumb()
-        if (!settings.pinned) {
-            hidePopupCard()
-        }
-    }
     document.addEventListener('mousedown', mouseDownHandler)
     document.addEventListener('touchstart', mouseDownHandler)
 
@@ -245,26 +252,43 @@ async function main() {
     await bindHotKey(settings.hotkey)
 }
 
-export async function bindHotKey(hotkey_: string | undefined) {
-    const hotkey = hotkey_?.trim().replace(/-/g, '+')
+// 1. Define the hotkey handler function separately and store a reference to it.
+const hotkeyHandler = (event: KeyboardEvent) => {
+    event.preventDefault()
+    const sel = window.getSelection()
+    let text = (sel?.toString() ?? '').trim()
+    if (!text) {
+        if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+            const elem = event.target as HTMLInputElement | HTMLTextAreaElement
+            text = elem.value.substring(elem.selectionStart ?? 0, elem.selectionEnd ?? 0)
+        }
+    }
+    const selRange = sel?.getRangeAt(0)
+    // Ensure showPopupCard is accessible, assuming it's defined in this scope or imported
+    if (selRange) {
+        showPopupCard({ getBoundingClientRect: () => selRange.getBoundingClientRect() }, text)
+    }
+}
 
-    if (!hotkey) {
-        return
+// 2. Create a top-level variable currentBoundHotkey to store the currently bound hotkey string.
+let currentBoundHotkey: string | undefined
+
+export async function bindHotKey(newHotkeyString_: string | undefined) {
+    const newHotkeyString = newHotkeyString_?.trim().replace(/-/g, '+')
+
+    // 3. Modify bindHotKey function
+    if (currentBoundHotkey && currentBoundHotkey !== newHotkeyString) {
+        hotkeys.unbind(currentBoundHotkey, hotkeyHandler)
     }
 
-    hotkeys(hotkey, (event) => {
-        event.preventDefault()
-        const sel = window.getSelection()
-        let text = (sel?.toString() ?? '').trim()
-        if (!text) {
-            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-                const elem = event.target
-                text = elem.value.substring(elem.selectionStart ?? 0, elem.selectionEnd ?? 0)
-            }
-        }
-        const selRange = sel?.getRangeAt(0)
-        selRange && showPopupCard({ getBoundingClientRect: () => selRange.getBoundingClientRect() }, text)
-    })
+    if (newHotkeyString && newHotkeyString !== currentBoundHotkey) {
+        hotkeys(newHotkeyString, hotkeyHandler)
+        currentBoundHotkey = newHotkeyString
+    } else if (!newHotkeyString && currentBoundHotkey) {
+        // If the new hotkey string is empty/undefined, and currentBoundHotkey is defined, unbind currentBoundHotkey and clear it.
+        hotkeys.unbind(currentBoundHotkey, hotkeyHandler)
+        currentBoundHotkey = undefined
+    }
 }
 
 if (utils.isFirefox()) {

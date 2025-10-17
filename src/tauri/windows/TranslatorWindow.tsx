@@ -156,14 +156,19 @@ export function TranslatorWindow() {
     }, [settings.writingTargetLanguage])
 
     useEffect(() => {
-        let unlisten
+        let unlistenFn: (() => void) | undefined
         ;(async () => {
-            unlisten = await listen('show', async () => {
+            // Correctly assign the unlisten function once the promise resolves
+            const unlisten = await listen('show', async () => {
                 const uuid_ = uuidv4().replace(/-/g, '').slice(0, 6)
                 setUUID(uuid_)
             })
-        })()
-        return unlisten
+            unlistenFn = unlisten
+        })() // Self-invoking async function
+
+        return () => {
+            unlistenFn?.() // Call the resolved unlisten function on cleanup
+        }
     }, [])
 
     const { pinned } = usePinned()

@@ -127,6 +127,9 @@ export interface ISettings {
     groqAPIModel: string
     groqAPIKey: string
     groqCustomModelName: string
+    grokApiKey?: string;
+    grokApiModel?: string;
+    grokTemperature?: number;
     claudeAPIURL: string
     claudeAPIURLPath: string
     claudeAPIModel: string
