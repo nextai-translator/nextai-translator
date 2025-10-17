@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Component-based architecture for reusability",
+    "content": "The homepage is implemented as three separate components (HomePage, QuickActionCard, RecentActivityList) instead of a single monolithic component. This follows the existing codebase pattern (similar to how Translator.tsx imports sub-components) and enables better code organization, testability, and reusability. Each component has a single, well-defined responsibility.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [1, 157]
+  },
+  {
+    "title": "Jotai for atomic state management",
+    "content": "showHomepageAtom is created using Jotai to manage homepage visibility state. This follows the existing pattern in the codebase (similar to showSettingsAtom in setting.ts). Jotai provides atomic state management with minimal boilerplate and excellent performance characteristics for fine-grained reactivity.",
+    "path": "src/common/store/homepage.ts",
+    "line_range": [1, 4]
+  },
+  {
+    "title": "Dexie versioning for database migration",
+    "content": "The recentActivity table is added using Dexie's versioning system (version 5) with proper upgrade handling. This ensures existing users' data is preserved when they upgrade to the new version. The schema includes all necessary fields (timestamp, mode, sourceText, targetText, language pairs) with appropriate indexing for efficient queries.",
+    "path": "src/common/internal-services/db.ts",
+    "line_range": [28, 55]
+  },
+  {
+    "title": "BaseUI and Styletron for consistent styling",
+    "content": "All components use BaseUI primitives (Button, Card, Input, Select, Typography components) and Styletron for styling via useStyletron() hook. This maintains visual consistency with existing components like Settings.tsx and Translator.tsx. The theme object provides consistent colors, spacing, and typography across light and dark modes.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [28, 62]
+  },
+  {
+    "title": "React Suspense for performance optimization",
+    "content": "RecentActivityList is wrapped in React Suspense with a fallback to prevent blocking the initial homepage render. This follows the NFR-1 performance requirement (<1s load time) by allowing the page shell to render immediately while the activity history loads asynchronously. This pattern is consistent with existing GlobalSuspense usage in the codebase.",
+    "path": "src/common/components/RecentActivityList.tsx",
+    "line_range": [166, 185]
+  },
+  {
+    "title": "useLiveQuery for reactive database queries",
+    "content": "The RecentActivityList uses useLiveQuery from dexie-react-hooks to reactively fetch recent activities. This automatically re-renders the component when the database changes, providing a seamless user experience. The query is optimized to fetch only the last 10 items in descending order by timestamp, minimizing data transfer and rendering overhead.",
+    "path": "src/common/components/RecentActivityList.tsx",
+    "line_range": [18, 23]
+  },
+  {
+    "title": "Internationalization with react-i18next",
+    "content": "All user-facing text uses the t() function from react-i18next. Translation keys are organized under the 'homepage' namespace in translation.json files. This follows NFR-3 (support 55+ languages) and ensures the homepage can be localized to all supported languages. No hardcoded strings are visible to users.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [29, 30]
+  },
+  {
+    "title": "Expandable card interaction pattern",
+    "content": "QuickActionCard uses a collapsed/expanded state pattern where cards show a preview initially and expand inline to show input fields when clicked. This provides a clean, uncluttered homepage while still allowing immediate action without navigation. The expanded state includes text input and language selection (for translate mode) with submit/cancel buttons.",
+    "path": "src/common/components/QuickActionCard.tsx",
+    "line_range": [21, 65]
+  },
+  {
+    "title": "Platform-agnostic integration points",
+    "content": "HomePage accepts callback props (onQuickAction, onNavigateToSettings, etc.) instead of directly importing platform-specific code. This allows the same component to be used in both Tauri desktop (HomeWindow.tsx) and browser extension (popup/index.tsx) with different navigation behaviors. The component is truly shared across platforms.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [15, 27]
+  },
+  {
+    "title": "Activity logging with size management",
+    "content": "When a quick action is triggered, the activity is logged to the Dexie database with automatic cleanup to maintain a maximum of 50 items. This prevents unbounded database growth while preserving enough history to be useful. The sourceText is truncated to 500 characters to limit storage requirements. Errors are caught and logged without blocking the user workflow.",
+    "path": "src/browser-extension/popup/index.tsx",
+    "line_range": [42, 68]
+  },
+  {
+    "title": "Conditional rendering based on settings",
+    "content": "The browser extension popup uses conditional rendering to show either HomePage or Translator based on the showHomepage atom. The defaultLandingPage setting from user preferences determines the initial state. This provides flexibility for users who prefer the traditional direct-to-translator experience vs. the new homepage.",
+    "path": "src/browser-extension/popup/index.tsx",
+    "line_range": [24, 103]
+  },
+  {
+    "title": "Tauri window mapping for multi-window support",
+    "content": "The HomeWindow is added to the windowsMap in Tauri's App.tsx, enabling it to be launched as a separate window with the label 'home'. This follows the existing pattern for other windows (translator, settings, action_manager) and maintains consistency with the Tauri architecture.",
+    "path": "src/tauri/App.tsx",
+    "line_range": [11, 19]
+  },
+  {
+    "title": "Settings schema extension for homepage preferences",
+    "content": "The ISettings interface is extended with defaultLandingPage and showRecentActivity fields. These optional fields allow users to configure their preferred experience without breaking existing configurations. The defaultLandingPage defaults to 'translator' for existing users (preserving current behavior) and can be set to 'homepage' for new users.",
+    "path": "src/common/types.ts",
+    "line_range": [145, 147]
+  },
+  {
+    "title": "Keyboard accessibility for interactive elements",
+    "content": "Recent activity items support keyboard navigation with role='button', tabIndex, and onKeyDown handlers that respond to both Enter and Space keys. This ensures the homepage is accessible to keyboard-only users and meets WCAG 2.1 AA standards (NFR-2).",
+    "path": "src/common/components/RecentActivityList.tsx",
+    "line_range": [107, 114]
+  },
+  {
+    "title": "Responsive grid layout",
+    "content": "The quick action cards use CSS Grid with 'repeat(auto-fit, minmax(280px, 1fr))' to create a responsive layout that adapts to different screen sizes. This ensures the homepage is usable at the minimum 800x600 resolution (NFR-6) while making efficient use of space on larger screens.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [119, 142]
+  }
+]

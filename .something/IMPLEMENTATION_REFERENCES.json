@@ -1,0 +1,107 @@
+[
+  {
+    "title": "BaseUI Design System",
+    "content": "Official Base Web (BaseUI) documentation for UI components used throughout the homepage implementation. BaseUI provides pre-built, accessible components with built-in theming support.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [1, 12],
+    "url": "https://baseweb.design/"
+  },
+  {
+    "title": "Styletron Atomic CSS-in-JS",
+    "content": "Styletron documentation explaining the atomic CSS-in-JS approach used for styling. The useStyletron hook provides access to the css function and theme object for dynamic styling.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [28, 62],
+    "url": "https://www.styletron.org/"
+  },
+  {
+    "title": "Jotai State Management",
+    "content": "Jotai documentation for atomic state management. The showHomepageAtom follows Jotai patterns for creating primitive atoms that can be read and written from any component.",
+    "path": "src/common/store/homepage.ts",
+    "line_range": [1, 4],
+    "url": "https://jotai.org/docs/introduction"
+  },
+  {
+    "title": "Dexie.js IndexedDB Wrapper",
+    "content": "Dexie.js documentation for working with IndexedDB in a simpler way. The versioning system is used to safely add the recentActivity table without breaking existing databases.",
+    "path": "src/common/internal-services/db.ts",
+    "line_range": [38, 56],
+    "url": "https://dexie.org/docs/Tutorial/Design"
+  },
+  {
+    "title": "dexie-react-hooks useLiveQuery",
+    "content": "Documentation for useLiveQuery hook that provides reactive database queries. The hook automatically re-renders the component when the underlying data changes.",
+    "path": "src/common/components/RecentActivityList.tsx",
+    "line_range": [18, 23],
+    "url": "https://dexie.org/docs/dexie-react-hooks/useLiveQuery()"
+  },
+  {
+    "title": "React i18next Internationalization",
+    "content": "React i18next documentation for implementing internationalization. The useTranslation hook provides the t() function for translating text keys to localized strings.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [29, 30],
+    "url": "https://react.i18next.com/latest/usetranslation-hook"
+  },
+  {
+    "title": "React Suspense for Lazy Loading",
+    "content": "React documentation on Suspense for handling asynchronous components and data loading. Used to wrap RecentActivityList to prevent blocking the initial render.",
+    "path": "src/common/components/RecentActivityList.tsx",
+    "line_range": [166, 185],
+    "url": "https://react.dev/reference/react/Suspense"
+  },
+  {
+    "title": "React Icons Library",
+    "content": "React Icons provides SVG icons as React components. The remix icon set (ri) is used for translate, polish, summarize, settings, and vocabulary icons throughout the homepage.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [7, 7],
+    "url": "https://react-icons.github.io/react-icons/"
+  },
+  {
+    "title": "Tauri Multi-Window Architecture",
+    "content": "Tauri documentation on creating and managing multiple windows. The windowsMap pattern allows different window labels to render different components.",
+    "path": "src/tauri/App.tsx",
+    "line_range": [11, 24],
+    "url": "https://tauri.app/v1/guides/features/multiwindow/"
+  },
+  {
+    "title": "Internal State Management Knowledge",
+    "content": "Project-specific knowledge about state management strategy using Jotai for atomic state, Zustand for global state, and React hooks for local state.",
+    "path": "src/common/store/homepage.ts",
+    "line_range": [1, 4],
+    "knowledge_uuid": "714cd2d0-ba58-48b5-a087-18e0fb11c348"
+  },
+  {
+    "title": "Internal Styling Patterns Knowledge",
+    "content": "Project-specific knowledge about styling with BaseUI + Styletron, including IThemedStyleProps interface and theme usage patterns.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [28, 62],
+    "knowledge_uuid": "36c6fca9-982d-458c-88c7-10323421cb47"
+  },
+  {
+    "title": "Internal i18n Implementation Knowledge",
+    "content": "Project-specific knowledge about internationalization using i18next with 55+ supported languages and translation key organization.",
+    "path": "src/common/i18n/locales/en/translation.json",
+    "line_range": [204, 226],
+    "knowledge_uuid": "530d22b8-eb6b-4014-bf93-0aff38afd264"
+  },
+  {
+    "title": "Internal Common Layer Architecture Knowledge",
+    "content": "Project-specific knowledge about the common layer organization with platform-agnostic components, services, and state management.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [1, 157],
+    "knowledge_uuid": "97df06e3-9d07-48a6-b70f-52ea301628e6"
+  },
+  {
+    "title": "WCAG 2.1 Accessibility Guidelines",
+    "content": "Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards for keyboard navigation, focus indicators, and screen reader support implemented in the homepage components.",
+    "path": "src/common/components/RecentActivityList.tsx",
+    "line_range": [107, 114],
+    "url": "https://www.w3.org/WAI/WCAG21/quickref/"
+  },
+  {
+    "title": "CSS Grid Layout Specification",
+    "content": "MDN documentation on CSS Grid Layout used for responsive quick action card arrangement. The auto-fit and minmax functions create a flexible, responsive grid.",
+    "path": "src/common/components/HomePage.tsx",
+    "line_range": [119, 125],
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout"
+  }
+]
