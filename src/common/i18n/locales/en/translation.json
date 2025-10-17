@@ -200,5 +200,27 @@
     "The survival time of the Ollama model in memory": "The survival time of the Ollama model in memory",
     "No models API support": "No models API support",
     "Some providers claiming to be compatible with OpenAI's API do not actually support OpenAI's standard model API. Therefore, we have no choice but to offer this option. If you choose this option (and then need to click the save button), we will not attempt to dynamically fetch the latest model list from the model API, but will only use a fixed model list and custom models.": "Some providers claiming to be compatible with OpenAI's API do not actually support OpenAI's standard model API. Therefore, we have no choice but to offer this option. If you choose this option (and then need to click the save button), we will not attempt to dynamically fetch the latest model list from the model API, but will only use a fixed model list and custom models.",
-    "If you find this tool helpful, you can buy me a cup of coffee.": "If you find this tool helpful, you can buy me a cup of coffee."
+    "If you find this tool helpful, you can buy me a cup of coffee.": "If you find this tool helpful, you can buy me a cup of coffee.",
+    "homepage": {
+        "title": "Welcome to NextAI Translator",
+        "subtitle": "Choose an action to get started",
+        "quickActions": {
+            "translate": {
+                "description": "Translate text between languages"
+            },
+            "polish": {
+                "description": "Improve and refine your writing"
+            },
+            "summarize": {
+                "description": "Create concise summaries of text"
+            },
+            "inputPlaceholder": "Enter text here...",
+            "selectLanguage": "Select target language"
+        },
+        "recentActivity": {
+            "title": "Recent Activity",
+            "empty": "No recent translations",
+            "clearHistory": "Clear History"
+        }
+    }
 }

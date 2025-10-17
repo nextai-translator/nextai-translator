@@ -142,4 +142,6 @@ export interface ISettings {
     uiFontSize: number
     iconSize: number
     noModelsAPISupport: boolean
+    defaultLandingPage?: 'homepage' | 'translator'
+    showRecentActivity?: boolean
 }

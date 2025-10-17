@@ -25,15 +25,32 @@ export interface Action {
     createdAt: string
 }
 
+export interface RecentActivity {
+    id?: number
+    timestamp: number
+    mode: TranslateMode
+    sourceText: string
+    targetText: string
+    sourceLang?: string
+    targetLang?: string
+}
+
 export class LocalDB extends Dexie {
     vocabulary!: Table<VocabularyItem>
     action!: Table<Action>
+    recentActivity!: Table<RecentActivity>
 
     constructor() {
         super('openai-translator')
         this.version(4).stores({
             vocabulary: 'word, reviewCount, description, updatedAt, createdAt',
             action: '++id, idx, mode, name, icon, rolePrompt, commandPrompt, outputRenderingFormat, updatedAt, createdAt',
+        })
+        // Add recentActivity table in version 5
+        this.version(5).stores({
+            vocabulary: 'word, reviewCount, description, updatedAt, createdAt',
+            action: '++id, idx, mode, name, icon, rolePrompt, commandPrompt, outputRenderingFormat, updatedAt, createdAt',
+            recentActivity: '++id, timestamp, mode, sourceText, targetText, sourceLang, targetLang',
         })
     }
 }
