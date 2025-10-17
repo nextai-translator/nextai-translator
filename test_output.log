@@ -1,0 +1,7 @@
+
+> openai-translator@0.1.0 test /private/var/folders/15/p0yqddvn4n13jpbjv5f1qt4m0000gn/T/nextai-translator-worktree-2391225866
+> vitest test "--run" "--reporter=verbose"
+
+sh: 1: vitest: not found
+ ELIFECYCLE  Test failed. See above for more details.
+ WARN   Local package.json exists, but node_modules missing, did you mean to install?
