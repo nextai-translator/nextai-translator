@@ -110,31 +110,61 @@ vi.mock('jotai', () => ({
 }))
 
 // Mock BaseUI components that might be causing issues
-vi.mock('baseui-sd/card', () => ({
-    Card: ({ children, ...props }: any) =>
-        React.createElement('div', { ...props, 'data-testid': 'mock-card' }, children),
-}))
+const Card = React.forwardRef(({ children, ...props }: any, ref: any) =>
+    React.createElement('div', { ...props, ref, 'data-testid': 'mock-card' }, children)
+)
+Card.displayName = 'Card'
 
+const Button = React.forwardRef(({ children, ...props }: any, ref: any) =>
+    React.createElement('button', { ...props, ref }, children)
+)
+Button.displayName = 'Button'
+
+const Input = React.forwardRef((props: any, ref: any) => React.createElement('input', { ...props, ref }))
+Input.displayName = 'Input'
+
+const Select = React.forwardRef((props: any, ref: any) => React.createElement('select', { ...props, ref }))
+Select.displayName = 'Select'
+
+const HeadingLarge = React.forwardRef(({ children, ...props }: any, ref: any) =>
+    React.createElement('h1', { ...props, ref }, children)
+)
+HeadingLarge.displayName = 'HeadingLarge'
+
+const HeadingXSmall = React.forwardRef(({ children, ...props }: any, ref: any) =>
+    React.createElement('h4', { ...props, ref }, children)
+)
+HeadingXSmall.displayName = 'HeadingXSmall'
+
+const ParagraphMedium = React.forwardRef(({ children, ...props }: any, ref: any) =>
+    React.createElement('p', { ...props, ref }, children)
+)
+ParagraphMedium.displayName = 'ParagraphMedium'
+
+const ParagraphSmall = React.forwardRef(({ children, ...props }: any, ref: any) =>
+    React.createElement('p', { ...props, ref }, children)
+)
+ParagraphSmall.displayName = 'ParagraphSmall'
+
+const LabelSmall = React.forwardRef(({ children, ...props }: any, ref: any) =>
+    React.createElement('label', { ...props, ref }, children)
+)
+LabelSmall.displayName = 'LabelSmall'
+
+vi.mock('baseui-sd/card', () => ({ Card }))
 vi.mock('baseui-sd/button', () => ({
-    Button: ({ children, ...props }: any) => React.createElement('button', props, children),
+    Button,
     SIZE: { compact: 'compact', mini: 'mini' },
-    KIND: { secondary: 'secondary', tertiary: 'tertiary' },
+    KIND: { secondary: 'secondary', tertiary: 'tertiary', primary: 'primary' },
 }))
-
-vi.mock('baseui-sd/input', () => ({
-    Input: (props: any) => React.createElement('input', props),
-}))
-
-vi.mock('baseui-sd/select', () => ({
-    Select: (props: any) => React.createElement('select', props),
-}))
-
+vi.mock('baseui-sd/input', () => ({ Input }))
+vi.mock('baseui-sd/select', () => ({ Select }))
 vi.mock('baseui-sd/typography', () => ({
-    HeadingLarge: ({ children, ...props }: any) => React.createElement('h1', props, children),
-    HeadingXSmall: ({ children, ...props }: any) => React.createElement('h4', props, children),
-    ParagraphMedium: ({ children, ...props }: any) => React.createElement('p', props, children),
-    ParagraphSmall: ({ children, ...props }: any) => React.createElement('p', props, children),
-    LabelSmall: ({ children, ...props }: any) => React.createElement('label', props, children),
+    HeadingLarge,
+    HeadingXSmall,
+    ParagraphMedium,
+    ParagraphSmall,
+    LabelSmall,
 }))
 
 vi.mock('baseui-sd', () => ({
