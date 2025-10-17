@@ -61,6 +61,12 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly
+          override: true
+
       - name: install frontend dependencies
         run: pnpm install --no-frozen-lockfile # change this to npm or pnpm depending on which one you use
 
@@ -121,14 +127,15 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
-      - name: Install frontend dependencies
-        run: pnpm install --no-frozen-lockfile # change this to npm or pnpm depending on which one you use
-
       - name: Install Rust nightly
         uses: dtolnay/rust-toolchain@nightly
         with:
           targets: ${{ matrix.config.rust_target }}
-          toolchain: '1.78.0'
+          toolchain: nightly
+          override: true
+
+      - name: Install frontend dependencies
+        run: pnpm install --no-frozen-lockfile # change this to npm or pnpm depending on which one you use
 
       - name: Install dependencies (ubuntu only)
         if: matrix.config.os == 'ubuntu-latest'
@@ -248,6 +255,12 @@ jobs:
         with:
           node-version: 18
           cache: 'pnpm'
+
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly
+          override: true
 
       - name: Get version
         id: get_version
