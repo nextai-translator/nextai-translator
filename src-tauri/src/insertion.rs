@@ -110,6 +110,7 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
 
 #[cfg(target_os = "windows")]
 fn parse_hwnd(window_id: &str) -> Result<windows::Win32::Foundation::HWND, String> {
+    use std::ffi::c_void;
     use windows::Win32::Foundation::HWND;
 
     let trimmed = window_id.trim();
@@ -120,13 +121,13 @@ fn parse_hwnd(window_id: &str) -> Result<windows::Win32::Foundation::HWND, Strin
         .trim_start_matches("0x");
     let value = usize::from_str_radix(hex_str, 16)
         .map_err(|_| format!("failed to parse window id {}", window_id))?;
-    Ok(HWND(value as isize))
+    Ok(HWND(value as *mut c_void))
 }
 
 #[cfg(target_os = "windows")]
 fn focus_window(window: &ActiveWindow) -> Result<(), String> {
     use windows::Win32::Foundation::HWND;
-    use windows::Win32::System::Threading::GetCurrentThreadId;
+    use windows::Win32::System::Threading::{AttachThreadInput, GetCurrentThreadId};
     use windows::Win32::UI::WindowsAndMessaging::{
         AttachThreadInput, BringWindowToTop, GetForegroundWindow, GetWindowThreadProcessId,
         IsIconic, SetForegroundWindow, ShowWindow, SW_RESTORE,
