@@ -2,12 +2,11 @@ use std::thread;
 use std::time::Duration;
 
 use active_win_pos_rs::{get_active_window, ActiveWindow};
-use arboard::Clipboard;
 use debug_print::debug_println;
-use enigo::{Enigo, Settings};
+use enigo::{Enigo, Keyboard, Settings};
 use parking_lot::Mutex;
 
-use crate::utils::{paste, select_all};
+use crate::utils::INPUT_LOCK;
 
 static PREVIOUS_ACTIVE_WINDOW: Mutex<Option<ActiveWindow>> = Mutex::new(None);
 
@@ -41,6 +40,8 @@ fn describe_window(window: &ActiveWindow) -> String {
 #[cfg(target_os = "macos")]
 fn focus_window(window: &ActiveWindow) -> Result<(), String> {
     use cocoa::appkit::{NSApplicationActivateIgnoringOtherApps, NSRunningApplication};
+    #[cfg(not(target_arch = "aarch64"))]
+    use cocoa::base::NO;
     use cocoa::base::{id, nil};
 
     unsafe {
@@ -49,10 +50,20 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
             window.process_id as i32,
         );
         if running_app != nil {
-            let activated = NSRunningApplication::activateWithOptions_(
+            let activated_raw = NSRunningApplication::activateWithOptions_(
                 running_app,
                 NSApplicationActivateIgnoringOtherApps,
             );
+            let activated = {
+                #[cfg(target_arch = "aarch64")]
+                {
+                    activated_raw
+                }
+                #[cfg(not(target_arch = "aarch64"))]
+                {
+                    activated_raw != NO
+                }
+            };
             if activated {
                 debug_println!(
                     "[insertion] activated app via NSRunningApplication: {}",
@@ -99,6 +110,7 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
 
 #[cfg(target_os = "windows")]
 fn parse_hwnd(window_id: &str) -> Result<windows::Win32::Foundation::HWND, String> {
+    use std::ffi::c_void;
     use windows::Win32::Foundation::HWND;
 
     let trimmed = window_id.trim();
@@ -109,13 +121,13 @@ fn parse_hwnd(window_id: &str) -> Result<windows::Win32::Foundation::HWND, Strin
         .trim_start_matches("0x");
     let value = usize::from_str_radix(hex_str, 16)
         .map_err(|_| format!("failed to parse window id {}", window_id))?;
-    Ok(HWND(value as isize))
+    Ok(HWND(value as *mut c_void))
 }
 
 #[cfg(target_os = "windows")]
 fn focus_window(window: &ActiveWindow) -> Result<(), String> {
     use windows::Win32::Foundation::HWND;
-    use windows::Win32::System::Threading::GetCurrentThreadId;
+    use windows::Win32::System::Threading::{AttachThreadInput, GetCurrentThreadId};
     use windows::Win32::UI::WindowsAndMessaging::{
         AttachThreadInput, BringWindowToTop, GetForegroundWindow, GetWindowThreadProcessId,
         IsIconic, SetForegroundWindow, ShowWindow, SW_RESTORE,
@@ -157,6 +169,7 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
 #[cfg(target_os = "linux")]
 fn focus_window(window: &ActiveWindow) -> Result<(), String> {
     use xcb::x;
+    use xcb::XidNew;
 
     let window_id: u32 = window
         .window_id
@@ -183,8 +196,9 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
 
     let net_active_window = atom("_NET_ACTIVE_WINDOW")?;
 
-    let data = x::ClientMessageData::from_data32([1, x::CURRENT_TIME, window_id, 0, 0]);
-    let event = x::ClientMessageEvent::new(32, x::Window::new(window_id), net_active_window, data);
+    let data = x::ClientMessageData::Data32([1, x::CURRENT_TIME, window_id, 0, 0]);
+    let window = unsafe { x::Window::new(window_id) };
+    let event = x::ClientMessageEvent::new(window, net_active_window, data);
 
     conn.send_request(&x::SendEvent {
         propagate: false,
@@ -204,27 +218,14 @@ fn focus_previous_window() -> Result<(), String> {
             describe_window(&window)
         );
         let result = focus_window(&window);
-        if let Err(err) = &result {
+        if let Err(ref err) = result {
             debug_println!("[insertion] failed to focus window: {}", err);
+            let _ = err;
         }
         result
     } else {
         debug_println!("[insertion] no previous window recorded");
         Err("no previous window recorded".to_string())
-    }
-}
-
-fn restore_clipboard(
-    old_clipboard: (
-        Result<String, arboard::Error>,
-        Result<arboard::ImageData<'static>, arboard::Error>,
-    ),
-) -> Result<(), String> {
-    let mut clipboard = Clipboard::new().map_err(|e| e.to_string())?;
-    match old_clipboard {
-        (Ok(text), _) => clipboard.set_text(text).map_err(|e| e.to_string()),
-        (_, Ok(image)) => clipboard.set_image(image).map_err(|e| e.to_string()),
-        _ => clipboard.clear().map_err(|e| e.to_string()),
     }
 }
 
@@ -234,26 +235,11 @@ fn replace_input_with_text(text: &str) -> Result<(), String> {
     }
 
     let mut enigo = Enigo::new(&Settings::default()).map_err(|e| e.to_string())?;
-
-    let old_clipboard = (
-        Clipboard::new().and_then(|mut c| c.get_text()),
-        Clipboard::new().and_then(|mut c| c.get_image()),
-    );
-
-    let mut clipboard = Clipboard::new().map_err(|e| e.to_string())?;
-    clipboard
-        .set_text(text.to_string())
-        .map_err(|e| e.to_string())?;
-
-    // thread::sleep(Duration::from_millis(20));
-
-    // select_all(&mut enigo);
-    // thread::sleep(Duration::from_millis(80));
-
-    paste(&mut enigo);
+    {
+        let _input_lock = INPUT_LOCK.lock();
+        enigo.text(text).map_err(|e| e.to_string())?;
+    }
     thread::sleep(Duration::from_millis(80));
-
-    restore_clipboard(old_clipboard)?;
 
     Ok(())
 }

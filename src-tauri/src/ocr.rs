@@ -1,3 +1,4 @@
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 use crate::insertion::remember_active_window;
 use debug_print::debug_println;
 #[cfg(target_os = "windows")]
