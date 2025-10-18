@@ -156,6 +156,7 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
 #[cfg(target_os = "linux")]
 fn focus_window(window: &ActiveWindow) -> Result<(), String> {
     use xcb::x;
+    use xcb::XidNew;
 
     let window_id: u32 = window
         .window_id
@@ -182,8 +183,9 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
 
     let net_active_window = atom("_NET_ACTIVE_WINDOW")?;
 
-    let data = x::ClientMessageData::from_data32([1, x::CURRENT_TIME, window_id, 0, 0]);
-    let event = x::ClientMessageEvent::new(32, x::Window::new(window_id), net_active_window, data);
+    let data = x::ClientMessageData::Data32([1, x::CURRENT_TIME, window_id, 0, 0]);
+    let window = unsafe { x::Window::new(window_id) };
+    let event = x::ClientMessageEvent::new(window, net_active_window, data);
 
     conn.send_request(&x::SendEvent {
         propagate: false,
@@ -203,7 +205,7 @@ fn focus_previous_window() -> Result<(), String> {
             describe_window(&window)
         );
         let result = focus_window(&window);
-        if let Err(err) = &result {
+        if let Err(ref err) = result {
             debug_println!("[insertion] failed to focus window: {}", err);
         }
         result
