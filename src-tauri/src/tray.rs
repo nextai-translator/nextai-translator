@@ -1,6 +1,7 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::config::get_config;
+use crate::insertion::remember_active_window;
 use crate::ocr::ocr;
 use crate::windows::{
     set_translator_window_always_on_top, show_settings_window, show_updater_window,
@@ -89,6 +90,7 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
             ocr();
         }
         "show" => {
+            remember_active_window();
             crate::windows::show_translator_window(false, false, true);
         }
         "hide" => {
@@ -111,6 +113,7 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
     tray.on_tray_icon_event(|_, event| {
         if let TrayIconEvent::Click { button, .. } = event {
             if button == MouseButton::Left {
+                remember_active_window();
                 crate::windows::show_translator_window(false, false, true);
             }
         };

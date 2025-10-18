@@ -1,4 +1,5 @@
 use crate::config;
+use crate::insertion::remember_active_window;
 use crate::utils;
 use crate::UpdateResult;
 use crate::ALWAYS_ON_TOP;
@@ -116,6 +117,7 @@ pub fn get_translator_window_always_on_top() -> bool {
 #[tauri::command]
 #[specta::specta]
 pub async fn show_translator_window_with_selected_text_command() {
+    remember_active_window();
     let mut window = show_translator_window(false, true, false);
     let mut enigo = Enigo::new(&Settings::default()).unwrap();
     let selected_text;
@@ -344,6 +346,7 @@ pub fn build_window<'a, R: tauri::Runtime, M: tauri::Manager<R>>(
 #[tauri::command]
 #[specta::specta]
 pub async fn show_translator_window_command() {
+    remember_active_window();
     show_translator_window(false, false, true);
 }
 
