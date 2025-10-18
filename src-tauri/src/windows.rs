@@ -11,7 +11,7 @@ use get_selected_text::get_selected_text;
 use mouse_position::mouse_position::Mouse;
 use serde_json::json;
 use std::sync::atomic::Ordering;
-use tauri::{LogicalPosition, Manager, PhysicalPosition};
+use tauri::{Emitter, Listener, LogicalPosition, Manager, PhysicalPosition};
 use tauri_plugin_updater::UpdaterExt;
 use tauri_specta::Event;
 
@@ -20,6 +20,7 @@ pub const SETTINGS_WIN_NAME: &str = "settings";
 pub const ACTION_MANAGER_WIN_NAME: &str = "action_manager";
 pub const UPDATER_WIN_NAME: &str = "updater";
 pub const THUMB_WIN_NAME: &str = "thumb";
+#[cfg(target_os = "windows")]
 pub const SCREENSHOT_WIN_NAME: &str = "screenshot";
 
 fn get_dummy_window() -> tauri::WebviewWindow {
@@ -215,6 +216,7 @@ pub fn get_thumb_window(x: i32, y: i32) -> tauri::WebviewWindow {
         }
         None => {
             debug_println!("Thumb window does not exist");
+            #[cfg_attr(not(target_os = "windows"), allow(unused_mut))]
             let mut builder = tauri::WebviewWindowBuilder::new(
                 handle,
                 THUMB_WIN_NAME,
@@ -245,7 +247,7 @@ pub fn get_thumb_window(x: i32, y: i32) -> tauri::WebviewWindow {
                 use windows::Win32::UI::WindowsAndMessaging::{
                     SetWindowLongPtrW, GWL_STYLE, WS_POPUP,
                 };
-                let hwnd: windows::Win32::Foundation::HWND = window.hwnd().unwrap();
+                let hwnd = window.hwnd().unwrap();
                 unsafe {
                     // let mut style = GetWindowLongPtrW(hwnd, GWL_STYLE);
                     // style = style & !(0x00020000 | 0x00010000 | 0x00080000); // WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU
@@ -599,11 +601,13 @@ pub fn get_updater_window() -> tauri::WebviewWindow {
     window
 }
 
+#[cfg(target_os = "windows")]
 pub fn show_screenshot_window() {
     let _ = get_screenshot_window();
     // window.show().unwrap();
 }
 
+#[cfg(target_os = "windows")]
 pub fn get_screenshot_window() -> tauri::WebviewWindow {
     let handle = APP_HANDLE.get().unwrap();
     let current_monitor = get_current_monitor();

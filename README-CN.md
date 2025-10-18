@@ -1,12 +1,10 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/1651790/224081217-86521beb-1b69-4071-b195-f2ce0bb33db7.png">
-  <img alt="NebulaGraph Data Intelligence Suite(ngdi)" src="https://user-images.githubusercontent.com/1651790/224081979-d3aa7867-94a6-4a85-a5d7-603e02360cee.png">
-</picture>
+# 因为收到了 OpenAI 公司的品牌名称所有权的警告，所以此项目和此产品改名为 nextai translator，望您能够理解。
+
 <p align="center">
     <br> <a href="README.md">English</a> | 中文
 </p>
 <p align="center">
-    <em>The translator that does more than just translation - powered by OpenAI.</em>
+    <em>The translator that does more than just translation</em>
 </p>
 
 <p align="center">

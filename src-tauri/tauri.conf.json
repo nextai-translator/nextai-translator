@@ -9,16 +9,7 @@
     "frontendDist": "../dist/tauri"
   },
   "plugins": {
-    "fs": {
-      "scope": {
-        "allow": [
-          "**",
-          "$CONFIG/*/**",
-          "$APPCONFIG/**",
-          "$APPCACHE/**"
-        ]
-      }
-    },
+    "fs": {},
     "shell": {
       "open": true
     },
@@ -35,6 +26,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "linux": {
       "deb": {
         "depends": [
@@ -67,7 +59,7 @@
       "resources/*"
     ],
     "shortDescription": "",
-    "targets": ["deb", "appimage", "nsis", "app", "dmg", "updater"],
+    "targets": ["deb", "appimage", "nsis", "app", "dmg"],
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
