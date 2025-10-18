@@ -2,12 +2,11 @@ use std::thread;
 use std::time::Duration;
 
 use active_win_pos_rs::{get_active_window, ActiveWindow};
-use arboard::Clipboard;
 use debug_print::debug_println;
-use enigo::{Enigo, Settings};
+use enigo::{Enigo, Keyboard, Settings};
 use parking_lot::Mutex;
 
-use crate::utils::{paste, select_all};
+use crate::utils::INPUT_LOCK;
 
 static PREVIOUS_ACTIVE_WINDOW: Mutex<Option<ActiveWindow>> = Mutex::new(None);
 
@@ -214,46 +213,17 @@ fn focus_previous_window() -> Result<(), String> {
     }
 }
 
-fn restore_clipboard(
-    old_clipboard: (
-        Result<String, arboard::Error>,
-        Result<arboard::ImageData<'static>, arboard::Error>,
-    ),
-) -> Result<(), String> {
-    let mut clipboard = Clipboard::new().map_err(|e| e.to_string())?;
-    match old_clipboard {
-        (Ok(text), _) => clipboard.set_text(text).map_err(|e| e.to_string()),
-        (_, Ok(image)) => clipboard.set_image(image).map_err(|e| e.to_string()),
-        _ => clipboard.clear().map_err(|e| e.to_string()),
-    }
-}
-
 fn replace_input_with_text(text: &str) -> Result<(), String> {
     if text.is_empty() {
         return Ok(());
     }
 
     let mut enigo = Enigo::new(&Settings::default()).map_err(|e| e.to_string())?;
-
-    let old_clipboard = (
-        Clipboard::new().and_then(|mut c| c.get_text()),
-        Clipboard::new().and_then(|mut c| c.get_image()),
-    );
-
-    let mut clipboard = Clipboard::new().map_err(|e| e.to_string())?;
-    clipboard
-        .set_text(text.to_string())
-        .map_err(|e| e.to_string())?;
-
-    // thread::sleep(Duration::from_millis(20));
-
-    // select_all(&mut enigo);
-    // thread::sleep(Duration::from_millis(80));
-
-    paste(&mut enigo);
+    {
+        let _input_lock = INPUT_LOCK.lock();
+        enigo.text(text).map_err(|e| e.to_string())?;
+    }
     thread::sleep(Duration::from_millis(80));
-
-    restore_clipboard(old_clipboard)?;
 
     Ok(())
 }
