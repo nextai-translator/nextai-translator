@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "download": "Download",
+    "docs": "Docs",
+    "community": "Community",
+    "about": "About"
+  },
+  "footer": {
+    "product": "Product",
+    "resources": "Resources",
+    "community": "Community",
+    "about": "About",
+    "changelog": "Changelog",
+    "roadmap": "Roadmap",
+    "api_keys": "API Keys Setup",
+    "faq": "FAQ",
+    "troubleshooting": "Troubleshooting",
+    "discussions": "Discussions",
+    "issues": "Report Issue",
+    "contributing": "Contributing",
+    "privacy": "Privacy Policy",
+    "license": "License",
+    "contact": "Contact",
+    "tagline": "Open-source AI translation tool supporting 55+ languages with multiple AI providers.",
+    "license_text": "Licensed under",
+    "made_with_love": "Made with ❤️ by the open-source community"
+  }
+}

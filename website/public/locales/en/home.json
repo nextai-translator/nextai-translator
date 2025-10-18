@@ -1,0 +1,70 @@
+{
+  "hero": {
+    "title": "AI-Powered Translation at Your Fingertips",
+    "subtitle": "Open-source translation tool supporting 55+ languages with multiple AI providers. Available as browser extension and desktop app.",
+    "cta_primary": "Get Started Free",
+    "cta_secondary": "Explore Features",
+    "stars": "Stars",
+    "open_source": "Open Source",
+    "multi_platform": "Multi-Platform"
+  },
+  "features": {
+    "title": "Powerful Features",
+    "subtitle": "Everything you need for seamless translation and language learning",
+    "multi_platform": {
+      "title": "Multi-Platform Support",
+      "description": "Available as browser extension, desktop app, userscript, and clip extensions"
+    },
+    "languages": {
+      "title": "55+ Languages",
+      "description": "Translate between all major world languages with high accuracy"
+    },
+    "ai_powered": {
+      "title": "Multiple AI Providers",
+      "description": "Choose from OpenAI, Claude, Gemini, and 10+ other AI providers"
+    },
+    "privacy": {
+      "title": "Privacy-Focused",
+      "description": "Your data stays private. Choose your own AI provider and API keys"
+    },
+    "fast": {
+      "title": "Lightning Fast",
+      "description": "Instant translations with streaming responses for real-time feedback"
+    },
+    "vocabulary": {
+      "title": "Vocabulary Book",
+      "description": "Save and review words with memory aids and spaced repetition"
+    },
+    "tts": {
+      "title": "Text-to-Speech",
+      "description": "Listen to pronunciations in multiple languages and voices"
+    },
+    "ocr": {
+      "title": "OCR Translation",
+      "description": "Translate text from screenshots and images instantly"
+    },
+    "learn_more": "Learn more about all features"
+  },
+  "platforms": {
+    "title": "Available Everywhere",
+    "subtitle": "Use nextai translator on all your devices with seamless sync",
+    "browser": {
+      "title": "Browser Extensions",
+      "description": "Install directly from your browser's extension store"
+    },
+    "desktop": {
+      "title": "Desktop Apps",
+      "description": "Native applications for Windows, macOS, and Linux"
+    },
+    "others": {
+      "title": "More Options",
+      "description": "Userscript and clip extensions for advanced users"
+    },
+    "cta": "View All Download Options"
+  },
+  "cta": {
+    "title": "Start Translating Today",
+    "subtitle": "Join thousands of users who trust nextai translator for their translation needs",
+    "button": "Download Now"
+  }
+}

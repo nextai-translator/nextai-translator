@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "home": "首页",
+    "features": "功能",
+    "download": "下载",
+    "docs": "文档",
+    "community": "社区",
+    "about": "关于"
+  },
+  "footer": {
+    "product": "产品",
+    "resources": "资源",
+    "community": "社区",
+    "about": "关于",
+    "changelog": "更新日志",
+    "roadmap": "路线图",
+    "api_keys": "API密钥设置",
+    "faq": "常见问题",
+    "troubleshooting": "故障排除",
+    "discussions": "讨论区",
+    "issues": "报告问题",
+    "contributing": "贡献指南",
+    "privacy": "隐私政策",
+    "license": "许可证",
+    "contact": "联系我们",
+    "tagline": "开源AI翻译工具，支持55+种语言和多个AI提供商。",
+    "license_text": "采用",
+    "made_with_love": "由开源社区用❤️打造"
+  }
+}

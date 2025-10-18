@@ -1,0 +1,70 @@
+{
+  "hero": {
+    "title": "AI驱动的翻译触手可及",
+    "subtitle": "开源翻译工具，支持55+种语言和多个AI提供商。提供浏览器扩展和桌面应用。",
+    "cta_primary": "免费开始使用",
+    "cta_secondary": "探索功能",
+    "stars": "星标",
+    "open_source": "开源",
+    "multi_platform": "多平台"
+  },
+  "features": {
+    "title": "强大功能",
+    "subtitle": "无缝翻译和语言学习所需的一切",
+    "multi_platform": {
+      "title": "多平台支持",
+      "description": "提供浏览器扩展、桌面应用、用户脚本和剪贴板扩展"
+    },
+    "languages": {
+      "title": "55+种语言",
+      "description": "在所有主要世界语言之间进行高精度翻译"
+    },
+    "ai_powered": {
+      "title": "多个AI提供商",
+      "description": "从OpenAI、Claude、Gemini等10+个AI提供商中选择"
+    },
+    "privacy": {
+      "title": "注重隐私",
+      "description": "您的数据保持私密。选择您自己的AI提供商和API密钥"
+    },
+    "fast": {
+      "title": "闪电般快速",
+      "description": "即时翻译，流式响应提供实时反馈"
+    },
+    "vocabulary": {
+      "title": "生词本",
+      "description": "保存和复习单词，配有记忆辅助和间隔重复"
+    },
+    "tts": {
+      "title": "文本转语音",
+      "description": "收听多种语言和声音的发音"
+    },
+    "ocr": {
+      "title": "OCR翻译",
+      "description": "即时翻译截图和图片中的文本"
+    },
+    "learn_more": "了解更多功能"
+  },
+  "platforms": {
+    "title": "随处可用",
+    "subtitle": "在所有设备上使用nextai translator，无缝同步",
+    "browser": {
+      "title": "浏览器扩展",
+      "description": "直接从浏览器扩展商店安装"
+    },
+    "desktop": {
+      "title": "桌面应用",
+      "description": "适用于Windows、macOS和Linux的原生应用"
+    },
+    "others": {
+      "title": "更多选项",
+      "description": "为高级用户提供的用户脚本和剪贴板扩展"
+    },
+    "cta": "查看所有下载选项"
+  },
+  "cta": {
+    "title": "今天就开始翻译",
+    "subtitle": "加入数千名信赖nextai translator满足翻译需求的用户",
+    "button": "立即下载"
+  }
+}
