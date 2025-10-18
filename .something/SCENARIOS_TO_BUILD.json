@@ -1,0 +1,1204 @@
+{
+  "project_name": "Official Website for nextai translator",
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "Homepage Hero Section Display",
+      "description": "Verify that the homepage hero section displays the value proposition, CTAs, and hero image correctly",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to homepage",
+          "description": "User opens the website homepage",
+          "context": "User arrives from search engine or direct URL"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify hero section elements",
+          "description": "Check that hero headline, subheadline, primary CTA, secondary CTA, and hero image are displayed",
+          "context": "Hero section should be immediately visible above the fold"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify value proposition clarity",
+          "description": "Ensure the value proposition is understandable within 10 seconds",
+          "context": "User should understand what nextai translator does immediately"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /",
+          "expected": "Homepage loads with hero section containing headline, subheadline, 2 CTAs, and hero image",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Check hero section HTML structure",
+          "expected": "Hero section has semantic HTML with proper heading hierarchy (h1 for main headline)",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Measure time to understand value proposition",
+          "expected": "Value proposition is clear within 10 seconds of viewing",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Hero section loads within 2 seconds",
+          "All hero elements are visible and properly styled",
+          "CTAs are clickable and functional",
+          "Value proposition is immediately clear"
+        ],
+        "failures": [
+          "Hero section fails to load",
+          "Missing hero elements",
+          "CTAs are not clickable",
+          "Unclear value proposition"
+        ],
+        "performance": [
+          "Hero section loads in <1 second",
+          "Images are optimized and lazy-loaded",
+          "No layout shift during load"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should include a hero section component with headline, subheadline, primary CTA (Download/Get Started), secondary CTA (View Demo/Learn More), and hero image/animation."
+      },
+      "expectation": "The homepage hero section should load quickly and display a compelling value proposition with clear CTAs that guide users to download or learn more about nextai translator.",
+      "prediction": "No implementation exists yet. Tests will fail until hero section component is created.",
+      "explanation": [
+        "Hero section component needs to be created in the website framework",
+        "Component should include headline emphasizing AI-powered translation",
+        "Primary CTA should link to download page or trigger download flow",
+        "Secondary CTA should link to features or demo section",
+        "Hero image should demonstrate the product in action"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Display hero section with clear value proposition and primary call-to-action (CTA). Showcase key features with visual demonstrations (screenshots, GIFs, or videos)."
+      }
+    },
+    {
+      "id": 2,
+      "name": "Platform Detection and Download Recommendation",
+      "description": "Verify that the download page detects user's platform and recommends the appropriate version",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to download page",
+          "description": "User clicks on Download CTA or navigates directly to /download",
+          "context": "User is on Windows, macOS, or Linux system"
+        },
+        {
+          "step_number": 2,
+          "action": "Platform detection executes",
+          "description": "System detects user's operating system and browser",
+          "context": "Detection should happen automatically on page load"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify recommended version is highlighted",
+          "description": "The detected platform's download option is prominently displayed",
+          "context": "Other platforms should still be accessible but less prominent"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify installation instructions",
+          "description": "Platform-specific installation instructions are shown",
+          "context": "Instructions should match the detected platform"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /download with Windows User-Agent",
+          "expected": "Windows .exe download is highlighted as recommended",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "GET /download with macOS User-Agent",
+          "expected": "macOS .dmg download is highlighted as recommended",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "GET /download with Chrome browser",
+          "expected": "Chrome Web Store extension is recommended",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "GET /download with Firefox browser",
+          "expected": "Firefox Add-ons extension is recommended",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "GET /download with Linux User-Agent",
+          "expected": "Linux packages are highlighted as recommended",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Platform is correctly detected",
+          "Recommended download is prominently displayed",
+          "Installation instructions match detected platform",
+          "All platform options remain accessible"
+        ],
+        "failures": [
+          "Platform detection fails",
+          "Wrong platform is recommended",
+          "Installation instructions don't match platform",
+          "Some platform options are not accessible"
+        ],
+        "performance": [
+          "Platform detection completes in <100ms",
+          "Page loads in <2 seconds"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should include user-agent detection logic, download page component with platform-specific sections, and dynamic highlighting based on detection."
+      },
+      "expectation": "The download page should automatically detect the user's platform and browser, then prominently display the most appropriate download option while keeping all other options accessible.",
+      "prediction": "No implementation exists yet. Tests will fail until download page with platform detection is created.",
+      "explanation": [
+        "Download page component needs to be created",
+        "Client-side or server-side user-agent detection required",
+        "Platform-specific download cards/sections needed",
+        "Conditional styling to highlight recommended option",
+        "Links to Chrome Web Store, Firefox Add-ons, and GitHub releases must be configured"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Detect user's platform and recommend appropriate version. Link to Chrome Web Store, Firefox Add-ons, and direct downloads for desktop apps (Windows .exe, macOS .dmg, Linux packages)."
+      }
+    },
+    {
+      "id": 3,
+      "name": "Multi-language Support and Language Switcher",
+      "description": "Verify that the website supports multiple languages with a functional language switcher",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Locate language switcher",
+          "description": "User finds the language switcher in the navigation header",
+          "context": "Language switcher should be prominently displayed"
+        },
+        {
+          "step_number": 2,
+          "action": "Open language menu",
+          "description": "User clicks on the language switcher",
+          "context": "Menu should display available languages"
+        },
+        {
+          "step_number": 3,
+          "action": "Select different language",
+          "description": "User selects Chinese Simplified from the menu",
+          "context": "At least English, Chinese (Simplified and Traditional), Japanese, Spanish, French, German should be available"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify content translation",
+          "description": "All website content updates to the selected language",
+          "context": "UI labels, navigation, content, and CTAs should be translated"
+        },
+        {
+          "step_number": 5,
+          "action": "Verify language persistence",
+          "description": "Language preference is saved for future visits",
+          "context": "Using localStorage or cookies"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Click language switcher and select Chinese",
+          "expected": "All content updates to Chinese and preference is saved",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Verify i18n keys are present for all pages",
+          "expected": "All pages have translation keys for priority languages",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Test language persistence across page navigation",
+          "expected": "Selected language persists when navigating between pages",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Test language switcher on mobile viewport",
+          "expected": "Language switcher is accessible and functional on mobile",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Language switcher is visible and accessible",
+          "At least 3 languages are available (English, Chinese Simplified, one other)",
+          "Content translates correctly when language is changed",
+          "Language preference persists across sessions",
+          "No untranslated text appears"
+        ],
+        "failures": [
+          "Language switcher is not visible",
+          "Language selection doesn't work",
+          "Content doesn't translate",
+          "Language preference is not saved",
+          "Some text remains untranslated"
+        ],
+        "performance": [
+          "Language switch completes in <500ms",
+          "No page reload required for language change"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should leverage i18next (same as product) with language detection and persistence. Translation files needed for each supported language."
+      },
+      "expectation": "Users should be able to easily switch between supported languages, with the entire website content updating to the selected language and the preference being remembered.",
+      "prediction": "No implementation exists yet. Tests will fail until i18n infrastructure and language switcher component are implemented.",
+      "explanation": [
+        "i18next configuration needs to be set up for the website",
+        "Language switcher component needs to be created in navigation",
+        "Translation JSON files required for each language (en, zh-CN, zh-TW, ja, es, fr, de)",
+        "Language detection logic (browser language) should be implemented",
+        "Language persistence using localStorage or cookies required",
+        "All pages and components need to be wrapped with i18n translation hooks"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Multi-language support matching the product's supported languages. Language switcher prominently displayed. Priority languages: English, Chinese (Simplified and Traditional), Japanese, Spanish, French, German."
+      }
+    },
+    {
+      "id": 4,
+      "name": "Features Showcase Section",
+      "description": "Verify that the features section displays all key features with visual demonstrations",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to features section",
+          "description": "User scrolls to features section on homepage or navigates to /features",
+          "context": "Features section should be prominent on homepage"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify feature cards",
+          "description": "Check that all key features are displayed: Multi-platform, 55+ languages, AI-powered, Privacy-focused, Open source, TTS/OCR, Vocabulary book",
+          "context": "Each feature should have title, description, and visual example"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify visual demonstrations",
+          "description": "Each feature includes a screenshot, GIF, or video demonstration",
+          "context": "Visual demonstrations should be optimized and load efficiently"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Navigate to features section",
+          "expected": "All 7+ key features are displayed with icons and descriptions",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Check for visual demonstrations",
+          "expected": "Each feature has a screenshot, GIF, or video",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Verify responsive layout on mobile",
+          "expected": "Features display correctly in grid or carousel on mobile",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All key features are displayed",
+          "Each feature has title, description, and visual example",
+          "Visual demonstrations load efficiently",
+          "Features are organized in a scannable layout"
+        ],
+        "failures": [
+          "Some features are missing",
+          "Visual demonstrations are broken or missing",
+          "Layout is not responsive",
+          "Features are hard to scan"
+        ],
+        "performance": [
+          "Feature section loads in <2 seconds",
+          "Images are lazy-loaded",
+          "Visual demonstrations are optimized (WebP/AVIF)"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should include feature showcase component with grid or carousel layout, feature cards, and optimized visual assets."
+      },
+      "expectation": "The features section should showcase all key features of nextai translator with clear descriptions and visual demonstrations, helping users understand the product's capabilities.",
+      "prediction": "No implementation exists yet. Tests will fail until features section component is created.",
+      "explanation": [
+        "Features showcase component needs to be created",
+        "Feature cards component for individual features required",
+        "Visual assets (screenshots, GIFs, videos) need to be created and optimized",
+        "Responsive grid or carousel layout needed",
+        "Features list: Multi-platform support, 55+ languages, AI-powered translation, Privacy-focused, Open source, TTS/OCR, Vocabulary book",
+        "Lazy loading for images and videos recommended"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Showcase key features with visual demonstrations (screenshots, GIFs, or videos). Highlight multi-platform support (browser extensions, desktop apps, userscripts, clip extensions)."
+      }
+    },
+    {
+      "id": 5,
+      "name": "API Key Configuration Documentation",
+      "description": "Verify that comprehensive API key setup guides are available for all supported AI providers",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to documentation section",
+          "description": "User clicks on Docs in navigation or visits /docs",
+          "context": "New user needs to configure API key to use the product"
+        },
+        {
+          "step_number": 2,
+          "action": "Find API key setup guide",
+          "description": "User locates the API key configuration section",
+          "context": "Should be easy to find from documentation homepage"
+        },
+        {
+          "step_number": 3,
+          "action": "Select AI provider",
+          "description": "User selects their preferred AI provider (e.g., OpenAI, Claude, Gemini)",
+          "context": "At least 3 major providers should have detailed guides"
+        },
+        {
+          "step_number": 4,
+          "action": "Follow setup instructions",
+          "description": "User follows step-by-step instructions with screenshots",
+          "context": "Instructions should cover: obtaining API key, configuring in extension/app, testing connection"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Navigate to /docs/api-keys",
+          "expected": "API key setup guide page loads with provider selection",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Check for OpenAI setup guide",
+          "expected": "OpenAI guide includes step-by-step instructions with screenshots",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Check for Claude setup guide",
+          "expected": "Claude guide includes step-by-step instructions with screenshots",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Check for Gemini setup guide",
+          "expected": "Gemini guide includes step-by-step instructions with screenshots",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Verify troubleshooting section",
+          "expected": "Common API key issues and solutions are documented",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "API key documentation is easily discoverable",
+          "Guides exist for all major providers (OpenAI, Claude, Gemini, Azure OpenAI)",
+          "Step-by-step instructions with screenshots",
+          "Troubleshooting section for common issues",
+          "Instructions are up-to-date with current provider UIs"
+        ],
+        "failures": [
+          "Documentation is hard to find",
+          "Some providers lack guides",
+          "Instructions are unclear or incomplete",
+          "Screenshots are outdated",
+          "No troubleshooting help"
+        ],
+        "performance": [
+          "Documentation pages load in <1.5 seconds",
+          "Search functionality (if implemented) returns results in <500ms"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should include documentation pages in Markdown/MDX format, with provider-specific guides and troubleshooting content."
+      },
+      "expectation": "Users should be able to easily find comprehensive, step-by-step guides for configuring API keys for all major AI providers, reducing setup friction and support requests.",
+      "prediction": "No implementation exists yet. Tests will fail until documentation infrastructure and API key guides are created.",
+      "explanation": [
+        "Documentation infrastructure needs to be set up (Markdown/MDX)",
+        "API key configuration page/section needs to be created",
+        "Individual guides required for each provider: OpenAI, Claude, Gemini, Azure OpenAI, Moonshot, DeepSeek, Groq, etc.",
+        "Screenshots showing provider dashboard and API key locations needed",
+        "Instructions for pasting API key into extension/app settings required",
+        "Troubleshooting section for common errors (invalid key, rate limits, permissions)",
+        "Documentation navigation and search functionality recommended"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "API key configuration guides for supported LLM providers (OpenAI, Azure OpenAI, Claude, Gemini, etc.). Configuration instructions for each provider. Comparison of providers (features, pricing considerations, setup complexity)."
+      }
+    },
+    {
+      "id": 6,
+      "name": "Performance Optimization and Core Web Vitals",
+      "description": "Verify that the website meets performance benchmarks including Lighthouse score ≥90 and load time <2 seconds",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Run Lighthouse audit on homepage",
+          "description": "Execute Lighthouse performance audit",
+          "context": "Should be tested on both desktop and mobile"
+        },
+        {
+          "step_number": 2,
+          "action": "Measure Core Web Vitals",
+          "description": "Check LCP, FID, CLS metrics",
+          "context": "LCP <2.5s, FID <100ms, CLS <0.1"
+        },
+        {
+          "step_number": 3,
+          "action": "Test on 3G connection",
+          "description": "Measure page load time on throttled connection",
+          "context": "Should load in <2 seconds even on 3G"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify image optimization",
+          "description": "Check that images use modern formats (WebP/AVIF) and are lazy-loaded",
+          "context": "Images should be responsive and optimized for different screen sizes"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "lighthouse --preset=desktop https://localhost:3000",
+          "expected": "Performance score ≥90, Accessibility ≥90, Best Practices ≥90, SEO ≥90",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "lighthouse --preset=mobile https://localhost:3000",
+          "expected": "Performance score ≥90 on mobile",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Measure page load on 3G throttle",
+          "expected": "Initial page load <2 seconds, Time to Interactive <3 seconds",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Check image formats",
+          "expected": "All images use WebP or AVIF with fallbacks",
+          "type": "unit"
+        },
+        {
+          "id": 5,
+          "input": "Verify lazy loading",
+          "expected": "Images below the fold are lazy-loaded",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Lighthouse performance score ≥90",
+          "LCP <2.5 seconds",
+          "FID <100 milliseconds",
+          "CLS <0.1",
+          "Page loads in <2 seconds on 3G",
+          "All images optimized and lazy-loaded"
+        ],
+        "failures": [
+          "Lighthouse score <90",
+          "Core Web Vitals don't meet thresholds",
+          "Slow load times",
+          "Unoptimized images",
+          "No lazy loading"
+        ],
+        "performance": [
+          "TTI <3 seconds",
+          "Total page size <2MB",
+          "Critical CSS inlined",
+          "JavaScript code-split and lazy-loaded"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should use static site generation (SSG), optimize images, implement lazy loading, and follow performance best practices."
+      },
+      "expectation": "The website should load quickly and score at least 90 on Lighthouse performance, providing an excellent user experience even on slower connections.",
+      "prediction": "No implementation exists yet. Tests will fail until website is built with performance optimizations.",
+      "explanation": [
+        "Website framework should support SSG or SSR for optimal performance",
+        "Image optimization pipeline needed (WebP/AVIF conversion, responsive images)",
+        "Lazy loading for images and videos required",
+        "Code splitting and lazy loading for JavaScript",
+        "Critical CSS inlining",
+        "CDN configuration for static assets",
+        "Font optimization (subset fonts, preload critical fonts)",
+        "Lighthouse CI integration for continuous performance monitoring"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Initial page load time <2 seconds on 3G connection. Time to Interactive (TTI) <3 seconds. Lighthouse performance score ≥90. Images optimized and lazy-loaded. CDN delivery for static assets."
+      }
+    },
+    {
+      "id": 7,
+      "name": "SEO Implementation and Meta Tags",
+      "description": "Verify that the website has proper SEO implementation including meta tags, sitemap, and structured data",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Check page meta tags",
+          "description": "Verify that each page has proper title, description, and Open Graph tags",
+          "context": "Meta tags should be unique and descriptive for each page"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify sitemap.xml",
+          "description": "Check that sitemap.xml exists and includes all pages",
+          "context": "Sitemap should be accessible at /sitemap.xml"
+        },
+        {
+          "step_number": 3,
+          "action": "Check structured data",
+          "description": "Verify that Schema.org structured data is implemented",
+          "context": "Should include Organization, WebSite, and SoftwareApplication schemas"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify robots.txt",
+          "description": "Check that robots.txt is configured correctly",
+          "context": "Should allow indexing of all public pages"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET / and check <head> meta tags",
+          "expected": "Title, description, OG tags, Twitter Card tags are present and valid",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "GET /sitemap.xml",
+          "expected": "Sitemap exists and includes all pages with proper format",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Check for structured data with Google's Rich Results Test",
+          "expected": "Valid Schema.org structured data for Organization and SoftwareApplication",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "GET /robots.txt",
+          "expected": "Robots.txt allows crawling and references sitemap",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Check canonical URLs on all pages",
+          "expected": "Each page has proper canonical URL",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All pages have unique, descriptive meta tags",
+          "Sitemap.xml is present and valid",
+          "Structured data is implemented correctly",
+          "Robots.txt allows indexing",
+          "Canonical URLs are set correctly",
+          "Open Graph and Twitter Card tags present"
+        ],
+        "failures": [
+          "Missing or duplicate meta tags",
+          "No sitemap",
+          "Invalid structured data",
+          "Robots.txt blocks indexing",
+          "Missing canonical URLs"
+        ],
+        "performance": [
+          "Meta tags render with SSR/SSG",
+          "No client-side meta tag injection"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should include meta tag configuration for each page, sitemap generation, and structured data schemas."
+      },
+      "expectation": "The website should have comprehensive SEO implementation to rank well in search engines and display properly when shared on social media.",
+      "prediction": "No implementation exists yet. Tests will fail until SEO infrastructure is implemented.",
+      "explanation": [
+        "Meta tags component or configuration needed for each page",
+        "Sitemap generation (automatic or manual) required",
+        "Schema.org structured data for Organization, WebSite, SoftwareApplication, FAQPage",
+        "Robots.txt file configuration",
+        "Canonical URL setup for each page",
+        "Open Graph tags for social sharing",
+        "Twitter Card tags for Twitter sharing",
+        "Consider using Next.js Head component or similar for meta management"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Server-side rendering (SSR) or static site generation (SSG) for optimal SEO. Semantic HTML structure with proper heading hierarchy. Meta tags, Open Graph, and Twitter Card support. XML sitemap and robots.txt. Structured data markup (Schema.org)."
+      }
+    },
+    {
+      "id": 8,
+      "name": "Accessibility Compliance (WCAG 2.1 AA)",
+      "description": "Verify that the website meets WCAG 2.1 AA accessibility standards",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Run automated accessibility audit",
+          "description": "Use axe or Lighthouse accessibility audit",
+          "context": "Should identify critical accessibility issues"
+        },
+        {
+          "step_number": 2,
+          "action": "Test keyboard navigation",
+          "description": "Navigate entire site using only keyboard (Tab, Enter, Escape)",
+          "context": "All interactive elements should be keyboard accessible"
+        },
+        {
+          "step_number": 3,
+          "action": "Test with screen reader",
+          "description": "Navigate site using NVDA or VoiceOver",
+          "context": "Content should be properly announced by screen reader"
+        },
+        {
+          "step_number": 4,
+          "action": "Check color contrast",
+          "description": "Verify that all text meets minimum 4.5:1 contrast ratio",
+          "context": "Use contrast checker tool"
+        },
+        {
+          "step_number": 5,
+          "action": "Verify alt text",
+          "description": "Check that all images have descriptive alt text",
+          "context": "Decorative images should have empty alt"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Run axe accessibility audit",
+          "expected": "No critical or serious accessibility violations",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Lighthouse accessibility audit",
+          "expected": "Accessibility score ≥90",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Test keyboard navigation through all interactive elements",
+          "expected": "Can access all buttons, links, forms using only keyboard",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Check color contrast for all text",
+          "expected": "All text meets 4.5:1 contrast ratio (3:1 for large text)",
+          "type": "unit"
+        },
+        {
+          "id": 5,
+          "input": "Verify ARIA labels and landmarks",
+          "expected": "Proper ARIA labels on interactive elements, semantic HTML landmarks",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Lighthouse accessibility score ≥90",
+          "All interactive elements keyboard accessible",
+          "Skip navigation link present",
+          "Focus indicators visible on all focusable elements",
+          "Color contrast meets WCAG AA standards",
+          "All images have alt text",
+          "Screen reader navigation works correctly",
+          "ARIA labels used appropriately"
+        ],
+        "failures": [
+          "Accessibility violations detected",
+          "Some elements not keyboard accessible",
+          "Poor color contrast",
+          "Missing alt text",
+          "Screen reader issues",
+          "Missing ARIA labels"
+        ],
+        "performance": [
+          "No accessibility blockers",
+          "Proper semantic HTML structure"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should follow WCAG 2.1 AA guidelines from the start, including semantic HTML, keyboard navigation, ARIA labels, and sufficient contrast."
+      },
+      "expectation": "The website should be fully accessible to users with disabilities, meeting WCAG 2.1 AA standards and working correctly with assistive technologies.",
+      "prediction": "No implementation exists yet. Tests will fail until website is built with accessibility best practices.",
+      "explanation": [
+        "Use semantic HTML elements (header, nav, main, section, footer, article)",
+        "Implement skip navigation link for keyboard users",
+        "Ensure all interactive elements are focusable and have visible focus indicators",
+        "Add ARIA labels where semantic HTML is insufficient",
+        "Provide alt text for all meaningful images",
+        "Use ARIA landmarks for major sections",
+        "Ensure color contrast meets 4.5:1 ratio for normal text, 3:1 for large text",
+        "Test with keyboard navigation and screen readers",
+        "Include accessibility testing in CI/CD pipeline"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "WCAG 2.1 AA compliance minimum. Keyboard navigation support. Screen reader compatible. Sufficient color contrast ratios (4.5:1 for normal text). Alt text for all images. ARIA labels where appropriate."
+      }
+    },
+    {
+      "id": 9,
+      "name": "Mobile Responsive Design",
+      "description": "Verify that the website is fully responsive and works well on mobile devices",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Test on mobile viewports",
+          "description": "View website on 320px, 375px, 414px, and tablet sizes",
+          "context": "Layout should adapt gracefully to all screen sizes"
+        },
+        {
+          "step_number": 2,
+          "action": "Test mobile navigation",
+          "description": "Verify that navigation collapses to hamburger menu on mobile",
+          "context": "Menu should be easy to open and use on touchscreens"
+        },
+        {
+          "step_number": 3,
+          "action": "Test touch targets",
+          "description": "Verify that all buttons and links have minimum 44x44px touch targets",
+          "context": "Touch targets should be easy to tap without mistakes"
+        },
+        {
+          "step_number": 4,
+          "action": "Test on real devices",
+          "description": "Test on actual iOS and Android devices",
+          "context": "Should work on latest iOS Safari and Chrome for Android"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "View homepage at 320px width",
+          "expected": "Content displays correctly without horizontal scroll",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "View homepage at 375px width (iPhone SE)",
+          "expected": "Layout is readable and functional",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "View homepage at 768px width (tablet)",
+          "expected": "Layout adapts to tablet size appropriately",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Test hamburger menu on mobile",
+          "expected": "Navigation collapses to hamburger, opens smoothly, closes on selection",
+          "type": "e2e"
+        },
+        {
+          "id": 5,
+          "input": "Measure touch target sizes",
+          "expected": "All interactive elements are at least 44x44px",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Website works on all viewport sizes from 320px to 4K",
+          "No horizontal scrolling on mobile",
+          "Navigation adapts to hamburger menu on mobile",
+          "Touch targets are appropriately sized (≥44x44px)",
+          "Text is readable without zooming",
+          "Images scale appropriately",
+          "Works on iOS Safari and Chrome for Android"
+        ],
+        "failures": [
+          "Layout breaks on some viewports",
+          "Horizontal scrolling required",
+          "Navigation doesn't work on mobile",
+          "Touch targets too small",
+          "Text too small to read",
+          "Images overflow or distort"
+        ],
+        "performance": [
+          "Mobile load time <3 seconds on 4G",
+          "No layout shift on mobile"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should use mobile-first responsive design with CSS Grid/Flexbox, responsive images, and mobile-optimized navigation."
+      },
+      "expectation": "The website should provide an excellent experience on mobile devices, with responsive layouts, touch-friendly interactions, and fast load times.",
+      "prediction": "No implementation exists yet. Tests will fail until responsive design is implemented.",
+      "explanation": [
+        "Use mobile-first CSS approach",
+        "Implement responsive breakpoints (320px, 768px, 1024px, 1440px)",
+        "Create hamburger menu component for mobile navigation",
+        "Ensure all touch targets are at least 44x44px",
+        "Use responsive images with srcset",
+        "Test on real devices (iOS Safari, Chrome for Android)",
+        "Consider using CSS Grid and Flexbox for responsive layouts",
+        "Optimize font sizes for mobile readability"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Mobile-first approach. Support for devices from 320px to 4K displays. Touch-friendly navigation on mobile devices. Optimized layouts for tablet and desktop."
+      }
+    },
+    {
+      "id": 10,
+      "name": "GitHub Integration and Social Proof",
+      "description": "Verify that GitHub stars, contributors, and release information are displayed correctly",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Check GitHub stars display",
+          "description": "Verify that real-time GitHub stars count is displayed",
+          "context": "Stars should be fetched from GitHub API"
+        },
+        {
+          "step_number": 2,
+          "action": "Check release information",
+          "description": "Verify that latest release version and date are shown",
+          "context": "Should link to GitHub releases page"
+        },
+        {
+          "step_number": 3,
+          "action": "Check contributors section",
+          "description": "Verify that contributors are displayed",
+          "context": "Optional: Show top contributors with avatars"
+        },
+        {
+          "step_number": 4,
+          "action": "Test GitHub links",
+          "description": "Verify that links to repository, issues, and discussions work",
+          "context": "Links should open in new tab"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Fetch GitHub stars via API",
+          "expected": "Stars count is fetched and displayed correctly",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Fetch latest release via GitHub API",
+          "expected": "Latest release version and date are displayed",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Click GitHub repository link",
+          "expected": "Opens GitHub repository in new tab",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Test API error handling",
+          "expected": "Graceful fallback when GitHub API is unavailable",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "GitHub stars count is displayed and accurate",
+          "Latest release information is shown",
+          "GitHub links are functional",
+          "Contributors are displayed (if implemented)",
+          "Graceful fallback if API fails"
+        ],
+        "failures": [
+          "GitHub data not displayed",
+          "API errors not handled",
+          "Broken links",
+          "Outdated information"
+        ],
+        "performance": [
+          "GitHub API calls cached to avoid rate limits",
+          "Data refreshes appropriately (e.g., daily)"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should use GitHub API to fetch stars, releases, and contributors. Consider caching strategy to avoid rate limits."
+      },
+      "expectation": "The website should display social proof from GitHub, including stars count, latest release information, and links to the repository, building trust and credibility.",
+      "prediction": "No implementation exists yet. Tests will fail until GitHub integration is implemented.",
+      "explanation": [
+        "Implement GitHub API integration (REST or GraphQL)",
+        "Fetch repository stars count",
+        "Fetch latest release version and date",
+        "Optional: Fetch contributors list",
+        "Display GitHub stars badge/counter prominently",
+        "Implement caching strategy (e.g., cache for 24 hours) to avoid rate limits",
+        "Handle API errors gracefully with fallback data",
+        "Consider using SSG to fetch data at build time"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Fetch real-time GitHub stars count via GitHub API. Display latest release version and release notes. Link to repository, issues, and discussions."
+      }
+    },
+    {
+      "id": 11,
+      "name": "Documentation Navigation and Search",
+      "description": "Verify that documentation is well-organized with navigation and search functionality",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to documentation section",
+          "description": "User visits /docs",
+          "context": "Documentation homepage should provide overview and navigation"
+        },
+        {
+          "step_number": 2,
+          "action": "Browse documentation categories",
+          "description": "User explores Getting Started, Features, API Keys, Troubleshooting sections",
+          "context": "Navigation should be clear and hierarchical"
+        },
+        {
+          "step_number": 3,
+          "action": "Use search functionality",
+          "description": "User searches for specific topic (e.g., 'API key')",
+          "context": "Search should return relevant results quickly"
+        },
+        {
+          "step_number": 4,
+          "action": "Navigate between pages",
+          "description": "User clicks on documentation links to navigate",
+          "context": "Navigation should update to show current location"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /docs",
+          "expected": "Documentation homepage loads with navigation sidebar",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Search for 'API key'",
+          "expected": "Search returns relevant documentation pages",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Navigate to /docs/getting-started",
+          "expected": "Getting started guide loads with proper navigation highlighting",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Check documentation structure",
+          "expected": "Documentation follows logical hierarchy: Getting Started, Features, API Keys, Troubleshooting, FAQ",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Documentation is well-organized with clear categories",
+          "Navigation sidebar shows current location",
+          "Search functionality returns relevant results",
+          "Documentation is comprehensive and up-to-date",
+          "Internal links work correctly"
+        ],
+        "failures": [
+          "Poor documentation organization",
+          "Navigation is confusing",
+          "Search doesn't work or returns poor results",
+          "Broken internal links",
+          "Outdated content"
+        ],
+        "performance": [
+          "Documentation pages load in <1.5 seconds",
+          "Search returns results in <500ms"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should include documentation framework (e.g., Docusaurus, Nextra) with sidebar navigation and search."
+      },
+      "expectation": "Users should be able to easily find and navigate documentation, with search functionality helping them quickly locate specific information.",
+      "prediction": "No implementation exists yet. Tests will fail until documentation infrastructure is implemented.",
+      "explanation": [
+        "Choose documentation framework (Docusaurus, Nextra, or custom with Markdown)",
+        "Create documentation structure: Getting Started, Features, API Keys, Troubleshooting, FAQ",
+        "Implement sidebar navigation with highlighting of current page",
+        "Add search functionality (Algolia DocSearch, Pagefind, or built-in)",
+        "Create comprehensive documentation content",
+        "Implement breadcrumb navigation",
+        "Add table of contents for long pages",
+        "Include 'Last Updated' dates on documentation pages"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Getting started guide with step-by-step setup instructions. Feature documentation covering translation modes, AI provider configuration, keyboard shortcuts, and advanced features. FAQ section addressing common questions and troubleshooting."
+      }
+    },
+    {
+      "id": 12,
+      "name": "Analytics and Conversion Tracking",
+      "description": "Verify that analytics are properly configured to track user behavior and conversions",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Configure analytics platform",
+          "description": "Set up Google Analytics or privacy-focused alternative (Plausible, Fathom)",
+          "context": "Analytics should respect user privacy"
+        },
+        {
+          "step_number": 2,
+          "action": "Track page views",
+          "description": "Verify that page views are tracked on all pages",
+          "context": "Page views should be sent on route changes"
+        },
+        {
+          "step_number": 3,
+          "action": "Track conversion events",
+          "description": "Track download clicks, CTA clicks, external link clicks",
+          "context": "Events should include relevant parameters (e.g., platform for downloads)"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify event parameters",
+          "description": "Check that events include useful context (platform, feature, language)",
+          "context": "Parameters help understand user behavior"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Navigate to homepage",
+          "expected": "Page view event is tracked",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Click Download CTA",
+          "expected": "'download_click' event is tracked with platform parameter",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Click Chrome Web Store link",
+          "expected": "'chrome_store_click' event is tracked",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Click GitHub repository link",
+          "expected": "'github_click' event is tracked",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Change website language",
+          "expected": "'language_change' event is tracked with language parameter",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Analytics platform is configured",
+          "Page views are tracked on all pages",
+          "Conversion events are tracked (downloads, CTA clicks)",
+          "Events include useful parameters",
+          "Privacy is respected (opt-in/opt-out mechanism if using GA)",
+          "Analytics data is visible in dashboard"
+        ],
+        "failures": [
+          "Analytics not configured",
+          "Events not tracked",
+          "Missing parameters",
+          "Privacy concerns",
+          "Data not appearing in dashboard"
+        ],
+        "performance": [
+          "Analytics script loads asynchronously",
+          "No impact on page load performance"
+        ]
+      },
+      "implementation": {
+        "files": [],
+        "notes": "No implementation exists yet. This is TDD red phase. Implementation should include analytics integration with event tracking for key conversions and user actions."
+      },
+      "expectation": "Analytics should be properly configured to track user behavior, conversions, and key metrics, providing insights for optimization while respecting user privacy.",
+      "prediction": "No implementation exists yet. Tests will fail until analytics integration is implemented.",
+      "explanation": [
+        "Choose analytics platform (Google Analytics 4, Plausible, Fathom, or similar)",
+        "Install analytics script/SDK",
+        "Track page views on route changes",
+        "Implement conversion event tracking: download_click, chrome_store_click, firefox_store_click, github_click, api_guide_view",
+        "Add parameters to events (platform, feature, language, etc.)",
+        "Consider privacy: cookie consent, opt-out mechanism, anonymization",
+        "Set up custom events for feature demos, documentation searches, etc.",
+        "Configure goals/conversions in analytics dashboard"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Privacy-respecting analytics implementation. User behavior tracking (page views, CTA clicks, download conversions). Performance monitoring. Analytics tracking configured and validated."
+      }
+    }
+  ],
+  "summary": {
+    "total_scenarios": 12,
+    "complexity": "high",
+    "estimated_time": "240 minutes (initial test creation and framework setup)"
+  },
+  "test_mapping": {
+    "notes": "This is TDD red phase. No tests exist yet. Test files should be created in the website repository following the chosen framework's conventions (e.g., Next.js with Jest/Testing Library, Playwright for E2E)."
+  }
+}
