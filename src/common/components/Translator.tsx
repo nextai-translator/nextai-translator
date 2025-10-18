@@ -10,7 +10,7 @@ import { AiOutlineFileSync } from 'react-icons/ai'
 import { IoSettingsOutline } from 'react-icons/io5'
 import { TiArrowBack } from 'react-icons/ti'
 import { TbArrowsExchange, TbCsv } from 'react-icons/tb'
-import { MdOutlineGrade, MdGrade } from 'react-icons/md'
+import { MdOutlineGrade, MdGrade, MdOutlineInput } from 'react-icons/md'
 import * as mdIcons from 'react-icons/md'
 import { StatefulTooltip } from 'baseui-sd/tooltip'
 import { detectLang, getLangConfig, sourceLanguages, targetLanguages, LangCode } from '../lang'
@@ -41,7 +41,7 @@ import { BsTextareaT } from 'react-icons/bs'
 import { FcIdea } from 'react-icons/fc'
 import rocket from '../assets/images/rocket.gif'
 import partyPopper from '../assets/images/party-popper.gif'
-import { listen, Event } from '@tauri-apps/api/event'
+import { listen, type Event, type UnlistenFn } from '@tauri-apps/api/event'
 import IpLocationNotification from '../components/IpLocationNotification'
 import { HighlightInTextarea } from '../highlight-in-textarea'
 import { LRUCache } from 'lru-cache'
@@ -74,7 +74,7 @@ import { useLazyEffect } from '../usehooks'
 import LogoWithText, { type LogoWithTextRef } from './LogoWithText'
 import Toaster from './Toaster'
 import { readFile } from '@tauri-apps/plugin-fs'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDeepCompareCallback } from 'use-deep-compare'
 import { useTranslatorStore } from '../store'
 import useSWR from 'swr'
@@ -520,10 +520,10 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         if (!isDesktopApp()) {
             return
         }
-        let unlisten: undefined | (() => void)
+        let unlisten: UnlistenFn | undefined
         listen('refresh-actions', () => {
             refreshActions()
-        }).then((cb) => {
+        }).then((cb: UnlistenFn) => {
             unlisten = cb
         })
         return () => {
@@ -604,8 +604,8 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         if (!isTauri()) {
             return undefined
         }
-        let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        let unlisten: UnlistenFn | undefined
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 const editor = editorRef.current
@@ -614,7 +614,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 }
                 editor.focus()
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
         return () => {
@@ -1402,6 +1402,26 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         setActionStr('Stopped')
     }
 
+    const handleInsertTranslatedText = useCallback(async () => {
+        if (!translatedText || !isTauri()) {
+            return
+        }
+        try {
+            const { commands } = await import('@/tauri/bindings')
+            await commands.insertTranslationIntoPreviousInput(translatedText)
+            toast(t('Inserted into previous input'), {
+                icon: '✅',
+                duration: 2000,
+            })
+        } catch (error) {
+            console.error(error)
+            toast(t('Failed to insert into previous input'), {
+                icon: '⚠️',
+                duration: 3000,
+            })
+        }
+    }, [t, translatedText])
+
     const [isScrolledToTop, setIsScrolledToTop] = useState(false)
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(false)
 
@@ -1501,13 +1521,13 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         if (!isTauri()) {
             return undefined
         }
-        let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        let unlisten: UnlistenFn | undefined
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 refetchPromotions()
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
         return () => {
@@ -1530,14 +1550,14 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 clearInterval(timer)
             }
         }
-        let unlisten: (() => void) | undefined = undefined
-        const appWindow = getCurrent()
+        let unlisten: UnlistenFn | undefined
+        const appWindow = WebviewWindow.getCurrent()
         appWindow
             .listen('tauri://focus', () => {
                 choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)
                 choicePromotionItem(promotions?.settings_header).then(setSettingsHeaderPromotion)
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
         return () => {
@@ -2299,6 +2319,19 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                             ) : (
                                                                 <LuStarOff size={15} />
                                                             )}
+                                                        </div>
+                                                    </Tooltip>
+                                                )}
+                                                {isTauri() && (
+                                                    <Tooltip
+                                                        content={t('Insert into previous input')}
+                                                        placement='bottom'
+                                                    >
+                                                        <div
+                                                            className={styles.actionButton}
+                                                            onClick={handleInsertTranslatedText}
+                                                        >
+                                                            <MdOutlineInput size={15} />
                                                         </div>
                                                     </Tooltip>
                                                 )}

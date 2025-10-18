@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { Translator } from '../../common/components/Translator'
 import { Client as Styletron } from 'styletron-engine-atomic'
-import { listen, Event } from '@tauri-apps/api/event'
+import { listen, type Event, type UnlistenFn } from '@tauri-apps/api/event'
 import { bindDisplayWindowHotkey, bindHotkey, bindOCRHotkey, bindWritingHotkey, onSettingsSave } from '../utils'
 import { v4 as uuidv4 } from 'uuid'
 import { PREFIX } from '../../common/constants'
@@ -11,7 +11,7 @@ import { useSettings } from '../../common/hooks/useSettings'
 import { setupAnalysis } from '../../common/analysis'
 import { Window } from '../components/Window'
 import { setExternalOriginalText } from '../../common/store'
-import { getCurrent } from '@tauri-apps/api/webviewWindow'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { usePinned } from '../../common/hooks/usePinned'
 import { useMemoWindow } from '../../common/hooks/useMemoWindow'
 import { isMacOS } from '@/common/utils'
@@ -76,7 +76,7 @@ export function TranslatorWindow() {
     }, [])
 
     useEffect(() => {
-        let unlisten: (() => void) | undefined = undefined
+        let unlisten: UnlistenFn | undefined
         ;(async () => {
             unlisten = await listen('change-text', async (event: Event<string>) => {
                 const selectedText = event.payload
@@ -93,7 +93,7 @@ export function TranslatorWindow() {
     }, [])
 
     useEffect(() => {
-        let unlisten: (() => void) | undefined = undefined
+        let unlisten: UnlistenFn | undefined
         ;(async () => {
             unlisten = await listen('show-settings', async () => {
                 const uuid_ = uuidv4().replace(/-/g, '').slice(0, 6)
@@ -110,7 +110,7 @@ export function TranslatorWindow() {
         if (!settings?.writingTargetLanguage) {
             return
         }
-        let unlisten: () => void | undefined
+        let unlisten: UnlistenFn | undefined
         ;(async () => {
             unlisten = await listen('writing-text', async (event: Event<string>) => {
                 const inputText = event.payload
@@ -156,7 +156,7 @@ export function TranslatorWindow() {
     }, [settings.writingTargetLanguage])
 
     useEffect(() => {
-        let unlisten
+        let unlisten: UnlistenFn | undefined
         ;(async () => {
             unlisten = await listen('show', async () => {
                 const uuid_ = uuidv4().replace(/-/g, '').slice(0, 6)
@@ -169,11 +169,14 @@ export function TranslatorWindow() {
     const { pinned } = usePinned()
 
     useEffect(() => {
-        const appWindow = getCurrent()
-        let unlisten: (() => void) | undefined = undefined
-        let timer: number | undefined = undefined
+        const appWindow = WebviewWindow.getCurrent()
+        let unlisten: UnlistenFn | undefined
+        let timer: number | undefined
         appWindow
-            .onFocusChanged(({ payload: focused }) => {
+            .onFocusChanged(({ payload: focused }: Event<boolean>) => {
+                if (!focused) {
+                    commands.rememberActiveWindowCommand().catch(console.error)
+                }
                 if (!pinned && settings.autoHideWindowWhenOutOfFocus) {
                     if (timer) {
                         clearTimeout(timer)
@@ -186,7 +189,7 @@ export function TranslatorWindow() {
                     }, 50)
                 }
             })
-            .then((cb) => {
+            .then((cb: UnlistenFn) => {
                 unlisten = cb
             })
         return () => {

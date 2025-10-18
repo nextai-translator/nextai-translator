@@ -1,3 +1,4 @@
+use crate::insertion::remember_active_window;
 use debug_print::debug_println;
 #[cfg(target_os = "windows")]
 use std::path::Path;
@@ -78,7 +79,6 @@ pub fn do_ocr() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(target_os = "windows")]
 pub fn do_ocr_with_cut_file_path(image_file_path: &Path) {
     use windows::core::HSTRING;
-    use windows::Globalization::Language;
     use windows::Graphics::Imaging::BitmapDecoder;
     use windows::Media::Ocr::OcrEngine;
     use windows::Storage::{FileAccessMode, StorageFile};
@@ -115,6 +115,7 @@ pub fn do_ocr_with_cut_file_path(image_file_path: &Path) {
 
             debug_println!("ocr content: {:?}", content);
             crate::utils::send_text(content);
+            remember_active_window();
             crate::windows::show_translator_window(false, true, true);
         }
         Err(e) => {
@@ -154,6 +155,7 @@ pub fn do_ocr() -> Result<(), Box<dyn std::error::Error>> {
         // get output content
         let content = String::from_utf8_lossy(&output.stdout);
         crate::utils::send_text(content.to_string());
+        remember_active_window();
         crate::windows::show_translator_window(false, true, true);
         Ok(())
     } else {

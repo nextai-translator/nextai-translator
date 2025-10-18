@@ -1,6 +1,7 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::config::get_config;
+use crate::insertion::remember_active_window;
 use crate::ocr::ocr;
 use crate::windows::{
     set_translator_window_always_on_top, show_settings_window, show_updater_window,
@@ -11,7 +12,7 @@ use crate::{ALWAYS_ON_TOP, UPDATE_RESULT};
 use serde::{Deserialize, Serialize};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
-    tray::ClickType,
+    tray::{MouseButton, TrayIconEvent},
     Manager, Runtime,
 };
 use tauri_specta::Event;
@@ -89,6 +90,7 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
             ocr();
         }
         "show" => {
+            remember_active_window();
             crate::windows::show_translator_window(false, false, true);
         }
         "hide" => {
@@ -108,10 +110,13 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
         "quit" => app.exit(0),
         _ => {}
     });
-    tray.on_tray_icon_event(|tray, event| {
-        if event.click_type == ClickType::Left {
-            crate::windows::show_translator_window(false, false, true);
-        }
+    tray.on_tray_icon_event(|_, event| {
+        if let TrayIconEvent::Click { button, .. } = event {
+            if button == MouseButton::Left {
+                remember_active_window();
+                crate::windows::show_translator_window(false, false, true);
+            }
+        };
     });
     tray.set_show_menu_on_left_click(false)?;
 

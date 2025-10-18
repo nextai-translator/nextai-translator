@@ -89,8 +89,6 @@ export class Gemini extends AbstractEngine {
             safetySettings: SAFETY_SETTINGS,
         }
 
-        let hasError = false
-        let finished = false
         await fetchSSE(url, {
             method: 'POST',
             headers,
@@ -98,32 +96,30 @@ export class Gemini extends AbstractEngine {
             signal: req.signal,
             usePartialArrayJSONParser: true,
             onMessage: async (msg) => {
-                if (finished) return
                 let resp
                 try {
                     resp = JSON.parse(msg)
                 } catch (e) {
-                    hasError = true
-                    finished = true
                     req.onError(JSON.stringify(e))
                     return
                 }
-                if (!resp.candidates || resp.candidates.length === 0) {
-                    hasError = true
-                    finished = true
-                    req.onError('no candidates')
-                    return
+
+                // Always process text content first
+                const text = resp.candidates?.[0]?.content?.parts?.[0]?.text
+                if (text) {
+                    await req.onMessage({ content: text, role: '' })
                 }
-                if (resp.candidates[0].finishReason !== 'STOP') {
-                    finished = true
-                    req.onFinished(resp.candidates[0].finishReason)
-                    return
+
+                // Check for a finish reason
+                const finishReason = resp.candidates?.[0]?.finishReason
+
+                // CRUCIAL: Only call onFinished if the reason is abnormal (i.e., NOT "STOP").
+                // A silent end of the stream after "STOP" is the success case.
+                if (finishReason && finishReason !== 'STOP') {
+                    req.onFinished(finishReason)
                 }
-                const targetTxt = resp.candidates[0].content.parts[0].text
-                await req.onMessage({ content: targetTxt, role: '' })
             },
             onError: (err) => {
-                hasError = true
                 if (err instanceof Error) {
                     req.onError(err.message)
                     return
@@ -132,35 +128,10 @@ export class Gemini extends AbstractEngine {
                     req.onError(err)
                     return
                 }
-                if (typeof err === 'object') {
-                    const item = err[0]
-                    if (item && item.error && item.error.message) {
-                        req.onError(item.error.message)
-                        return
-                    }
-                }
-                const { error } = err
-                if (error instanceof Error) {
-                    req.onError(error.message)
-                    return
-                }
-                if (typeof error === 'object') {
-                    const { message } = error
-                    if (message) {
-                        if (typeof message === 'string') {
-                            req.onError(message)
-                        } else {
-                            req.onError(JSON.stringify(message))
-                        }
-                        return
-                    }
-                }
-                req.onError('Unknown error')
+                // Simplified the rest of the error handling as it was overly complex
+                const errorMessage = JSON.stringify(err)
+                req.onError(errorMessage)
             },
         })
-
-        if (!finished && !hasError) {
-            req.onFinished('stop')
-        }
     }
 }

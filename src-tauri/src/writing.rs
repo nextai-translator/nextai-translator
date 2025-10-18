@@ -42,7 +42,7 @@ pub fn writing_command() {
         return;
     }
     let app_handle = APP_HANDLE.get().unwrap();
-    app_handle.track_event("writing", None);
+    let _ = app_handle.track_event("writing", None);
     {
         let mut incremental_actions = INCREMENTAL_ACTIONS.lock();
         incremental_actions.clear();
