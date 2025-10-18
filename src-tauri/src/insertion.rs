@@ -40,6 +40,8 @@ fn describe_window(window: &ActiveWindow) -> String {
 #[cfg(target_os = "macos")]
 fn focus_window(window: &ActiveWindow) -> Result<(), String> {
     use cocoa::appkit::{NSApplicationActivateIgnoringOtherApps, NSRunningApplication};
+    #[cfg(not(target_arch = "aarch64"))]
+    use cocoa::base::NO;
     use cocoa::base::{id, nil};
 
     unsafe {
@@ -48,10 +50,20 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
             window.process_id as i32,
         );
         if running_app != nil {
-            let activated = NSRunningApplication::activateWithOptions_(
+            let activated_raw = NSRunningApplication::activateWithOptions_(
                 running_app,
                 NSApplicationActivateIgnoringOtherApps,
             );
+            let activated = {
+                #[cfg(target_arch = "aarch64")]
+                {
+                    activated_raw
+                }
+                #[cfg(not(target_arch = "aarch64"))]
+                {
+                    activated_raw != NO
+                }
+            };
             if activated {
                 debug_println!(
                     "[insertion] activated app via NSRunningApplication: {}",
@@ -207,6 +219,7 @@ fn focus_previous_window() -> Result<(), String> {
         let result = focus_window(&window);
         if let Err(ref err) = result {
             debug_println!("[insertion] failed to focus window: {}", err);
+            let _ = err;
         }
         result
     } else {
