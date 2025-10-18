@@ -8,20 +8,24 @@ import qs from 'qs'
 
 const SAFETY_SETTINGS = [
     {
-        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-        threshold: 'BLOCK_NONE',
+        category: 'HARM_CATEGORY_HARASSMENT',
+        threshold: 'OFF',
     },
     {
         category: 'HARM_CATEGORY_HATE_SPEECH',
-        threshold: 'BLOCK_NONE',
+        threshold: 'OFF',
     },
     {
-        category: 'HARM_CATEGORY_HARASSMENT',
-        threshold: 'BLOCK_NONE',
+        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        threshold: 'OFF',
     },
     {
         category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-        threshold: 'BLOCK_NONE',
+        threshold: 'OFF',
+    },
+    {
+        category: 'HARM_CATEGORY_CIVIC_INTEGRITY',
+        threshold: 'OFF',
     },
 ]
 
@@ -69,7 +73,7 @@ export class Gemini extends AbstractEngine {
         const model = await this.getModel()
         const url =
             urlJoin(geminiAPIURL, '/v1beta/models/', `${model}:streamGenerateContent`) +
-            qs.stringify({ key: apiKey }, { addQueryPrefix: true })
+            qs.stringify({ key: apiKey, alt: 'sse' }, { addQueryPrefix: true })
         const headers = {
             'Content-Type': 'application/json',
             'User-Agent':
@@ -87,6 +91,11 @@ export class Gemini extends AbstractEngine {
                 },
             ],
             safetySettings: SAFETY_SETTINGS,
+            generationConfig: {
+                thinkingConfig: {
+                    thinkingBudget: 0,
+                },
+            },
         }
 
         let hasError = false
@@ -96,7 +105,7 @@ export class Gemini extends AbstractEngine {
             headers,
             body: JSON.stringify(body),
             signal: req.signal,
-            usePartialArrayJSONParser: true,
+            usePartialArrayJSONParser: false,
             onMessage: async (msg) => {
                 if (finished) return
                 let resp
@@ -114,7 +123,7 @@ export class Gemini extends AbstractEngine {
                     req.onError('no candidates')
                     return
                 }
-                if (resp.candidates[0].finishReason !== 'STOP') {
+                if (resp.candidates[0].finishReason && resp.candidates[0].finishReason !== 'STOP') {
                     finished = true
                     req.onFinished(resp.candidates[0].finishReason)
                     return
