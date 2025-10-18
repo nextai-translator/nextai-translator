@@ -1,0 +1,108 @@
+[
+  {
+    "title": "Next.js 14 Documentation - App Router",
+    "content": "Referenced Next.js 14 App Router documentation for implementing the website structure, layouts, and routing. The App Router provides better performance and developer experience compared to the Pages Router.",
+    "path": "website/src/app/",
+    "line_range": [1, 10],
+    "url": "https://nextjs.org/docs/app"
+  },
+  {
+    "title": "Next.js Metadata API",
+    "content": "Used Next.js Metadata API for SEO optimization including meta tags, Open Graph, and Twitter Cards. This provides type-safe metadata configuration with excellent SEO defaults.",
+    "path": "website/src/app/layout.tsx",
+    "line_range": [8, 60],
+    "url": "https://nextjs.org/docs/app/api-reference/functions/generate-metadata"
+  },
+  {
+    "title": "i18next Documentation",
+    "content": "Referenced i18next documentation for internationalization setup, following the same patterns used in the main nextai translator product for consistency.",
+    "path": "website/src/lib/i18n.ts",
+    "line_range": [1, 30],
+    "url": "https://www.i18next.com/overview/getting-started",
+    "knowledge_uuid": "530d22b8-eb6b-4014-bf93-0aff38afd264"
+  },
+  {
+    "title": "react-i18next Hooks",
+    "content": "Used react-i18next hooks (useTranslation) for accessing translations in React components, enabling dynamic language switching without page reloads.",
+    "path": "website/src/components/Header.tsx",
+    "line_range": [5, 15],
+    "url": "https://react.i18next.com/latest/usetranslation-hook"
+  },
+  {
+    "title": "GitHub REST API Documentation",
+    "content": "Integrated GitHub REST API to fetch repository information (stars, forks) and latest release data for social proof and download links.",
+    "path": "website/src/lib/github.ts",
+    "line_range": [1, 80],
+    "url": "https://docs.github.com/en/rest"
+  },
+  {
+    "title": "Tailwind CSS Documentation",
+    "content": "Used Tailwind CSS utility classes for styling components with responsive design, custom colors, and animations. Configured custom theme in tailwind.config.ts.",
+    "path": "website/tailwind.config.ts",
+    "line_range": [1, 50],
+    "url": "https://tailwindcss.com/docs"
+  },
+  {
+    "title": "WCAG 2.1 AA Guidelines",
+    "content": "Implemented accessibility features following WCAG 2.1 AA standards including semantic HTML, ARIA labels, keyboard navigation, color contrast requirements, and skip navigation link.",
+    "path": "website/src/app/layout.tsx",
+    "line_range": [50, 70],
+    "url": "https://www.w3.org/WAI/WCAG21/quickref/?versions=2.1&levels=aa"
+  },
+  {
+    "title": "MDN Web Docs - User-Agent",
+    "content": "Referenced MDN documentation for user-agent parsing to implement platform and browser detection for download recommendations.",
+    "path": "website/src/lib/platform-detect.ts",
+    "line_range": [10, 40],
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent"
+  },
+  {
+    "title": "Vitest Documentation",
+    "content": "Set up Vitest for unit testing with React Testing Library integration for component tests.",
+    "path": "website/vitest.config.ts",
+    "line_range": [1, 20],
+    "url": "https://vitest.dev/guide/"
+  },
+  {
+    "title": "Playwright Documentation",
+    "content": "Configured Playwright for end-to-end testing across multiple browsers and devices, including mobile viewports.",
+    "path": "website/playwright.config.ts",
+    "line_range": [1, 40],
+    "url": "https://playwright.dev/docs/intro"
+  },
+  {
+    "title": "Google Analytics 4 Event Tracking",
+    "content": "Implemented Google Analytics 4 event tracking for conversion monitoring (downloads, CTA clicks, language changes) with custom parameters.",
+    "path": "website/src/lib/analytics.ts",
+    "line_range": [1, 60],
+    "url": "https://developers.google.com/analytics/devguides/collection/ga4/events"
+  },
+  {
+    "title": "Schema.org Structured Data",
+    "content": "Referenced Schema.org documentation for implementing structured data (Organization, WebSite, SoftwareApplication schemas) to enhance search engine understanding and rich snippets.",
+    "path": "website/src/app/layout.tsx",
+    "line_range": [20, 40],
+    "url": "https://schema.org/"
+  },
+  {
+    "title": "Open Graph Protocol",
+    "content": "Implemented Open Graph meta tags for optimal social media sharing appearance on Facebook, LinkedIn, and other platforms.",
+    "path": "website/src/app/layout.tsx",
+    "line_range": [30, 50],
+    "url": "https://ogp.me/"
+  },
+  {
+    "title": "Twitter Cards Documentation",
+    "content": "Configured Twitter Card meta tags for rich previews when the website is shared on Twitter/X.",
+    "path": "website/src/app/layout.tsx",
+    "line_range": [50, 60],
+    "url": "https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards"
+  },
+  {
+    "title": "Project Knowledge - nextai translator Overview",
+    "content": "Referenced project knowledge about nextai translator's features, supported platforms, and AI providers to accurately represent the product on the website.",
+    "path": "website/src/app/page.tsx",
+    "line_range": [1, 200],
+    "knowledge_uuid": "9784d98a-2069-4d34-8940-4413cf949203"
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "title": "Next.js 14 Framework Selection",
+    "content": "Selected Next.js 14 with App Router for the official website due to its excellent SEO capabilities (SSR/SSG), performance optimization features, built-in image optimization, TypeScript support, and alignment with the product's React tech stack. Next.js provides optimal developer experience and is well-suited for marketing websites with its static generation capabilities.",
+    "path": "website/",
+    "line_range": [1, 10]
+  },
+  {
+    "title": "i18next for Internationalization",
+    "content": "Used i18next (same as the main product) for internationalization to maintain consistency and leverage existing team knowledge. Supports 7 languages (English, Chinese Simplified/Traditional, Japanese, Spanish, French, German) with language detection and localStorage persistence. This aligns with the PRD requirement for multi-language support.",
+    "path": "website/src/lib/i18n.ts",
+    "line_range": [1, 30]
+  },
+  {
+    "title": "Platform Detection for Download Page",
+    "content": "Implemented client-side platform and browser detection using user-agent parsing to automatically recommend the most appropriate download option for users. This reduces friction in the download process and improves user experience by highlighting the recommended version while keeping all options accessible.",
+    "path": "website/src/lib/platform-detect.ts",
+    "line_range": [1, 100]
+  },
+  {
+    "title": "GitHub API Integration with Caching",
+    "content": "Integrated GitHub API to fetch real-time repository stars and latest release information, providing social proof and keeping download links current. Used Next.js revalidate (1 hour cache) to avoid rate limits while ensuring data freshness. Implemented error handling with fallback to prevent API failures from breaking the site.",
+    "path": "website/src/lib/github.ts",
+    "line_range": [1, 80]
+  },
+  {
+    "title": "Analytics Abstraction Layer",
+    "content": "Created an analytics wrapper that supports multiple analytics platforms (Google Analytics 4, Plausible) to allow flexibility in analytics provider choice. Tracks key conversion events (downloads, CTA clicks, language changes) with relevant parameters for optimization insights while respecting user privacy.",
+    "path": "website/src/lib/analytics.ts",
+    "line_range": [1, 60]
+  },
+  {
+    "title": "Tailwind CSS for Styling",
+    "content": "Used Tailwind CSS for rapid development, consistent design system, excellent performance (no runtime CSS-in-JS overhead), and easy responsive design implementation. Configured custom theme colors and animations to match the brand while maintaining accessibility standards.",
+    "path": "website/tailwind.config.ts",
+    "line_range": [1, 50]
+  },
+  {
+    "title": "Mobile-First Responsive Design",
+    "content": "Implemented mobile-first approach with responsive breakpoints, hamburger menu for mobile navigation, and touch-friendly targets (≥44x44px). This ensures excellent user experience across all devices from 320px mobile to 4K displays, meeting the PRD requirement for multi-device support.",
+    "path": "website/src/components/Header.tsx",
+    "line_range": [40, 100]
+  },
+  {
+    "title": "Accessibility Features",
+    "content": "Implemented WCAG 2.1 AA compliance features including semantic HTML, skip navigation link, ARIA labels, keyboard navigation support, sufficient color contrast (4.5:1), and focus indicators. This ensures the website is accessible to all users including those using assistive technologies.",
+    "path": "website/src/app/layout.tsx",
+    "line_range": [50, 70]
+  },
+  {
+    "title": "SEO Optimization",
+    "content": "Implemented comprehensive SEO including Next.js metadata API for meta tags, Open Graph and Twitter Card support, XML sitemap, robots.txt, and semantic HTML structure. This maximizes search engine visibility and social media sharing appearance, critical for organic user acquisition.",
+    "path": "website/src/app/layout.tsx",
+    "line_range": [10, 60]
+  },
+  {
+    "title": "Test Infrastructure",
+    "content": "Set up comprehensive testing with Vitest for unit tests (platform detection, utilities) and Playwright for E2E tests (homepage, download flow). This ensures code quality and prevents regressions as the website evolves. Tests cover key user journeys and critical functionality.",
+    "path": "website/vitest.config.ts",
+    "line_range": [1, 20]
+  },
+  {
+    "title": "Component Modularity",
+    "content": "Organized code into reusable components (Header, Footer, LanguageSwitcher, I18nProvider) following React best practices. This improves maintainability, enables code reuse, and makes it easier to test and update individual features independently.",
+    "path": "website/src/components/",
+    "line_range": [1, 10]
+  },
+  {
+    "title": "Security Headers",
+    "content": "Configured security headers in Next.js config (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy) to protect against common web vulnerabilities and enhance user security. This follows security best practices for modern web applications.",
+    "path": "website/next.config.js",
+    "line_range": [15, 45]
+  }
+]
