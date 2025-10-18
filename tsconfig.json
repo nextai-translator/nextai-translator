@@ -23,5 +23,5 @@
             "@/*": ["./src/*"]
         }
     },
-    "include": ["src", "src-tauri", "vite.config*.ts", ".eslintrc.js", "playwright.config.ts", "e2e"]
+    "include": ["src", "src-tauri", "vite.config*.ts", ".eslintrc.js", "playwright.config.ts", "e2e", "tests"]
 }

@@ -1,0 +1,1283 @@
+{
+  "project_name": "nextai translator Official Website",
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "Homepage Renders with Value Proposition",
+      "description": "Homepage should display clear value proposition, features, and CTAs",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to homepage",
+          "description": "User lands on the official website homepage",
+          "context": "User visits the website for the first time via organic search or direct URL"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify hero section displays",
+          "description": "Check that hero section contains tagline, description, and primary CTA",
+          "context": "Hero section is the first thing users see above the fold"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify feature highlights are visible",
+          "description": "Check that key features (translation, polishing, summarization) are showcased",
+          "context": "Feature cards should be visible with icons and descriptions"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify social proof elements",
+          "description": "Check for GitHub stars, download counts, or user testimonials",
+          "context": "Social proof builds credibility for new users"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /",
+          "expected": "Status 200 with HTML containing 'nextai translator' title",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Check hero section content",
+          "expected": "Hero section contains tagline and primary CTA button",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Check feature cards",
+          "expected": "At least 3 feature cards visible with icons and descriptions",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Homepage loads within 3 seconds",
+          "Hero section displays clear value proposition",
+          "Feature highlights are visible and engaging",
+          "CTAs are prominent and clickable"
+        ],
+        "failures": [
+          "Page returns 404 or 500 error",
+          "Hero section is missing or incomplete",
+          "Features are not displayed",
+          "No clear call-to-action buttons"
+        ],
+        "performance": [
+          "Lighthouse performance score >= 90",
+          "First Contentful Paint < 1.5s",
+          "Largest Contentful Paint < 2.5s"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/pages/index.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 50,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Homepage component with hero section and feature highlights"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists yet. Tests should fail until homepage is created."
+      },
+      "expectation": "Homepage renders successfully with all required sections, providing clear value proposition and feature showcase to new visitors.",
+      "prediction": "Tests will fail as the website directory and homepage component do not exist yet.",
+      "explanation": [
+        "This is TDD red phase - no website implementation exists",
+        "Tests are designed to drive the homepage implementation",
+        "Once implementation is complete, these tests should pass"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Display clear value proposition and tagline ('The translator that does more than just translation'). Showcase key features with visual demonstrations (translation, polishing, summarization). Include social proof (GitHub stars, user testimonials, download counts). Call-to-action buttons for downloads and getting started."
+      }
+    },
+    {
+      "id": 2,
+      "name": "Download Page Lists All Platforms",
+      "description": "Download page should provide unified download hub for all distribution channels",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to /download",
+          "description": "User clicks download link or navigates directly to download page",
+          "context": "User is ready to install and needs correct version for their platform"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify browser extensions section",
+          "description": "Check Chrome and Firefox extension download links are present",
+          "context": "Browser extensions are primary distribution channel"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify desktop apps section",
+          "description": "Check Windows, macOS, and Linux download options are available",
+          "context": "Desktop apps provide full-featured experience"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify version information",
+          "description": "Check that version numbers and release dates are displayed",
+          "context": "Users need to know they're getting the latest version"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /download",
+          "expected": "Status 200 with download page content",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Check Chrome extension link",
+          "expected": "Link to Chrome Web Store is present and valid",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Check Firefox addon link",
+          "expected": "Link to Firefox Add-ons is present and valid",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Check desktop app download buttons",
+          "expected": "Windows, macOS, and Linux download buttons present",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All platform download options are visible",
+          "Download links are valid and working",
+          "Version numbers are displayed correctly",
+          "System requirements are clear"
+        ],
+        "failures": [
+          "Download page returns 404",
+          "Missing platform options",
+          "Broken download links",
+          "No version information"
+        ],
+        "performance": [
+          "Page loads in < 2 seconds",
+          "All platform icons load quickly"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/pages/download.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 100,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Download page component with platform-specific download sections"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive creation of download page with all platform options."
+      },
+      "expectation": "Download page displays all available platforms with working download links, version information, and system requirements.",
+      "prediction": "Tests will fail as download page does not exist in the codebase.",
+      "explanation": [
+        "TDD red phase - download page not yet implemented",
+        "Tests specify exact requirements for all platform downloads",
+        "Implementation should include browser extensions and desktop apps"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Provide unified download hub for all distribution channels: Browser extensions (Chrome, Firefox) with direct store links, Desktop applications (Windows, macOS, Linux) with version-specific downloads. Display current version numbers and release dates. Include system requirements for each platform."
+      }
+    },
+    {
+      "id": 3,
+      "name": "Features Page Showcases Capabilities",
+      "description": "Features page should provide detailed explanations of all product capabilities",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to /features",
+          "description": "User wants to learn about product capabilities in detail",
+          "context": "User is evaluating whether the product meets their needs"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify translation features",
+          "description": "Check 55+ languages support and streaming capabilities are documented",
+          "context": "Translation is the core feature"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify additional features",
+          "description": "Check polishing, summarization, OCR, TTS, vocabulary features are listed",
+          "context": "Additional features differentiate from competitors"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify AI provider support",
+          "description": "Check OpenAI, Claude, Gemini provider options are shown",
+          "context": "Users need to know which AI providers are supported"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /features",
+          "expected": "Status 200 with features page content",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Check translation feature section",
+          "expected": "Section mentions 55+ languages and streaming support",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Check feature count",
+          "expected": "At least 6 major features listed (translation, polishing, summarization, OCR, TTS, vocabulary)",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Check AI provider section",
+          "expected": "OpenAI, Claude, Gemini providers mentioned",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All major features are documented",
+          "Each feature has description and visual demo",
+          "AI providers are clearly listed",
+          "Use cases are provided"
+        ],
+        "failures": [
+          "Features page returns 404",
+          "Missing core features",
+          "No visual demonstrations",
+          "AI providers not mentioned"
+        ],
+        "performance": [
+          "Page loads with lazy-loaded images",
+          "GIFs/videos load progressively"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/pages/features.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 150,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Features page component with detailed feature explanations and demos"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive comprehensive features page creation."
+      },
+      "expectation": "Features page provides detailed documentation of all product capabilities with visual demonstrations and use cases.",
+      "prediction": "Tests will fail as features page does not exist yet.",
+      "explanation": [
+        "TDD red phase - features page not implemented",
+        "Tests require all 6+ major features to be documented",
+        "Implementation should include screenshots and demos"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Detailed feature explanations with screenshots/GIFs: Translation (55+ languages, streaming support), Text polishing and editing, Summarization capabilities, Screenshot translation (OCR), Text-to-Speech (TTS), Vocabulary book with memory aids, Code explanation. AI provider support showcase (OpenAI, Claude, Gemini, etc.)."
+      }
+    },
+    {
+      "id": 4,
+      "name": "Getting Started Guide Provides Setup Instructions",
+      "description": "Getting started page should guide users through installation and API key setup",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to /getting-started",
+          "description": "New user needs help setting up the product",
+          "context": "User just installed and needs configuration guidance"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify installation instructions",
+          "description": "Check step-by-step installation for each platform",
+          "context": "Different platforms have different installation procedures"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify API key setup section",
+          "description": "Check instructions for obtaining OpenAI, Azure, or alternative provider API keys",
+          "context": "API key configuration is critical for product to work"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify troubleshooting section",
+          "description": "Check common issues and solutions are documented",
+          "context": "Users need self-service troubleshooting"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /getting-started",
+          "expected": "Status 200 with getting started guide content",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Check API key section",
+          "expected": "Instructions for OpenAI and Azure API key setup present",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Check platform-specific guides",
+          "expected": "Separate instructions for browser and desktop platforms",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Check troubleshooting content",
+          "expected": "At least 5 common issues documented with solutions",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Clear installation instructions for all platforms",
+          "Detailed API key setup guidance",
+          "Visual aids (screenshots, videos) present",
+          "Troubleshooting section helpful"
+        ],
+        "failures": [
+          "Getting started page missing",
+          "No API key setup instructions",
+          "Missing platform-specific guides",
+          "No troubleshooting help"
+        ],
+        "performance": [
+          "Page loads quickly with optimized images",
+          "Videos load on demand"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/pages/getting-started.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 120,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Getting started guide with installation and API key setup instructions"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive creation of comprehensive setup guide."
+      },
+      "expectation": "Getting started guide provides clear, step-by-step instructions for installation and API key configuration across all platforms.",
+      "prediction": "Tests will fail as getting started page does not exist.",
+      "explanation": [
+        "TDD red phase - no implementation yet",
+        "Tests require comprehensive setup instructions",
+        "API key configuration is critical path"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Step-by-step installation walkthrough for each platform. API key setup instructions: How to obtain OpenAI API key, Azure OpenAI Service configuration, Alternative provider setup. First-time usage tutorial with screenshots. Common configuration scenarios. Troubleshooting common issues."
+      }
+    },
+    {
+      "id": 5,
+      "name": "Documentation Section Provides User Guides",
+      "description": "Documentation section should offer comprehensive user guides and references",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to /docs",
+          "description": "User needs detailed documentation on features",
+          "context": "Active user seeking advanced feature information"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify documentation structure",
+          "description": "Check sidebar navigation with categorized documentation",
+          "context": "Users need organized, browsable documentation"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify search functionality",
+          "description": "Check that documentation search is available",
+          "context": "Users should be able to search for specific topics"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify FAQ section",
+          "description": "Check that common questions are answered",
+          "context": "FAQ reduces support burden"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /docs",
+          "expected": "Status 200 with documentation homepage",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Check sidebar navigation",
+          "expected": "Sidebar contains categorized documentation links",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Check search functionality",
+          "expected": "Search input present and functional",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "GET /docs/faq",
+          "expected": "FAQ page with at least 10 questions answered",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Documentation is well-organized with categories",
+          "Search functionality works correctly",
+          "Code snippets have syntax highlighting",
+          "FAQ answers common questions"
+        ],
+        "failures": [
+          "Documentation section missing",
+          "No search functionality",
+          "Poorly organized content",
+          "Missing FAQ section"
+        ],
+        "performance": [
+          "Documentation pages load quickly",
+          "Search returns results in < 500ms"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/pages/docs/index.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 80,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Documentation homepage with navigation and search"
+              }
+            ]
+          },
+          {
+            "file_path": "website/pages/docs/faq.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 60,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "FAQ page with common questions and answers"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive documentation structure and content creation."
+      },
+      "expectation": "Documentation section provides organized, searchable user guides with FAQ and reference materials.",
+      "prediction": "Tests will fail as documentation pages do not exist.",
+      "explanation": [
+        "TDD red phase - documentation section not implemented",
+        "Tests require organized navigation and search",
+        "FAQ section should have at least 10 questions"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "User guides and how-to articles. Configuration reference. Keyboard shortcuts and hotkeys. Advanced features documentation. Integration guides (API, custom providers). FAQ section addressing common questions. Link to GitHub repository for technical documentation."
+      }
+    },
+    {
+      "id": 6,
+      "name": "Support Page Provides Contact and Resources",
+      "description": "Support page should offer contact form and links to community resources",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to /support",
+          "description": "User needs help or wants to report an issue",
+          "context": "User encountering problem or has question"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify contact form",
+          "description": "Check that contact form is present and functional",
+          "context": "Users need way to reach support team"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify GitHub Issues link",
+          "description": "Check link to GitHub Issues for bug reports",
+          "context": "Technical users prefer GitHub for issues"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify community links",
+          "description": "Check for community channel links (if any)",
+          "context": "Community can provide peer support"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /support",
+          "expected": "Status 200 with support page content",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Check contact form fields",
+          "expected": "Form has name, email, subject, message fields",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Submit contact form with valid data",
+          "expected": "Form submits successfully with confirmation message",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "Check GitHub Issues link",
+          "expected": "Link to repository issues page present and valid",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Contact form is present and functional",
+          "Form validation works correctly",
+          "GitHub Issues link is prominent",
+          "Community resources are linked"
+        ],
+        "failures": [
+          "Support page missing",
+          "Contact form broken or missing",
+          "Form submission fails",
+          "No link to GitHub Issues"
+        ],
+        "performance": [
+          "Form loads quickly",
+          "Form submission completes in < 2 seconds"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/pages/support.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 90,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Support page with contact form and community links"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive support page and form creation."
+      },
+      "expectation": "Support page provides functional contact form and clear links to GitHub Issues and community resources.",
+      "prediction": "Tests will fail as support page and contact form do not exist.",
+      "explanation": [
+        "TDD red phase - support page not implemented",
+        "Tests require functional contact form with validation",
+        "GitHub Issues integration is essential"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Contact form for user inquiries. Link to GitHub Issues for bug reports and feature requests. Community channels (if any - Discord, Slack, etc.). Contributing guidelines link. Feedback mechanism. Status page or known issues tracker."
+      }
+    },
+    {
+      "id": 7,
+      "name": "About Page Explains Project History",
+      "description": "About page should provide project background, mission, and licensing information",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Navigate to /about",
+          "description": "User wants to learn about project background",
+          "context": "Curious user or potential contributor"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify project history section",
+          "description": "Check that rename from OpenAI Translator is explained",
+          "context": "Users may be confused by name change"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify license information",
+          "description": "Check that AGPL-3.0 license is mentioned",
+          "context": "Developers need to know licensing terms"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify contributing link",
+          "description": "Check link to contributing guidelines",
+          "context": "Potential contributors need guidance"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "GET /about",
+          "expected": "Status 200 with about page content",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Check for name change explanation",
+          "expected": "Page mentions 'formerly OpenAI Translator' or explains rename",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "Check license information",
+          "expected": "AGPL-3.0 license is mentioned",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Check contributing link",
+          "expected": "Link to GitHub contributing guidelines present",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Project history is clearly explained",
+          "Name change context is provided",
+          "License information is visible",
+          "Contributing guidelines are linked"
+        ],
+        "failures": [
+          "About page missing",
+          "No explanation of name change",
+          "License not mentioned",
+          "No contributing information"
+        ],
+        "performance": [
+          "Page loads quickly"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/pages/about.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 70,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "About page with project history, mission, and licensing"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive about page creation."
+      },
+      "expectation": "About page provides clear project history including name change explanation, licensing information, and contributing guidelines.",
+      "prediction": "Tests will fail as about page does not exist.",
+      "explanation": [
+        "TDD red phase - about page not implemented",
+        "Tests require name change explanation",
+        "AGPL-3.0 license must be mentioned"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Project history and mission. Information about the rename (OpenAI Translator → nextai translator). Technology stack overview. License information (AGPL-3.0). Team or contributors recognition. Roadmap or future plans (optional)."
+      }
+    },
+    {
+      "id": 8,
+      "name": "Responsive Design Works on Mobile",
+      "description": "Website should be fully responsive across desktop, tablet, and mobile devices",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Load website on mobile viewport",
+          "description": "Simulate mobile device viewing",
+          "context": "Mobile users represent significant traffic"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify navigation menu",
+          "description": "Check that mobile navigation (hamburger menu) works",
+          "context": "Mobile navigation differs from desktop"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify content readability",
+          "description": "Check that text is readable without horizontal scrolling",
+          "context": "Content must adapt to small screens"
+        },
+        {
+          "step_number": 4,
+          "action": "Verify touch-friendly elements",
+          "description": "Check that buttons and links are appropriately sized for touch",
+          "context": "Touch targets need minimum 44x44px size"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Load homepage with mobile viewport (375x667)",
+          "expected": "Page renders without horizontal scroll",
+          "type": "e2e"
+        },
+        {
+          "id": 2,
+          "input": "Test mobile navigation menu",
+          "expected": "Hamburger menu opens and closes correctly",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Check button sizes on mobile",
+          "expected": "All interactive elements are at least 44x44px",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Test tablet viewport (768x1024)",
+          "expected": "Layout adapts appropriately for tablet size",
+          "type": "e2e"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Website is fully responsive on all screen sizes",
+          "Mobile navigation works smoothly",
+          "No horizontal scrolling required",
+          "Touch targets are appropriately sized"
+        ],
+        "failures": [
+          "Layout breaks on mobile",
+          "Navigation doesn't work on mobile",
+          "Content requires horizontal scrolling",
+          "Buttons too small for touch"
+        ],
+        "performance": [
+          "Mobile page load < 3 seconds on 3G",
+          "Touch interactions respond immediately"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/components/layout/MobileNav.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 60,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Mobile navigation component with hamburger menu"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive responsive design implementation."
+      },
+      "expectation": "Website provides excellent mobile experience with responsive layout, touch-friendly navigation, and readable content on all screen sizes.",
+      "prediction": "Tests will fail as responsive design is not yet implemented.",
+      "explanation": [
+        "TDD red phase - no responsive design implementation",
+        "Tests require mobile breakpoints at 768px and below",
+        "Mobile navigation must be functional"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Fully responsive across desktop, tablet, and mobile devices. Breakpoints: mobile (< 768px), tablet (768-1024px), desktop (> 1024px). Touch-friendly navigation on mobile devices. Readable typography across all screen sizes."
+      }
+    },
+    {
+      "id": 9,
+      "name": "SEO Meta Tags Present on All Pages",
+      "description": "All pages should have proper SEO meta tags for search engine optimization",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Check homepage meta tags",
+          "description": "Verify title, description, and Open Graph tags",
+          "context": "Proper meta tags improve search visibility"
+        },
+        {
+          "step_number": 2,
+          "action": "Verify sitemap.xml exists",
+          "description": "Check that sitemap is generated and accessible",
+          "context": "Sitemap helps search engines crawl site"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify robots.txt exists",
+          "description": "Check robots.txt is configured correctly",
+          "context": "Robots.txt controls search engine crawling"
+        },
+        {
+          "step_number": 4,
+          "action": "Check structured data",
+          "description": "Verify Schema.org structured data is present",
+          "context": "Structured data enhances search results"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Check homepage <title> tag",
+          "expected": "Title contains 'nextai translator' and is 50-60 characters",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Check meta description",
+          "expected": "Description is present and 150-160 characters",
+          "type": "unit"
+        },
+        {
+          "id": 3,
+          "input": "GET /sitemap.xml",
+          "expected": "Status 200 with valid XML sitemap",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "GET /robots.txt",
+          "expected": "Status 200 with proper robots.txt content",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Check for structured data",
+          "expected": "JSON-LD structured data present with SoftwareApplication schema",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "All pages have unique title and description tags",
+          "Open Graph tags present for social sharing",
+          "Sitemap.xml generated and accessible",
+          "Robots.txt configured correctly",
+          "Structured data enhances search results"
+        ],
+        "failures": [
+          "Missing meta tags on pages",
+          "Duplicate titles across pages",
+          "Sitemap not generated",
+          "No structured data"
+        ],
+        "performance": [
+          "Meta tags don't affect page load performance"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/components/SEO.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 50,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "SEO component for meta tags and structured data"
+              }
+            ]
+          },
+          {
+            "file_path": "website/public/sitemap.xml",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 20,
+                "code": "<!-- Implementation pending - TDD red phase -->",
+                "purpose": "XML sitemap for search engine crawling"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive SEO optimization implementation."
+      },
+      "expectation": "All pages have proper SEO meta tags, sitemap is generated, and structured data is present for optimal search engine visibility.",
+      "prediction": "Tests will fail as SEO implementation does not exist.",
+      "explanation": [
+        "TDD red phase - no SEO meta tags implemented",
+        "Tests require unique titles and descriptions per page",
+        "Sitemap and structured data must be generated"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Semantic HTML with proper heading hierarchy. Meta tags (title, description, Open Graph, Twitter Card). Sitemap.xml and robots.txt. Structured data markup (Schema.org). Clean, descriptive URLs. Optimized page titles and descriptions."
+      }
+    },
+    {
+      "id": 10,
+      "name": "Accessibility Standards Met (WCAG 2.1 AA)",
+      "description": "Website should meet WCAG 2.1 Level AA accessibility standards",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Run accessibility audit",
+          "description": "Use automated tools to check accessibility",
+          "context": "Accessibility is legal requirement and improves UX for all"
+        },
+        {
+          "step_number": 2,
+          "action": "Test keyboard navigation",
+          "description": "Navigate site using only keyboard (Tab, Enter, Escape)",
+          "context": "Keyboard users cannot use mouse"
+        },
+        {
+          "step_number": 3,
+          "action": "Check color contrast",
+          "description": "Verify text has sufficient contrast ratios",
+          "context": "Low contrast affects users with visual impairments"
+        },
+        {
+          "step_number": 4,
+          "action": "Test screen reader",
+          "description": "Use screen reader to navigate site",
+          "context": "Screen reader users rely on semantic HTML and ARIA"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Run axe-core accessibility audit",
+          "expected": "Zero critical or serious accessibility violations",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Test keyboard navigation on homepage",
+          "expected": "All interactive elements accessible via keyboard",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Check color contrast ratios",
+          "expected": "All text has contrast ratio >= 4.5:1 (7:1 for large text)",
+          "type": "unit"
+        },
+        {
+          "id": 4,
+          "input": "Check image alt text",
+          "expected": "All images have descriptive alt attributes",
+          "type": "unit"
+        },
+        {
+          "id": 5,
+          "input": "Check ARIA labels",
+          "expected": "Interactive elements have appropriate ARIA labels",
+          "type": "unit"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Zero critical accessibility violations",
+          "Full keyboard navigation support",
+          "Sufficient color contrast throughout",
+          "Screen reader compatibility",
+          "Semantic HTML structure"
+        ],
+        "failures": [
+          "Critical accessibility violations",
+          "Cannot navigate with keyboard alone",
+          "Poor color contrast",
+          "Missing alt text on images",
+          "No ARIA labels on interactive elements"
+        ],
+        "performance": [
+          "Accessibility features don't impact performance"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/components/AccessibleButton.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 40,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Accessible button component with proper ARIA attributes"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive accessibility compliance."
+      },
+      "expectation": "Website meets WCAG 2.1 Level AA standards with keyboard navigation, screen reader support, and sufficient color contrast.",
+      "prediction": "Tests will fail as accessibility features are not yet implemented.",
+      "explanation": [
+        "TDD red phase - accessibility not implemented",
+        "Tests require WCAG 2.1 AA compliance",
+        "Keyboard navigation and screen reader support essential"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Semantic HTML structure. Keyboard navigation support. Screen reader compatibility. Sufficient color contrast ratios. Alt text for all images. ARIA labels where appropriate."
+      }
+    },
+    {
+      "id": 11,
+      "name": "Performance Meets Lighthouse Standards",
+      "description": "Website should achieve Lighthouse performance score >= 90",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Run Lighthouse audit",
+          "description": "Test performance, accessibility, best practices, and SEO",
+          "context": "Lighthouse provides comprehensive quality metrics"
+        },
+        {
+          "step_number": 2,
+          "action": "Check page load time",
+          "description": "Measure time to first contentful paint and interactive",
+          "context": "Fast loading improves user experience and SEO"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify image optimization",
+          "description": "Check that images are compressed and lazy-loaded",
+          "context": "Images often biggest performance bottleneck"
+        },
+        {
+          "step_number": 4,
+          "action": "Check bundle size",
+          "description": "Verify JavaScript bundle is optimized and code-split",
+          "context": "Large bundles slow page load"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Run Lighthouse performance audit",
+          "expected": "Performance score >= 90",
+          "type": "integration"
+        },
+        {
+          "id": 2,
+          "input": "Measure First Contentful Paint (FCP)",
+          "expected": "FCP < 1.5 seconds",
+          "type": "integration"
+        },
+        {
+          "id": 3,
+          "input": "Measure Largest Contentful Paint (LCP)",
+          "expected": "LCP < 2.5 seconds",
+          "type": "integration"
+        },
+        {
+          "id": 4,
+          "input": "Measure Time to Interactive (TTI)",
+          "expected": "TTI < 3.5 seconds",
+          "type": "integration"
+        },
+        {
+          "id": 5,
+          "input": "Check Cumulative Layout Shift (CLS)",
+          "expected": "CLS < 0.1",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Lighthouse performance score >= 90",
+          "Core Web Vitals in green range",
+          "Images optimized and lazy-loaded",
+          "JavaScript bundle optimized",
+          "CDN caching configured"
+        ],
+        "failures": [
+          "Performance score < 90",
+          "Slow page load times",
+          "Unoptimized images",
+          "Large JavaScript bundles",
+          "Poor caching strategy"
+        ],
+        "performance": [
+          "FCP < 1.5s, LCP < 2.5s, TTI < 3.5s",
+          "CLS < 0.1",
+          "Total bundle size < 200KB gzipped"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/next.config.js",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 30,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Next.js configuration for image optimization and performance"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive performance optimization."
+      },
+      "expectation": "Website achieves excellent performance metrics with Lighthouse score >= 90 and Core Web Vitals in green range.",
+      "prediction": "Tests will fail as performance optimization is not yet implemented.",
+      "explanation": [
+        "TDD red phase - no performance optimization yet",
+        "Tests require Lighthouse score >= 90",
+        "Core Web Vitals must be in green range"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Page load time < 3 seconds on standard broadband. Lighthouse performance score ≥ 90. Optimized images and assets with lazy loading. CDN delivery for static assets. Mobile-optimized loading."
+      }
+    },
+    {
+      "id": 12,
+      "name": "Internationalization Support (i18n)",
+      "description": "Website should support multiple languages with language switcher",
+      "steps": [
+        {
+          "step_number": 1,
+          "action": "Check language switcher presence",
+          "description": "Verify language switcher in header or footer",
+          "context": "Users need way to change language"
+        },
+        {
+          "step_number": 2,
+          "action": "Test language switching",
+          "description": "Switch from English to Chinese and verify content updates",
+          "context": "Content should be localized for each language"
+        },
+        {
+          "step_number": 3,
+          "action": "Verify language persistence",
+          "description": "Check that language preference is remembered",
+          "context": "Users shouldn't need to select language on every visit"
+        },
+        {
+          "step_number": 4,
+          "action": "Check URL structure",
+          "description": "Verify URLs include language code (e.g., /en/, /zh/)",
+          "context": "Language-specific URLs improve SEO"
+        }
+      ],
+      "test_cases": [
+        {
+          "id": 1,
+          "input": "Check for language switcher component",
+          "expected": "Language switcher present in header with EN/ZH options",
+          "type": "unit"
+        },
+        {
+          "id": 2,
+          "input": "Click language switcher to Chinese",
+          "expected": "Page content updates to Chinese, URL changes to /zh/",
+          "type": "e2e"
+        },
+        {
+          "id": 3,
+          "input": "Refresh page after language change",
+          "expected": "Language preference persists (localStorage or cookie)",
+          "type": "e2e"
+        },
+        {
+          "id": 4,
+          "input": "GET /zh/",
+          "expected": "Chinese homepage loads correctly",
+          "type": "integration"
+        }
+      ],
+      "expected": {
+        "success": [
+          "Language switcher is visible and functional",
+          "Content is properly localized for each language",
+          "Language preference persists across sessions",
+          "URLs are SEO-friendly with language codes"
+        ],
+        "failures": [
+          "No language switcher present",
+          "Language switching doesn't work",
+          "Content not properly translated",
+          "Language preference not remembered"
+        ],
+        "performance": [
+          "Language switching is instantaneous",
+          "No page reload required for language change"
+        ]
+      },
+      "implementation": {
+        "files": [
+          {
+            "file_path": "website/components/LanguageSwitcher.tsx",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 50,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "Language switcher component with EN/ZH support"
+              }
+            ]
+          },
+          {
+            "file_path": "website/locales/en.json",
+            "snippets": [
+              {
+                "start_line": 1,
+                "end_line": 30,
+                "code": "// Implementation pending - TDD red phase",
+                "purpose": "English translations"
+              }
+            ]
+          }
+        ],
+        "notes": "No implementation exists. Tests will drive i18n implementation."
+      },
+      "expectation": "Website supports English and Chinese languages with functional language switcher and persistent language preference.",
+      "prediction": "Tests will fail as internationalization is not yet implemented.",
+      "explanation": [
+        "TDD red phase - no i18n implementation",
+        "Tests require English and Chinese support",
+        "Language switcher must be functional"
+      ],
+      "status": "not_implemented",
+      "design_spec_quote": {
+        "selected_text": "Support for multiple languages (initially English, Chinese). Language switcher in header/footer. Localized content for key pages. RTL (Right-to-Left) support architecture for future expansion. Use existing i18n infrastructure from the product if possible."
+      }
+    }
+  ],
+  "summary": {
+    "total_scenarios": 12,
+    "complexity": "high",
+    "estimated_time": "240 minutes"
+  }
+}
