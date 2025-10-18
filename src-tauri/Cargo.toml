@@ -65,6 +65,9 @@ core-graphics = "0.22.3"
 accessibility-ng = "0.1.6"
 accessibility-sys-ng = "0.1.3"
 
+[target.'cfg(target_os = "linux")'.dependencies]
+xcb = "1.4.0"
+
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.61.3", features = [ "Win32_UI_WindowsAndMessaging", "Win32_Foundation", "Graphics_Imaging", "Media_Ocr", "Foundation", "Foundation_Collections", "Globalization", "Storage", "Storage_Streams" ] }
 

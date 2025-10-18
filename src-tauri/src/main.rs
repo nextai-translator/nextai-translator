@@ -5,6 +5,7 @@
 
 mod config;
 mod fetch;
+mod insertion;
 mod lang;
 mod ocr;
 mod tray;
@@ -15,6 +16,9 @@ mod writing;
 use config::get_config;
 use debug_print::debug_println;
 use get_selected_text::get_selected_text;
+use insertion::{
+    insert_translation_into_previous_input, remember_active_window, remember_active_window_command,
+};
 use parking_lot::Mutex;
 use serde_json::json;
 use std::env;
@@ -125,6 +129,7 @@ fn launch_ipc_server(server: &Server) {
         let mut selected_text = String::new();
         req.as_reader().read_to_string(&mut selected_text).unwrap();
         utils::send_text(selected_text);
+        remember_active_window();
         let window = windows::show_translator_window(false, true, false);
         window.set_focus().unwrap();
         utils::show();
@@ -288,6 +293,7 @@ fn bind_mouse_hook() {
                     windows::close_thumb();
                     let selected_text = (*SELECTED_TEXT.lock()).to_string();
                     if !selected_text.is_empty() {
+                        remember_active_window();
                         let window = windows::show_translator_window(false, true, false);
                         utils::send_text(selected_text);
                         window.set_focus().unwrap();
@@ -332,6 +338,8 @@ fn main() {
             writing_command,
             write_to_input,
             finish_writing,
+            insert_translation_into_previous_input,
+            remember_active_window_command,
             detect_lang,
             screenshot,
             hide_translator_window,
@@ -566,6 +574,7 @@ fn main() {
             ..
         } => {
             if !has_visible_windows {
+                remember_active_window();
                 windows::show_translator_window(false, false, false);
             }
         }

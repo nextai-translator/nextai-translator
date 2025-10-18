@@ -41,6 +41,17 @@ export const commands = {
     async finishWriting(): Promise<void> {
         await TAURI_INVOKE('finish_writing')
     },
+    async insertTranslationIntoPreviousInput(text: string): Promise<Result<null, string>> {
+        try {
+            return { status: 'ok', data: await TAURI_INVOKE('insert_translation_into_previous_input', { text }) }
+        } catch (e) {
+            if (e instanceof Error) throw e
+            else return { status: 'error', error: e as any }
+        }
+    },
+    async rememberActiveWindowCommand(): Promise<boolean> {
+        return await TAURI_INVOKE('remember_active_window_command')
+    },
     async detectLang(text: string): Promise<string> {
         return await TAURI_INVOKE('detect_lang', { text })
     },

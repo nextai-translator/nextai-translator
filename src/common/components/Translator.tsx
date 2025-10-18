@@ -10,7 +10,7 @@ import { AiOutlineFileSync } from 'react-icons/ai'
 import { IoSettingsOutline } from 'react-icons/io5'
 import { TiArrowBack } from 'react-icons/ti'
 import { TbArrowsExchange, TbCsv } from 'react-icons/tb'
-import { MdOutlineGrade, MdGrade } from 'react-icons/md'
+import { MdOutlineGrade, MdGrade, MdOutlineInput } from 'react-icons/md'
 import * as mdIcons from 'react-icons/md'
 import { StatefulTooltip } from 'baseui-sd/tooltip'
 import { detectLang, getLangConfig, sourceLanguages, targetLanguages, LangCode } from '../lang'
@@ -1402,6 +1402,26 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         setActionStr('Stopped')
     }
 
+    const handleInsertTranslatedText = useCallback(async () => {
+        if (!translatedText || !isTauri()) {
+            return
+        }
+        try {
+            const { commands } = await import('@/tauri/bindings')
+            await commands.insertTranslationIntoPreviousInput(translatedText)
+            toast(t('Inserted into previous input'), {
+                icon: '✅',
+                duration: 2000,
+            })
+        } catch (error) {
+            console.error(error)
+            toast(t('Failed to insert into previous input'), {
+                icon: '⚠️',
+                duration: 3000,
+            })
+        }
+    }, [t, translatedText])
+
     const [isScrolledToTop, setIsScrolledToTop] = useState(false)
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(false)
 
@@ -2299,6 +2319,19 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                             ) : (
                                                                 <LuStarOff size={15} />
                                                             )}
+                                                        </div>
+                                                    </Tooltip>
+                                                )}
+                                                {isTauri() && (
+                                                    <Tooltip
+                                                        content={t('Insert into previous input')}
+                                                        placement='bottom'
+                                                    >
+                                                        <div
+                                                            className={styles.actionButton}
+                                                            onClick={handleInsertTranslatedText}
+                                                        >
+                                                            <MdOutlineInput size={15} />
                                                         </div>
                                                     </Tooltip>
                                                 )}

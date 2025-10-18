@@ -174,6 +174,9 @@ export function TranslatorWindow() {
         let timer: number | undefined
         appWindow
             .onFocusChanged(({ payload: focused }: Event<boolean>) => {
+                if (!focused) {
+                    commands.rememberActiveWindowCommand().catch(console.error)
+                }
                 if (!pinned && settings.autoHideWindowWhenOutOfFocus) {
                     if (timer) {
                         clearTimeout(timer)
