@@ -10,13 +10,13 @@ import { AiOutlineFileSync } from 'react-icons/ai'
 import { IoSettingsOutline } from 'react-icons/io5'
 import { TiArrowBack } from 'react-icons/ti'
 import { TbArrowsExchange, TbCsv } from 'react-icons/tb'
-import { MdOutlineGrade, MdGrade, MdOutlineInput } from 'react-icons/md'
+import { MdOutlineGrade, MdGrade, MdHistory } from 'react-icons/md'
 import * as mdIcons from 'react-icons/md'
 import { StatefulTooltip } from 'baseui-sd/tooltip'
 import { detectLang, getLangConfig, sourceLanguages, targetLanguages, LangCode } from '../lang'
 import { translate, TranslateMode } from '../translate'
 import { Select, Value, Option } from 'baseui-sd/select'
-import { RxEraser, RxReload, RxStop } from 'react-icons/rx'
+import { RxEraser, RxEnter, RxReload, RxStop } from 'react-icons/rx'
 import { LuStar, LuStarOff } from 'react-icons/lu'
 import { clsx } from 'clsx'
 import { Button } from 'baseui-sd/button'
@@ -53,11 +53,13 @@ import Vocabulary from './Vocabulary'
 import { useCollectedWordTotal } from '../hooks/useCollectedWordTotal'
 import { Modal, ModalBody, ModalHeader } from 'baseui-sd/modal'
 import { vocabularyService } from '../services/vocabulary'
-import { Action, VocabularyItem } from '../internal-services/db'
+import { Action, VocabularyItem, HistoryItem } from '../internal-services/db'
 import { CopyButton } from './CopyButton'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { actionService } from '../services/action'
+import { historyService } from '../services/history'
 import { ActionManager } from './ActionManager'
+import { TranslationHistory } from './TranslationHistory'
 import { GrMoreVertical } from 'react-icons/gr'
 import { StatefulPopover } from 'baseui-sd/popover'
 import { StatefulMenu } from 'baseui-sd/menu'
@@ -87,7 +89,7 @@ import {
 } from '../services/promotion'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
 import { SpeakerIcon } from './SpeakerIcon'
-import { Provider, engineIcons, getEngine } from '../engines'
+import { Provider, engineIcons, getEngine, providerToEngine } from '../engines'
 import color from 'color'
 import { useAtom } from 'jotai'
 import { showSettingsAtom } from '../store/setting'
@@ -115,6 +117,10 @@ function genLangOptions(langs: [LangCode, string][]): Value {
 const sourceLangOptions = genLangOptions(sourceLanguages)
 const targetLangOptions = genLangOptions(targetLanguages)
 
+const isProviderValue = (value: unknown): value is Provider => {
+    return typeof value === 'string' && Object.prototype.hasOwnProperty.call(providerToEngine, value)
+}
+
 const useStyles = createUseStyles({
     'popupCard': {
         height: '100%',
@@ -129,11 +135,19 @@ const useStyles = createUseStyles({
         left: '0',
         bottom: '0',
         paddingLeft: '6px',
+        paddingRight: '6px',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
         backdropFilter: 'blur(10px)',
     }),
+    'footerActions': {
+        marginLeft: 'auto',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: '8px',
+    },
     'poweredBy': (props: IThemedStyleProps) => ({
         fontSize: props.theme.sizing.scale300,
         color: props.theme.colors.contentInverseTertiary,
@@ -532,9 +546,13 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     }, [])
 
     const [showActionManager, setShowActionManager] = useState(false)
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
     const [translationFlag, forceTranslate] = useReducer((x: number) => x + 1, 0)
     const translationIDRef = useRef(0)
+    const skipNextTranslateRef = useRef(false)
+    const historyEntryIdRef = useRef<number | null>(null)
+    const lastHistoryKeyRef = useRef<string | null>(null)
 
     const editorRef = useRef<HTMLTextAreaElement>(null)
     const isCompositing = useRef(false)
@@ -811,13 +829,19 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
     const { theme, themeType } = useTheme()
 
-    const styles = useStyles({ theme, themeType, isDesktopApp: isDesktopApp(), showLogo })
+    const styles = useStyles({
+        theme,
+        themeType,
+        isDesktopApp: isDesktopApp(),
+        showLogo,
+    })
     const [isLoading, setIsLoading] = useState(false)
     const [editableText, setEditableText] = useState('')
     const [tokenCount, setTokenCount] = useState(0)
     const [translatedText, setTranslatedText] = useState('')
     const [translatedLines, setTranslatedLines] = useState<string[]>([])
     const [isWordMode, setIsWordMode] = useState(false)
+    const isWordModeRef = useRef(false)
     const [isCollectedWord, setIsCollectedWord] = useState(false)
     const [isAutoCollectOn, setIsAutoCollectOn] = useState(
         settings.autoCollect === undefined ? false : settings.autoCollect
@@ -944,6 +968,9 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     useEffect(() => {
         setTranslatedLines(translatedText.split('\n'))
     }, [translatedText])
+    useEffect(() => {
+        isWordModeRef.current = isWordMode
+    }, [isWordMode])
     const [errorMessage, setErrorMessage] = useState('')
     const startLoading = useCallback(() => {
         setIsLoading(true)
@@ -1076,6 +1103,10 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
     const translateText = useDeepCompareCallback(
         async (selectedWord: string, signal: AbortSignal) => {
+            if (skipNextTranslateRef.current) {
+                skipNextTranslateRef.current = false
+                return
+            }
             translationIDRef.current += 1
             if (translationIDRef.current > 1024) {
                 translationIDRef.current = 0
@@ -1093,7 +1124,54 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                       beforeStr: 'Processing...',
                       afterStr: 'Processed',
                   }
+            const persistHistory = async (resultText: string) => {
+                if (!resultText || !resultText.trim()) {
+                    return
+                }
+                if (
+                    !translateDeps.text ||
+                    !translateDeps.sourceLang ||
+                    !translateDeps.targetLang ||
+                    !translateDeps.action
+                ) {
+                    return
+                }
+                const dedupeKey = `${translateDeps.text}__${resultText}__${translateDeps.sourceLang}__${
+                    translateDeps.targetLang
+                }__${translateDeps.action.id ?? translateDeps.action.mode ?? ''}`
+                if (lastHistoryKeyRef.current === dedupeKey) {
+                    return
+                }
+                try {
+                    if (historyEntryIdRef.current !== null) {
+                        await historyService.update(historyEntryIdRef.current, {
+                            translatedText: resultText,
+                            tokenCount,
+                        })
+                    } else {
+                        const history = await historyService.create({
+                            text: translateDeps.text,
+                            translatedText: resultText,
+                            sourceLang: translateDeps.sourceLang,
+                            targetLang: translateDeps.targetLang,
+                            actionId: translateDeps.action.id,
+                            actionName: translateDeps.action.name,
+                            actionMode: translateDeps.action.mode,
+                            provider: translateDeps.provider ?? settings.provider,
+                            engineModel: translateDeps.engineModel ?? settings.apiModel,
+                            wordMode: isWordModeRef.current,
+                            tokenCount,
+                        })
+                        historyEntryIdRef.current = history.id ?? null
+                    }
+                    lastHistoryKeyRef.current = dedupeKey
+                } catch (error) {
+                    console.error('Failed to persist history', error)
+                }
+            }
             const beforeTranslate = () => {
+                historyEntryIdRef.current = null
+                lastHistoryKeyRef.current = null
                 let actionStr = actionStrItem.beforeStr
                 if (actionMode === 'translate' && sourceLang === targetLang) {
                     actionStr = 'Polishing...'
@@ -1138,8 +1216,10 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             }:${sourceLang}:${targetLang}:${text}:${selectedWord}:${translationFlag}`
             const cachedValue = cache.get(cachedKey)
             if (cachedValue) {
+                const cachedText = cachedValue as string
                 afterTranslate('stop')
-                setTranslatedText(cachedValue as string)
+                setTranslatedText(cachedText)
+                void persistHistory(cachedText)
                 return
             }
             let isStopped = false
@@ -1172,6 +1252,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                         setTranslatedText((translatedText) => {
                             const result = translatedText
                             cache.set(cachedKey, result)
+                            void persistHistory(result)
                             return result
                         })
                     },
@@ -1208,6 +1289,59 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             translateControllerRef.current?.abort()
         }
     }, [translateText, selectedWord])
+
+    const handleHistoryRestore = useCallback(
+        (item: HistoryItem) => {
+            const matchedAction =
+                actions?.find((action) => action.id === item.actionId) ??
+                actions?.find((action) => action.mode && action.mode === item.actionMode)
+            if (matchedAction) {
+                setActivateAction(matchedAction)
+            }
+            historyEntryIdRef.current = item.id ?? null
+            lastHistoryKeyRef.current = null
+            skipNextTranslateRef.current = true
+            setSourceLang(item.sourceLang)
+            setTargetLang(item.targetLang)
+            setEditableText(item.text)
+            setTranslatedText(item.translatedText)
+            setActionStr('')
+            setErrorMessage('')
+            setShowWordbookButtons(false)
+            setSelectedWord('')
+            setHighlightWords([])
+            setTranslateDeps((prev) => {
+                const nextAction = matchedAction ?? prev.action
+                const providerFromHistory = isProviderValue(item.provider) ? item.provider : undefined
+                return {
+                    ...prev,
+                    text: item.text,
+                    sourceLang: item.sourceLang,
+                    targetLang: item.targetLang,
+                    action: nextAction,
+                    provider: providerFromHistory ?? prev.provider ?? settings.provider,
+                    engineModel: item.engineModel ?? prev.engineModel,
+                }
+            })
+            setIsHistoryOpen(false)
+        },
+        [actions, settings.provider, setActivateAction]
+    )
+
+    useEffect(() => {
+        if (!isDesktopApp()) {
+            return
+        }
+        let unlistenHistory: UnlistenFn | undefined
+        listen<HistoryItem>('history:restore', ({ payload }) => {
+            handleHistoryRestore(payload)
+        }).then((cb) => {
+            unlistenHistory = cb
+        })
+        return () => {
+            unlistenHistory?.()
+        }
+    }, [handleHistoryRestore])
 
     useEffect(() => {
         if (!props.defaultShowSettings) {
@@ -2331,7 +2465,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                             className={styles.actionButton}
                                                             onClick={handleInsertTranslatedText}
                                                         >
-                                                            <MdOutlineInput size={15} />
+                                                            <RxEnter size={15} />
                                                         </div>
                                                     </Tooltip>
                                                 )}
@@ -2547,6 +2681,44 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             {translateDeps.engineModel && ` ${translateDeps.engineModel}`}
                         </div>
                     )}
+                    {!showSettings && (
+                        <div className={styles.footerActions}>
+                            <Tooltip content={t('History')} placement='top'>
+                                <Button
+                                    size='mini'
+                                    kind='tertiary'
+                                    overrides={{
+                                        Root: {
+                                            style: {
+                                                zIndex: 1003,
+                                            },
+                                        },
+                                    }}
+                                    onClick={async (event) => {
+                                        event.stopPropagation()
+                                        event.preventDefault()
+                                        // if (isTauri()) {
+                                        //     const { commands } = await import('@/tauri/bindings')
+                                        //     await commands.showHistoryWindow()
+                                        //     return
+                                        // }
+                                        setIsHistoryOpen(true)
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            gap: 6,
+                                        }}
+                                    >
+                                        <MdHistory size={15} />
+                                    </div>
+                                </Button>
+                            </Tooltip>
+                        </div>
+                    )}
                 </div>
             )}
             {enableVocabulary && (
@@ -2602,6 +2774,13 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     <ActionManager draggable={props.showSettingsIcon} />
                 </ModalBody>
             </Modal>
+            <TranslationHistory
+                isOpen={isHistoryOpen}
+                actions={actions ?? []}
+                activeActionId={activateAction?.id}
+                onClose={() => setIsHistoryOpen(false)}
+                onRestore={handleHistoryRestore}
+            />
             <Toaster />
         </div>
     )

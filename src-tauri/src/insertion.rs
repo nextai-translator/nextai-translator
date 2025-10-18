@@ -245,10 +245,10 @@ fn replace_input_with_text(text: &str) -> Result<(), String> {
         .set_text(text.to_string())
         .map_err(|e| e.to_string())?;
 
-    thread::sleep(Duration::from_millis(80));
+    // thread::sleep(Duration::from_millis(20));
 
-    select_all(&mut enigo);
-    thread::sleep(Duration::from_millis(80));
+    // select_all(&mut enigo);
+    // thread::sleep(Duration::from_millis(80));
 
     paste(&mut enigo);
     thread::sleep(Duration::from_millis(80));
