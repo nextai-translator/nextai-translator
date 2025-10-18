@@ -4,6 +4,7 @@ import { BackgroundEventNames } from '../../common/background/eventnames'
 import { BackgroundFetchRequestMessage, BackgroundFetchResponseMessage } from '../../common/background/fetch'
 import { vocabularyInternalService } from '../../common/internal-services/vocabulary'
 import { actionInternalService } from '../../common/internal-services/action'
+import { historyInternalService } from '../../common/internal-services/history'
 import { optionsPageHeaderPromotionIDKey, optionsPageOpenaiAPIKeyPromotionIDKey } from '../common'
 import { chatgptArkoseReqParams } from '@/common/constants'
 import { keyChatgptArkoseReqForm, keyChatgptArkoseReqUrl } from '@/common/engines/chatgpt'
@@ -136,6 +137,8 @@ browser.runtime.onMessage.addListener(async (request) => {
             return await callMethod(request, vocabularyInternalService)
         case BackgroundEventNames.actionService:
             return await callMethod(request, actionInternalService)
+        case BackgroundEventNames.historyService:
+            return await callMethod(request, historyInternalService)
         case BackgroundEventNames.getItem:
             const resp = await browser.storage.local.get(request.key)
             return {
