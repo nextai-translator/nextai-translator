@@ -89,7 +89,7 @@ import {
 } from '../services/promotion'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
 import { SpeakerIcon } from './SpeakerIcon'
-import { Provider, engineIcons, getEngine } from '../engines'
+import { Provider, engineIcons, getEngine, providerToEngine } from '../engines'
 import color from 'color'
 import { useAtom } from 'jotai'
 import { showSettingsAtom } from '../store/setting'
@@ -116,6 +116,10 @@ function genLangOptions(langs: [LangCode, string][]): Value {
 }
 const sourceLangOptions = genLangOptions(sourceLanguages)
 const targetLangOptions = genLangOptions(targetLanguages)
+
+const isProviderValue = (value: unknown): value is Provider => {
+    return typeof value === 'string' && Object.prototype.hasOwnProperty.call(providerToEngine, value)
+}
 
 const useStyles = createUseStyles({
     'popupCard': {
@@ -1308,13 +1312,14 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             setHighlightWords([])
             setTranslateDeps((prev) => {
                 const nextAction = matchedAction ?? prev.action
+                const providerFromHistory = isProviderValue(item.provider) ? item.provider : undefined
                 return {
                     ...prev,
                     text: item.text,
                     sourceLang: item.sourceLang,
                     targetLang: item.targetLang,
                     action: nextAction,
-                    provider: item.provider ?? prev.provider ?? settings.provider,
+                    provider: providerFromHistory ?? prev.provider ?? settings.provider,
                     engineModel: item.engineModel ?? prev.engineModel,
                 }
             })
@@ -1322,6 +1327,21 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         },
         [actions, settings.provider, setActivateAction]
     )
+
+    useEffect(() => {
+        if (!isDesktopApp()) {
+            return
+        }
+        let unlistenHistory: UnlistenFn | undefined
+        listen<HistoryItem>('history:restore', ({ payload }) => {
+            handleHistoryRestore(payload)
+        }).then((cb) => {
+            unlistenHistory = cb
+        })
+        return () => {
+            unlistenHistory?.()
+        }
+    }, [handleHistoryRestore])
 
     useEffect(() => {
         if (!props.defaultShowSettings) {
@@ -2661,33 +2681,44 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             {translateDeps.engineModel && ` ${translateDeps.engineModel}`}
                         </div>
                     )}
-                    <div className={styles.footerActions}>
-                        <Tooltip content={t('History')} placement='top'>
-                            <Button
-                                size='mini'
-                                kind='tertiary'
-                                overrides={{
-                                    Root: {
-                                        style: {
-                                            zIndex: 1003,
+                    {!showSettings && (
+                        <div className={styles.footerActions}>
+                            <Tooltip content={t('History')} placement='top'>
+                                <Button
+                                    size='mini'
+                                    kind='tertiary'
+                                    overrides={{
+                                        Root: {
+                                            style: {
+                                                zIndex: 1003,
+                                            },
                                         },
-                                    },
-                                }}
-                                onClick={() => setIsHistoryOpen(true)}
-                            >
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        gap: 6,
+                                    }}
+                                    onClick={async (event) => {
+                                        event.stopPropagation()
+                                        event.preventDefault()
+                                        // if (isTauri()) {
+                                        //     const { commands } = await import('@/tauri/bindings')
+                                        //     await commands.showHistoryWindow()
+                                        //     return
+                                        // }
+                                        setIsHistoryOpen(true)
                                     }}
                                 >
-                                    <MdHistory size={15} />
-                                </div>
-                            </Button>
-                        </Tooltip>
-                    </div>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            gap: 6,
+                                        }}
+                                    >
+                                        <MdHistory size={15} />
+                                    </div>
+                                </Button>
+                            </Tooltip>
+                        </div>
+                    )}
                 </div>
             )}
             {enableVocabulary && (

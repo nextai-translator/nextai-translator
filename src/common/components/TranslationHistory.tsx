@@ -16,6 +16,8 @@ import { RxTrash, RxCopy } from 'react-icons/rx'
 import { MdReplay } from 'react-icons/md'
 import color from 'color'
 import toast from 'react-hot-toast/headless'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
+import { isTauri } from '../utils'
 
 interface TranslationHistoryProps {
     isOpen: boolean
@@ -23,6 +25,7 @@ interface TranslationHistoryProps {
     activeActionId?: number
     onClose: () => void
     onRestore: (item: HistoryItem) => void
+    variant?: 'modal' | 'window'
 }
 
 const useStyles = createUseStyles({
@@ -95,6 +98,34 @@ const useStyles = createUseStyles({
         textAlign: 'center',
         padding: '32px 0',
     },
+    windowRoot: {
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        boxSizing: 'border-box',
+        gap: '16px',
+    },
+    windowHeader: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'start',
+        padding: '36px 32px 16px 32px',
+        gap: '12px',
+    },
+    windowTitleGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px',
+    },
+    windowBody: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '0 32px 32px 32px',
+        boxSizing: 'border-box',
+        gap: '16px',
+        minHeight: 0,
+    },
 })
 
 const ALL_ACTIONS_OPTION_ID = '__all__'
@@ -117,18 +148,26 @@ function useActionOptions(actions: Action[], t: (key: string) => string): Option
 }
 
 export function TranslationHistory(props: TranslationHistoryProps) {
-    const { isOpen, onClose, actions, activeActionId, onRestore } = props
+    const { isOpen, onClose, actions, activeActionId, onRestore, variant = 'modal' } = props
+    const isModal = variant !== 'window'
+    const isActive = isModal ? isOpen : true
     const { t } = useTranslation()
     const { theme, themeType } = useTheme()
     const styles = useStyles()
+    const headerRef = useRef<HTMLDivElement>(null)
     const searchInputRef = useRef<HTMLInputElement>(null)
     const [search, setSearch] = useState('')
     const [favoritesOnly, setFavoritesOnly] = useState(false)
     const actionsOptions = useActionOptions(actions, t)
-    const [selectedAction, setSelectedAction] = useState<Value>([actionsOptions[0]])
+    const [selectedActionId, setSelectedActionId] = useState<string | number>(ALL_ACTIONS_OPTION_ID)
+    const selectedActionOption = useMemo(() => {
+        return actionsOptions.find((option) => option.id === selectedActionId) ?? actionsOptions[0]
+    }, [actionsOptions, selectedActionId])
+    const selectedActionData = selectedActionOption?.data as Action | undefined
+    const selectValue: Value = selectedActionOption ? [selectedActionOption] : []
 
     useEffect(() => {
-        if (!isOpen) {
+        if (!isActive) {
             return
         }
         const timer = window.setTimeout(() => {
@@ -137,15 +176,50 @@ export function TranslationHistory(props: TranslationHistoryProps) {
         return () => {
             window.clearTimeout(timer)
         }
-    }, [isOpen])
+    }, [isActive])
 
     useEffect(() => {
-        if (!isOpen) {
-            setSearch('')
-            setFavoritesOnly(false)
-            setSelectedAction([actionsOptions[0]])
+        if (!isModal) {
+            return
         }
-    }, [isOpen, actionsOptions])
+        if (isOpen) {
+            return
+        }
+        setSearch('')
+        setFavoritesOnly(false)
+        setSelectedActionId(ALL_ACTIONS_OPTION_ID)
+    }, [isModal, isOpen])
+
+    useEffect(() => {
+        if (variant !== 'window' || !isTauri()) {
+            return
+        }
+        const headerNode = headerRef.current
+        if (!headerNode) {
+            return
+        }
+        const shouldIgnore = (target: EventTarget | null) => {
+            if (!(target instanceof HTMLElement)) {
+                return false
+            }
+            return target.closest('[data-tauri-drag-ignore="true"]') !== null
+        }
+        const handlePointerDown = (event: PointerEvent) => {
+            if (event.button !== 0 || shouldIgnore(event.target)) {
+                return
+            }
+            event.preventDefault()
+            WebviewWindow.getCurrent()
+                .startDragging()
+                .catch((error) => {
+                    console.error('Failed to drag history window', error)
+                })
+        }
+        headerNode.addEventListener('pointerdown', handlePointerDown)
+        return () => {
+            headerNode.removeEventListener('pointerdown', handlePointerDown)
+        }
+    }, [variant])
 
     const historyItems = useLiveQuery(
         () =>
@@ -154,14 +228,14 @@ export function TranslationHistory(props: TranslationHistoryProps) {
                 favoritesOnly,
                 limit: 200,
                 actionId:
-                    selectedAction[0]?.id === ALL_ACTIONS_OPTION_ID
+                    selectedActionId === ALL_ACTIONS_OPTION_ID
                         ? undefined
-                        : typeof selectedAction[0]?.data?.id === 'number'
-                        ? selectedAction[0]?.data?.id
+                        : typeof selectedActionData?.id === 'number'
+                        ? selectedActionData.id
                         : undefined,
-                actionMode: selectedAction[0]?.id === ALL_ACTIONS_OPTION_ID ? undefined : selectedAction[0]?.data?.mode,
+                actionMode: selectedActionId === ALL_ACTIONS_OPTION_ID ? undefined : selectedActionData?.mode,
             }),
-        [search, favoritesOnly, selectedAction],
+        [search, favoritesOnly, selectedActionId],
         []
     )
 
@@ -211,6 +285,308 @@ export function TranslationHistory(props: TranslationHistoryProps) {
         }
     }
 
+    const historyCountLabel = historyItems?.length ? ` (${historyItems.length})` : ''
+    const headerTitle = (
+        <>
+            {t('History')}
+            {historyCountLabel}
+        </>
+    )
+
+    const renderControls = (styleOverride?: React.CSSProperties) => (
+        <div className={styles.controls} style={styleOverride} data-tauri-drag-ignore='true'>
+            <Input
+                inputRef={searchInputRef}
+                value={search}
+                clearable
+                placeholder={t('Search History')}
+                size='compact'
+                onChange={(e) => setSearch(e.currentTarget.value)}
+                onClear={() => setSearch('')}
+            />
+            <Select
+                size='compact'
+                clearable={false}
+                options={actionsOptions}
+                value={selectValue}
+                onChange={({ value }) => {
+                    const nextId = (value[0]?.id ?? ALL_ACTIONS_OPTION_ID) as string | number
+                    setSelectedActionId((current) => (current === nextId ? current : nextId))
+                }}
+            />
+            <Checkbox checked={favoritesOnly} onChange={(event) => setFavoritesOnly(event.currentTarget.checked)}>
+                {t('Favorites Only')}
+            </Checkbox>
+        </div>
+    )
+
+    const bodyContent = (
+        <div
+            className={styles.body}
+            style={{
+                maxHeight: isModal ? '70vh' : 'none',
+                width: isModal ? 'min(720px, 90vw)' : '100%',
+                flex: isModal ? undefined : 1,
+                margin: isModal ? undefined : '0 auto',
+                maxWidth: isModal ? undefined : '960px',
+            }}
+        >
+            {isModal ? renderControls() : null}
+            <div
+                className={styles.historyList}
+                style={{
+                    flex: isModal ? undefined : 1,
+                }}
+            >
+                {historyItems && historyItems.length > 0 ? (
+                    historyItems.map((item) => {
+                        const matchedAction =
+                            actions.find((action) => action.id === item.actionId) ??
+                            actions.find((action) => action.mode && action.mode === item.actionMode)
+                        const isActive = activeActionId !== undefined && matchedAction?.id === activeActionId
+                        const borderColor = isActive ? theme.colors.accent : theme.colors.borderOpaque
+                        const backgroundColor =
+                            themeType === 'dark'
+                                ? color(theme.colors.backgroundPrimary)
+                                      .lighten(isActive ? 0.3 : 0.15)
+                                      .alpha(0.85)
+                                      .string()
+                                : color(theme.colors.backgroundSecondary)
+                                      .lighten(isActive ? 0.05 : 0)
+                                      .alpha(isActive ? 1 : 0.9)
+                                      .string()
+                        return (
+                            <div
+                                key={item.id}
+                                className={styles.historyItem}
+                                style={{
+                                    border: `1px solid ${borderColor}`,
+                                    background: backgroundColor,
+                                    cursor: 'pointer',
+                                }}
+                                role='button'
+                                tabIndex={0}
+                                onClick={() => {
+                                    void handleRestore(item)
+                                }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault()
+                                        void handleRestore(item)
+                                    }
+                                }}
+                            >
+                                <div className={styles.historyMeta} style={{ color: theme.colors.contentSecondary }}>
+                                    <div>
+                                        {formatTimestamp(item.updatedAt)}
+                                        {matchedAction
+                                            ? ` · ${matchedAction.mode ? t(matchedAction.name) : matchedAction.name}`
+                                            : ''}
+                                    </div>
+                                    <div className={styles.historyActions}>
+                                        <Tooltip
+                                            content={item.favorite ? t('Remove from favorites') : t('Add to favorites')}
+                                            placement='bottom'
+                                        >
+                                            <Button
+                                                size='mini'
+                                                kind='tertiary'
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    void onToggleFavorite(item)
+                                                }}
+                                                overrides={{
+                                                    BaseButton: {
+                                                        style: { paddingLeft: '6px', paddingRight: '6px' },
+                                                    },
+                                                }}
+                                            >
+                                                {item.favorite ? <LuStar size={16} /> : <LuStarOff size={16} />}
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip content={t('Restore')} placement='bottom'>
+                                            <Button
+                                                size='mini'
+                                                kind='secondary'
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    void handleRestore(item)
+                                                }}
+                                                overrides={{
+                                                    BaseButton: {
+                                                        style: { paddingLeft: '6px', paddingRight: '6px' },
+                                                    },
+                                                }}
+                                            >
+                                                <MdReplay size={16} />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip content={t('Copy to clipboard')} placement='bottom'>
+                                            <Button
+                                                size='mini'
+                                                kind='tertiary'
+                                                onClick={async (event) => {
+                                                    event.stopPropagation()
+                                                    try {
+                                                        if (!navigator?.clipboard?.writeText) {
+                                                            throw new Error('Clipboard API unavailable')
+                                                        }
+                                                        await navigator.clipboard.writeText(item.translatedText)
+                                                        toast(t('Copy to clipboard'), {
+                                                            duration: 3000,
+                                                            icon: '👏',
+                                                        })
+                                                    } catch (error) {
+                                                        console.error(error)
+                                                        toast(t('Copy failed'), {
+                                                            duration: 3000,
+                                                            icon: '⚠️',
+                                                        })
+                                                    }
+                                                }}
+                                                overrides={{
+                                                    BaseButton: {
+                                                        style: { paddingLeft: '6px', paddingRight: '6px' },
+                                                    },
+                                                }}
+                                            >
+                                                <RxCopy size={16} />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip content={t('Delete')} placement='bottom'>
+                                            <Button
+                                                size='mini'
+                                                kind='tertiary'
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    void onDelete(item)
+                                                }}
+                                                overrides={{
+                                                    BaseButton: {
+                                                        style: { paddingLeft: '6px', paddingRight: '6px' },
+                                                    },
+                                                }}
+                                            >
+                                                <RxTrash size={16} />
+                                            </Button>
+                                        </Tooltip>
+                                    </div>
+                                </div>
+                                <div className={styles.historyText}>
+                                    <div
+                                        className={styles.historyTextLabel}
+                                        style={{ color: theme.colors.contentTertiary }}
+                                    >
+                                        {t('Original Text')}
+                                    </div>
+                                    <div
+                                        className={styles.historyTextBlock}
+                                        style={{ color: theme.colors.contentPrimary }}
+                                    >
+                                        {item.text}
+                                    </div>
+                                </div>
+                                <div className={styles.divider} style={{ background: theme.colors.borderOpaque }} />
+                                <div className={styles.historyText}>
+                                    <div
+                                        className={styles.historyTextLabel}
+                                        style={{ color: theme.colors.contentTertiary }}
+                                    >
+                                        {t('Translation')}
+                                    </div>
+                                    <div
+                                        className={styles.historyTextBlock}
+                                        style={{ color: theme.colors.contentPrimary }}
+                                    >
+                                        {item.translatedText}
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })
+                ) : (
+                    <div className={styles.empty} style={{ color: theme.colors.contentSecondary }}>
+                        {t('No History Yet')}
+                    </div>
+                )}
+            </div>
+            <div
+                className={styles.historyActions}
+                style={{
+                    justifyContent: isModal ? 'flex-start' : 'flex-end',
+                }}
+            >
+                <Button size='compact' kind='tertiary' onClick={onClose}>
+                    {t('Close')}
+                </Button>
+                <Button size='compact' kind='secondary' onClick={onClear} disabled={!historyItems?.length}>
+                    {t('Clear History')}
+                </Button>
+            </div>
+        </div>
+    )
+
+    if (!isModal) {
+        return (
+            <div
+                className={styles.windowRoot}
+                style={{
+                    background: theme.colors.backgroundPrimary,
+                    color: theme.colors.contentPrimary,
+                }}
+            >
+                <div
+                    ref={headerRef}
+                    className={styles.windowHeader}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 999,
+                        borderBottom: `1px solid ${theme.colors.borderTransparent}`,
+                        background:
+                            themeType === 'dark'
+                                ? color(theme.colors.backgroundPrimary).alpha(0.92).string()
+                                : color(theme.colors.backgroundPrimary).alpha(0.94).string(),
+                        backdropFilter: 'blur(10px)',
+                    }}
+                    data-tauri-drag-region
+                >
+                    <div className={styles.windowTitleGroup}>
+                        <div
+                            style={{
+                                fontSize: '18px',
+                                fontWeight: 600,
+                            }}
+                        >
+                            {headerTitle}
+                        </div>
+                        <div
+                            style={{
+                                fontSize: '12px',
+                                color: theme.colors.contentSecondary,
+                            }}
+                        >
+                            {t('Browse, search, and restore translation entries.')}
+                        </div>
+                    </div>
+                    {!isModal && renderControls({ width: '100%' })}
+                </div>
+                <div
+                    className={styles.windowBody}
+                    style={{
+                        background: theme.colors.backgroundPrimary,
+                        overflowY: 'auto',
+                        paddingTop: 170,
+                    }}
+                >
+                    {bodyContent}
+                </div>
+            </div>
+        )
+    }
+
     return (
         <Modal
             isOpen={isOpen}
@@ -226,233 +602,8 @@ export function TranslationHistory(props: TranslationHistoryProps) {
                 },
             }}
         >
-            <ModalHeader>
-                {t('History')}
-                {historyItems?.length ? ` (${historyItems.length})` : ''}
-            </ModalHeader>
-            <ModalBody>
-                <div className={styles.body}>
-                    <div className={styles.controls}>
-                        <Input
-                            inputRef={searchInputRef}
-                            value={search}
-                            clearable
-                            placeholder={t('Search History')}
-                            size='compact'
-                            onChange={(e) => setSearch(e.currentTarget.value)}
-                            onClear={() => setSearch('')}
-                        />
-                        <Select
-                            size='compact'
-                            clearable={false}
-                            options={actionsOptions}
-                            value={selectedAction}
-                            onChange={({ value }) => {
-                                setSelectedAction(value)
-                            }}
-                        />
-                        <Checkbox
-                            checked={favoritesOnly}
-                            onChange={(event) => setFavoritesOnly(event.currentTarget.checked)}
-                        >
-                            {t('Favorites Only')}
-                        </Checkbox>
-                    </div>
-                    <div className={styles.historyList}>
-                        {historyItems && historyItems.length > 0 ? (
-                            historyItems.map((item) => {
-                                const matchedAction =
-                                    actions.find((action) => action.id === item.actionId) ??
-                                    actions.find((action) => action.mode && action.mode === item.actionMode)
-                                const isActive = activeActionId !== undefined && matchedAction?.id === activeActionId
-                                const borderColor = isActive ? theme.colors.accent : theme.colors.borderOpaque
-                                const backgroundColor =
-                                    themeType === 'dark'
-                                        ? color(theme.colors.backgroundPrimary)
-                                              .lighten(isActive ? 0.3 : 0.15)
-                                              .alpha(0.85)
-                                              .string()
-                                        : color(theme.colors.backgroundSecondary)
-                                              .lighten(isActive ? 0.05 : 0)
-                                              .alpha(isActive ? 1 : 0.9)
-                                              .string()
-                                return (
-                                    <div
-                                        key={item.id}
-                                        className={styles.historyItem}
-                                        style={{
-                                            border: `1px solid ${borderColor}`,
-                                            background: backgroundColor,
-                                            cursor: 'pointer',
-                                        }}
-                                        role='button'
-                                        tabIndex={0}
-                                        onClick={() => {
-                                            void handleRestore(item)
-                                        }}
-                                        onKeyDown={(event) => {
-                                            if (event.key === 'Enter' || event.key === ' ') {
-                                                event.preventDefault()
-                                                void handleRestore(item)
-                                            }
-                                        }}
-                                    >
-                                        <div
-                                            className={styles.historyMeta}
-                                            style={{ color: theme.colors.contentSecondary }}
-                                        >
-                                            <div>
-                                                {formatTimestamp(item.updatedAt)}
-                                                {' · '}
-                                                {item.sourceLang} → {item.targetLang}
-                                                {matchedAction
-                                                    ? ` · ${
-                                                          matchedAction.mode
-                                                              ? t(matchedAction.name)
-                                                              : matchedAction.name
-                                                      }`
-                                                    : ''}
-                                            </div>
-                                            <div className={styles.historyActions}>
-                                                <Tooltip
-                                                    content={item.favorite ? t('Unfavorite') : t('Favorite')}
-                                                    placement='bottom'
-                                                >
-                                                    <Button
-                                                        size='mini'
-                                                        kind='tertiary'
-                                                        onClick={(event) => {
-                                                            event.stopPropagation()
-                                                            void onToggleFavorite(item)
-                                                        }}
-                                                        overrides={{
-                                                            BaseButton: {
-                                                                style: { paddingLeft: '6px', paddingRight: '6px' },
-                                                            },
-                                                        }}
-                                                    >
-                                                        {item.favorite ? <LuStar size={16} /> : <LuStarOff size={16} />}
-                                                    </Button>
-                                                </Tooltip>
-                                                <Tooltip content={t('Reuse')} placement='bottom'>
-                                                    <Button
-                                                        size='mini'
-                                                        kind='tertiary'
-                                                        onClick={(event) => {
-                                                            event.stopPropagation()
-                                                            void handleRestore(item)
-                                                        }}
-                                                        overrides={{
-                                                            BaseButton: {
-                                                                style: { paddingLeft: '6px', paddingRight: '6px' },
-                                                            },
-                                                        }}
-                                                    >
-                                                        <MdReplay size={16} />
-                                                    </Button>
-                                                </Tooltip>
-                                                <Tooltip content={t('Copy Translation')} placement='bottom'>
-                                                    <Button
-                                                        size='mini'
-                                                        kind='tertiary'
-                                                        onClick={async (event) => {
-                                                            event.stopPropagation()
-                                                            try {
-                                                                if (!navigator?.clipboard?.writeText) {
-                                                                    throw new Error('Clipboard API unavailable')
-                                                                }
-                                                                await navigator.clipboard.writeText(item.translatedText)
-                                                                toast(t('Copy to clipboard'), {
-                                                                    duration: 3000,
-                                                                    icon: '👏',
-                                                                })
-                                                            } catch (error) {
-                                                                console.error(error)
-                                                                toast(t('Copy failed'), {
-                                                                    duration: 3000,
-                                                                    icon: '⚠️',
-                                                                })
-                                                            }
-                                                        }}
-                                                        overrides={{
-                                                            BaseButton: {
-                                                                style: { paddingLeft: '6px', paddingRight: '6px' },
-                                                            },
-                                                        }}
-                                                    >
-                                                        <RxCopy size={16} />
-                                                    </Button>
-                                                </Tooltip>
-                                                <Tooltip content={t('Delete')} placement='bottom'>
-                                                    <Button
-                                                        size='mini'
-                                                        kind='tertiary'
-                                                        onClick={(event) => {
-                                                            event.stopPropagation()
-                                                            void onDelete(item)
-                                                        }}
-                                                        overrides={{
-                                                            BaseButton: {
-                                                                style: { paddingLeft: '6px', paddingRight: '6px' },
-                                                            },
-                                                        }}
-                                                    >
-                                                        <RxTrash size={16} />
-                                                    </Button>
-                                                </Tooltip>
-                                            </div>
-                                        </div>
-                                        <div className={styles.historyText}>
-                                            <div
-                                                className={styles.historyTextLabel}
-                                                style={{ color: theme.colors.contentTertiary }}
-                                            >
-                                                {t('Original Text')}
-                                            </div>
-                                            <div
-                                                className={styles.historyTextBlock}
-                                                style={{ color: theme.colors.contentPrimary }}
-                                            >
-                                                {item.text}
-                                            </div>
-                                        </div>
-                                        <div
-                                            className={styles.divider}
-                                            style={{ background: theme.colors.borderOpaque }}
-                                        />
-                                        <div className={styles.historyText}>
-                                            <div
-                                                className={styles.historyTextLabel}
-                                                style={{ color: theme.colors.contentTertiary }}
-                                            >
-                                                {t('Translation')}
-                                            </div>
-                                            <div
-                                                className={styles.historyTextBlock}
-                                                style={{ color: theme.colors.contentPrimary }}
-                                            >
-                                                {item.translatedText}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })
-                        ) : (
-                            <div className={styles.empty} style={{ color: theme.colors.contentSecondary }}>
-                                {t('No History Yet')}
-                            </div>
-                        )}
-                    </div>
-                    <div className={styles.historyActions}>
-                        <Button size='compact' kind='tertiary' onClick={onClose}>
-                            {t('Close')}
-                        </Button>
-                        <Button size='compact' kind='secondary' onClick={onClear} disabled={!historyItems?.length}>
-                            {t('Clear History')}
-                        </Button>
-                    </div>
-                </div>
-            </ModalBody>
+            <ModalHeader>{headerTitle}</ModalHeader>
+            <ModalBody>{bodyContent}</ModalBody>
         </Modal>
     )
 }
