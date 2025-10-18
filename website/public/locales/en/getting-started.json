@@ -1,0 +1,203 @@
+{
+  "title": "Getting Started",
+  "description": "Learn how to set up and use nextai translator",
+  "hero": {
+    "title": "Get Started with nextai translator",
+    "subtitle": "Follow this guide to install and configure nextai translator in minutes"
+  },
+  "quickStart": {
+    "title": "Quick Start Guide",
+    "step1": {
+      "title": "Download & Install",
+      "description": "Download the app for your platform and run the installer"
+    },
+    "step2": {
+      "title": "Configure API Keys",
+      "description": "Add your AI provider API keys in settings"
+    },
+    "step3": {
+      "title": "Start Translating",
+      "description": "Select text and use the shortcut to translate"
+    }
+  },
+  "installation": {
+    "title": "Installation",
+    "desktop": {
+      "title": "Desktop Application",
+      "windows": {
+        "title": "Windows",
+        "steps": [
+          "Download the Windows installer (.exe)",
+          "Run the installer and follow the setup wizard",
+          "Launch nextai translator from the Start menu",
+          "Complete the initial setup"
+        ]
+      },
+      "macos": {
+        "title": "macOS",
+        "steps": [
+          "Download the macOS installer (.dmg)",
+          "Open the DMG file and drag the app to Applications",
+          "Launch nextai translator from Applications",
+          "Allow necessary permissions when prompted"
+        ]
+      },
+      "linux": {
+        "title": "Linux",
+        "steps": [
+          "Download the appropriate package for your distribution",
+          "Install using your package manager or AppImage",
+          "Launch nextai translator from your application menu",
+          "Complete the initial setup"
+        ]
+      }
+    },
+    "browser": {
+      "title": "Browser Extension",
+      "chrome": {
+        "title": "Chrome/Edge",
+        "steps": [
+          "Visit the Chrome Web Store",
+          "Click 'Add to Chrome'",
+          "Pin the extension to your toolbar",
+          "Click the icon to configure settings"
+        ]
+      },
+      "firefox": {
+        "title": "Firefox",
+        "steps": [
+          "Visit Firefox Add-ons",
+          "Click 'Add to Firefox'",
+          "Grant necessary permissions",
+          "Click the icon to configure settings"
+        ]
+      }
+    }
+  },
+  "configuration": {
+    "title": "Configuration",
+    "apiKeys": {
+      "title": "Setting Up API Keys",
+      "description": "nextai translator supports multiple AI providers. You'll need at least one API key to use the translation features.",
+      "providers": {
+        "openai": {
+          "title": "OpenAI",
+          "steps": [
+            "Visit platform.openai.com",
+            "Create an account or sign in",
+            "Navigate to API Keys section",
+            "Create a new API key",
+            "Copy the key and paste it in nextai translator settings"
+          ]
+        },
+        "anthropic": {
+          "title": "Anthropic Claude",
+          "steps": [
+            "Visit console.anthropic.com",
+            "Create an account or sign in",
+            "Navigate to API Keys",
+            "Generate a new key",
+            "Add the key to nextai translator"
+          ]
+        },
+        "google": {
+          "title": "Google Gemini",
+          "steps": [
+            "Visit makersuite.google.com",
+            "Create or sign in to your account",
+            "Get your API key",
+            "Add it to nextai translator settings"
+          ]
+        }
+      }
+    },
+    "shortcuts": {
+      "title": "Keyboard Shortcuts",
+      "description": "Customize keyboard shortcuts for quick access to translation features",
+      "default": {
+        "translate": "Ctrl/Cmd + Shift + T - Translate selected text",
+        "polish": "Ctrl/Cmd + Shift + P - Polish selected text",
+        "summarize": "Ctrl/Cmd + Shift + S - Summarize selected text",
+        "screenshot": "Ctrl/Cmd + Shift + X - Screenshot translation",
+        "vocabulary": "Ctrl/Cmd + Shift + V - Add to vocabulary"
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "language": {
+        "title": "Default Languages",
+        "description": "Set your source and target languages for quick translations"
+      },
+      "theme": {
+        "title": "Appearance",
+        "description": "Choose between light, dark, or system theme"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Configure when and how you receive notifications"
+      }
+    }
+  },
+  "usage": {
+    "title": "How to Use",
+    "translation": {
+      "title": "Translation",
+      "description": "To translate text:",
+      "steps": [
+        "Select any text in any application",
+        "Press the translation shortcut (default: Ctrl/Cmd + Shift + T)",
+        "View the translation in the popup window",
+        "Copy, edit, or perform additional actions"
+      ]
+    },
+    "screenshot": {
+      "title": "Screenshot Translation",
+      "description": "To translate text from images:",
+      "steps": [
+        "Press the screenshot shortcut (default: Ctrl/Cmd + Shift + X)",
+        "Select the area containing text",
+        "Wait for OCR processing",
+        "View and translate the extracted text"
+      ]
+    },
+    "vocabulary": {
+      "title": "Vocabulary Book",
+      "description": "To save words for later review:",
+      "steps": [
+        "Select a word or phrase",
+        "Click 'Add to Vocabulary' in the translation window",
+        "Access your vocabulary book from the main menu",
+        "Review and practice saved words"
+      ]
+    }
+  },
+  "troubleshooting": {
+    "title": "Troubleshooting",
+    "common": {
+      "title": "Common Issues",
+      "apiError": {
+        "title": "API Key Error",
+        "description": "If you see API errors, verify that your key is valid and has available credits"
+      },
+      "shortcut": {
+        "title": "Shortcut Not Working",
+        "description": "Make sure no other application is using the same keyboard shortcut"
+      },
+      "ocr": {
+        "title": "OCR Not Accurate",
+        "description": "Ensure the screenshot has clear, well-lit text with good contrast"
+      },
+      "performance": {
+        "title": "Performance Issues",
+        "description": "Close unused applications and check your internet connection"
+      }
+    }
+  },
+  "nextSteps": {
+    "title": "Next Steps",
+    "explore": "Explore all features",
+    "documentation": "Read the full documentation",
+    "community": "Join the community",
+    "contribute": "Contribute on GitHub"
+  }
+}

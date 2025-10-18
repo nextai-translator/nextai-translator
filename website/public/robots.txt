@@ -1,0 +1,7 @@
+# robots.txt for nextai translator website
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://nextai-translator.com/sitemap.xml

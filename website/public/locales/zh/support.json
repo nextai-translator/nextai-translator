@@ -1,0 +1,108 @@
+{
+  "title": "支持",
+  "description": "获取 nextai translator 的帮助和支持",
+  "hero": {
+    "title": "我们能帮您什么？",
+    "subtitle": "获取支持、报告问题或与社区联系"
+  },
+  "options": {
+    "title": "支持选项",
+    "documentation": {
+      "title": "文档",
+      "description": "在我们的综合文档中查找答案",
+      "cta": "浏览文档"
+    },
+    "faq": {
+      "title": "常见问题",
+      "description": "快速解答常见问题",
+      "cta": "查看常见问题"
+    },
+    "github": {
+      "title": "GitHub 讨论",
+      "description": "向社区提问并讨论",
+      "cta": "加入讨论"
+    },
+    "issues": {
+      "title": "报告错误",
+      "description": "发现错误？在 GitHub Issues 上告诉我们",
+      "cta": "报告问题"
+    }
+  },
+  "contact": {
+    "title": "联系我们",
+    "description": "给我们发送消息，我们会尽快回复您",
+    "form": {
+      "name": {
+        "label": "姓名",
+        "placeholder": "您的姓名",
+        "required": "姓名为必填项"
+      },
+      "email": {
+        "label": "电子邮件",
+        "placeholder": "your.email@example.com",
+        "required": "电子邮件为必填项",
+        "invalid": "请输入有效的电子邮件"
+      },
+      "subject": {
+        "label": "主题",
+        "placeholder": "我们能帮您什么？",
+        "required": "主题为必填项"
+      },
+      "category": {
+        "label": "类别",
+        "options": {
+          "general": "一般问题",
+          "bug": "错误报告",
+          "feature": "功能请求",
+          "installation": "安装帮助",
+          "api": "API 问题",
+          "other": "其他"
+        },
+        "required": "请选择类别"
+      },
+      "message": {
+        "label": "消息",
+        "placeholder": "请详细描述您的问题或问题...",
+        "required": "消息为必填项",
+        "minLength": "消息至少需要 20 个字符"
+      },
+      "submit": "发送消息",
+      "submitting": "发送中...",
+      "success": "谢谢！我们已收到您的消息，很快就会回复。",
+      "error": "出了点问题。请重试或在 GitHub 上联系我们。"
+    }
+  },
+  "community": {
+    "title": "加入社区",
+    "description": "与其他用户和贡献者联系",
+    "github": {
+      "title": "GitHub",
+      "description": "给仓库加星、贡献代码或报告问题",
+      "link": "在 GitHub 上查看"
+    },
+    "discussions": {
+      "title": "讨论",
+      "description": "提问、分享技巧和讨论功能",
+      "link": "加入讨论"
+    },
+    "discord": {
+      "title": "Discord",
+      "description": "与社区实时聊天",
+      "link": "加入 Discord",
+      "comingSoon": "（即将推出）"
+    }
+  },
+  "resources": {
+    "title": "其他资源",
+    "gettingStarted": "入门指南",
+    "documentation": "完整文档",
+    "faq": "常见问题",
+    "changelog": "更新日志",
+    "contributing": "贡献指南"
+  },
+  "emergency": {
+    "title": "紧急问题",
+    "description": "对于安全漏洞或关键错误，请直接联系我们：",
+    "email": "security@nextai-translator.com"
+  }
+}

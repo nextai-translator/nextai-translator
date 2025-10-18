@@ -1,0 +1,203 @@
+{
+  "title": "入门指南",
+  "description": "学习如何设置和使用 nextai translator",
+  "hero": {
+    "title": "开始使用 nextai translator",
+    "subtitle": "按照本指南在几分钟内安装和配置 nextai translator"
+  },
+  "quickStart": {
+    "title": "快速开始指南",
+    "step1": {
+      "title": "下载并安装",
+      "description": "下载适合您平台的应用并运行安装程序"
+    },
+    "step2": {
+      "title": "配置 API 密钥",
+      "description": "在设置中添加您的 AI 提供商 API 密钥"
+    },
+    "step3": {
+      "title": "开始翻译",
+      "description": "选择文本并使用快捷键进行翻译"
+    }
+  },
+  "installation": {
+    "title": "安装",
+    "desktop": {
+      "title": "桌面应用",
+      "windows": {
+        "title": "Windows",
+        "steps": [
+          "下载 Windows 安装程序 (.exe)",
+          "运行安装程序并按照设置向导操作",
+          "从开始菜单启动 nextai translator",
+          "完成初始设置"
+        ]
+      },
+      "macos": {
+        "title": "macOS",
+        "steps": [
+          "下载 macOS 安装程序 (.dmg)",
+          "打开 DMG 文件并将应用拖到应用程序文件夹",
+          "从应用程序启动 nextai translator",
+          "根据提示允许必要的权限"
+        ]
+      },
+      "linux": {
+        "title": "Linux",
+        "steps": [
+          "下载适合您发行版的软件包",
+          "使用软件包管理器或 AppImage 安装",
+          "从应用程序菜单启动 nextai translator",
+          "完成初始设置"
+        ]
+      }
+    },
+    "browser": {
+      "title": "浏览器扩展",
+      "chrome": {
+        "title": "Chrome/Edge",
+        "steps": [
+          "访问 Chrome 网上应用店",
+          "点击"添加到 Chrome"",
+          "将扩展固定到工具栏",
+          "点击图标配置设置"
+        ]
+      },
+      "firefox": {
+        "title": "Firefox",
+        "steps": [
+          "访问 Firefox 附加组件",
+          "点击"添加到 Firefox"",
+          "授予必要的权限",
+          "点击图标配置设置"
+        ]
+      }
+    }
+  },
+  "configuration": {
+    "title": "配置",
+    "apiKeys": {
+      "title": "设置 API 密钥",
+      "description": "nextai translator 支持多个 AI 提供商。您至少需要一个 API 密钥才能使用翻译功能。",
+      "providers": {
+        "openai": {
+          "title": "OpenAI",
+          "steps": [
+            "访问 platform.openai.com",
+            "创建账户或登录",
+            "导航到 API 密钥部分",
+            "创建新的 API 密钥",
+            "复制密钥并粘贴到 nextai translator 设置中"
+          ]
+        },
+        "anthropic": {
+          "title": "Anthropic Claude",
+          "steps": [
+            "访问 console.anthropic.com",
+            "创建账户或登录",
+            "导航到 API 密钥",
+            "生成新密钥",
+            "将密钥添加到 nextai translator"
+          ]
+        },
+        "google": {
+          "title": "Google Gemini",
+          "steps": [
+            "访问 makersuite.google.com",
+            "创建或登录您的账户",
+            "获取您的 API 密钥",
+            "将其添加到 nextai translator 设置中"
+          ]
+        }
+      }
+    },
+    "shortcuts": {
+      "title": "键盘快捷键",
+      "description": "自定义键盘快捷键以快速访问翻译功能",
+      "default": {
+        "translate": "Ctrl/Cmd + Shift + T - 翻译选定文本",
+        "polish": "Ctrl/Cmd + Shift + P - 润色选定文本",
+        "summarize": "Ctrl/Cmd + Shift + S - 总结选定文本",
+        "screenshot": "Ctrl/Cmd + Shift + X - 截图翻译",
+        "vocabulary": "Ctrl/Cmd + Shift + V - 添加到生词本"
+      }
+    },
+    "preferences": {
+      "title": "偏好设置",
+      "language": {
+        "title": "默认语言",
+        "description": "设置源语言和目标语言以进行快速翻译"
+      },
+      "theme": {
+        "title": "外观",
+        "description": "在浅色、深色或系统主题之间选择"
+      },
+      "notifications": {
+        "title": "通知",
+        "description": "配置何时以及如何接收通知"
+      }
+    }
+  },
+  "usage": {
+    "title": "如何使用",
+    "translation": {
+      "title": "翻译",
+      "description": "翻译文本：",
+      "steps": [
+        "在任何应用程序中选择任何文本",
+        "按下翻译快捷键（默认：Ctrl/Cmd + Shift + T）",
+        "在弹出窗口中查看翻译",
+        "复制、编辑或执行其他操作"
+      ]
+    },
+    "screenshot": {
+      "title": "截图翻译",
+      "description": "从图像翻译文本：",
+      "steps": [
+        "按下截图快捷键（默认：Ctrl/Cmd + Shift + X）",
+        "选择包含文本的区域",
+        "等待 OCR 处理",
+        "查看并翻译提取的文本"
+      ]
+    },
+    "vocabulary": {
+      "title": "生词本",
+      "description": "保存单词以供以后复习：",
+      "steps": [
+        "选择一个单词或短语",
+        "在翻译窗口中点击"添加到生词本"",
+        "从主菜单访问您的生词本",
+        "复习和练习保存的单词"
+      ]
+    }
+  },
+  "troubleshooting": {
+    "title": "故障排除",
+    "common": {
+      "title": "常见问题",
+      "apiError": {
+        "title": "API 密钥错误",
+        "description": "如果您看到 API 错误，请验证您的密钥是否有效且有可用额度"
+      },
+      "shortcut": {
+        "title": "快捷键不起作用",
+        "description": "确保没有其他应用程序使用相同的键盘快捷键"
+      },
+      "ocr": {
+        "title": "OCR 不准确",
+        "description": "确保截图具有清晰、光线充足且对比度良好的文本"
+      },
+      "performance": {
+        "title": "性能问题",
+        "description": "关闭未使用的应用程序并检查您的互联网连接"
+      }
+    }
+  },
+  "nextSteps": {
+    "title": "下一步",
+    "explore": "探索所有功能",
+    "documentation": "阅读完整文档",
+    "community": "加入社区",
+    "contribute": "在 GitHub 上贡献"
+  }
+}

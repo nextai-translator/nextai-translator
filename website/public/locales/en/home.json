@@ -1,0 +1,48 @@
+{
+  "hero": {
+    "title": "The translator that does more than just translation",
+    "subtitle": "AI-powered translation tool supporting 55+ languages with advanced features like polishing, summarization, OCR, and TTS",
+    "primaryCTA": "Download Now",
+    "secondaryCTA": "Learn More"
+  },
+  "features": {
+    "title": "Powerful Features",
+    "subtitle": "Everything you need for professional translation and text processing",
+    "translation": {
+      "title": "Translation",
+      "description": "Support for 55+ languages with streaming responses"
+    },
+    "polishing": {
+      "title": "Text Polishing",
+      "description": "Improve your writing with AI-powered editing"
+    },
+    "summarization": {
+      "title": "Summarization",
+      "description": "Get concise summaries of long texts"
+    },
+    "ocr": {
+      "title": "Screenshot Translation",
+      "description": "Translate text from images using OCR"
+    },
+    "tts": {
+      "title": "Text-to-Speech",
+      "description": "Listen to translations with natural-sounding voices"
+    },
+    "vocabulary": {
+      "title": "Vocabulary Book",
+      "description": "Save and review words with memory aids"
+    }
+  },
+  "platforms": {
+    "title": "Available on All Platforms",
+    "subtitle": "Download for your preferred platform",
+    "browser": "Browser Extensions",
+    "desktop": "Desktop Apps",
+    "allPlatforms": "View all download options"
+  },
+  "socialProof": {
+    "stars": "GitHub Stars",
+    "downloads": "Downloads",
+    "languages": "Supported Languages"
+  }
+}

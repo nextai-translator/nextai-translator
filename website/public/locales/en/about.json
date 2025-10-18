@@ -1,0 +1,128 @@
+{
+  "title": "About",
+  "description": "Learn about nextai translator and our mission",
+  "hero": {
+    "title": "About nextai translator",
+    "subtitle": "Breaking down language barriers with AI"
+  },
+  "mission": {
+    "title": "Our Mission",
+    "description": "To make powerful AI translation accessible to everyone, everywhere. We believe that language should never be a barrier to communication, learning, or opportunity.",
+    "vision": "We envision a world where anyone can instantly understand and communicate in any language, enabling global collaboration and understanding."
+  },
+  "story": {
+    "title": "Our Story",
+    "content": "nextai translator was born from a simple observation: while AI translation technology has made incredible advances, most tools were either too expensive, too limited, or too complicated for everyday users. We set out to create a solution that combines the power of cutting-edge AI models with simplicity and accessibility.",
+    "timeline": {
+      "founded": {
+        "year": "2023",
+        "title": "Project Started",
+        "description": "Initial development began as an open-source project"
+      },
+      "firstRelease": {
+        "year": "2023",
+        "title": "First Release",
+        "description": "v1.0 launched with basic translation features"
+      },
+      "growth": {
+        "year": "2024",
+        "title": "Rapid Growth",
+        "description": "Added OCR, TTS, vocabulary features, and reached 100K+ downloads"
+      },
+      "community": {
+        "year": "2025",
+        "title": "Thriving Community",
+        "description": "Growing community of contributors and users worldwide"
+      }
+    }
+  },
+  "values": {
+    "title": "Our Values",
+    "openSource": {
+      "title": "Open Source",
+      "description": "We believe in transparency and community-driven development. All our code is open source and available on GitHub."
+    },
+    "privacy": {
+      "title": "Privacy First",
+      "description": "Your data stays on your device. We don't collect, store, or sell your personal information."
+    },
+    "accessibility": {
+      "title": "Accessibility",
+      "description": "We're committed to making our tools accessible to everyone, regardless of ability or economic status."
+    },
+    "quality": {
+      "title": "Quality",
+      "description": "We prioritize quality over quantity, delivering reliable and accurate translations every time."
+    }
+  },
+  "features": {
+    "title": "What Makes Us Different",
+    "multiProvider": {
+      "title": "Multi-Provider Support",
+      "description": "Use OpenAI, Anthropic, Google, or other providers - you choose"
+    },
+    "comprehensive": {
+      "title": "Comprehensive Features",
+      "description": "More than translation - polishing, summarization, OCR, TTS, and vocabulary"
+    },
+    "crossPlatform": {
+      "title": "Cross-Platform",
+      "description": "Available everywhere - desktop apps and browser extensions"
+    },
+    "privacy": {
+      "title": "Privacy Focused",
+      "description": "All data stored locally, no tracking, no ads"
+    }
+  },
+  "stats": {
+    "title": "By the Numbers",
+    "downloads": {
+      "value": "100K+",
+      "label": "Downloads"
+    },
+    "stars": {
+      "value": "4.8K+",
+      "label": "GitHub Stars"
+    },
+    "languages": {
+      "value": "55+",
+      "label": "Languages Supported"
+    },
+    "contributors": {
+      "value": "50+",
+      "label": "Contributors"
+    }
+  },
+  "team": {
+    "title": "The Team",
+    "description": "nextai translator is built by a global community of contributors who are passionate about making AI translation accessible to everyone. From developers to translators, designers to users - everyone plays a role in making this project successful.",
+    "contribute": "Join us in building the future of translation"
+  },
+  "openSource": {
+    "title": "Open Source",
+    "description": "nextai translator is proudly open source and licensed under the AGPL-3.0 license. We welcome contributions from developers, translators, designers, and anyone passionate about breaking down language barriers.",
+    "github": {
+      "title": "GitHub Repository",
+      "description": "View the code, report issues, or contribute",
+      "cta": "View on GitHub"
+    },
+    "contributing": {
+      "title": "Contributing",
+      "description": "Learn how to contribute to the project",
+      "cta": "Contributing Guide"
+    }
+  },
+  "contact": {
+    "title": "Get in Touch",
+    "description": "Have questions or want to collaborate? We'd love to hear from you.",
+    "github": "GitHub Discussions",
+    "email": "Email Us",
+    "support": "Support Page"
+  },
+  "cta": {
+    "title": "Ready to Get Started?",
+    "description": "Join thousands of users worldwide who trust nextai translator for their translation needs",
+    "download": "Download Now",
+    "documentation": "View Documentation"
+  }
+}

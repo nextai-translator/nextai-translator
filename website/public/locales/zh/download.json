@@ -1,0 +1,109 @@
+{
+  "title": "下载",
+  "description": "下载 nextai translator",
+  "hero": {
+    "title": "下载 nextai translator",
+    "subtitle": "选择您的平台，几秒钟内开始翻译"
+  },
+  "desktop": {
+    "title": "桌面应用",
+    "subtitle": "适用于 Windows、macOS 和 Linux 的全功能桌面应用",
+    "windows": {
+      "title": "Windows",
+      "description": "适用于 Windows 10 及更高版本",
+      "download": "下载 Windows 版",
+      "architecture": {
+        "x64": "Windows (x64)",
+        "arm64": "Windows (ARM64)"
+      }
+    },
+    "macos": {
+      "title": "macOS",
+      "description": "适用于 macOS 10.15 及更高版本",
+      "download": "下载 macOS 版",
+      "architecture": {
+        "intel": "Intel 芯片",
+        "apple": "Apple Silicon"
+      }
+    },
+    "linux": {
+      "title": "Linux",
+      "description": "适用于 Ubuntu、Debian 等发行版",
+      "download": "下载 Linux 版",
+      "formats": {
+        "appimage": "AppImage (通用)",
+        "deb": "Debian/Ubuntu (.deb)",
+        "rpm": "Fedora/RHEL (.rpm)",
+        "snap": "Snap 包"
+      }
+    }
+  },
+  "browser": {
+    "title": "浏览器扩展",
+    "subtitle": "直接在浏览器中翻译",
+    "chrome": {
+      "title": "Chrome 扩展",
+      "description": "适用于 Chrome 和 Edge",
+      "install": "添加到 Chrome"
+    },
+    "firefox": {
+      "title": "Firefox 扩展",
+      "description": "适用于 Firefox 浏览器",
+      "install": "添加到 Firefox"
+    },
+    "safari": {
+      "title": "Safari 扩展",
+      "description": "适用于 Safari（即将推出）",
+      "comingSoon": "即将推出"
+    }
+  },
+  "features": {
+    "title": "包含内容",
+    "offline": {
+      "title": "离线模式",
+      "description": "无需互联网连接即可工作"
+    },
+    "sync": {
+      "title": "跨设备同步",
+      "description": "在所有设备间同步设置"
+    },
+    "updates": {
+      "title": "自动更新",
+      "description": "始终保持最新版本"
+    },
+    "privacy": {
+      "title": "隐私优先",
+      "description": "您的数据保留在您的设备上"
+    }
+  },
+  "systemRequirements": {
+    "title": "系统要求",
+    "windows": {
+      "os": "Windows 10 或更高版本",
+      "processor": "Intel Core i3 或同等处理器",
+      "memory": "4 GB 内存",
+      "storage": "200 MB 可用空间"
+    },
+    "macos": {
+      "os": "macOS 10.15 (Catalina) 或更高版本",
+      "processor": "Intel 或 Apple Silicon",
+      "memory": "4 GB 内存",
+      "storage": "200 MB 可用空间"
+    },
+    "linux": {
+      "os": "Ubuntu 18.04 或更高版本、Debian 10 或更高版本",
+      "processor": "Intel Core i3 或同等处理器",
+      "memory": "4 GB 内存",
+      "storage": "200 MB 可用空间"
+    }
+  },
+  "installation": {
+    "title": "安装指南",
+    "viewGuide": "查看安装指南"
+  },
+  "github": {
+    "title": "开源",
+    "description": "nextai translator 是开源的。在 GitHub 上查看代码、报告问题或贡献代码。",
+    "viewOnGitHub": "在 GitHub 上查看"
+  }
+}

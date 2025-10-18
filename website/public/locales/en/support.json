@@ -1,0 +1,108 @@
+{
+  "title": "Support",
+  "description": "Get help and support for nextai translator",
+  "hero": {
+    "title": "How can we help you?",
+    "subtitle": "Get support, report issues, or connect with the community"
+  },
+  "options": {
+    "title": "Support Options",
+    "documentation": {
+      "title": "Documentation",
+      "description": "Find answers in our comprehensive documentation",
+      "cta": "Browse Docs"
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Quick answers to frequently asked questions",
+      "cta": "View FAQ"
+    },
+    "github": {
+      "title": "GitHub Discussions",
+      "description": "Ask questions and discuss with the community",
+      "cta": "Join Discussion"
+    },
+    "issues": {
+      "title": "Report a Bug",
+      "description": "Found a bug? Let us know on GitHub Issues",
+      "cta": "Report Issue"
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Send us a message and we'll get back to you as soon as possible",
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Your name",
+        "required": "Name is required"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "your.email@example.com",
+        "required": "Email is required",
+        "invalid": "Please enter a valid email"
+      },
+      "subject": {
+        "label": "Subject",
+        "placeholder": "How can we help?",
+        "required": "Subject is required"
+      },
+      "category": {
+        "label": "Category",
+        "options": {
+          "general": "General Question",
+          "bug": "Bug Report",
+          "feature": "Feature Request",
+          "installation": "Installation Help",
+          "api": "API Issues",
+          "other": "Other"
+        },
+        "required": "Please select a category"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Please describe your issue or question in detail...",
+        "required": "Message is required",
+        "minLength": "Message must be at least 20 characters"
+      },
+      "submit": "Send Message",
+      "submitting": "Sending...",
+      "success": "Thank you! We've received your message and will respond soon.",
+      "error": "Something went wrong. Please try again or contact us on GitHub."
+    }
+  },
+  "community": {
+    "title": "Join the Community",
+    "description": "Connect with other users and contributors",
+    "github": {
+      "title": "GitHub",
+      "description": "Star the repo, contribute code, or report issues",
+      "link": "View on GitHub"
+    },
+    "discussions": {
+      "title": "Discussions",
+      "description": "Ask questions, share tips, and discuss features",
+      "link": "Join Discussions"
+    },
+    "discord": {
+      "title": "Discord",
+      "description": "Chat with the community in real-time",
+      "link": "Join Discord",
+      "comingSoon": "(Coming Soon)"
+    }
+  },
+  "resources": {
+    "title": "Additional Resources",
+    "gettingStarted": "Getting Started Guide",
+    "documentation": "Full Documentation",
+    "faq": "FAQ",
+    "changelog": "Changelog",
+    "contributing": "Contributing Guidelines"
+  },
+  "emergency": {
+    "title": "Critical Issues",
+    "description": "For security vulnerabilities or critical bugs, please contact us directly:",
+    "email": "security@nextai-translator.com"
+  }
+}

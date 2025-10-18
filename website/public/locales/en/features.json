@@ -1,0 +1,173 @@
+{
+  "title": "Features",
+  "description": "Discover all the powerful features of nextai translator",
+  "hero": {
+    "title": "Powerful Features for Modern Translation",
+    "subtitle": "Everything you need for professional translation and text processing"
+  },
+  "translation": {
+    "title": "Multi-Language Translation",
+    "description": "Support for 55+ languages with streaming responses",
+    "details": {
+      "streaming": {
+        "title": "Real-time Streaming",
+        "description": "See translations appear instantly as they're generated"
+      },
+      "languages": {
+        "title": "55+ Languages",
+        "description": "From English to Chinese, Japanese to Spanish, and everything in between"
+      },
+      "context": {
+        "title": "Context-Aware",
+        "description": "AI understands context for more accurate translations"
+      },
+      "customization": {
+        "title": "Customizable",
+        "description": "Adjust tone, formality, and style to match your needs"
+      }
+    }
+  },
+  "polishing": {
+    "title": "Text Polishing",
+    "description": "Improve your writing with AI-powered editing",
+    "details": {
+      "grammar": {
+        "title": "Grammar Correction",
+        "description": "Fix grammar, spelling, and punctuation errors"
+      },
+      "style": {
+        "title": "Style Improvement",
+        "description": "Enhance clarity, flow, and readability"
+      },
+      "tone": {
+        "title": "Tone Adjustment",
+        "description": "Make text more formal, casual, or professional"
+      },
+      "suggestions": {
+        "title": "Smart Suggestions",
+        "description": "Get alternative phrasings and word choices"
+      }
+    }
+  },
+  "summarization": {
+    "title": "Text Summarization",
+    "description": "Get concise summaries of long texts",
+    "details": {
+      "length": {
+        "title": "Adjustable Length",
+        "description": "Choose from brief, medium, or detailed summaries"
+      },
+      "keyPoints": {
+        "title": "Key Points",
+        "description": "Extract the most important information"
+      },
+      "bulletPoints": {
+        "title": "Bullet Points",
+        "description": "Get summaries in easy-to-scan bullet format"
+      },
+      "multilingual": {
+        "title": "Multilingual",
+        "description": "Summarize and translate in one step"
+      }
+    }
+  },
+  "ocr": {
+    "title": "Screenshot Translation",
+    "description": "Translate text from images using OCR",
+    "details": {
+      "instant": {
+        "title": "Instant Capture",
+        "description": "Take screenshots and translate immediately"
+      },
+      "accurate": {
+        "title": "High Accuracy",
+        "description": "Advanced OCR technology for reliable text extraction"
+      },
+      "multiLanguage": {
+        "title": "Multi-Language OCR",
+        "description": "Recognize text in multiple languages automatically"
+      },
+      "overlay": {
+        "title": "Overlay Translation",
+        "description": "See translations overlaid on the original image"
+      }
+    }
+  },
+  "tts": {
+    "title": "Text-to-Speech",
+    "description": "Listen to translations with natural-sounding voices",
+    "details": {
+      "voices": {
+        "title": "Natural Voices",
+        "description": "High-quality, human-like voice synthesis"
+      },
+      "speed": {
+        "title": "Adjustable Speed",
+        "description": "Control playback speed from 0.5x to 2x"
+      },
+      "multiLanguage": {
+        "title": "Multiple Languages",
+        "description": "Native voices for all supported languages"
+      },
+      "offline": {
+        "title": "Offline Available",
+        "description": "Use TTS without an internet connection"
+      }
+    }
+  },
+  "vocabulary": {
+    "title": "Vocabulary Book",
+    "description": "Save and review words with memory aids",
+    "details": {
+      "save": {
+        "title": "Save Words",
+        "description": "Build your personal vocabulary collection"
+      },
+      "examples": {
+        "title": "Context Examples",
+        "description": "See how words are used in sentences"
+      },
+      "review": {
+        "title": "Spaced Repetition",
+        "description": "Smart review system for better retention"
+      },
+      "export": {
+        "title": "Export & Import",
+        "description": "Share vocabulary lists with others"
+      }
+    }
+  },
+  "additional": {
+    "title": "Additional Features",
+    "shortcut": {
+      "title": "Keyboard Shortcuts",
+      "description": "Access all features with customizable hotkeys"
+    },
+    "history": {
+      "title": "Translation History",
+      "description": "Access all your previous translations"
+    },
+    "themes": {
+      "title": "Dark Mode",
+      "description": "Easy on the eyes with dark and light themes"
+    },
+    "privacy": {
+      "title": "Privacy First",
+      "description": "Your data stays on your device"
+    },
+    "openSource": {
+      "title": "Open Source",
+      "description": "Community-driven development on GitHub"
+    },
+    "crossPlatform": {
+      "title": "Cross-Platform",
+      "description": "Available on Windows, macOS, Linux, and browsers"
+    }
+  },
+  "cta": {
+    "title": "Ready to Get Started?",
+    "subtitle": "Download nextai translator and experience the future of translation",
+    "download": "Download Now",
+    "viewDocs": "View Documentation"
+  }
+}

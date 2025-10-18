@@ -1,0 +1,138 @@
+{
+  "title": "常见问题",
+  "description": "查找有关 nextai translator 的常见问题的答案",
+  "hero": {
+    "title": "常见问题",
+    "subtitle": "查找有关 nextai translator 最常见问题的答案"
+  },
+  "categories": {
+    "general": {
+      "title": "常规",
+      "questions": {
+        "whatIs": {
+          "question": "什么是 nextai translator？",
+          "answer": "nextai translator 是一个 AI 驱动的翻译工具，支持 55+ 种语言，包括文本润色、摘要、OCR、文本转语音和词汇管理等高级功能。它可作为桌面应用程序和浏览器扩展使用。"
+        },
+        "cost": {
+          "question": "nextai translator 是免费的吗？",
+          "answer": "是的，nextai translator 完全免费且开源。但是，您需要来自 AI 提供商（OpenAI、Anthropic、Google 等）的 API 密钥，这些提供商可能有自己的定价。大多数提供商提供免费套餐以开始使用。"
+        },
+        "platforms": {
+          "question": "支持哪些平台？",
+          "answer": "nextai translator 可在 Windows、macOS、Linux 上作为桌面应用程序使用，以及作为 Chrome、Firefox 和 Edge 的浏览器扩展使用。"
+        },
+        "openSource": {
+          "question": "它是开源的吗？",
+          "answer": "是的！nextai translator 完全开源，可在 GitHub 上获得。您可以查看代码、贡献或 fork 项目。"
+        }
+      }
+    },
+    "setup": {
+      "title": "设置和配置",
+      "questions": {
+        "apiKeys": {
+          "question": "我需要哪些 API 密钥？",
+          "answer": "您至少需要来自受支持的 AI 提供商之一的 API 密钥：OpenAI、Anthropic Claude、Google Gemini、Azure OpenAI 或其他兼容的提供商。您可以配置多个提供商并在它们之间切换。"
+        },
+        "freeApi": {
+          "question": "有免费的 API 选项吗？",
+          "answer": "大多数 AI 提供商提供免费试用额度或免费套餐。Google Gemini 和一些其他提供商有适合个人使用的慷慨免费配额。"
+        },
+        "offline": {
+          "question": "我可以离线使用吗？",
+          "answer": "某些功能（如 TTS）可以离线工作，但翻译需要互联网连接才能与 AI 提供商通信。我们正在开发本地模型支持，以实现完全离线操作。"
+        },
+        "shortcuts": {
+          "question": "如何自定义键盘快捷键？",
+          "answer": "转到"设置">"快捷键"以查看和自定义所有键盘快捷键。您可以为翻译、润色、摘要和其他功能设置不同的快捷键。"
+        }
+      }
+    },
+    "features": {
+      "title": "功能",
+      "questions": {
+        "languages": {
+          "question": "支持多少种语言？",
+          "answer": "nextai translator 支持 55+ 种语言，包括英语、中文、日语、韩语、西班牙语、法语、德语、俄语、阿拉伯语等。确切的数量取决于您的 AI 提供商。"
+        },
+        "accuracy": {
+          "question": "翻译的准确性如何？",
+          "answer": "翻译准确性取决于您使用的 AI 模型。我们支持来自 OpenAI (GPT-4)、Anthropic (Claude) 和 Google (Gemini) 的最新模型，这些模型提供最先进的翻译质量。"
+        },
+        "ocr": {
+          "question": "截图翻译如何工作？",
+          "answer": "按下截图快捷键，选择包含文本的区域，OCR 引擎将提取文本。然后您可以翻译、复制或编辑提取的文本。"
+        },
+        "vocabulary": {
+          "question": "生词本如何工作？",
+          "answer": "在翻译时，您可以将单词和短语保存到生词本中。它使用间隔重复来帮助您有效地复习和记忆单词。"
+        }
+      }
+    },
+    "troubleshooting": {
+      "title": "故障排除",
+      "questions": {
+        "apiError": {
+          "question": "为什么我会收到 API 错误？",
+          "answer": "常见原因包括：无效的 API 密钥、额度不足、速率限制或网络问题。请检查您的 API 密钥有效性和提供商的账户状态。"
+        },
+        "slowTranslation": {
+          "question": "为什么翻译很慢？",
+          "answer": "翻译速度取决于您的互联网连接和 AI 提供商的响应时间。如果持续缓慢，请尝试切换到不同的模型或提供商。"
+        },
+        "shortcutConflict": {
+          "question": "我的键盘快捷键不起作用",
+          "answer": "另一个应用程序可能正在使用相同的快捷键。尝试在"设置">"快捷键"中自定义快捷键。还要确保 nextai translator 在您的系统上具有必要的权限。"
+        },
+        "crashes": {
+          "question": "应用程序不断崩溃",
+          "answer": "尝试清除应用程序缓存、更新到最新版本或重新安装。如果问题仍然存在，请在 GitHub 上报告并附上详细的错误日志。"
+        }
+      }
+    },
+    "privacy": {
+      "title": "隐私和安全",
+      "questions": {
+        "dataCollection": {
+          "question": "nextai translator 收集哪些数据？",
+          "answer": "nextai translator 不会收集或存储您的个人数据。所有设置和词汇都本地存储在您的设备上。翻译会根据其隐私政策发送到您选择的 AI 提供商。"
+        },
+        "apiKeySecurity": {
+          "question": "我的 API 密钥如何存储？",
+          "answer": "API 密钥安全地存储在您系统的加密凭据存储中（macOS 上的钥匙串、Windows 上的凭据管理器、Linux 上的 Secret Service）。"
+        },
+        "history": {
+          "question": "我的翻译历史记录是否保存？",
+          "answer": "翻译历史记录本地存储在您的设备上，永远不会发送到我们的服务器。您可以随时从设置中清除历史记录。"
+        }
+      }
+    },
+    "support": {
+      "title": "支持和贡献",
+      "questions": {
+        "help": {
+          "question": "我可以在哪里获得帮助？",
+          "answer": "您可以通过 GitHub 讨论获得帮助，通过 GitHub Issues 报告错误，或访问我们的支持页面。社区活跃且乐于助人！"
+        },
+        "contribute": {
+          "question": "我如何贡献？",
+          "answer": "欢迎贡献！您可以在 GitHub 上贡献代码、翻译、文档或错误报告。查看我们的贡献指南以开始使用。"
+        },
+        "feature": {
+          "question": "我可以请求功能吗？",
+          "answer": "当然可以！在 GitHub Issues 上提出功能请求。描述您的用例以及为什么该功能有价值。社区反馈帮助我们确定开发的优先级。"
+        },
+        "donate": {
+          "question": "我可以支持该项目吗？",
+          "answer": "支持该项目的最佳方式是使用它、与他人分享、贡献代码或翻译，并在 GitHub 上给我们一个星标！"
+        }
+      }
+    }
+  },
+  "stillHaveQuestions": {
+    "title": "还有问题？",
+    "description": "找不到您要找的答案？我们随时为您提供帮助。",
+    "contact": "联系支持",
+    "github": "在 GitHub 上提问"
+  }
+}

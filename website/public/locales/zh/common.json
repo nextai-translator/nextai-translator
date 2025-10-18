@@ -1,0 +1,26 @@
+{
+  "siteTitle": "nextai translator",
+  "siteTagline": "不仅仅是翻译的翻译工具",
+  "siteDescription": "支持55+种语言的AI翻译工具，具备润色、摘要、OCR、TTS等功能",
+  "nav": {
+    "home": "首页",
+    "features": "功能",
+    "download": "下载",
+    "docs": "文档",
+    "support": "支持",
+    "about": "关于"
+  },
+  "footer": {
+    "product": "产品",
+    "resources": "资源",
+    "community": "社区",
+    "company": "公司",
+    "allRightsReserved": "版权所有"
+  },
+  "cta": {
+    "download": "立即下载",
+    "getStarted": "开始使用",
+    "learnMore": "了解更多",
+    "viewOnGitHub": "查看 GitHub"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "title": "Documentation",
+  "description": "Complete documentation for nextai translator",
+  "hero": {
+    "title": "Documentation",
+    "subtitle": "Everything you need to know about nextai translator",
+    "search": "Search documentation..."
+  },
+  "categories": {
+    "gettingStarted": {
+      "title": "Getting Started",
+      "description": "Learn the basics and get up and running quickly",
+      "items": {
+        "installation": "Installation Guide",
+        "quickStart": "Quick Start",
+        "configuration": "Configuration",
+        "firstTranslation": "Your First Translation"
+      }
+    },
+    "features": {
+      "title": "Features",
+      "description": "Detailed guides for each feature",
+      "items": {
+        "translation": "Translation",
+        "polishing": "Text Polishing",
+        "summarization": "Summarization",
+        "ocr": "Screenshot Translation",
+        "tts": "Text-to-Speech",
+        "vocabulary": "Vocabulary Book"
+      }
+    },
+    "configuration": {
+      "title": "Configuration",
+      "description": "Customize nextai translator to your needs",
+      "items": {
+        "apiKeys": "API Keys Setup",
+        "shortcuts": "Keyboard Shortcuts",
+        "preferences": "Preferences",
+        "themes": "Themes & Appearance"
+      }
+    },
+    "advanced": {
+      "title": "Advanced",
+      "description": "Advanced features and customization",
+      "items": {
+        "plugins": "Plugins & Extensions",
+        "customPrompts": "Custom Prompts",
+        "automation": "Automation",
+        "api": "API Reference"
+      }
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "description": "Solutions to common problems",
+      "items": {
+        "faq": "Frequently Asked Questions",
+        "commonIssues": "Common Issues",
+        "performance": "Performance Optimization",
+        "support": "Getting Support"
+      }
+    },
+    "development": {
+      "title": "Development",
+      "description": "For developers and contributors",
+      "items": {
+        "contributing": "Contributing Guide",
+        "buildFromSource": "Building from Source",
+        "architecture": "Architecture Overview",
+        "pluginDevelopment": "Plugin Development"
+      }
+    }
+  },
+  "popular": {
+    "title": "Popular Topics",
+    "items": [
+      "How to set up API keys",
+      "Translating with keyboard shortcuts",
+      "Using screenshot translation",
+      "Customizing appearance",
+      "Managing vocabulary",
+      "Troubleshooting API errors"
+    ]
+  },
+  "support": {
+    "title": "Need Help?",
+    "description": "Can't find what you're looking for?",
+    "github": "View on GitHub",
+    "discussions": "GitHub Discussions",
+    "issues": "Report an Issue",
+    "contact": "Contact Support"
+  }
+}

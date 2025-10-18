@@ -1,0 +1,128 @@
+{
+  "title": "关于",
+  "description": "了解 nextai translator 和我们的使命",
+  "hero": {
+    "title": "关于 nextai translator",
+    "subtitle": "用 AI 打破语言障碍"
+  },
+  "mission": {
+    "title": "我们的使命",
+    "description": "让强大的 AI 翻译对每个人、每个地方都可访问。我们相信语言永远不应该成为沟通、学习或机会的障碍。",
+    "vision": "我们设想一个任何人都可以即时理解和使用任何语言进行交流的世界，实现全球协作和理解。"
+  },
+  "story": {
+    "title": "我们的故事",
+    "content": "nextai translator 源于一个简单的观察：虽然 AI 翻译技术取得了令人难以置信的进步，但大多数工具要么太贵、太有限，要么对日常用户来说太复杂。我们着手创建一个将尖端 AI 模型的力量与简单性和可访问性相结合的解决方案。",
+    "timeline": {
+      "founded": {
+        "year": "2023",
+        "title": "项目启动",
+        "description": "作为开源项目开始初步开发"
+      },
+      "firstRelease": {
+        "year": "2023",
+        "title": "首次发布",
+        "description": "v1.0 发布，具有基本翻译功能"
+      },
+      "growth": {
+        "year": "2024",
+        "title": "快速增长",
+        "description": "添加 OCR、TTS、词汇功能，下载量超过 100K+"
+      },
+      "community": {
+        "year": "2025",
+        "title": "蓬勃发展的社区",
+        "description": "全球贡献者和用户社区不断增长"
+      }
+    }
+  },
+  "values": {
+    "title": "我们的价值观",
+    "openSource": {
+      "title": "开源",
+      "description": "我们相信透明度和社区驱动的开发。我们所有的代码都是开源的，可在 GitHub 上获得。"
+    },
+    "privacy": {
+      "title": "隐私优先",
+      "description": "您的数据保留在您的设备上。我们不会收集、存储或出售您的个人信息。"
+    },
+    "accessibility": {
+      "title": "可访问性",
+      "description": "我们致力于让每个人都能使用我们的工具，无论能力或经济状况如何。"
+    },
+    "quality": {
+      "title": "质量",
+      "description": "我们优先考虑质量而非数量，每次都提供可靠和准确的翻译。"
+    }
+  },
+  "features": {
+    "title": "我们的不同之处",
+    "multiProvider": {
+      "title": "多提供商支持",
+      "description": "使用 OpenAI、Anthropic、Google 或其他提供商 - 您选择"
+    },
+    "comprehensive": {
+      "title": "综合功能",
+      "description": "不仅仅是翻译 - 润色、摘要、OCR、TTS 和词汇"
+    },
+    "crossPlatform": {
+      "title": "跨平台",
+      "description": "随处可用 - 桌面应用程序和浏览器扩展"
+    },
+    "privacy": {
+      "title": "注重隐私",
+      "description": "所有数据本地存储，无跟踪，无广告"
+    }
+  },
+  "stats": {
+    "title": "数字说话",
+    "downloads": {
+      "value": "100K+",
+      "label": "下载量"
+    },
+    "stars": {
+      "value": "4.8K+",
+      "label": "GitHub 星标"
+    },
+    "languages": {
+      "value": "55+",
+      "label": "支持的语言"
+    },
+    "contributors": {
+      "value": "50+",
+      "label": "贡献者"
+    }
+  },
+  "team": {
+    "title": "团队",
+    "description": "nextai translator 由一个全球贡献者社区构建，他们热衷于让每个人都能访问 AI 翻译。从开发人员到翻译人员，设计师到用户 - 每个人都在使这个项目成功中发挥作用。",
+    "contribute": "加入我们，共同构建翻译的未来"
+  },
+  "openSource": {
+    "title": "开源",
+    "description": "nextai translator 自豪地开源，并根据 AGPL-3.0 许可证授权。我们欢迎来自开发人员、翻译人员、设计师以及任何热衷于打破语言障碍的人的贡献。",
+    "github": {
+      "title": "GitHub 仓库",
+      "description": "查看代码、报告问题或贡献",
+      "cta": "在 GitHub 上查看"
+    },
+    "contributing": {
+      "title": "贡献",
+      "description": "了解如何为项目做出贡献",
+      "cta": "贡献指南"
+    }
+  },
+  "contact": {
+    "title": "联系我们",
+    "description": "有问题或想合作？我们很乐意听到您的声音。",
+    "github": "GitHub 讨论",
+    "email": "给我们发邮件",
+    "support": "支持页面"
+  },
+  "cta": {
+    "title": "准备开始了吗？",
+    "description": "加入全球数千名信任 nextai translator 满足其翻译需求的用户",
+    "download": "立即下载",
+    "documentation": "查看文档"
+  }
+}

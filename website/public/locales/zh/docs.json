@@ -1,0 +1,92 @@
+{
+  "title": "文档",
+  "description": "nextai translator 的完整文档",
+  "hero": {
+    "title": "文档",
+    "subtitle": "关于 nextai translator 您需要了解的一切",
+    "search": "搜索文档..."
+  },
+  "categories": {
+    "gettingStarted": {
+      "title": "入门指南",
+      "description": "学习基础知识并快速上手",
+      "items": {
+        "installation": "安装指南",
+        "quickStart": "快速开始",
+        "configuration": "配置",
+        "firstTranslation": "您的第一次翻译"
+      }
+    },
+    "features": {
+      "title": "功能",
+      "description": "每个功能的详细指南",
+      "items": {
+        "translation": "翻译",
+        "polishing": "文本润色",
+        "summarization": "摘要",
+        "ocr": "截图翻译",
+        "tts": "文本转语音",
+        "vocabulary": "生词本"
+      }
+    },
+    "configuration": {
+      "title": "配置",
+      "description": "根据您的需求自定义 nextai translator",
+      "items": {
+        "apiKeys": "API 密钥设置",
+        "shortcuts": "键盘快捷键",
+        "preferences": "偏好设置",
+        "themes": "主题和外观"
+      }
+    },
+    "advanced": {
+      "title": "高级",
+      "description": "高级功能和自定义",
+      "items": {
+        "plugins": "插件和扩展",
+        "customPrompts": "自定义提示",
+        "automation": "自动化",
+        "api": "API 参考"
+      }
+    },
+    "troubleshooting": {
+      "title": "故障排除",
+      "description": "常见问题的解决方案",
+      "items": {
+        "faq": "常见问题",
+        "commonIssues": "常见问题",
+        "performance": "性能优化",
+        "support": "获取支持"
+      }
+    },
+    "development": {
+      "title": "开发",
+      "description": "适用于开发人员和贡献者",
+      "items": {
+        "contributing": "贡献指南",
+        "buildFromSource": "从源代码构建",
+        "architecture": "架构概述",
+        "pluginDevelopment": "插件开发"
+      }
+    }
+  },
+  "popular": {
+    "title": "热门话题",
+    "items": [
+      "如何设置 API 密钥",
+      "使用键盘快捷键翻译",
+      "使用截图翻译",
+      "自定义外观",
+      "管理生词本",
+      "排查 API 错误"
+    ]
+  },
+  "support": {
+    "title": "需要帮助？",
+    "description": "找不到您要找的内容？",
+    "github": "在 GitHub 上查看",
+    "discussions": "GitHub 讨论",
+    "issues": "报告问题",
+    "contact": "联系支持"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "hero": {
+    "title": "不仅仅是翻译的翻译工具",
+    "subtitle": "支持55+种语言的AI翻译工具，具备润色、摘要、OCR、TTS等高级功能",
+    "primaryCTA": "立即下载",
+    "secondaryCTA": "了解更多"
+  },
+  "features": {
+    "title": "强大功能",
+    "subtitle": "专业翻译和文本处理所需的一切",
+    "translation": {
+      "title": "翻译",
+      "description": "支持55+种语言的流式响应"
+    },
+    "polishing": {
+      "title": "文本润色",
+      "description": "使用AI改善您的写作"
+    },
+    "summarization": {
+      "title": "摘要",
+      "description": "获取长文本的简洁摘要"
+    },
+    "ocr": {
+      "title": "截图翻译",
+      "description": "使用OCR翻译图片中的文字"
+    },
+    "tts": {
+      "title": "文字转语音",
+      "description": "使用自然语音聆听翻译"
+    },
+    "vocabulary": {
+      "title": "生词本",
+      "description": "保存和复习单词，配有记忆辅助"
+    }
+  },
+  "platforms": {
+    "title": "全平台可用",
+    "subtitle": "为您喜欢的平台下载",
+    "browser": "浏览器扩展",
+    "desktop": "桌面应用",
+    "allPlatforms": "查看所有下载选项"
+  },
+  "socialProof": {
+    "stars": "GitHub 星标",
+    "downloads": "下载量",
+    "languages": "支持的语言"
+  }
+}

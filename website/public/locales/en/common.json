@@ -1,0 +1,26 @@
+{
+  "siteTitle": "nextai translator",
+  "siteTagline": "The translator that does more than just translation",
+  "siteDescription": "AI-powered translation tool supporting 55+ languages with polishing, summarization, OCR, TTS, and more",
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "download": "Download",
+    "docs": "Documentation",
+    "support": "Support",
+    "about": "About"
+  },
+  "footer": {
+    "product": "Product",
+    "resources": "Resources",
+    "community": "Community",
+    "company": "Company",
+    "allRightsReserved": "All rights reserved"
+  },
+  "cta": {
+    "download": "Download Now",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "viewOnGitHub": "View on GitHub"
+  }
+}

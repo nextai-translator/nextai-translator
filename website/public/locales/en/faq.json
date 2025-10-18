@@ -1,0 +1,138 @@
+{
+  "title": "Frequently Asked Questions",
+  "description": "Find answers to common questions about nextai translator",
+  "hero": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to the most common questions about nextai translator"
+  },
+  "categories": {
+    "general": {
+      "title": "General",
+      "questions": {
+        "whatIs": {
+          "question": "What is nextai translator?",
+          "answer": "nextai translator is an AI-powered translation tool that supports 55+ languages and includes advanced features like text polishing, summarization, OCR, text-to-speech, and vocabulary management. It's available as a desktop application and browser extension."
+        },
+        "cost": {
+          "question": "Is nextai translator free?",
+          "answer": "Yes, nextai translator is completely free and open source. However, you'll need API keys from AI providers (OpenAI, Anthropic, Google, etc.), which may have their own pricing. Most providers offer free tiers to get started."
+        },
+        "platforms": {
+          "question": "What platforms are supported?",
+          "answer": "nextai translator is available on Windows, macOS, Linux as desktop applications, and as browser extensions for Chrome, Firefox, and Edge."
+        },
+        "openSource": {
+          "question": "Is it open source?",
+          "answer": "Yes! nextai translator is fully open source and available on GitHub. You can view the code, contribute, or fork the project."
+        }
+      }
+    },
+    "setup": {
+      "title": "Setup & Configuration",
+      "questions": {
+        "apiKeys": {
+          "question": "Which API keys do I need?",
+          "answer": "You need at least one API key from supported AI providers: OpenAI, Anthropic Claude, Google Gemini, Azure OpenAI, or other compatible providers. You can configure multiple providers and switch between them."
+        },
+        "freeApi": {
+          "question": "Are there free API options?",
+          "answer": "Most AI providers offer free trial credits or free tiers. Google Gemini and some other providers have generous free quotas that are suitable for personal use."
+        },
+        "offline": {
+          "question": "Can I use it offline?",
+          "answer": "Some features like TTS can work offline, but translation requires an internet connection to communicate with AI providers. We're working on local model support for fully offline operation."
+        },
+        "shortcuts": {
+          "question": "How do I customize keyboard shortcuts?",
+          "answer": "Go to Settings > Shortcuts to view and customize all keyboard shortcuts. You can set different shortcuts for translation, polishing, summarization, and other features."
+        }
+      }
+    },
+    "features": {
+      "title": "Features",
+      "questions": {
+        "languages": {
+          "question": "How many languages are supported?",
+          "answer": "nextai translator supports 55+ languages including English, Chinese, Japanese, Korean, Spanish, French, German, Russian, Arabic, and many more. The exact number depends on your AI provider."
+        },
+        "accuracy": {
+          "question": "How accurate are the translations?",
+          "answer": "Translation accuracy depends on the AI model you're using. We support the latest models from OpenAI (GPT-4), Anthropic (Claude), and Google (Gemini), which provide state-of-the-art translation quality."
+        },
+        "ocr": {
+          "question": "How does screenshot translation work?",
+          "answer": "Press the screenshot shortcut, select the area containing text, and the OCR engine will extract the text. You can then translate, copy, or edit the extracted text."
+        },
+        "vocabulary": {
+          "question": "How does the vocabulary book work?",
+          "answer": "While translating, you can save words and phrases to your vocabulary book. It uses spaced repetition to help you review and memorize words effectively."
+        }
+      }
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "questions": {
+        "apiError": {
+          "question": "Why am I getting API errors?",
+          "answer": "Common causes include: invalid API key, insufficient credits, rate limiting, or network issues. Check your API key validity and account status with your provider."
+        },
+        "slowTranslation": {
+          "question": "Why are translations slow?",
+          "answer": "Translation speed depends on your internet connection and the AI provider's response time. Try switching to a different model or provider if experiencing consistent slowness."
+        },
+        "shortcutConflict": {
+          "question": "My keyboard shortcut isn't working",
+          "answer": "Another application might be using the same shortcut. Try customizing the shortcut in Settings > Shortcuts. Also ensure nextai translator has necessary permissions on your system."
+        },
+        "crashes": {
+          "question": "The app keeps crashing",
+          "answer": "Try clearing the app cache, updating to the latest version, or reinstalling. If the problem persists, please report it on GitHub with detailed error logs."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Privacy & Security",
+      "questions": {
+        "dataCollection": {
+          "question": "What data does nextai translator collect?",
+          "answer": "nextai translator does not collect or store your personal data. All settings and vocabulary are stored locally on your device. Translations are sent to your chosen AI provider according to their privacy policies."
+        },
+        "apiKeySecurity": {
+          "question": "How are my API keys stored?",
+          "answer": "API keys are stored securely in your system's encrypted credential storage (Keychain on macOS, Credential Manager on Windows, Secret Service on Linux)."
+        },
+        "history": {
+          "question": "Is my translation history saved?",
+          "answer": "Translation history is stored locally on your device and never sent to our servers. You can clear your history anytime from the settings."
+        }
+      }
+    },
+    "support": {
+      "title": "Support & Contributing",
+      "questions": {
+        "help": {
+          "question": "Where can I get help?",
+          "answer": "You can get help through GitHub Discussions, GitHub Issues for bug reports, or our support page. The community is active and helpful!"
+        },
+        "contribute": {
+          "question": "How can I contribute?",
+          "answer": "Contributions are welcome! You can contribute code, translations, documentation, or bug reports on GitHub. Check out our contributing guidelines to get started."
+        },
+        "feature": {
+          "question": "Can I request a feature?",
+          "answer": "Absolutely! Open a feature request on GitHub Issues. Describe your use case and why the feature would be valuable. Community feedback helps us prioritize development."
+        },
+        "donate": {
+          "question": "Can I support the project?",
+          "answer": "The best way to support the project is by using it, sharing it with others, contributing code or translations, and giving us a star on GitHub!"
+        }
+      }
+    }
+  },
+  "stillHaveQuestions": {
+    "title": "Still have questions?",
+    "description": "Can't find the answer you're looking for? We're here to help.",
+    "contact": "Contact Support",
+    "github": "Ask on GitHub"
+  }
+}

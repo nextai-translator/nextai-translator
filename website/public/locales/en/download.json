@@ -1,0 +1,109 @@
+{
+  "title": "Download",
+  "description": "Download nextai translator for your platform",
+  "hero": {
+    "title": "Download nextai translator",
+    "subtitle": "Choose your platform and start translating in seconds"
+  },
+  "desktop": {
+    "title": "Desktop Applications",
+    "subtitle": "Full-featured desktop apps for Windows, macOS, and Linux",
+    "windows": {
+      "title": "Windows",
+      "description": "For Windows 10 and later",
+      "download": "Download for Windows",
+      "architecture": {
+        "x64": "Windows (x64)",
+        "arm64": "Windows (ARM64)"
+      }
+    },
+    "macos": {
+      "title": "macOS",
+      "description": "For macOS 10.15 and later",
+      "download": "Download for macOS",
+      "architecture": {
+        "intel": "Intel Chip",
+        "apple": "Apple Silicon"
+      }
+    },
+    "linux": {
+      "title": "Linux",
+      "description": "For Ubuntu, Debian, and other distributions",
+      "download": "Download for Linux",
+      "formats": {
+        "appimage": "AppImage (Universal)",
+        "deb": "Debian/Ubuntu (.deb)",
+        "rpm": "Fedora/RHEL (.rpm)",
+        "snap": "Snap Package"
+      }
+    }
+  },
+  "browser": {
+    "title": "Browser Extensions",
+    "subtitle": "Translate directly in your browser",
+    "chrome": {
+      "title": "Chrome Extension",
+      "description": "For Chrome and Edge",
+      "install": "Add to Chrome"
+    },
+    "firefox": {
+      "title": "Firefox Extension",
+      "description": "For Firefox Browser",
+      "install": "Add to Firefox"
+    },
+    "safari": {
+      "title": "Safari Extension",
+      "description": "For Safari (Coming Soon)",
+      "comingSoon": "Coming Soon"
+    }
+  },
+  "features": {
+    "title": "What's Included",
+    "offline": {
+      "title": "Offline Mode",
+      "description": "Work without an internet connection"
+    },
+    "sync": {
+      "title": "Cross-Device Sync",
+      "description": "Sync settings across all devices"
+    },
+    "updates": {
+      "title": "Auto Updates",
+      "description": "Always stay up to date"
+    },
+    "privacy": {
+      "title": "Privacy First",
+      "description": "Your data stays on your device"
+    }
+  },
+  "systemRequirements": {
+    "title": "System Requirements",
+    "windows": {
+      "os": "Windows 10 or later",
+      "processor": "Intel Core i3 or equivalent",
+      "memory": "4 GB RAM",
+      "storage": "200 MB available space"
+    },
+    "macos": {
+      "os": "macOS 10.15 (Catalina) or later",
+      "processor": "Intel or Apple Silicon",
+      "memory": "4 GB RAM",
+      "storage": "200 MB available space"
+    },
+    "linux": {
+      "os": "Ubuntu 18.04 or later, Debian 10 or later",
+      "processor": "Intel Core i3 or equivalent",
+      "memory": "4 GB RAM",
+      "storage": "200 MB available space"
+    }
+  },
+  "installation": {
+    "title": "Installation Guide",
+    "viewGuide": "View Installation Guide"
+  },
+  "github": {
+    "title": "Open Source",
+    "description": "nextai translator is open source. View the code, report issues, or contribute on GitHub.",
+    "viewOnGitHub": "View on GitHub"
+  }
+}

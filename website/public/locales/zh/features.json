@@ -1,0 +1,173 @@
+{
+  "title": "功能",
+  "description": "探索 nextai translator 的强大功能",
+  "hero": {
+    "title": "现代翻译的强大功能",
+    "subtitle": "专业翻译和文本处理所需的一切"
+  },
+  "translation": {
+    "title": "多语言翻译",
+    "description": "支持 55+ 种语言，实时流式响应",
+    "details": {
+      "streaming": {
+        "title": "实时流式",
+        "description": "翻译即时生成，立即显示"
+      },
+      "languages": {
+        "title": "55+ 种语言",
+        "description": "从英语到中文，日语到西班牙语，应有尽有"
+      },
+      "context": {
+        "title": "上下文感知",
+        "description": "AI 理解上下文，提供更准确的翻译"
+      },
+      "customization": {
+        "title": "可定制",
+        "description": "调整语气、正式程度和风格以满足您的需求"
+      }
+    }
+  },
+  "polishing": {
+    "title": "文本润色",
+    "description": "使用 AI 驱动的编辑改进您的写作",
+    "details": {
+      "grammar": {
+        "title": "语法纠正",
+        "description": "修复语法、拼写和标点错误"
+      },
+      "style": {
+        "title": "风格改进",
+        "description": "增强清晰度、流畅性和可读性"
+      },
+      "tone": {
+        "title": "语气调整",
+        "description": "使文本更正式、随意或专业"
+      },
+      "suggestions": {
+        "title": "智能建议",
+        "description": "获取替代措辞和词汇选择"
+      }
+    }
+  },
+  "summarization": {
+    "title": "文本摘要",
+    "description": "获取长文本的简洁摘要",
+    "details": {
+      "length": {
+        "title": "可调长度",
+        "description": "选择简短、中等或详细摘要"
+      },
+      "keyPoints": {
+        "title": "关键要点",
+        "description": "提取最重要的信息"
+      },
+      "bulletPoints": {
+        "title": "要点列表",
+        "description": "以易于浏览的要点格式获取摘要"
+      },
+      "multilingual": {
+        "title": "多语言",
+        "description": "一步完成摘要和翻译"
+      }
+    }
+  },
+  "ocr": {
+    "title": "截图翻译",
+    "description": "使用 OCR 从图像中翻译文本",
+    "details": {
+      "instant": {
+        "title": "即时捕获",
+        "description": "截图并立即翻译"
+      },
+      "accurate": {
+        "title": "高精度",
+        "description": "先进的 OCR 技术，可靠的文本提取"
+      },
+      "multiLanguage": {
+        "title": "多语言 OCR",
+        "description": "自动识别多种语言的文本"
+      },
+      "overlay": {
+        "title": "覆盖翻译",
+        "description": "在原始图像上显示翻译"
+      }
+    }
+  },
+  "tts": {
+    "title": "文本转语音",
+    "description": "使用自然语音收听翻译",
+    "details": {
+      "voices": {
+        "title": "自然语音",
+        "description": "高质量、类人语音合成"
+      },
+      "speed": {
+        "title": "可调速度",
+        "description": "控制播放速度，从 0.5 倍到 2 倍"
+      },
+      "multiLanguage": {
+        "title": "多种语言",
+        "description": "所有支持语言的本地语音"
+      },
+      "offline": {
+        "title": "离线可用",
+        "description": "无需互联网连接即可使用 TTS"
+      }
+    }
+  },
+  "vocabulary": {
+    "title": "生词本",
+    "description": "保存和复习单词，配合记忆辅助",
+    "details": {
+      "save": {
+        "title": "保存单词",
+        "description": "建立您的个人词汇集合"
+      },
+      "examples": {
+        "title": "上下文示例",
+        "description": "查看单词在句子中的用法"
+      },
+      "review": {
+        "title": "间隔重复",
+        "description": "智能复习系统，更好地记忆"
+      },
+      "export": {
+        "title": "导出和导入",
+        "description": "与他人分享词汇表"
+      }
+    }
+  },
+  "additional": {
+    "title": "其他功能",
+    "shortcut": {
+      "title": "键盘快捷键",
+      "description": "使用可自定义的热键访问所有功能"
+    },
+    "history": {
+      "title": "翻译历史",
+      "description": "访问所有以前的翻译"
+    },
+    "themes": {
+      "title": "深色模式",
+      "description": "深色和浅色主题，护眼舒适"
+    },
+    "privacy": {
+      "title": "隐私优先",
+      "description": "您的数据保留在您的设备上"
+    },
+    "openSource": {
+      "title": "开源",
+      "description": "GitHub 上的社区驱动开发"
+    },
+    "crossPlatform": {
+      "title": "跨平台",
+      "description": "可在 Windows、macOS、Linux 和浏览器上使用"
+    }
+  },
+  "cta": {
+    "title": "准备开始了吗？",
+    "subtitle": "下载 nextai translator，体验翻译的未来",
+    "download": "立即下载",
+    "viewDocs": "查看文档"
+  }
+}
