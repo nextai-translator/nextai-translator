@@ -129,8 +129,8 @@ fn focus_window(window: &ActiveWindow) -> Result<(), String> {
     use windows::Win32::Foundation::HWND;
     use windows::Win32::System::Threading::{AttachThreadInput, GetCurrentThreadId};
     use windows::Win32::UI::WindowsAndMessaging::{
-        AttachThreadInput, BringWindowToTop, GetForegroundWindow, GetWindowThreadProcessId,
-        IsIconic, SetForegroundWindow, ShowWindow, SW_RESTORE,
+        BringWindowToTop, GetForegroundWindow, GetWindowThreadProcessId, IsIconic,
+        SetForegroundWindow, ShowWindow, SW_RESTORE,
     };
 
     let hwnd = parse_hwnd(&window.window_id)?;
