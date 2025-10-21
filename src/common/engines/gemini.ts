@@ -23,10 +23,6 @@ const SAFETY_SETTINGS = [
         category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
         threshold: 'OFF',
     },
-    {
-        category: 'HARM_CATEGORY_CIVIC_INTEGRITY',
-        threshold: 'OFF',
-    },
 ]
 
 export class Gemini extends AbstractEngine {
