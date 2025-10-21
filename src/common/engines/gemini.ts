@@ -1,44 +1,42 @@
 /* eslint-disable camelcase */
-import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
-import { getSettings } from '../utils'
+import { urlJoin } from 'url-join-ts'
+import { getUniversalFetch } from '../universal-fetch'
+import { fetchSSE, getSettings } from '../utils'
 import { AbstractEngine } from './abstract-engine'
 import { IMessageRequest, IModel } from './interfaces'
+import qs from 'qs'
 
 const SAFETY_SETTINGS = [
     {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.BLOCK_NONE,
+        category: 'HARM_CATEGORY_HARASSMENT',
+        threshold: 'OFF',
     },
     {
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.BLOCK_NONE,
+        category: 'HARM_CATEGORY_HATE_SPEECH',
+        threshold: 'OFF',
     },
     {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.BLOCK_NONE,
+        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        threshold: 'OFF',
     },
     {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.BLOCK_NONE,
+        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+        threshold: 'OFF',
     },
 ]
 
 export class Gemini extends AbstractEngine {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listModels(apiKey: string | undefined): Promise<IModel[]> {
-        // The new SDK does not support listing models in the same way.
-        // This might need to be implemented differently if required,
-        // for now, we can return a hardcoded or empty list.
-        // Keeping old implementation for now as SDK doesn't support it.
         if (!apiKey) {
             return []
         }
         const settings = await getSettings()
         const geminiAPIURL = settings.geminiAPIURL
-        // The SDK doesn't expose a model listing API. We have to do it manually.
-        // It's a known issue: https://github.com/google/generative-ai-js/issues/31
-        const url = `${geminiAPIURL}/v1beta/models?key=${apiKey}&pageSize=1000`
-        const fetcher = fetch
+        const url =
+            urlJoin(geminiAPIURL, '/v1beta/models') +
+            qs.stringify({ key: apiKey, pageSize: 1000 }, { addQueryPrefix: true })
+        const fetcher = getUniversalFetch()
         const resp = await fetcher(url, {
             method: 'GET',
             headers: {
@@ -67,55 +65,112 @@ export class Gemini extends AbstractEngine {
     async sendMessage(req: IMessageRequest): Promise<void> {
         const settings = await getSettings()
         const apiKey = settings.geminiAPIKey
-        if (!apiKey) {
-            req.onError('Gemini API key not set')
-            return
+        const geminiAPIURL = settings.geminiAPIURL
+        const model = await this.getModel()
+        const url =
+            urlJoin(geminiAPIURL, '/v1beta/models/', `${model}:streamGenerateContent`) +
+            qs.stringify({ key: apiKey, alt: 'sse' }, { addQueryPrefix: true })
+        const headers = {
+            'Content-Type': 'application/json',
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36 Edg/91.0.864.41',
         }
-        const modelName = await this.getModel()
 
-        try {
-            const genAI = new GoogleGenerativeAI(apiKey)
-            const model = genAI.getGenerativeModel({
-                model: modelName,
-                safetySettings: SAFETY_SETTINGS,
-            })
+        // 2.5 Pro cannot disable thinking: remove 0 or use -1
+        // https://ai.google.dev/gemini-api/docs/thinking#set-budget
+        const thinkingConfig = /-pro($|[-:])/i.test(model)
+            ? { thinkingBudget: -1 } // dynamic thinking
+            : { thinkingBudget: 0 }
 
-            const prompt = req.rolePrompt ? `${req.rolePrompt}\n\n${req.commandPrompt}` : req.commandPrompt
+        const body = {
+            contents: [
+                {
+                    role: 'user',
+                    parts: [
+                        {
+                            text: req.rolePrompt ? req.rolePrompt + '\n\n' + req.commandPrompt : req.commandPrompt,
+                        },
+                    ],
+                },
+            ],
+            safetySettings: SAFETY_SETTINGS,
+            generationConfig: {
+                thinkingConfig,
+            },
+        }
 
-            const result = await model.generateContentStream(prompt)
-
-            const signal = req.signal
-            if (signal) {
-                signal.addEventListener('abort', () => {
-                    // This is a bit of a hack, as the SDK doesn't directly support aborting streams yet.
-                    // We can't truly abort the underlying request, but we can stop processing it.
-                    console.log('Gemini stream aborted')
-                })
-            }
-
-            for await (const chunk of result.stream) {
-                if (signal?.aborted) {
-                    break
+        let hasError = false
+        let finished = false
+        await fetchSSE(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body),
+            signal: req.signal,
+            usePartialArrayJSONParser: false,
+            onMessage: async (msg) => {
+                if (finished) return
+                let resp
+                try {
+                    resp = JSON.parse(msg)
+                } catch (e) {
+                    hasError = true
+                    finished = true
+                    req.onError(JSON.stringify(e))
+                    return
                 }
-                const chunkText = chunk.text()
-                if (chunkText) {
-                    await req.onMessage({ content: chunkText, role: '' })
+                if (!resp.candidates || resp.candidates.length === 0) {
+                    hasError = true
+                    finished = true
+                    req.onError('no candidates')
+                    return
                 }
-                const finishReason = chunk.candidates?.[0]?.finishReason
-                if (finishReason && finishReason !== 'STOP') {
-                    req.onFinished(finishReason)
+                if (resp.candidates[0].finishReason && resp.candidates[0].finishReason !== 'STOP') {
+                    finished = true
+                    req.onFinished(resp.candidates[0].finishReason)
+                    return
                 }
-            }
-        } catch (err) {
-            let errorMessage = 'An unknown error occurred'
-            if (err instanceof Error) {
-                errorMessage = err.message
-            } else if (typeof err === 'string') {
-                errorMessage = err
-            } else if (err && typeof err === 'object' && 'message' in err) {
-                errorMessage = String((err as { message: unknown }).message)
-            }
-            req.onError(errorMessage)
+                const targetTxt = resp.candidates[0].content.parts[0].text
+                await req.onMessage({ content: targetTxt, role: '' })
+            },
+            onError: (err) => {
+                hasError = true
+                if (err instanceof Error) {
+                    req.onError(err.message)
+                    return
+                }
+                if (typeof err === 'string') {
+                    req.onError(err)
+                    return
+                }
+                if (typeof err === 'object') {
+                    const item = err[0]
+                    if (item && item.error && item.error.message) {
+                        req.onError(item.error.message)
+                        return
+                    }
+                }
+                const { error } = err
+                if (error instanceof Error) {
+                    req.onError(error.message)
+                    return
+                }
+                if (typeof error === 'object') {
+                    const { message } = error
+                    if (message) {
+                        if (typeof message === 'string') {
+                            req.onError(message)
+                        } else {
+                            req.onError(JSON.stringify(message))
+                        }
+                        return
+                    }
+                }
+                req.onError('Unknown error')
+            },
+        })
+
+        if (!finished && !hasError) {
+            req.onFinished('stop')
         }
     }
 }
