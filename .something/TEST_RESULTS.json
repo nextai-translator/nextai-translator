@@ -1,0 +1,137 @@
+{
+  "run": {
+    "command": "pnpm exec vitest run",
+    "passed": false,
+    "duration_ms": 8330,
+    "timestamp": "2025-10-24T08:06:22Z",
+    "output": "Test Files: 5 failed | 1 passed (6)\nTests: 10 passed (10)\nDuration: 8.33s"
+  },
+  "summary": {
+    "total_test_files": 6,
+    "passed_test_files": 1,
+    "failed_test_files": 5,
+    "total_tests": 10,
+    "passed_tests": 10,
+    "failed_tests": 0,
+    "skipped_tests": 0,
+    "tdd_phase": "red",
+    "notes": "TDD Red Phase - wwwaa test files fail because implementation does not exist yet. This is expected and correct. The existing translate.test.ts passes (10 tests)."
+  },
+  "test_files": [
+    {
+      "file": "src/common/__tests__/translate.test.ts",
+      "status": "passed",
+      "tests_run": 10,
+      "tests_passed": 10,
+      "tests_failed": 0,
+      "duration_ms": 15,
+      "scenarios_validated": [],
+      "notes": "Existing test suite for QuoteProcessor - all tests pass"
+    },
+    {
+      "file": "src/common/wwwaa/__tests__/initialization.test.ts",
+      "status": "failed",
+      "tests_run": 0,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "error": "Failed to resolve import '../index' - implementation does not exist",
+      "error_type": "module_not_found",
+      "scenarios_validated": [1],
+      "notes": "TDD Red Phase - Cannot import wwwaa modules because they don't exist yet"
+    },
+    {
+      "file": "src/common/wwwaa/__tests__/processor.test.ts",
+      "status": "failed",
+      "tests_run": 0,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "error": "Failed to resolve import '../processor' - implementation does not exist",
+      "error_type": "module_not_found",
+      "scenarios_validated": [2, 5],
+      "notes": "TDD Red Phase - Cannot import processor module because it doesn't exist yet"
+    },
+    {
+      "file": "src/common/wwwaa/__tests__/errors.test.ts",
+      "status": "failed",
+      "tests_run": 0,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "error": "Failed to resolve import '../processor' - implementation does not exist",
+      "error_type": "module_not_found",
+      "scenarios_validated": [3],
+      "notes": "TDD Red Phase - Cannot import error handling modules because they don't exist yet"
+    },
+    {
+      "file": "src/common/wwwaa/__tests__/integration.test.ts",
+      "status": "failed",
+      "tests_run": 0,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "error": "Transform failed - JSX syntax error in test file",
+      "error_type": "syntax_error",
+      "scenarios_validated": [4],
+      "notes": "TDD Red Phase - Syntax error in JSX rendering code, needs fixing. Also missing integration modules."
+    },
+    {
+      "file": "src/common/wwwaa/__tests__/components.test.tsx",
+      "status": "failed",
+      "tests_run": 0,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "error": "Transform failed - JSX syntax error in test file",
+      "error_type": "syntax_error",
+      "scenarios_validated": [6],
+      "notes": "TDD Red Phase - Syntax error in JSX rendering code, needs fixing. Also missing React components."
+    }
+  ],
+  "e2e_tests": {
+    "file": "e2e/wwwaa.spec.ts",
+    "status": "not_run",
+    "notes": "E2E tests created but not run - requires implementation and running application"
+  },
+  "tdd_status": {
+    "phase": "red",
+    "description": "Test-Driven Development Red Phase",
+    "next_steps": [
+      "Fix JSX syntax errors in integration.test.ts and components.test.tsx",
+      "Implement core wwwaa modules to make tests green",
+      "Create src/common/wwwaa/index.ts with initialization logic",
+      "Create src/common/wwwaa/processor.ts with processing logic",
+      "Create src/common/wwwaa/config.ts with configuration management",
+      "Create src/common/wwwaa/errors.ts with custom error types",
+      "Create src/common/wwwaa/state.ts with state management",
+      "Create React components for UI",
+      "Run tests again to verify implementation",
+      "Move to TDD Green Phase"
+    ]
+  },
+  "implementation_status": {
+    "modules_needed": [
+      "src/common/wwwaa/index.ts",
+      "src/common/wwwaa/processor.ts",
+      "src/common/wwwaa/config.ts",
+      "src/common/wwwaa/errors.ts",
+      "src/common/wwwaa/validator.ts",
+      "src/common/wwwaa/state.ts",
+      "src/common/wwwaa/cache.ts",
+      "src/common/wwwaa/hooks.ts",
+      "src/common/wwwaa/i18n.ts",
+      "src/common/wwwaa/components/WwwaaComponent.tsx",
+      "src/common/wwwaa/components/WwwaaDialog.tsx",
+      "src/common/wwwaa/components/WwwaaForm.tsx",
+      "src/common/wwwaa/styles.ts",
+      "src/tauri/wwwaa-commands.ts",
+      "src/browser-extension/wwwaa-integration.ts",
+      "src/common/i18n/locales/en/wwwaa.json",
+      "src/common/i18n/locales/zh-Hans/wwwaa.json",
+      "src/common/i18n/locales/zh-Hant/wwwaa.json",
+      "src/common/i18n/locales/ja/wwwaa.json",
+      "src/common/i18n/locales/tr/wwwaa.json",
+      "src/common/i18n/locales/th/wwwaa.json"
+    ],
+    "modules_created": 0,
+    "tests_created": 6,
+    "tests_passing": 0,
+    "test_coverage": "0% (no implementation exists)"
+  }
+}
