@@ -603,7 +603,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         if (!editor) {
             return undefined
         }
-        highlightRef.current = new HighlightInTextarea(editor, { highlight: '' })
+        highlightRef.current = new HighlightInTextarea(editor, { highlight: [] })
         if (props.autoFocus) {
             editor.focus()
         }

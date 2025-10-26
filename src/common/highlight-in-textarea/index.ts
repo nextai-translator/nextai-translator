@@ -148,6 +148,12 @@ export class HighlightInTextarea {
     }
 
     public handleInput() {
+        if (!this.hasActiveHighlight()) {
+            if (this.highlights) {
+                this.highlights.innerHTML = ''
+            }
+            return
+        }
         const input = this.el?.value
         const ranges = this.getRanges(input, this.highlight?.highlight ?? null)
         const unstaggeredRanges = this.removeStaggeredRanges(ranges)
@@ -394,5 +400,19 @@ export class HighlightInTextarea {
         }
         this.container.parentElement?.replaceChild(this.el, this.container)
         this.el?.classList.remove(this.ID + '-content', this.ID + '-input')
+    }
+
+    private hasActiveHighlight(): boolean {
+        const highlight = this.highlight?.highlight
+        if (!highlight) {
+            return false
+        }
+        if (Array.isArray(highlight)) {
+            return highlight.length > 0
+        }
+        if (typeof highlight === 'string') {
+            return highlight.trim().length > 0
+        }
+        return true
     }
 }
