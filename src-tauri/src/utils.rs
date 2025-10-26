@@ -251,6 +251,10 @@ pub fn get_selected_text_by_clipboard(
 
     thread::sleep(Duration::from_millis(50));
 
+    println!(
+        "get_selected_text_by_clipboard: Invoking copy shortcut to capture selected text (cancel_select={})",
+        cancel_select
+    );
     copy(enigo);
 
     if cancel_select {

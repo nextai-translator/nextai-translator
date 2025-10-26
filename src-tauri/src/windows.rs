@@ -123,15 +123,10 @@ pub fn get_translator_window_always_on_top() -> bool {
 pub async fn show_translator_window_with_selected_text_command() {
     remember_active_window();
     let config = config::get_config().ok();
-    let allow_clipboard_fallback = config
-        .as_ref()
-        .and_then(|conf| conf.allow_using_clipboard_when_selected_text_not_available)
-        .unwrap_or(true);
     let restore_previous_position = config
         .as_ref()
         .and_then(|conf| conf.restore_previous_position)
         .unwrap_or(false);
-    let translator_is_foreground = is_translator_foreground();
     let read_selected_text = || -> String {
         match get_selected_text() {
             Ok(text) => text,
@@ -142,30 +137,7 @@ pub async fn show_translator_window_with_selected_text_command() {
         }
     };
 
-    let mut selected_text = read_selected_text();
-
-    if selected_text.trim().is_empty() {
-        sleep(Duration::from_millis(80)).await;
-        selected_text = read_selected_text();
-    }
-
-    if selected_text.trim().is_empty() && !translator_is_foreground {
-        if allow_clipboard_fallback {
-            match Enigo::new(&Settings::default()) {
-                Ok(mut enigo) => match utils::get_selected_text_by_clipboard(&mut enigo, false) {
-                    Ok(text) => {
-                        selected_text = text;
-                    }
-                    Err(e) => {
-                        eprintln!("Error getting selected text via clipboard fallback: {}", e);
-                    }
-                },
-                Err(e) => {
-                    eprintln!("Error initializing Enigo for clipboard fallback: {}", e);
-                }
-            }
-        }
-    }
+    let selected_text = read_selected_text();
 
     // Show the translator window only after we've captured the current selection.
     let window = show_translator_window(false, true, true);
