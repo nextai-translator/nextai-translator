@@ -2774,13 +2774,15 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     <ActionManager draggable={props.showSettingsIcon} />
                 </ModalBody>
             </Modal>
-            <TranslationHistory
-                isOpen={isHistoryOpen}
-                actions={actions ?? []}
-                activeActionId={activateAction?.id}
-                onClose={() => setIsHistoryOpen(false)}
-                onRestore={handleHistoryRestore}
-            />
+            {isHistoryOpen ? (
+                <TranslationHistory
+                    isOpen
+                    actions={actions ?? []}
+                    activeActionId={activateAction?.id}
+                    onClose={() => setIsHistoryOpen(false)}
+                    onRestore={handleHistoryRestore}
+                />
+            ) : null}
             <Toaster />
         </div>
     )

@@ -222,8 +222,11 @@ export function TranslationHistory(props: TranslationHistoryProps) {
     }, [variant])
 
     const historyItems = useLiveQuery(
-        () =>
-            historyService.list({
+        () => {
+            if (!isActive) {
+                return []
+            }
+            return historyService.list({
                 search,
                 favoritesOnly,
                 limit: 200,
@@ -234,8 +237,9 @@ export function TranslationHistory(props: TranslationHistoryProps) {
                         ? selectedActionData.id
                         : undefined,
                 actionMode: selectedActionId === ALL_ACTIONS_OPTION_ID ? undefined : selectedActionData?.mode,
-            }),
-        [search, favoritesOnly, selectedActionId],
+            })
+        },
+        [isActive, search, favoritesOnly, selectedActionId, selectedActionData?.id, selectedActionData?.mode],
         []
     )
 
@@ -331,29 +335,29 @@ export function TranslationHistory(props: TranslationHistoryProps) {
                 maxWidth: isModal ? undefined : '960px',
             }}
         >
-            {isModal ? renderControls() : null}
+            {isModal && isActive ? renderControls() : null}
             <div
                 className={styles.historyList}
                 style={{
                     flex: isModal ? undefined : 1,
                 }}
             >
-                {historyItems && historyItems.length > 0 ? (
+                {isActive && historyItems && historyItems.length > 0 ? (
                     historyItems.map((item) => {
                         const matchedAction =
                             actions.find((action) => action.id === item.actionId) ??
                             actions.find((action) => action.mode && action.mode === item.actionMode)
-                        const isActive = activeActionId !== undefined && matchedAction?.id === activeActionId
-                        const borderColor = isActive ? theme.colors.accent : theme.colors.borderOpaque
+                        const isActiveAction = activeActionId !== undefined && matchedAction?.id === activeActionId
+                        const borderColor = isActiveAction ? theme.colors.accent : theme.colors.borderOpaque
                         const backgroundColor =
                             themeType === 'dark'
                                 ? color(theme.colors.backgroundPrimary)
-                                      .lighten(isActive ? 0.3 : 0.15)
+                                      .lighten(isActiveAction ? 0.3 : 0.15)
                                       .alpha(0.85)
                                       .string()
                                 : color(theme.colors.backgroundSecondary)
-                                      .lighten(isActive ? 0.05 : 0)
-                                      .alpha(isActive ? 1 : 0.9)
+                                      .lighten(isActiveAction ? 0.05 : 0)
+                                      .alpha(isActiveAction ? 1 : 0.9)
                                       .string()
                         return (
                             <div
@@ -504,11 +508,11 @@ export function TranslationHistory(props: TranslationHistoryProps) {
                             </div>
                         )
                     })
-                ) : (
+                ) : isActive ? (
                     <div className={styles.empty} style={{ color: theme.colors.contentSecondary }}>
                         {t('No History Yet')}
                     </div>
-                )}
+                ) : null}
             </div>
             <div
                 className={styles.historyActions}
@@ -519,7 +523,7 @@ export function TranslationHistory(props: TranslationHistoryProps) {
                 <Button size='compact' kind='tertiary' onClick={onClose}>
                     {t('Close')}
                 </Button>
-                <Button size='compact' kind='secondary' onClick={onClear} disabled={!historyItems?.length}>
+                <Button size='compact' kind='secondary' onClick={onClear} disabled={!isActive || !historyItems?.length}>
                     {t('Clear History')}
                 </Button>
             </div>
