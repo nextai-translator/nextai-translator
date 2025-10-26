@@ -107,15 +107,35 @@ export function TranslatorWindow() {
     }, [])
 
     useEffect(() => {
-        if (!settings?.writingTargetLanguage) {
-            return
-        }
         let unlisten: UnlistenFn | undefined
         ;(async () => {
             unlisten = await listen('writing-text', async (event: Event<string>) => {
+                const ensureFinish = () => {
+                    writingQueue.current.push(0)
+                    writing()
+                }
+                if (!settings?.writingTargetLanguage) {
+                    commands.finishWriting().catch(console.error)
+                    return
+                }
                 const inputText = event.payload
-                const { signal } = new AbortController()
-                if (inputText) {
+                if (!inputText) {
+                    commands.finishWriting().catch(console.error)
+                    return
+                }
+
+                const controller = new AbortController()
+                const { signal } = controller
+                let hasEnqueuedFinish = false
+                const enqueueFinish = () => {
+                    if (hasEnqueuedFinish) {
+                        return
+                    }
+                    hasEnqueuedFinish = true
+                    ensureFinish()
+                }
+
+                try {
                     const sourceLang = await detectLang(inputText)
                     const targetLang = intoLangCode(settings.writingTargetLanguage)
                     await translate({
@@ -139,21 +159,23 @@ export function TranslatorWindow() {
                             writing()
                         },
                         onFinish: () => {
-                            writingQueue.current.push(0)
-                            writing()
+                            enqueueFinish()
                         },
                         onError: () => {
-                            writingQueue.current.push(0)
-                            writing()
+                            enqueueFinish()
                         },
                     })
+                    enqueueFinish()
+                } catch (error) {
+                    console.error(error)
+                    enqueueFinish()
                 }
             })
         })()
         return () => {
             unlisten?.()
         }
-    }, [settings.writingTargetLanguage])
+    }, [settings?.writingTargetLanguage])
 
     useEffect(() => {
         let unlisten: UnlistenFn | undefined
