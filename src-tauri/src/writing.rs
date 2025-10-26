@@ -33,14 +33,42 @@ struct IncrementalAction {
 
 static INCREMENTAL_ACTIONS: Mutex<Vec<IncrementalAction>> = Mutex::new(Vec::new());
 
+struct WritingGuard {
+    committed: bool,
+}
+
+impl WritingGuard {
+    fn new() -> Option<Self> {
+        let mut is_writing = IS_WRITING.lock();
+        if *is_writing {
+            return None;
+        }
+        *is_writing = true;
+        Some(Self { committed: false })
+    }
+
+    fn commit(&mut self) {
+        self.committed = true;
+    }
+}
+
+impl Drop for WritingGuard {
+    fn drop(&mut self) {
+        if !self.committed {
+            let mut is_writing = IS_WRITING.lock();
+            *is_writing = false;
+        }
+    }
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn writing_command() {
     debug_println!("[writing] trigger");
-    let is_writing = IS_WRITING.lock();
-    if *is_writing {
-        return;
-    }
+    let mut writing_guard = match WritingGuard::new() {
+        Some(guard) => guard,
+        None => return,
+    };
     let app_handle = APP_HANDLE.get().unwrap();
     let _ = app_handle.track_event("writing", None);
     {
@@ -58,6 +86,7 @@ pub fn writing_command() {
             TRANSLATE_SELECTED_TEXT_PLACEHOLDER.to_owned(),
             false,
         );
+        writing_guard.commit();
         crate::utils::writing_text(selected_text);
         return;
     }
@@ -203,6 +232,7 @@ pub fn writing_command() {
             *previous_translated_text = content;
             return;
         }
+        writing_guard.commit();
         thread::spawn(move || {
             let mut global_incremental_actions = INCREMENTAL_ACTIONS.lock();
             let reversed_incremental_actions = incremental_actions
@@ -232,6 +262,7 @@ pub fn writing_command() {
         }
         content = translated_text;
     }
+    writing_guard.commit();
     crate::utils::writing_text(content);
 }
 
