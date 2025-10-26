@@ -4,6 +4,7 @@ use crate::utils;
 use crate::UpdateResult;
 use crate::ALWAYS_ON_TOP;
 use crate::APP_HANDLE;
+use active_win_pos_rs::get_active_window;
 #[cfg(target_os = "macos")]
 use cocoa::appkit::NSWindow;
 use debug_print::debug_println;
@@ -12,9 +13,11 @@ use get_selected_text::get_selected_text;
 use mouse_position::mouse_position::Mouse;
 use serde_json::json;
 use std::sync::atomic::Ordering;
+use std::time::Duration;
 use tauri::{Emitter, Listener, LogicalPosition, Manager, PhysicalPosition};
 use tauri_plugin_updater::UpdaterExt;
 use tauri_specta::Event;
+use tokio::time::sleep;
 
 pub const TRANSLATOR_WIN_NAME: &str = "translator";
 pub const SETTINGS_WIN_NAME: &str = "settings";
@@ -119,34 +122,70 @@ pub fn get_translator_window_always_on_top() -> bool {
 #[specta::specta]
 pub async fn show_translator_window_with_selected_text_command() {
     remember_active_window();
-    let mut window = show_translator_window(false, true, false);
-    let mut enigo = Enigo::new(&Settings::default()).unwrap();
-    let selected_text;
-    if cfg!(target_os = "macos") {
-        selected_text = match utils::get_selected_text_by_clipboard(&mut enigo, false) {
+    let config = config::get_config().ok();
+    let allow_clipboard_fallback = config
+        .as_ref()
+        .and_then(|conf| conf.allow_using_clipboard_when_selected_text_not_available)
+        .unwrap_or(true);
+    let restore_previous_position = config
+        .as_ref()
+        .and_then(|conf| conf.restore_previous_position)
+        .unwrap_or(false);
+    let translator_is_foreground = is_translator_foreground();
+    let read_selected_text = || -> String {
+        match get_selected_text() {
             Ok(text) => text,
             Err(e) => {
-                eprintln!("Error getting selected text: {}", e);
-                "".to_string()
+                eprintln!("Error getting selected text natively: {}", e);
+                String::new()
             }
-        };
-    } else {
-        selected_text = match get_selected_text() {
-            Ok(text) => text,
-            Err(e) => {
-                eprintln!("Error getting selected text: {}", e);
-                "".to_string()
-            }
-        };
-    }
-    if !selected_text.is_empty() {
-        utils::send_text(selected_text);
-    } else {
-        window = show_translator_window(true, false, false);
+        }
+    };
+
+    let mut selected_text = read_selected_text();
+
+    if selected_text.trim().is_empty() {
+        sleep(Duration::from_millis(80)).await;
+        selected_text = read_selected_text();
     }
 
-    window.set_focus().unwrap();
+    if selected_text.trim().is_empty() && !translator_is_foreground {
+        if allow_clipboard_fallback {
+            match Enigo::new(&Settings::default()) {
+                Ok(mut enigo) => match utils::get_selected_text_by_clipboard(&mut enigo, false) {
+                    Ok(text) => {
+                        selected_text = text;
+                    }
+                    Err(e) => {
+                        eprintln!("Error getting selected text via clipboard fallback: {}", e);
+                    }
+                },
+                Err(e) => {
+                    eprintln!("Error initializing Enigo for clipboard fallback: {}", e);
+                }
+            }
+        }
+    }
+
+    // Show the translator window only after we've captured the current selection.
+    let window = show_translator_window(false, true, true);
+
+    if !selected_text.trim().is_empty() {
+        utils::send_text(selected_text);
+    }
+
+    if !restore_previous_position {
+        position_translator_window_to_cursor(&window);
+    }
+    focus_translator_window(&window);
     utils::show();
+}
+
+fn is_translator_foreground() -> bool {
+    match get_active_window() {
+        Ok(window) => window.process_id == std::process::id() as u64,
+        Err(_) => false,
+    }
 }
 
 pub fn do_hide_translator_window() {
@@ -359,6 +398,78 @@ pub fn show_translator_window(
     let window = get_translator_window(center, to_mouse_position, set_focus);
     window.show().unwrap();
     window
+}
+
+fn position_translator_window_to_cursor(window: &tauri::WebviewWindow) {
+    let current_monitor = get_current_monitor();
+    let mouse_position = get_mouse_location();
+    let window_physical_size = window.outer_size();
+    if mouse_position.is_err() || window_physical_size.is_err() {
+        return;
+    }
+    let (mouse_logical_x, mouse_logical_y) = mouse_position.unwrap();
+    let window_physical_size = window_physical_size.unwrap();
+    let scale_factor = window.scale_factor().unwrap_or(1.0);
+    let mut mouse_physical_position = PhysicalPosition::new(mouse_logical_x, mouse_logical_y);
+    if cfg!(target_os = "macos") {
+        mouse_physical_position =
+            LogicalPosition::new(mouse_logical_x as f64, mouse_logical_y as f64)
+                .to_physical(scale_factor);
+    }
+
+    let monitor_physical_size = current_monitor.size();
+    let monitor_physical_position = current_monitor.position();
+
+    let mut window_physical_position = mouse_physical_position;
+    if window_physical_position.x < monitor_physical_position.x {
+        window_physical_position.x = monitor_physical_position.x;
+    }
+    if window_physical_position.y < monitor_physical_position.y {
+        window_physical_position.y = monitor_physical_position.y;
+    }
+    if window_physical_position.x + (window_physical_size.width as i32)
+        > monitor_physical_position.x + (monitor_physical_size.width as i32)
+    {
+        window_physical_position.x = monitor_physical_position.x
+            + (monitor_physical_size.width as i32)
+            - (window_physical_size.width as i32);
+    }
+    if window_physical_position.y + (window_physical_size.height as i32)
+        > monitor_physical_position.y + (monitor_physical_size.height as i32)
+    {
+        window_physical_position.y = monitor_physical_position.y
+            + (monitor_physical_size.height as i32)
+            - (window_physical_size.height as i32);
+    }
+
+    if let Err(e) = window.set_position(window_physical_position) {
+        eprintln!("Error setting translator window position: {}", e);
+    }
+}
+
+fn focus_translator_window(window: &tauri::WebviewWindow) {
+    if let Err(e) = window.unminimize() {
+        eprintln!("Error unminimizing translator window: {}", e);
+    }
+
+    if let Err(e) = window.set_focus() {
+        eprintln!("Error focusing translator window: {}", e);
+    }
+
+    let should_restore_on_top = !ALWAYS_ON_TOP.load(Ordering::Acquire);
+    if let Err(e) = window.set_always_on_top(true) {
+        eprintln!("Error enabling always on top for translator window: {}", e);
+        return;
+    }
+
+    if should_restore_on_top {
+        if let Err(e) = window.set_always_on_top(false) {
+            eprintln!(
+                "Error disabling temporary always on top for translator window: {}",
+                e
+            );
+        }
+    }
 }
 
 pub fn get_translator_window(
