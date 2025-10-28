@@ -53,11 +53,8 @@ import {
 } from '../services/promotion'
 import useSWR from 'swr'
 import { Markdown } from './Markdown'
-import { open } from '@tauri-apps/plugin-shell'
-import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import type { UnlistenFn } from '@tauri-apps/api/event'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
-import { trackEvent } from '@aptabase/tauri'
 import { Skeleton } from 'baseui-sd/skeleton'
 import { SpeakerIcon } from './SpeakerIcon'
 import { RxSpeakerLoud } from 'react-icons/rx'
@@ -1435,31 +1432,69 @@ export function InnerSettings({
     }, [refetchPromotions])
 
     const isTauri = utils.isTauri()
+    const registerFocusListener = useCallback(
+        async (handler: () => void): Promise<UnlistenFn | undefined> => {
+            if (!isTauri) {
+                return undefined
+            }
+            try {
+                const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+                const appWindow = WebviewWindow.getCurrent()
+                return await appWindow.listen('tauri://focus', handler)
+            } catch (error) {
+                console.error('Failed to register Tauri focus listener', error)
+                return undefined
+            }
+        },
+        [isTauri]
+    )
+    const trackTauriEvent = useCallback(
+        async (eventName: string, payload?: Record<string, string | number>) => {
+            if (!isTauri) {
+                return
+            }
+            try {
+                const { trackEvent } = await import('@aptabase/tauri')
+                await trackEvent(eventName, payload)
+            } catch (error) {
+                console.error(`Failed to track event ${eventName}`, error)
+            }
+        },
+        [isTauri]
+    )
 
     useEffect(() => {
         if (!isTauri) {
             return undefined
         }
+        let disposed = false
         let unlisten: UnlistenFn | undefined
-        const appWindow = WebviewWindow.getCurrent()
-        appWindow
-            .listen('tauri://focus', () => {
-                refetchPromotions()
-            })
-            .then((cb: UnlistenFn) => {
+
+        registerFocusListener(() => {
+            refetchPromotions()
+        })
+            .then((cb) => {
+                if (!cb) {
+                    return
+                }
+                if (disposed) {
+                    cb()
+                    return
+                }
                 unlisten = cb
             })
+            .catch((error) => {
+                console.error('Failed to set promotions focus listener', error)
+            })
         return () => {
+            disposed = true
             unlisten?.()
         }
-    }, [isTauri, refetchPromotions])
+    }, [isTauri, refetchPromotions, registerFocusListener])
 
     useEffect(() => {
-        if (!isTauri) {
-            return
-        }
-        trackEvent('screen_view', { name: 'Settings' })
-    }, [isTauri])
+        void trackTauriEvent('screen_view', { name: 'Settings' })
+    }, [trackTauriEvent])
 
     const { theme, themeType } = useTheme()
 
@@ -1522,9 +1557,7 @@ export function InnerSettings({
                 refreshThemeType()
             }
 
-            if (isTauri) {
-                trackEvent('save_settings')
-            }
+            void trackTauriEvent('save_settings')
 
             toast(t('Saved'), {
                 icon: '👍',
@@ -1534,7 +1567,7 @@ export function InnerSettings({
             setSettings(data)
             onSave?.(oldSettings)
         },
-        [isTauri, onSave, setSettings, refreshThemeType, t]
+        [isTauri, onSave, setSettings, refreshThemeType, t, trackTauriEvent]
     )
 
     const onBlur = useCallback(async () => {
@@ -1692,50 +1725,86 @@ export function InnerSettings({
     const [openaiAPIKeyPromotion, setOpenaiAPIKeyPromotion] = useState<IPromotionItem>()
 
     useEffect(() => {
+        let disposed = false
         let unlisten: UnlistenFn | undefined
         if (openaiAPIKeyPromotionID) {
             setOpenaiAPIKeyPromotion(promotions?.openai_api_key?.find((item) => item.id === openaiAPIKeyPromotionID))
         } else {
-            choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)
+            choicePromotionItem(promotions?.openai_api_key).then((item) => {
+                if (!disposed) {
+                    setOpenaiAPIKeyPromotion(item)
+                }
+            })
             if (isTauri) {
-                const appWindow = WebviewWindow.getCurrent()
-                appWindow
-                    .listen('tauri://focus', () => {
-                        choicePromotionItem(promotions?.openai_api_key).then(setOpenaiAPIKeyPromotion)
+                registerFocusListener(() => {
+                    choicePromotionItem(promotions?.openai_api_key).then((item) => {
+                        if (!disposed) {
+                            setOpenaiAPIKeyPromotion(item)
+                        }
                     })
-                    .then((cb: UnlistenFn) => {
+                })
+                    .then((cb) => {
+                        if (!cb) {
+                            return
+                        }
+                        if (disposed) {
+                            cb()
+                            return
+                        }
                         unlisten = cb
+                    })
+                    .catch((error) => {
+                        console.error('Failed to set OpenAI promotion focus listener', error)
                     })
             }
         }
         return () => {
+            disposed = true
             unlisten?.()
         }
-    }, [isTauri, openaiAPIKeyPromotionID, promotions?.openai_api_key])
+    }, [isTauri, openaiAPIKeyPromotionID, promotions?.openai_api_key, registerFocusListener])
 
     const [headerPromotion, setHeaderPromotion] = useState<IPromotionItem>()
 
     useEffect(() => {
+        let disposed = false
         let unlisten: UnlistenFn | undefined
         if (headerPromotionID) {
             setHeaderPromotion(promotions?.settings_header?.find((item) => item.id === headerPromotionID))
         } else {
-            choicePromotionItem(promotions?.settings_header).then(setHeaderPromotion)
+            choicePromotionItem(promotions?.settings_header).then((item) => {
+                if (!disposed) {
+                    setHeaderPromotion(item)
+                }
+            })
             if (isTauri) {
-                const appWindow = WebviewWindow.getCurrent()
-                appWindow
-                    .listen('tauri://focus', () => {
-                        choicePromotionItem(promotions?.settings_header).then(setHeaderPromotion)
+                registerFocusListener(() => {
+                    choicePromotionItem(promotions?.settings_header).then((item) => {
+                        if (!disposed) {
+                            setHeaderPromotion(item)
+                        }
                     })
-                    .then((cb: UnlistenFn) => {
+                })
+                    .then((cb) => {
+                        if (!cb) {
+                            return
+                        }
+                        if (disposed) {
+                            cb()
+                            return
+                        }
                         unlisten = cb
+                    })
+                    .catch((error) => {
+                        console.error('Failed to set header promotion focus listener', error)
                     })
             }
         }
         return () => {
+            disposed = true
             unlisten?.()
         }
-    }, [headerPromotionID, isTauri, promotions?.settings_header])
+    }, [headerPromotionID, isTauri, promotions?.settings_header, registerFocusListener])
 
     const { promotionShowed: openaiAPIKeyPromotionShowed, setPromotionShowed: setOpenaiAPIKeyPromotionShowed } =
         usePromotionShowed(openaiAPIKeyPromotion)
@@ -1761,15 +1830,15 @@ export function InnerSettings({
 
     useEffect(() => {
         if (isOpenAI && openaiAPIKeyPromotion) {
-            trackEvent('promotion_view', { id: openaiAPIKeyPromotion.id })
+            void trackTauriEvent('promotion_view', { id: openaiAPIKeyPromotion.id })
         }
-    }, [isOpenAI, openaiAPIKeyPromotion])
+    }, [isOpenAI, openaiAPIKeyPromotion, trackTauriEvent])
 
     useEffect(() => {
         if (disclaimerPromotion?.id) {
-            trackEvent('promotion_disclaimer_view', { id: disclaimerPromotion.id })
+            void trackTauriEvent('promotion_disclaimer_view', { id: disclaimerPromotion.id })
         }
-    }, [disclaimerPromotion?.id])
+    }, [disclaimerPromotion?.id, trackTauriEvent])
 
     console.debug('render settings')
 
@@ -1843,7 +1912,7 @@ export function InnerSettings({
                             onClick={(e) => {
                                 e.stopPropagation()
                                 setShowBuyMeACoffee(true)
-                                trackEvent('buy_me_a_coffee_clicked')
+                                void trackTauriEvent('buy_me_a_coffee_clicked')
                             }}
                         >
                             {'❤️  ' + t('Buy me a coffee')}
@@ -3070,10 +3139,14 @@ export function InnerSettings({
                         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                             e.stopPropagation()
                             e.preventDefault()
-                            trackEvent('promotion_clicked', { id: openaiAPIKeyPromotion?.id ?? '' })
                             if (isTauri) {
+                                void trackTauriEvent('promotion_clicked', { id: openaiAPIKeyPromotion?.id ?? '' })
                                 if (disclaimerAgreeLink) {
-                                    open(disclaimerAgreeLink)
+                                    void import('@tauri-apps/plugin-shell')
+                                        .then(({ open }) => open(disclaimerAgreeLink))
+                                        .catch((error) => {
+                                            console.error('Failed to open disclaimer link', error)
+                                        })
                                 }
                             } else {
                                 window.open(disclaimerAgreeLink)
