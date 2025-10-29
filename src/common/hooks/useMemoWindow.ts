@@ -4,8 +4,8 @@ import type { UnlistenFn } from '@tauri-apps/api/event'
 import { PhysicalPosition, PhysicalSize } from '@tauri-apps/api/window'
 import { useEffect } from 'react'
 
-const positionKey = '_position'
-const sizeKey = '_size'
+const POSITION_KEY_SUFFIX = '_position'
+const SIZE_KEY_SUFFIX = '_size'
 
 export type WindowMemoProps = {
     size: boolean
@@ -19,6 +19,9 @@ export type WindowMemoProps = {
 export const useMemoWindow = (props: WindowMemoProps) => {
     useEffect(() => {
         const appWindow = WebviewWindow.getCurrent()
+        const label = appWindow.label ?? 'main'
+        const positionKey = `${label}${POSITION_KEY_SUFFIX}`
+        const sizeKey = `${label}${SIZE_KEY_SUFFIX}`
         const initWindow = async () => {
             try {
                 if (props.position) {
@@ -57,30 +60,39 @@ export const useMemoWindow = (props: WindowMemoProps) => {
                 }
             }
         }
-        initWindow()
+        void initWindow()
     }, [props.position, props.size, props.show])
 
     useEffect(() => {
         const appWindow = WebviewWindow.getCurrent()
+        const label = appWindow.label ?? 'main'
+        const positionKey = `${label}${POSITION_KEY_SUFFIX}`
+        const sizeKey = `${label}${SIZE_KEY_SUFFIX}`
         let unListenMove: UnlistenFn | undefined
         let unListenResize: UnlistenFn | undefined
-        appWindow
-            .onMoved(({ payload }) => {
-                localStorage.setItem(positionKey, JSON.stringify(payload))
-            })
-            .then((unListen: UnlistenFn) => {
-                unListenMove = unListen
-            })
-        appWindow
-            .onResized(({ payload }) => {
-                localStorage.setItem(sizeKey, JSON.stringify(payload))
-            })
-            .then((unListen: UnlistenFn) => {
-                unListenResize = unListen
-            })
+
+        if (props.position) {
+            appWindow
+                .onMoved(({ payload }) => {
+                    localStorage.setItem(positionKey, JSON.stringify(payload))
+                })
+                .then((unListen: UnlistenFn) => {
+                    unListenMove = unListen
+                })
+        }
+        if (props.size) {
+            appWindow
+                .onResized(({ payload }) => {
+                    localStorage.setItem(sizeKey, JSON.stringify(payload))
+                })
+                .then((unListen: UnlistenFn) => {
+                    unListenResize = unListen
+                })
+        }
+
         return () => {
             unListenMove?.()
             unListenResize?.()
         }
-    }, [])
+    }, [props.position, props.size])
 }
