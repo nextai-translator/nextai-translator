@@ -1323,7 +1323,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     engineModel: item.engineModel ?? prev.engineModel,
                 }
             })
-            setIsHistoryOpen(false)
         },
         [actions, settings.provider, setActivateAction]
     )
