@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
 
-const README_JP_PATH = path.join(__dirname, '..', 'README-JP.md')
-const README_EN_PATH = path.join(__dirname, '..', 'README.md')
-const README_CN_PATH = path.join(__dirname, '..', 'README-CN.md')
+const README_JP_PATH = path.join(__dirname, '..', '..', '..', 'README-JP.md')
+const README_EN_PATH = path.join(__dirname, '..', '..', '..', 'README.md')
+const README_CN_PATH = path.join(__dirname, '..', '..', '..', 'README-CN.md')
 
 describe('Japanese README - File Existence and Structure', () => {
     it('should have README-JP.md file in repository root', () => {
@@ -278,22 +278,21 @@ describe('Japanese README - Markdown Formatting', () => {
 
 describe('Japanese README - Feature List Completeness', () => {
     const features = [
-        'translation', // 翻訳
-        'polishing', // 文章改善/推敲
-        'summarization', // 要約
-        '55', // 55 languages
-        'streaming', // ストリーミング
-        'TTS', // 音声読み上げ
-        'screenshot', // スクリーンショット
-        'vocabulary', // 単語帳
+        { en: 'translation', jp: '翻訳' },
+        { en: 'polishing', jp: '文章改善' },
+        { en: 'summarization', jp: '要約' },
+        { en: '55 languages', jp: '55' },
+        { en: 'streaming', jp: 'ストリーミング' },
+        { en: 'TTS', jp: 'TTS' },
+        { en: 'screenshot', jp: 'スクリーンショット' },
+        { en: 'vocabulary', jp: '単語帳' },
     ]
 
-    features.forEach((feature) => {
-        it(`should mention feature: ${feature}`, () => {
+    features.forEach(({ en, jp }) => {
+        it(`should mention feature: ${en}`, () => {
             if (fs.existsSync(README_JP_PATH)) {
                 const content = fs.readFileSync(README_JP_PATH, 'utf-8')
-                const contentLower = content.toLowerCase()
-                expect(contentLower).toContain(feature.toLowerCase())
+                expect(content).toContain(jp)
             } else {
                 expect.fail('README-JP.md does not exist')
             }
