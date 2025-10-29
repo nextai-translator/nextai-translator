@@ -1,7 +1,7 @@
 # 因为收到了 OpenAI 公司的品牌名称所有权的警告，所以此项目和此产品改名为 nextai translator，望您能够理解。
 
 <p align="center">
-    <br> <a href="README.md">English</a> | 中文
+    <br> <a href="README.md">English</a> | 中文 | <a href="README-JP.md">日本語</a>
 </p>
 <p align="center">
     <em>The translator that does more than just translation</em>

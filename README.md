@@ -1,7 +1,7 @@
 # Due to receiving a trademark ownership warning from OpenAI, this project and product has been renamed to nextai translator. We hope you understand.
 
 <p align="center">
-    <br> English | <a href="README-CN.md">中文</a>
+    <br> English | <a href="README-CN.md">中文</a> | <a href="README-JP.md">日本語</a>
 </p>
 <p align="center">
     <em>The translator that does more than just translation</em>
