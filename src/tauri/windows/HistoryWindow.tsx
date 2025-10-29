@@ -23,13 +23,9 @@ export function HistoryWindow() {
         void appWindow.close()
     }, [appWindow])
 
-    const handleRestore = useCallback(
-        (item: HistoryItem) => {
-            void emit('history:restore', item)
-            void appWindow.close()
-        },
-        [appWindow]
-    )
+    const handleRestore = useCallback((item: HistoryItem) => {
+        void emit('history:restore', item)
+    }, [])
 
     return (
         <Window>

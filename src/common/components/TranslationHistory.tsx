@@ -244,11 +244,8 @@ export function TranslationHistory(props: TranslationHistoryProps) {
     )
 
     const handleRestore = useCallback(
-        async (item: HistoryItem) => {
+        (item: HistoryItem) => {
             onRestore(item)
-            if (item.id !== undefined) {
-                await historyService.touch(item.id)
-            }
         },
         [onRestore]
     )
