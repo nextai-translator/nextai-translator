@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Basic Meta Tags (PRD 4.5) -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Primary Meta Tags (PRD 4.5: SEO Requirements) -->
+    <title>OpenAI Translator - Instant Translation Anywhere</title>
+    <meta name="title" content="OpenAI Translator - Instant Translation Anywhere">
+    <meta name="description" content="AI-powered translation tool that works seamlessly across your browser, desktop, and mobile devices. Supports 100+ languages with offline mode and privacy-first approach.">
+    <meta name="keywords" content="translator, AI translation, OpenAI, language translation, browser extension, desktop app, instant translation, multilingual">
+    <meta name="author" content="OpenAI Translator Team">
+
+    <!-- Canonical URL (PRD 4.5) -->
+    <link rel="canonical" href="https://openai-translator.com">
+
+    <!-- Open Graph / Facebook (PRD 4.5) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://openai-translator.com">
+    <meta property="og:title" content="OpenAI Translator - Instant Translation Anywhere">
+    <meta property="og:description" content="AI-powered translation tool that works seamlessly across your browser, desktop, and mobile devices. Supports 100+ languages with offline mode.">
+    <meta property="og:image" content="https://openai-translator.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="OpenAI Translator">
+
+    <!-- Twitter Card (PRD 4.5) -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://openai-translator.com">
+    <meta property="twitter:title" content="OpenAI Translator - Instant Translation Anywhere">
+    <meta property="twitter:description" content="AI-powered translation tool that works seamlessly across your browser, desktop, and mobile devices.">
+    <meta property="twitter:image" content="https://openai-translator.com/og-image.png">
+    <meta property="twitter:creator" content="@openaitranslator">
+
+    <!-- Favicon (PRD 5.3) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/site.webmanifest">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="msapplication-TileColor" content="#3b82f6">
+
+    <!-- Security Headers (PRD 4.6) -->
+    <!-- Note: These should ideally be set by server, but can be referenced here -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:">
+
+    <!-- Structured Data - Schema.org (PRD 4.5) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "OpenAI Translator",
+        "description": "AI-powered translation tool for browser, desktop, and mobile",
+        "url": "https://openai-translator.com",
+        "logo": "https://openai-translator.com/logo.svg",
+        "sameAs": [
+            "https://github.com/openai-translator/openai-translator",
+            "https://twitter.com/openaitranslator",
+            "https://discord.gg/openaitranslator"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Support",
+            "email": "support@openai-translator.com"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "OpenAI Translator",
+        "url": "https://openai-translator.com",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://openai-translator.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
+    <!-- Preconnect for Performance (PRD 4.1) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+
+    <!-- Google Analytics (PRD 9.2) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID', {
+            'anonymize_ip': true,
+            'cookie_flags': 'secure;samesite=strict'
+        });
+    </script>
+</head>
+<body>
+    <!-- Skip to Content Link (WCAG 2.4.1) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- React Root -->
+    <div id="root"></div>
+
+    <!-- Noscript Fallback -->
+    <noscript>
+        <div style="text-align: center; padding: 2rem; font-family: sans-serif;">
+            <h1>OpenAI Translator</h1>
+            <p>This application requires JavaScript to be enabled in your browser.</p>
+            <p>Please enable JavaScript and refresh the page.</p>
+        </div>
+    </noscript>
+</body>
+</html>

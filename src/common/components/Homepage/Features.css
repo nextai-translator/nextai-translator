@@ -1,0 +1,227 @@
+/**
+ * Features Section Styles
+ *
+ * Responsive grid layout with SVG icons and accessibility
+ * Implements PRD Section 3.1.3
+ */
+
+/* Features Section */
+.features {
+    padding: var(--spacing-3xl) 0;
+    background-color: var(--color-bg);
+}
+
+.features-container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+}
+
+/* Section Header */
+.features-header {
+    text-align: center;
+    margin-bottom: var(--spacing-3xl);
+}
+
+/* Features Heading - H2 (PRD 4.5) */
+.features-heading {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 var(--spacing-md) 0;
+}
+
+.features-subheading {
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    color: var(--color-text-light);
+    margin: 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Features Grid - Responsive (PRD 4.4) */
+.features-grid {
+    display: grid;
+    /* Desktop: 3 columns (PRD 4.4: 1024px+) */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-xl);
+    /* Prevent layout shift */
+    min-height: 200px;
+}
+
+/* Feature Card */
+.feature-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl);
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    transition: all var(--transition-base);
+}
+
+.feature-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary);
+    transform: translateY(-4px);
+}
+
+/* Feature Icon (PRD 5.3, 7.2: SVG format) */
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.feature-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Feature Title - H3 (PRD 4.5) */
+.feature-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+/* Feature Description (PRD 7.1: 15-30 words) */
+.feature-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-light);
+    margin: 0;
+    flex: 1;
+}
+
+/* Feature Link (PRD 3.1.3: optional) */
+.feature-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    margin-top: var(--spacing-sm);
+    transition: all var(--transition-fast);
+    /* Touch-friendly */
+    padding: var(--spacing-xs) 0;
+    min-height: 44px;
+}
+
+.feature-link:hover {
+    color: var(--color-primary-hover);
+    gap: var(--spacing-sm);
+}
+
+.feature-link:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: var(--focus-ring-offset);
+    border-radius: 4px;
+}
+
+/* Tablet Responsive (PRD 4.4: 768-1023px) */
+@media (max-width: 1023px) {
+    .features {
+        padding: var(--spacing-2xl) 0;
+    }
+
+    .features-header {
+        margin-bottom: var(--spacing-2xl);
+    }
+
+    /* 2 columns on tablet */
+    .features-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .feature-card {
+        padding: var(--spacing-lg);
+    }
+}
+
+/* Mobile Responsive (PRD 4.4: 320-767px) */
+@media (max-width: 767px) {
+    .features {
+        padding: var(--spacing-xl) 0;
+    }
+
+    .features-container {
+        padding: 0 var(--spacing-md);
+    }
+
+    .features-header {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    /* 1 column on mobile */
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .feature-card {
+        padding: var(--spacing-md);
+    }
+
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .feature-title {
+        font-size: 1.125rem;
+    }
+
+    .feature-description {
+        font-size: 0.95rem;
+    }
+}
+
+/* Reduced Motion Support (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+    .feature-card {
+        transition: none;
+    }
+
+    .feature-card:hover {
+        transform: none;
+    }
+
+    .feature-link:hover {
+        gap: var(--spacing-xs);
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .feature-card {
+        border-width: 2px;
+    }
+
+    .feature-card:hover {
+        border-width: 3px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .features {
+        padding: var(--spacing-md) 0;
+    }
+
+    .feature-card {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid var(--color-border);
+    }
+
+    .feature-link {
+        display: none;
+    }
+}

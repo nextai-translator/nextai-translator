@@ -1,0 +1,173 @@
+/**
+ * Hero Section Styles
+ *
+ * Responsive hero section with image optimization and accessibility
+ * Implements PRD Section 3.1.2
+ */
+
+/* Hero Section */
+.hero {
+    padding-top: calc(var(--header-height) + var(--spacing-3xl));
+    padding-bottom: var(--spacing-3xl);
+    background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+}
+
+.hero-container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-3xl);
+    align-items: center;
+}
+
+/* Content Column */
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* Headline - H1 (PRD 4.5, PRD 7.1: 5-10 words) */
+.hero-headline {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--color-text);
+    margin: 0;
+    /* Prevent layout shift */
+    min-height: 1em;
+}
+
+/* Subheadline (PRD 7.1: 10-20 words) */
+.hero-subheadline {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    line-height: 1.6;
+    color: var(--color-text-light);
+    margin: 0;
+    max-width: 600px;
+}
+
+/* Hero Actions */
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+/* Visual Column */
+.hero-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Hero Image (PRD 4.1: WebP with fallbacks) */
+.hero-image {
+    width: 100%;
+    height: auto;
+    max-width: 600px;
+    /* Explicit dimensions prevent CLS (PRD 4.1: CLS < 0.1) */
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Hero Video (PRD 7.3: optional) */
+.hero-video {
+    width: 100%;
+    height: auto;
+    max-width: 600px;
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    object-fit: cover;
+}
+
+/* Tablet Responsive (PRD 4.4: 768-1023px) */
+@media (max-width: 1023px) {
+    .hero {
+        padding-top: calc(var(--header-height) + var(--spacing-2xl));
+        padding-bottom: var(--spacing-2xl);
+    }
+
+    .hero-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-2xl);
+    }
+
+    .hero-headline {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+    }
+
+    .hero-subheadline {
+        font-size: clamp(0.95rem, 2vw, 1.125rem);
+    }
+
+    .hero-visual {
+        order: -1; /* Image on top for mobile */
+    }
+}
+
+/* Mobile Responsive (PRD 4.4: 320-767px) */
+@media (max-width: 767px) {
+    .hero {
+        padding-top: calc(var(--header-height) + var(--spacing-xl));
+        padding-bottom: var(--spacing-xl);
+    }
+
+    .hero-container {
+        padding: 0 var(--spacing-md);
+        gap: var(--spacing-xl);
+    }
+
+    .hero-headline {
+        font-size: clamp(1.5rem, 8vw, 2rem);
+    }
+
+    .hero-subheadline {
+        font-size: 1rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+    }
+
+    .hero-image,
+    .hero-video {
+        max-width: 100%;
+        border-radius: 8px;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .hero {
+        background: var(--color-bg);
+    }
+
+    .hero-headline {
+        color: var(--color-text);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .hero {
+        padding-top: var(--spacing-md);
+        padding-bottom: var(--spacing-md);
+        background: none;
+    }
+
+    .hero-actions {
+        display: none;
+    }
+}
