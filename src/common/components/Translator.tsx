@@ -2697,11 +2697,11 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                     onClick={async (event) => {
                                         event.stopPropagation()
                                         event.preventDefault()
-                                        // if (isTauri()) {
-                                        //     const { commands } = await import('@/tauri/bindings')
-                                        //     await commands.showHistoryWindow()
-                                        //     return
-                                        // }
+                                        if (isTauri()) {
+                                            const { commands } = await import('@/tauri/bindings')
+                                            await commands.showHistoryWindow()
+                                            return
+                                        }
                                         setIsHistoryOpen(true)
                                     }}
                                 >
