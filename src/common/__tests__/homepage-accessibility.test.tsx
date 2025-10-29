@@ -559,7 +559,7 @@ describe('Homepage Accessibility (WCAG 2.1 AA) - TDD Red Phase', () => {
     describe('Automated Accessibility Testing', () => {
         it('WILL FAIL: should pass axe-core automated accessibility scan', () => {
             // PRD 8.3: Automated accessibility scanning (aXe, WAVE)
-            expect(async () => {
+            expect(() => {
                 throw new Error('NOT_IMPLEMENTED: Homepage not implemented for axe testing')
             }).toThrow('NOT_IMPLEMENTED')
         })

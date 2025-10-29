@@ -49,6 +49,7 @@
     "@tauri-apps/plugin-process": "^2.3.0",
     "@tauri-apps/plugin-shell": "^2.3.1",
     "@tauri-apps/plugin-updater": "^2.9.0",
+    "@testing-library/react": "^16.3.0",
     "@types/color": "^3.0.6",
     "@types/qs": "^6.9.10",
     "@types/react-copy-to-clipboard": "^5.0.4",
