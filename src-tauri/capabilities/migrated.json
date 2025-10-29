@@ -8,7 +8,8 @@
     "action_manager",
     "updater",
     "thumb",
-    "screenshot"
+    "screenshot",
+    "history"
   ],
   "permissions": [
     {
