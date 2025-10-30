@@ -95,11 +95,11 @@ pub fn get_config_content() -> String {
 pub fn get_config_content_by_app(app: &AppHandle) -> Result<String, String> {
     let app_paths = app.path();
     let app_config_dir = app_paths
-        .resolve("xyz.yetone.apps.nextai-translator", BaseDirectory::Config)
+        .resolve("xyz.yetone.apps.openai-translator", BaseDirectory::Config)
         .unwrap();
     if !app_config_dir.exists() {
         let old_config_dir = app_paths
-            .resolve("xyz.yetone.apps.openai-translator", BaseDirectory::Config)
+            .resolve("xyz.yetone.apps.nextai-translator", BaseDirectory::Config)
             .unwrap();
         if old_config_dir.exists() {
             if std::fs::rename(&old_config_dir, &app_config_dir).is_err() {

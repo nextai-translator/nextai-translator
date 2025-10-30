@@ -25,7 +25,7 @@
         <key>Extension Description</key>
         <string>Translate text with NextAI Translator.</string>
         <key>Extension Identifier</key>
-        <string>xyz.yetone.apps.nextai-translator.clip-extensions.popclip</string>
+        <string>xyz.yetone.apps.openai-translator.clip-extensions.popclip</string>
         <key>Extension Image File</key>
         <string>nextai-translator.png</string>
         <key>Extension Name</key>

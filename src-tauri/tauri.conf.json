@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "productName": "NextAI Translator",
   "version": "0.1.0",
-  "identifier": "xyz.yetone.apps.nextai-translator",
+  "identifier": "xyz.yetone.apps.openai-translator",
   "build": {
     "beforeDevCommand": "pnpm dev-tauri-renderer",
     "devUrl": "http://localhost:3333",
