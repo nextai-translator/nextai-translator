@@ -18,10 +18,10 @@ export default defineConfig({
             entry: 'src/browser-extension/content_script/index.tsx',
             userscript: {
                 name,
-                icon: 'https://cdn.jsdelivr.net/gh/openai-translator/openai-translator/public/icon.png',
-                namespace: 'https://github.com/openai-translator/openai-translator',
+                icon: 'https://cdn.jsdelivr.net/gh/nextai-translator/nextai-translator/public/icon.png',
+                namespace: 'https://github.com/nextai-translator/nextai-translator',
                 match: ['*://*/*'],
-                author: 'https://github.com/openai-translator',
+                author: 'https://github.com/nextai-translator',
                 license,
                 description: {
                     '': '基于 ChatGPT API 的划词翻译浏览器插件和跨平台桌面端应用',

@@ -19,11 +19,11 @@ build-userscript: change-package-version
 	pnpm vite build -c vite.config.userscript.ts
 
 build-popclip-extension:
-	rm -f dist/openai-translator.popclipextz
-	mkdir -p dist/openai-translator.popclipext
-	cp -r clip-extensions/popclip/* dist/openai-translator.popclipext
-	cd dist && zip -r openai-translator.popclipextz openai-translator.popclipext && rm -r openai-translator.popclipext
+	rm -f dist/nextai-translator.popclipextz
+	mkdir -p dist/nextai-translator.popclipext
+	cp -r clip-extensions/popclip/* dist/nextai-translator.popclipext
+	cd dist && zip -r nextai-translator.popclipextz nextai-translator.popclipext && rm -r nextai-translator.popclipext
 
 build-snipdo-extension:
-	rm -f dist/openai-translator.pbar
-	zip -j -r dist/openai-translator.pbar clip-extensions/snipdo/*
+	rm -f dist/nextai-translator.pbar
+	zip -j -r dist/nextai-translator.pbar clip-extensions/snipdo/*

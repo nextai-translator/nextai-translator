@@ -114,7 +114,7 @@ async function showPopupCard(reference: ReferenceElement, text: string, autoFocu
     root.render(
         <React.StrictMode>
             <GlobalSuspense>
-                <JSS jss={jss} generateId={generateId} classNamePrefix='__yetone-openai-translator-jss-'>
+                <JSS jss={jss} generateId={generateId} classNamePrefix='__yetone-nextai-translator-jss-'>
                     <InnerContainer reference={reference}>
                         <TitleBar pinned={settings.pinned} onClose={hidePopupCard} engine={engine} />
                         <Translator
