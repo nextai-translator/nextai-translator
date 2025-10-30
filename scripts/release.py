@@ -1,6 +1,5 @@
 import os
 import subprocess
-from functools import reduce
 
 def get_current_version_from_tag():
     subprocess.check_output(['git', 'pull', 'origin', 'main', '-r'])
@@ -45,6 +44,8 @@ def create_new_tag():
     seen = set()
     for line in release_note.split('\n'):
         line = line.strip().strip('"')
+        if not line:
+            continue
         t_, _, _ = line.partition(':')
         if t_.lower() not in ('fix', 'feat', 'docs', 'refactor', 'optimize', 'enhance', 'openai'):
             continue
@@ -52,16 +53,14 @@ def create_new_tag():
             continue
         release_notes.append(line)
         seen.add(line)
-    args = ['git', 'tag', '-a', 'v' + new_version] + flatten([['-m', line] for line in release_notes])
+    if not release_notes:
+        release_notes.append(f'release: v{new_version}')
+    tag_message = '\n'.join(release_notes)
+    args = ['git', 'tag', '-a', 'v' + new_version, '-m', tag_message]
     # Create a new tag for the current release.
     subprocess.check_output(args)
     # Push the new tag to the repository.
     subprocess.check_output(['git', 'push', 'origin', 'v' + new_version])
-
-def flatten(l):
-    if not l:
-        return l
-    return reduce(lambda x, y: x + y, l)
 
 def main():
     print(create_new_tag())
