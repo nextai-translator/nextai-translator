@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { LangCode } from '../../lang'
 
 /**
@@ -11,7 +11,6 @@ import type { LangCode } from '../../lang'
  */
 
 describe('TTS Module Integration with Eleven Labs', () => {
-
     describe('Provider Selection', () => {
         it('should include ElevenLabs in TTSProvider type', () => {
             // Type test: TTSProvider should accept 'ElevenLabs'
@@ -22,12 +21,11 @@ describe('TTS Module Integration with Eleven Labs', () => {
 
         it('should route to Eleven Labs speak function when provider is ElevenLabs', async () => {
             // Mock routing logic in doSpeak function
-            const mockDoSpeak = vi.fn()
             const options = {
                 provider: 'ElevenLabs' as 'WebSpeech' | 'EdgeTTS' | 'ElevenLabs',
                 text: 'Test text',
                 lang: 'en' as LangCode,
-                signal: new AbortController().signal
+                signal: new AbortController().signal,
             }
 
             // This will fail until routing logic is implemented
@@ -39,9 +37,9 @@ describe('TTS Module Integration with Eleven Labs', () => {
                 tts: {
                     provider: 'ElevenLabs' as 'WebSpeech' | 'EdgeTTS' | 'ElevenLabs',
                     elevenlabs: {
-                        autoFallback: true
-                    }
-                }
+                        autoFallback: true,
+                    },
+                },
             }
 
             // Simulate ElevenLabs failure
@@ -83,8 +81,8 @@ describe('TTS Module Integration with Eleven Labs', () => {
                     stability: 50,
                     similarityBoost: 75,
                     autoFallback: true,
-                    usageWarningEnabled: true
-                }
+                    usageWarningEnabled: true,
+                },
             }
 
             expect(settings.provider).toBe('ElevenLabs')
@@ -104,7 +102,7 @@ describe('TTS Module Integration with Eleven Labs', () => {
                 provider: 'EdgeTTS',
                 voices: [{ lang: 'en', voice: 'en-US-JennyNeural' }],
                 rate: 10,
-                volume: 100
+                volume: 100,
             }
 
             expect(edgeTTSSettings.provider).toBe('EdgeTTS')
@@ -122,7 +120,7 @@ describe('TTS Module Integration with Eleven Labs', () => {
                 'ko': 'ko-KR',
                 'fr': 'fr-FR',
                 'de': 'de-DE',
-                'es': 'es-ES'
+                'es': 'es-ES',
             }
 
             expect(langCode2TTSLang['en']).toBe('en-US')
@@ -131,22 +129,20 @@ describe('TTS Module Integration with Eleven Labs', () => {
 
         it('should map Tier 1 languages correctly', () => {
             // PRD Appendix B: Tier 1 languages
-            const tier1: LangCode[] = [
-                'en', 'es', 'fr', 'de', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'it', 'pt', 'ru'
-            ]
+            const tier1: LangCode[] = ['en', 'es', 'fr', 'de', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'it', 'pt', 'ru']
 
-            tier1.forEach(lang => {
+            tier1.forEach((lang) => {
                 expect(lang).toBeDefined()
             })
         })
 
         it('should provide test text for voice preview', () => {
             const ttsLangTestTextMap: Partial<Record<LangCode, string>> = {
-                'en': 'Hello, welcome to OpenAI Translator',
-                'es': 'Hola, gracias por usar OpenAI Translator',
-                'fr': "Bonjour, merci d'utiliser OpenAI Translator",
-                'de': 'Hallo, vielen Dank, dass Sie OpenAI Translator verwenden',
-                'ja': 'こんにちは、OpenAI Translator をご利用いただきありがとうございます'
+                en: 'Hello, welcome to OpenAI Translator',
+                es: 'Hola, gracias por usar OpenAI Translator',
+                fr: "Bonjour, merci d'utiliser OpenAI Translator",
+                de: 'Hallo, vielen Dank, dass Sie OpenAI Translator verwenden',
+                ja: 'こんにちは、OpenAI Translator をご利用いただきありがとうございます',
             }
 
             expect(ttsLangTestTextMap['en']).toBeDefined()
@@ -158,7 +154,7 @@ describe('TTS Module Integration with Eleven Labs', () => {
         it('should store Eleven Labs voice IDs in voice configuration', () => {
             const voiceConfig = {
                 lang: 'en' as LangCode,
-                voice: 'ElevenLabs:voice_001' // Prefix to distinguish from EdgeTTS
+                voice: 'ElevenLabs:voice_001', // Prefix to distinguish from EdgeTTS
             }
 
             expect(voiceConfig.voice).toContain('ElevenLabs:')
@@ -167,25 +163,16 @@ describe('TTS Module Integration with Eleven Labs', () => {
         it('should support multiple voice configurations per language', () => {
             const voices = [
                 { lang: 'en' as LangCode, voice: 'EdgeTTS:en-US-JennyNeural' },
-                { lang: 'en' as LangCode, voice: 'ElevenLabs:voice_rachel' }
+                { lang: 'en' as LangCode, voice: 'ElevenLabs:voice_rachel' },
             ]
 
-            const enVoices = voices.filter(v => v.lang === 'en')
+            const enVoices = voices.filter((v) => v.lang === 'en')
             expect(enVoices.length).toBe(2)
         })
     })
 
     describe('Speak Function Integration', () => {
         it('should call Eleven Labs speak when provider is ElevenLabs', async () => {
-            const mockSpeak = vi.fn()
-            const options = {
-                text: 'Test text for Eleven Labs',
-                lang: 'en' as LangCode,
-                signal: new AbortController().signal,
-                onFinish: vi.fn(),
-                onStartSpeaking: vi.fn()
-            }
-
             // Mock settings with ElevenLabs provider
             const mockSettings = {
                 tts: {
@@ -196,9 +183,9 @@ describe('TTS Module Integration with Eleven Labs', () => {
                     elevenlabs: {
                         apiKey: 'sk_test',
                         stability: 50,
-                        similarityBoost: 75
-                    }
-                }
+                        similarityBoost: 75,
+                    },
+                },
             }
 
             // This will fail until implementation exists
@@ -210,8 +197,8 @@ describe('TTS Module Integration with Eleven Labs', () => {
                 elevenlabs: {
                     stability: 60,
                     similarityBoost: 80,
-                    model: 'eleven_turbo_v2' as 'eleven_multilingual_v2' | 'eleven_turbo_v2'
-                }
+                    model: 'eleven_turbo_v2' as 'eleven_multilingual_v2' | 'eleven_turbo_v2',
+                },
             }
 
             // These should be passed in the API request body
@@ -249,8 +236,8 @@ describe('TTS Module Integration with Eleven Labs', () => {
                 404: 'Selected voice is no longer available. Please choose another voice.',
                 429: 'Too many requests. Please wait a moment and try again.',
                 500: 'Eleven Labs service is temporarily unavailable. Using Edge TTS instead.',
-                'NETWORK': 'Unable to connect to Eleven Labs. Check your internet connection.',
-                'TIMEOUT': 'Request took too long. Please try again with shorter text.'
+                NETWORK: 'Unable to connect to Eleven Labs. Check your internet connection.',
+                TIMEOUT: 'Request took too long. Please try again with shorter text.',
             }
 
             expect(errorMessages[401]).toContain('invalid')
@@ -262,7 +249,7 @@ describe('TTS Module Integration with Eleven Labs', () => {
             const error = {
                 message: 'API request failed',
                 status: 401,
-                apiKey: apiKey
+                apiKey: apiKey,
             }
 
             // Error logging should sanitize API key
@@ -272,15 +259,6 @@ describe('TTS Module Integration with Eleven Labs', () => {
 
         it('should retry transient errors automatically', async () => {
             const maxRetries = 3
-            let attemptCount = 0
-
-            const mockRequestWithRetry = async () => {
-                attemptCount++
-                if (attemptCount < 2) {
-                    throw new Error('Transient error')
-                }
-                return 'Success'
-            }
 
             // Retry logic should attempt up to maxRetries times
             expect(maxRetries).toBe(3)
@@ -305,7 +283,7 @@ describe('TTS Module Integration with Eleven Labs', () => {
             const mockCache = {
                 key: cacheKey,
                 expiry: Date.now() + cacheExpiry,
-                data: []
+                data: [],
             }
 
             expect(mockCache.expiry).toBeGreaterThan(Date.now())
@@ -335,9 +313,9 @@ describe('TTS Module Integration with Eleven Labs', () => {
                         apiKey: 'sk_test',
                         model: 'eleven_multilingual_v2' as 'eleven_multilingual_v2' | 'eleven_turbo_v2',
                         stability: 50,
-                        similarityBoost: 75
-                    }
-                }
+                        similarityBoost: 75,
+                    },
+                },
             }
 
             // Mock storage
@@ -351,9 +329,9 @@ describe('TTS Module Integration with Eleven Labs', () => {
                     provider: 'ElevenLabs',
                     elevenlabs: {
                         apiKey: 'sk_stored',
-                        stability: 60
-                    }
-                }
+                        stability: 60,
+                    },
+                },
             }
 
             const loaded = storedSettings.tts.elevenlabs
@@ -390,8 +368,8 @@ describe('TTS Module Integration with Eleven Labs', () => {
             const mockFetchVoices = async (apiKey: string) => {
                 if (!apiKey) throw new Error('API key required')
                 return [
-                    { voice_id: 'v1', name: 'Rachel', language: 'en-US' },
-                    { voice_id: 'v2', name: 'Adam', language: 'en-US' }
+                    { voiceId: 'v1', name: 'Rachel', language: 'en-US' },
+                    { voiceId: 'v2', name: 'Adam', language: 'en-US' },
                 ]
             }
 
@@ -403,7 +381,7 @@ describe('TTS Module Integration with Eleven Labs', () => {
             const usage = {
                 characterCount: 45231,
                 characterLimit: 50000,
-                percentage: 90.5
+                percentage: 90.5,
             }
 
             const displayText = `Used: ${usage.characterCount} / ${usage.characterLimit} characters this month`

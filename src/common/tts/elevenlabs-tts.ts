@@ -1,7 +1,6 @@
 import { langCode2TTSLang } from '.'
 import { getUniversalFetch } from '../universal-fetch'
 import { SpeakOptions } from './types'
-import { LangCode } from '../lang'
 import { speak as edgeSpeak } from './edge-tts'
 import { getSettings, setSettings } from '../utils'
 
@@ -76,7 +75,10 @@ export function validateElevenLabsAPIKeyFormat(apiKey: string): boolean {
 // Validate API key against Eleven Labs API
 export async function validateElevenLabsAPIKey(apiKey: string): Promise<{ valid: boolean; error?: string }> {
     if (!validateElevenLabsAPIKeyFormat(apiKey)) {
-        return { valid: false, error: 'Invalid API key format. Keys should start with "sk_" and have at least 32 characters.' }
+        return {
+            valid: false,
+            error: 'Invalid API key format. Keys should start with "sk_" and have at least 32 characters.',
+        }
     }
 
     try {
@@ -108,7 +110,9 @@ export async function validateElevenLabsAPIKey(apiKey: string): Promise<{ valid:
 }
 
 // Fetch usage statistics
-export async function fetchElevenLabsUsage(apiKey: string): Promise<{ characterCount: number; characterLimit: number } | null> {
+export async function fetchElevenLabsUsage(
+    apiKey: string
+): Promise<{ characterCount: number; characterLimit: number } | null> {
     try {
         const fetcher = getUniversalFetch()
         const controller = new AbortController()
@@ -134,20 +138,26 @@ export async function fetchElevenLabsUsage(apiKey: string): Promise<{ characterC
 
         return null
     } catch (error) {
-        console.error('Failed to fetch Eleven Labs usage:', sanitizeError(error instanceof Error ? error.message : 'Unknown error'))
+        console.error(
+            'Failed to fetch Eleven Labs usage:',
+            sanitizeError(error instanceof Error ? error.message : 'Unknown error')
+        )
         return null
     }
 }
 
 // Get cached usage or fetch fresh data
-export async function getElevenLabsUsage(apiKey: string, forceRefresh: boolean = false): Promise<{ characterCount: number; characterLimit: number } | null> {
+export async function getElevenLabsUsage(
+    apiKey: string,
+    forceRefresh: boolean = false
+): Promise<{ characterCount: number; characterLimit: number } | null> {
     const settings = await getSettings()
     const cachedUsage = settings.tts?.elevenlabs?.cachedUsage
     const lastCheck = settings.tts?.elevenlabs?.lastUsageCheck || 0
     const now = Date.now()
 
     // Use cache if available and not expired
-    if (!forceRefresh && cachedUsage && (now - lastCheck) < USAGE_CACHE_DURATION_MS) {
+    if (!forceRefresh && cachedUsage && now - lastCheck < USAGE_CACHE_DURATION_MS) {
         return cachedUsage
     }
 
@@ -214,14 +224,17 @@ export async function fetchElevenLabsVoices(apiKey: string): Promise<ElevenLabsV
 
         return []
     } catch (error) {
-        console.error('Failed to fetch Eleven Labs voices:', sanitizeError(error instanceof Error ? error.message : 'Unknown error'))
+        console.error(
+            'Failed to fetch Eleven Labs voices:',
+            sanitizeError(error instanceof Error ? error.message : 'Unknown error')
+        )
         return []
     }
 }
 
 // Filter voices by language
 export function filterVoicesByLanguage(voices: ElevenLabsVoice[], lang: string): ElevenLabsVoice[] {
-    return voices.filter(voice => {
+    return voices.filter((voice) => {
         const voiceLang = voice.labels?.language?.toLowerCase()
         const targetLang = lang.toLowerCase()
         return voiceLang && (voiceLang.includes(targetLang) || targetLang.includes(voiceLang))
@@ -288,6 +301,7 @@ function getErrorMessage(status: number, defaultMessage: string): string {
 async function retryWithBackoff<T>(
     operation: () => Promise<T>,
     maxRetries: number = MAX_RETRIES,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isRetryable: (error: any) => boolean = () => true
 ): Promise<T> {
     let lastError: Error | null = null
@@ -306,7 +320,7 @@ async function retryWithBackoff<T>(
             // Don't delay on last attempt
             if (attempt < maxRetries - 1) {
                 const delay = calculateBackoff(attempt)
-                await new Promise(resolve => setTimeout(resolve, delay))
+                await new Promise((resolve) => setTimeout(resolve, delay))
             }
         }
     }
@@ -315,6 +329,7 @@ async function retryWithBackoff<T>(
 }
 
 // Check if error is retryable
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isRetryableError(error: any): boolean {
     if (error.status) {
         // Retry on rate limits and server errors
@@ -371,11 +386,15 @@ export async function speak({
 
     // Get Eleven Labs-specific settings
     const model = elevenLabsSettings.model || DEFAULT_MODEL
-    const stability = elevenLabsSettings.stability !== undefined ? elevenLabsSettings.stability / 100 : DEFAULT_STABILITY / 100
-    const similarityBoost = elevenLabsSettings.similarityBoost !== undefined ? elevenLabsSettings.similarityBoost / 100 : DEFAULT_SIMILARITY_BOOST / 100
+    const stability =
+        elevenLabsSettings.stability !== undefined ? elevenLabsSettings.stability / 100 : DEFAULT_STABILITY / 100
+    const similarityBoost =
+        elevenLabsSettings.similarityBoost !== undefined
+            ? elevenLabsSettings.similarityBoost / 100
+            : DEFAULT_SIMILARITY_BOOST / 100
 
     // Use default voice if not specified
-    const voiceId = voice || await getDefaultVoiceForLanguage(apiKey, lang)
+    const voiceId = voice || (await getDefaultVoiceForLanguage(apiKey, lang))
 
     if (!voiceId) {
         console.error(`No voice available for language: ${lang}`)
@@ -427,13 +446,15 @@ export async function speak({
                     onFinish: isLastSegment ? onFinish : undefined,
                 })
             }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             // Handle errors with fallback
             const errorMessage = sanitizeError(error.message || 'Unknown error')
             console.error('Eleven Labs TTS error:', errorMessage)
 
             // Check if we should fallback to EdgeTTS
-            const shouldFallback = elevenLabsSettings.autoFallback !== false &&
+            const shouldFallback =
+                elevenLabsSettings.autoFallback !== false &&
                 (error.status === 403 || error.status === 500 || error.status === 502 || error.status === 503)
 
             if (shouldFallback) {
@@ -502,9 +523,12 @@ async function synthesizeAndPlay({
                 },
                 body: JSON.stringify({
                     text,
+                    // eslint-disable-next-line camelcase
                     model_id: model,
+                    // eslint-disable-next-line camelcase
                     voice_settings: {
                         stability,
+                        // eslint-disable-next-line camelcase
                         similarity_boost: similarityBoost,
                     },
                 }),
@@ -514,6 +538,7 @@ async function synthesizeAndPlay({
             clearTimeout(timeoutId)
 
             if (!res.ok) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const error: any = new Error(`API request failed with status ${res.status}`)
                 error.status = res.status
                 throw error
