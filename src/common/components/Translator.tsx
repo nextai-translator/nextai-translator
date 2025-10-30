@@ -1505,7 +1505,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     const onCsvExport = async () => {
         try {
             const words = await vocabularyService.listItems()
-            await exportToCsv<VocabularyItem>(`openai-translator-collection-${new Date().valueOf()}`, words)
+            await exportToCsv<VocabularyItem>(`nextai-translator-collection-${new Date().valueOf()}`, words)
             if (isDesktopApp()) {
                 toast(t('CSV file saved on Desktop'), {
                     duration: 5000,
@@ -2318,8 +2318,8 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     target='_blank'
                                                     href={
                                                         settings?.i18n?.toLowerCase().includes('zh')
-                                                            ? 'https://github.com/openai-translator/openai-translator/blob/main/docs/chatgpt-cn.md'
-                                                            : 'https://github.com/openai-translator/openai-translator/blob/main/docs/chatgpt.md'
+                                                            ? 'https://github.com/nextai-translator/nextai-translator/blob/main/docs/chatgpt-cn.md'
+                                                            : 'https://github.com/nextai-translator/nextai-translator/blob/main/docs/chatgpt.md'
                                                     }
                                                     rel='noreferrer'
                                                     style={{
@@ -2511,8 +2511,8 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     target='_blank'
                                                     href={
                                                         settings?.i18n?.toLowerCase().includes('zh')
-                                                            ? 'https://github.com/openai-translator/openai-translator/blob/main/docs/kimi-cn.md'
-                                                            : 'https://github.com/openai-translator/openai-translator/blob/main/docs/kimi.md'
+                                                            ? 'https://github.com/nextai-translator/nextai-translator/blob/main/docs/kimi-cn.md'
+                                                            : 'https://github.com/nextai-translator/nextai-translator/blob/main/docs/kimi.md'
                                                     }
                                                     rel='noreferrer'
                                                     style={{
@@ -2554,8 +2554,8 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     target='_blank'
                                                     href={
                                                         settings?.i18n?.toLowerCase().includes('zh')
-                                                            ? 'https://github.com/openai-translator/openai-translator/blob/main/docs/chatglm-cn.md'
-                                                            : 'https://github.com/openai-translator/openai-translator/blob/main/docs/chatglm.md'
+                                                            ? 'https://github.com/nextai-translator/nextai-translator/blob/main/docs/chatglm-cn.md'
+                                                            : 'https://github.com/nextai-translator/nextai-translator/blob/main/docs/chatglm.md'
                                                     }
                                                     rel='noreferrer'
                                                     style={{

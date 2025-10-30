@@ -72,7 +72,7 @@ export class ChatGLM extends AbstractEngine {
         const fetcher = getUniversalFetch()
 
         const assistantID = '65940acff94777010aa6b796'
-        const conversationTitle = 'OpenAI Translator'
+        const conversationTitle = 'NextAI Translator'
 
         req.onStatusCode?.(200)
 

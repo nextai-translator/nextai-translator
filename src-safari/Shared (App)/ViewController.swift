@@ -16,7 +16,7 @@ import SafariServices
 typealias PlatformViewController = NSViewController
 #endif
 
-let extensionBundleIdentifier = "xyz.yetone.OpenAI-Translator.Extension"
+let extensionBundleIdentifier = "xyz.yetone.NextAI-Translator.Extension"
 
 class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMessageHandler {
 

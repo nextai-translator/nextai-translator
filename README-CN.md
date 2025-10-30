@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="LICENSE" target="_blank">
-    <img alt="MIT License" src="https://img.shields.io/github/license/yetone/openai-translator.svg?style=flat-square" />
+    <img alt="MIT License" src="https://img.shields.io/github/license/nextai-translator/nextai-translator.svg?style=flat-square" />
   </a>
 
   <!-- TypeScript Badge -->
@@ -18,23 +18,23 @@
   <!-- Rust Badge -->
   <img alt="Rust" src="https://img.shields.io/badge/-Rust-orange?style=flat-square&logo=rust&logoColor=white" />
 
-  <a href="https://chrome.google.com/webstore/detail/openai-translator/ogjibjphoadhljaoicdnjnmgokohngcc" target="_blank">
+  <a href="https://chrome.google.com/webstore/detail/nextai-translator/ogjibjphoadhljaoicdnjnmgokohngcc" target="_blank">
     <img alt="Chrome" src="https://img.shields.io/chrome-web-store/stars/ogjibjphoadhljaoicdnjnmgokohngcc?color=blue&label=Chrome&style=flat-square&logo=google-chrome&logoColor=white" />
   </a>
 
-  <a href="https://addons.mozilla.org/en-US/firefox/addon/openai-translator/" target="_blank">
-    <img alt="Firefox" src="https://img.shields.io/amo/stars/openai-translator?color=orange&label=Firefox&style=flat-square&logo=firefox&logoColor=white" />
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/nextai-translator/" target="_blank">
+    <img alt="Firefox" src="https://img.shields.io/amo/stars/nextai-translator?color=orange&label=Firefox&style=flat-square&logo=firefox&logoColor=white" />
   </a>
 
-  <a href="https://github.com/yetone/openai-translator/releases" target="_blank">
+  <a href="https://github.com/nextai-translator/nextai-translator/releases" target="_blank">
     <img alt="macOS" src="https://img.shields.io/badge/-macOS-black?style=flat-square&logo=apple&logoColor=white" />
   </a>
 
-  <a href="https://github.com/yetone/openai-translator/releases" target="_blank">
+  <a href="https://github.com/nextai-translator/nextai-translator/releases" target="_blank">
     <img alt="Windows" src="https://img.shields.io/badge/-Windows-blue?style=flat-square&logo=windows&logoColor=white" />
   </a>
 
-  <a href="https://github.com/yetone/openai-translator/releases" target="_blank">
+  <a href="https://github.com/nextai-translator/nextai-translator/releases" target="_blank">
     <img alt="Linux" src="https://img.shields.io/badge/-Linux-yellow?style=flat-square&logo=linux&logoColor=white" />
   </a>
 
@@ -42,7 +42,7 @@
 
 # 为啥要造这个轮子？
 
-我开发了一个 Bob 的插件 [bob-plugin-openai-translator](https://github.com/yetone/bob-plugin-openai-translator) 使用 ChatGPT API 在 macOS 上进行全局划词翻译。
+我开发了一个 Bob 的插件 [bob-plugin-nextai-translator](https://github.com/yetone/bob-plugin-nextai-translator) 使用 ChatGPT API 在 macOS 上进行全局划词翻译。
 
 但是由于很多用户并不是 macOS 用户，所以特此开发了一个浏览器插件方便非 macOS 用户使用 ChatGPT 进行划词翻译。
 
@@ -82,7 +82,7 @@
 
 ### 手动安装
 
-1. 在 [Latest Release](https://github.com/yetone/openai-translator/releases/latest) 页面下载以 `.exe` 结尾的安装包
+1. 在 [Latest Release](https://github.com/nextai-translator/nextai-translator/releases/latest) 页面下载以 `.exe` 结尾的安装包
 2. 下载完成后双击安装包进行安装
 3. 如果提示不安全，可以点击 `更多信息` -> `仍要运行` 进行安装
 4. 开始使用吧！
@@ -91,31 +91,31 @@
 
 ### 手动安装
 
-1.  去 [Latest Release](https://github.com/yetone/openai-translator/releases/latest) 页面下载对应芯片以 `.dmg` 的安装包（Apple Silicon机器请使用aarch64版本，并注意执行下文`xattr`指令）
-2.  下载完成后双击安装包进行安装，然后将 `OpenAI Translator` 拖动到 `Applications` 文件夹。
+1.  去 [Latest Release](https://github.com/nextai-translator/nextai-translator/releases/latest) 页面下载对应芯片以 `.dmg` 的安装包（Apple Silicon机器请使用aarch64版本，并注意执行下文`xattr`指令）
+2.  下载完成后双击安装包进行安装，然后将 `NextAI Translator` 拖动到 `Applications` 文件夹。
 3.  开始使用吧！
 
 ### 故障排除
 
--   "OpenAI Translator" can’t be opened because the developer cannot be verified.
+-   "NextAI Translator" can’t be opened because the developer cannot be verified.
     
     <p align="center">
       <img width="300" src="https://user-images.githubusercontent.com/1206493/223916804-45ce3f34-6a4a-4baf-a0c1-4ab5c54c521f.png" />
     </p>
 
-    -   点击 `Cancel` 按钮，然后去 `设置` -> `隐私与安全性` 页面，点击 `仍要打开` 按钮，然后在弹出窗口里点击 `打开` 按钮即可，以后打开 `OpenAI Translator` 就再也不会有任何弹窗告警了 🎉
+    -   点击 `Cancel` 按钮，然后去 `设置` -> `隐私与安全性` 页面，点击 `仍要打开` 按钮，然后在弹出窗口里点击 `打开` 按钮即可，以后打开 `NextAI Translator` 就再也不会有任何弹窗告警了 🎉
         
         <p align="center">
           <img width="500" src="https://user-images.githubusercontent.com/1206493/223916970-9c99f15e-cf61-4770-b92d-4a78f980bb26.png" /> <img width="200" src="https://user-images.githubusercontent.com/1206493/223917449-ed1ac19f-c43d-4b13-9888-79ba46ceb862.png" />
         </p>
 
-    -   如果在 `隐私与安全性` 中找不到以上选项，或启动时提示文件损坏（Apple Silicon版本）。打开 `Terminal.app`，并输入以下命令（中途可能需要输入密码），然后重启 `OpenAI Translator` 即可：
+    -   如果在 `隐私与安全性` 中找不到以上选项，或启动时提示文件损坏（Apple Silicon版本）。打开 `Terminal.app`，并输入以下命令（中途可能需要输入密码），然后重启 `NextAI Translator` 即可：
 
         ```sh
-        sudo xattr -d com.apple.quarantine /Applications/OpenAI\ Translator.app
+        sudo xattr -d com.apple.quarantine /Applications/NextAI\ Translator.app
         ```
 
--   如果您每次打开它都遇到权限提示，或者无法执行快捷键划词翻译，请前往 `设置` -> `隐私与安全性` -> `辅助功能` 中删除 OpenAI Translator，然后重新添加 OpenAI Translator:
+-   如果您每次打开它都遇到权限提示，或者无法执行快捷键划词翻译，请前往 `设置` -> `隐私与安全性` -> `辅助功能` 中删除 NextAI Translator，然后重新添加 NextAI Translator:
 
     <p align="center">
       <img width="500" src="https://user-images.githubusercontent.com/1206493/224536148-eec559bf-4d99-48c1-bbd3-2cc105aff084.png" />
@@ -135,15 +135,15 @@
 1. 访问你使用的浏览器的插件市场安装此插件：
 
    <p align="center">
-     <a target="_blank" href="https://chrome.google.com/webstore/detail/openai-translator/ogjibjphoadhljaoicdnjnmgokohngcc">
+     <a target="_blank" href="https://chrome.google.com/webstore/detail/nextai-translator/ogjibjphoadhljaoicdnjnmgokohngcc">
        <img src="https://img.shields.io/chrome-web-store/v/ogjibjphoadhljaoicdnjnmgokohngcc?label=Chrome%20Web%20Store&style=for-the-badge&color=blue&logo=google-chrome&logoColor=white" />
      </a>
-     <a target="_blank" href="https://addons.mozilla.org/en-US/firefox/addon/openai-translator/">
-       <img src="https://img.shields.io/amo/v/openai-translator?label=Firefox%20Add-on&style=for-the-badge&color=orange&logo=firefox&logoColor=white" />
+     <a target="_blank" href="https://addons.mozilla.org/en-US/firefox/addon/nextai-translator/">
+       <img src="https://img.shields.io/amo/v/nextai-translator?label=Firefox%20Add-on&style=for-the-badge&color=orange&logo=firefox&logoColor=white" />
      </a>
    </p>
 
-2. 点击浏览器插件列表里的 OpenAI Translator 图标，把获取的 API KEY 填入此插件弹出的配置界面中
+2. 点击浏览器插件列表里的 NextAI Translator 图标，把获取的 API KEY 填入此插件弹出的配置界面中
 
    <p align="center">
      <img width="600" src="https://user-images.githubusercontent.com/1206493/222958165-159719b4-28a5-44a4-b700-567786df7f03.png" />
@@ -169,10 +169,10 @@ const API_URL_PATH = `/openai/deployments/${deployName}/chat/completions?api-ver
 # Star 历史
 
 <p align="center">
-  <a target="_blank" href="https://star-history.com/#yetone/openai-translator&Date">
+  <a target="_blank" href="https://star-history.com/#nextai-translator/nextai-translator&Date">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=yetone/openai-translator&type=Date&theme=dark">
-      <img alt="NebulaGraph Data Intelligence Suite(ngdi)" src="https://api.star-history.com/svg?repos=yetone/openai-translator&type=Date">
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=nextai-translator/nextai-translator&type=Date&theme=dark">
+      <img alt="NebulaGraph Data Intelligence Suite(ngdi)" src="https://api.star-history.com/svg?repos=nextai-translator/nextai-translator&type=Date">
     </picture>
   </a>
 </p>

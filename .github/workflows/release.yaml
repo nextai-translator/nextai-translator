@@ -217,8 +217,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: dist/openai-translator.popclipextz
-          asset_name: openai-translator.popclipextz
+          asset_path: dist/nextai-translator.popclipextz
+          asset_name: nextai-translator.popclipextz
           asset_content_type: application/zip
 
       - name: Build SnipDo extension
@@ -230,8 +230,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: dist/openai-translator.pbar
-          asset_name: openai-translator.pbar
+          asset_path: dist/nextai-translator.pbar
+          asset_name: nextai-translator.pbar
           asset_content_type: application/zip
 
   build-browser-extension:
@@ -283,7 +283,7 @@ jobs:
         run: |
           mkdir release
           mv dist/browser-extension/*.zip release/
-          mv dist/openai-translator.user.js release/openai-translator-${{ steps.get_version.outputs.version-without-v }}.user.js
+          mv dist/nextai-translator.user.js release/nextai-translator-${{ steps.get_version.outputs.version-without-v }}.user.js
 
       - name: Upload Chromium extensions to release
         id: upload-chromium-release-asset
@@ -293,7 +293,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release.outputs.release_upload_url }}
           asset_path: release/chromium.zip
-          asset_name: openai-translator-chromium-extension-${{ steps.get_version.outputs.version-without-v }}.zip
+          asset_name: nextai-translator-chromium-extension-${{ steps.get_version.outputs.version-without-v }}.zip
           asset_content_type: application/zip
 
       - name: Upload Firefox extensions to release
@@ -304,7 +304,7 @@ jobs:
         with:
           upload_url: ${{ needs.create-release.outputs.release_upload_url }}
           asset_path: release/firefox.zip
-          asset_name: openai-translator-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.xpi
+          asset_name: nextai-translator-firefox-extension-${{ steps.get_version.outputs.version-without-v }}.xpi
           asset_content_type: application/zip
 
       - name: Upload userscript to release
@@ -314,8 +314,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/openai-translator-${{ steps.get_version.outputs.version-without-v }}.user.js
-          asset_name: openai-translator-${{ steps.get_version.outputs.version-without-v }}.user.js
+          asset_path: release/nextai-translator-${{ steps.get_version.outputs.version-without-v }}.user.js
+          asset_name: nextai-translator-${{ steps.get_version.outputs.version-without-v }}.user.js
           asset_content_type: application/javascript
 
   publish-release:

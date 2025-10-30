@@ -6,30 +6,30 @@
         <array>
             <dict>
                 <key>Shell Script File</key>
-                <string>openai-translator.sh</string>
+                <string>nextai-translator.sh</string>
                 <key>Image File</key>
                 <string>icon.png</string>
                 <key>Title</key>
-                <string>OpenAI Translator</string>
+                <string>NextAI Translator</string>
             </dict>
         </array>
         <key>Credits</key>
         <array>
             <dict>
                 <key>Link</key>
-                <string>https://github.com/openai-translator/openai-translator</string>
+                <string>https://github.com/nextai-translator/nextai-translator</string>
                 <key>Name</key>
-                <string>OpenAI Translator</string>
+                <string>NextAI Translator</string>
             </dict>
         </array>
         <key>Extension Description</key>
-        <string>Translate text with OpenAI Translator.</string>
+        <string>Translate text with NextAI Translator.</string>
         <key>Extension Identifier</key>
-        <string>xyz.yetone.apps.openai-translator.clip-extensions.popclip</string>
+        <string>xyz.yetone.apps.nextai-translator.clip-extensions.popclip</string>
         <key>Extension Image File</key>
-        <string>openai-translator.png</string>
+        <string>nextai-translator.png</string>
         <key>Extension Name</key>
-        <string>OpenAI Translator</string>
+        <string>NextAI Translator</string>
         <key>Required OS Version</key>
         <string>10.13</string>
     </dict>
