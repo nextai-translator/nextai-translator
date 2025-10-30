@@ -1,6 +1,6 @@
 {
     "name": "NextAI Translator",
-    "identifier": "xyz.yetone.apps.nextai-translator.clip-extensions.snipdo",
+    "identifier": "xyz.yetone.apps.openai-translator.clip-extensions.snipdo",
     "icon": "icon.png",
     "actions": [
         {
