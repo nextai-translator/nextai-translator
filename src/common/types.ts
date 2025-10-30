@@ -94,6 +94,19 @@ export interface ISettings {
         provider?: TTSProvider
         volume?: number
         rate?: number
+        elevenlabs?: {
+            apiKey?: string
+            model?: 'eleven_multilingual_v2' | 'eleven_turbo_v2'
+            stability?: number // 0-100
+            similarityBoost?: number // 0-100
+            autoFallback?: boolean
+            usageWarningEnabled?: boolean
+            lastUsageCheck?: number
+            cachedUsage?: {
+                characterCount: number
+                characterLimit: number
+            }
+        }
     }
     restorePreviousPosition?: boolean
     selectInputElementsText?: boolean

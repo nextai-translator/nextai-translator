@@ -8,7 +8,7 @@ export interface SpeakOptions {
     onStartSpeaking?: () => void
 }
 
-export type TTSProvider = 'WebSpeech' | 'EdgeTTS'
+export type TTSProvider = 'WebSpeech' | 'EdgeTTS' | 'ElevenLabs'
 
 export interface DoSpeakOptions extends SpeakOptions {
     lang: LangCode

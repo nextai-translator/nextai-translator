@@ -1,7 +1,18 @@
 import { DoSpeakOptions, SpeakOptions } from './types'
 import { getSettings } from '../utils'
 import { speak as edgeSpeak } from './edge-tts'
+import { speak as elevenLabsSpeak } from './elevenlabs-tts'
 import { LangCode } from '../lang'
+
+// Re-export Eleven Labs utilities for convenience
+export {
+    validateElevenLabsAPIKey,
+    validateElevenLabsAPIKeyFormat,
+    fetchElevenLabsVoices,
+    filterVoicesByLanguage,
+    getElevenLabsUsage,
+    shouldShowUsageWarning,
+} from './elevenlabs-tts'
 
 export const defaultTTSProvider = 'EdgeTTS'
 
@@ -108,6 +119,19 @@ export async function doSpeak({
 
     if (provider === 'EdgeTTS') {
         return edgeSpeak({
+            text,
+            lang,
+            onFinish,
+            voice: voice,
+            rate,
+            volume: volume ?? 100,
+            signal,
+            onStartSpeaking,
+        })
+    }
+
+    if (provider === 'ElevenLabs') {
+        return elevenLabsSpeak({
             text,
             lang,
             onFinish,
