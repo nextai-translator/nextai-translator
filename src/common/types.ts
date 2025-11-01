@@ -138,6 +138,8 @@ export interface ISettings {
     chatglmRefreshToken: string
     cohereAPIKey: string
     cohereAPIModel: string
+    cerebrasAPIKey: string
+    cerebrasAPIModel: string
     fontSize: number
     uiFontSize: number
     iconSize: number
