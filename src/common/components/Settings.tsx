@@ -1337,6 +1337,7 @@ function ProviderSelector({ value, onChange, hasPromotion }: IProviderSelectorPr
               { label: 'Moonshot', id: 'Moonshot' },
               { label: 'Groq', id: 'Groq' },
               { label: 'DeepSeek', id: 'DeepSeek' },
+              { label: 'Cerebras', id: 'Cerebras' },
           ] as {
               label: string
               id: Provider
@@ -1354,6 +1355,7 @@ function ProviderSelector({ value, onChange, hasPromotion }: IProviderSelectorPr
               { label: 'Moonshot', id: 'Moonshot' },
               { label: 'Groq', id: 'Groq' },
               { label: 'DeepSeek', id: 'DeepSeek' },
+              { label: 'Cerebras', id: 'Cerebras' },
           ] as {
               label: string
               id: Provider
@@ -2824,6 +2826,45 @@ export function InnerSettings({
                                     currentProvider={values.provider}
                                     onBlur={onBlur}
                                     apiKey={values.moonshotAPIKey}
+                                />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'Cerebras' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'Cerebras'}
+                                name='cerebrasAPIKey'
+                                label='Cerebras API Key'
+                                caption={
+                                    <div>
+                                        {t('Go to the')}{' '}
+                                        <a
+                                            target='_blank'
+                                            href='https://cloud.cerebras.ai/'
+                                            rel='noreferrer'
+                                            style={linkStyle}
+                                        >
+                                            Cerebras Page
+                                        </a>{' '}
+                                        {t('to get your API Key.')}
+                                    </div>
+                                }
+                            >
+                                <Input autoFocus type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='cerebrasAPIModel'
+                                label={t('API Model')}
+                                required={values.provider === 'Cerebras'}
+                            >
+                                <APIModelSelector
+                                    provider='Cerebras'
+                                    currentProvider={values.provider}
+                                    apiKey={values.cerebrasAPIKey}
+                                    onBlur={onBlur}
                                 />
                             </FormItem>
                         </div>

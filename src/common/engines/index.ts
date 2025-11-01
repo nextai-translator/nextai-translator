@@ -25,6 +25,8 @@ import { CohereIcon } from '@/common/components/icons/CohereIcon'
 import { Cohere } from './cohere'
 import { DeepSeekIcon } from '@/common/components/icons/DeepSeekIcon'
 import { DeepSeek } from './deepseek'
+import { CerebrasIcon } from '@/common/components/icons/CerebrasIcon'
+import { Cerebras } from './cerebras'
 
 export type Provider =
     | 'OpenAI'
@@ -40,6 +42,7 @@ export type Provider =
     | 'ChatGLM'
     | 'Cohere'
     | 'DeepSeek'
+    | 'Cerebras'
 
 export const engineIcons: Record<Provider, IconType> = {
     OpenAI: RiOpenaiFill,
@@ -55,6 +58,7 @@ export const engineIcons: Record<Provider, IconType> = {
     ChatGLM: ChatGLMIcon,
     Cohere: CohereIcon,
     DeepSeek: DeepSeekIcon,
+    Cerebras: CerebrasIcon,
 }
 
 export const providerToEngine: Record<Provider, { new (): IEngine }> = {
@@ -71,6 +75,7 @@ export const providerToEngine: Record<Provider, { new (): IEngine }> = {
     ChatGLM: ChatGLM,
     Cohere: Cohere,
     DeepSeek: DeepSeek,
+    Cerebras: Cerebras,
 }
 
 export function getEngine(provider: Provider): IEngine {
