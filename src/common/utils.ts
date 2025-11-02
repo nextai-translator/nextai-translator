@@ -108,6 +108,8 @@ const settingKeys: Record<keyof ISettings, number> = {
     cohereAPIModel: 1,
     deepSeekAPIKey: 1,
     deepSeekAPIModel: 1,
+    cerebrasAPIKey: 1,
+    cerebrasAPIModel: 1,
     fontSize: 1,
     uiFontSize: 1,
     iconSize: 1,
