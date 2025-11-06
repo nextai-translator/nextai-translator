@@ -872,7 +872,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 setTargetLang((targetLang_) => {
                     const newTargetLang = (() => {
                         if (
-                            isTranslate && 
+                            isTranslate &&
                             (!stopAutomaticallyChangeTargetLang.current || newSourceLang === targetLang_)
                         ) {
                             if (stopAutomaticallyChangeTargetLang.current && targetLang_) {
