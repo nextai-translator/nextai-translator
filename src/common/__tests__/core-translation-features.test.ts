@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { createTranslator } from '../translator'
 
 /**
  * TDD Red Phase: Core Translation Features
@@ -296,12 +297,3 @@ describe('Core Translation Features - TDD Red Phase', () => {
         })
     })
 })
-
-/**
- * Mock factory for creating translator instances
- * This will be implemented in the actual code
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-function createTranslator(options?: any): any {
-    throw new Error('Translator not implemented - TDD Red Phase')
-}
