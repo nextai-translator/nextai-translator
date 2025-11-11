@@ -90,20 +90,46 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         return true
     }
 
+    /**
+     * Check if the model is a GPT-5 series model
+     * GPT-5 models include: gpt-5, gpt-5-mini, gpt-5-nano, gpt-5-chat-latest
+     */
+    async isGPT5Model(): Promise<boolean> {
+        const model = await this.getAPIModel()
+        const modelLower = model.toLowerCase()
+        return (
+            modelLower.includes('gpt-5') &&
+            !modelLower.includes('gpt-4') &&
+            !modelLower.includes('gpt-3')
+        )
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async getBaseRequestBody(): Promise<Record<string, any>> {
         const model = await this.getAPIModel()
+        const isGPT5 = await this.isGPT5Model()
         const body: Record<string, any> = {
             model,
-            top_p: 1,
-            frequency_penalty: 1,
-            presence_penalty: 1,
             stream: true,
         }
-        // GPT-5 models don't support temperature parameter (only default value 1 is supported)
+        // GPT-5 models don't support temperature, top_p, frequency_penalty, presence_penalty parameters
+        // Instead, GPT-5 uses reasoning.effort and text.verbosity parameters
         // See: https://community.openai.com/t/temperature-in-gpt-5-models/1337133/5
-        if (!model.toLowerCase().includes('gpt-5')) {
+        if (isGPT5) {
+            // For translation tasks, use minimal reasoning effort for faster response
+            // and low verbosity for concise, accurate translations
+            body.reasoning = {
+                effort: 'minimal',
+            }
+            body.text = {
+                verbosity: 'low',
+            }
+        } else {
+            // Traditional OpenAI models parameters
             body.temperature = 0
+            body.top_p = 1
+            body.frequency_penalty = 1
+            body.presence_penalty = 1
         }
         return body
     }
