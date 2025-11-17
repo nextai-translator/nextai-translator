@@ -1,42 +1,6 @@
 import { langCode2TTSLang } from '.'
-import { getUniversalFetch } from '../universal-fetch'
 import { SpeakOptions } from './types'
-import { v4 as uuidv4 } from 'uuid'
-
-function mkssml(text: string, voice: string, rate: number, volume: number) {
-    return (
-        "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>" +
-        `<voice name='${voice}'><prosody pitch='+0Hz' rate='${rate}' volume='${volume}'>` +
-        `${text}</prosody></voice></speak>`
-    )
-}
-
-function ssmlHeadersPlusData(requestId: string, timestamp: string, ssml: string) {
-    return (
-        `X-RequestId:${requestId}\r\n` +
-        'Content-Type:application/ssml+xml\r\n' +
-        `X-Timestamp:${timestamp}Z\r\n` + // This is not a mistake, Microsoft Edge bug.
-        `Path:ssml\r\n\r\n` +
-        `${ssml}`
-    )
-}
-
-function getHeadersAndData(data: string) {
-    const headers: { [key: string]: string } = {}
-    data.slice(0, data.indexOf('\r\n\r\n'))
-        .split('\r\n')
-        .forEach((line) => {
-            const [key, value] = line.split(':', 2)
-            headers[key] = value
-        })
-    return { headers, data: data.slice(data.indexOf('\r\n\r\n') + 4) }
-}
-
-const trustedClientToken = '6A5AA1D4EAFF4E9FB37E23D68491D6F4'
-const wssURL =
-    'wss://speech.platform.bing.com/consumer/speech/synthesize/' +
-    'readaloud/edge/v1?TrustedClientToken=' +
-    trustedClientToken
+import { EdgeTTS, listVoices } from 'edge-tts-universal'
 
 // https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/e6faf6b7fc1febb45993b940617719e8ed1358b2/src/sdk/SpeechSynthesizer.ts#L216
 const languageToDefaultVoice: { [key: string]: string } = {
@@ -171,91 +135,6 @@ const languageToDefaultVoice: { [key: string]: string } = {
     ['zu-ZA']: 'zu-ZA-ThandoNeural',
 }
 
-function dictReplace(s: string, d: Record<string, string>): string {
-    for (const [key, value] of Object.entries(d)) {
-        s = s.split(key).join(value)
-    }
-    return s
-}
-
-function escape(data: string, entities: Record<string, string> = {}): string {
-    data = data.replace(/&/g, '&amp;')
-    data = data.replace(/>/g, '&gt;')
-    data = data.replace(/</g, '&lt;')
-    if (Object.keys(entities).length > 0) {
-        data = dictReplace(data, entities)
-    }
-    return data
-}
-
-function removeIncompatibleCharacters(str: string): string {
-    const chars: string[] = Array.from(str)
-
-    for (let idx = 0; idx < chars.length; idx++) {
-        const char = chars[idx]
-        const code = char.charCodeAt(0)
-        if ((code >= 0 && code <= 8) || (code >= 11 && code <= 12) || (code >= 14 && code <= 31)) {
-            chars[idx] = ' '
-        }
-    }
-
-    return chars.join('')
-}
-
-function* splitTextByByteLength(text: string, byteLength: number): Generator<string, void, void> {
-    if (byteLength <= 0) {
-        throw new Error('byteLength must be greater than 0')
-    }
-
-    while (text.length > byteLength) {
-        // Find the last space in the string
-        let splitAt = text.lastIndexOf(' ', byteLength)
-
-        // If no space found, splitAt is byteLength
-        splitAt = splitAt !== -1 ? splitAt : byteLength
-
-        // Verify all & are terminated with a ;
-        while (text.slice(0, splitAt).includes('&')) {
-            const ampersandIndex = text.lastIndexOf('&', splitAt)
-            if (text.slice(ampersandIndex, splitAt).includes(';')) {
-                break
-            }
-
-            splitAt = ampersandIndex - 1
-            if (splitAt < 0) {
-                throw new Error('Maximum byte length is too small or invalid text')
-            }
-            if (splitAt === 0) {
-                break
-            }
-        }
-
-        // Append the string to the list
-        const newText = text.slice(0, splitAt).trim()
-        if (newText.length > 0) {
-            yield newText
-        }
-        if (splitAt === 0) {
-            splitAt = 1
-        }
-        text = text.slice(splitAt)
-    }
-
-    text = text.trim()
-    if (text.length > 0) {
-        yield text
-    }
-}
-
-function calcMaxMesgSize(voice: string, rate: number, volume: number): number {
-    const connectId = uuidv4().replace(/-/g, '')
-    const date = new Date().toString()
-    const websocketMaxSize: number = 2 ** 16
-    const overheadPerMessage: number = ssmlHeadersPlusData(connectId, date, mkssml('', voice, rate, volume)).length + 50 // margin of error
-
-    return websocketMaxSize - overheadPerMessage
-}
-
 interface EdgeTTSOptions extends SpeakOptions {
     voice?: string
     rate?: number
@@ -273,136 +152,94 @@ export async function speak({
     onStartSpeaking,
 }: EdgeTTSOptions) {
     const lang = langCode2TTSLang[lang_ ?? 'en'] ?? 'en-US'
-    const connectId = uuidv4().replace(/-/g, '')
-    const date = new Date().toString()
-    const audioContext = new AudioContext()
-    const audioBufferSource = audioContext.createBufferSource()
+    const selectedVoice = voice ?? languageToDefaultVoice[lang] ?? 'en-US-JennyNeural'
 
-    const texts = splitTextByByteLength(
-        escape(removeIncompatibleCharacters(text)),
-        calcMaxMesgSize(voice ?? languageToDefaultVoice[lang], rate, volume)
-    )
+    // Convert rate and volume to proper format
+    // rate: 1 = +0%, 1.2 = +20%, 0.8 = -20%
+    const rateStr = rate >= 1 ? `+${Math.round((rate - 1) * 100)}%` : `-${Math.round((1 - rate) * 100)}%`
+    // volume: 100 = +0%, 120 = +20%, 80 = -20%
+    const volumeStr = volume >= 100 ? `+${Math.round(volume - 100)}%` : `-${Math.round(100 - volume)}%`
 
-    let stopped = false
-
-    signal.addEventListener(
-        'abort',
-        () => {
-            try {
-                stopped = true
-                audioBufferSource.stop()
-            } catch (e) {
-                // ignore
-            }
-        },
-        { once: true }
-    )
-
-    for (const text of texts) {
-        const ws = new WebSocket(`${wssURL}&ConnectionId=${connectId}`)
-        ws.binaryType = 'arraybuffer'
-        ws.addEventListener('open', () => {
-            ws.send(
-                `X-Timestamp:${date}\r\n` +
-                    'Content-Type:application/json; charset=utf-8\r\n' +
-                    'Path:speech.config\r\n\r\n' +
-                    '{"context":{"synthesis":{"audio":{"metadataoptions":{' +
-                    '"sentenceBoundaryEnabled":false,"wordBoundaryEnabled":true},' +
-                    '"outputFormat":"audio-24khz-48kbitrate-mono-mp3"' +
-                    '}}}}\r\n'
-            )
-            ws.send(
-                ssmlHeadersPlusData(
-                    connectId,
-                    date,
-                    mkssml(text, voice ?? languageToDefaultVoice[lang ?? 'en-US'], rate, volume)
-                )
-            )
-        })
+    try {
+        const audioContext = new AudioContext()
+        let audioBufferSource: AudioBufferSourceNode | null = null
+        let stopped = false
 
         signal.addEventListener(
             'abort',
             () => {
-                try {
-                    ws.close()
-                } catch (e) {
-                    // ignore
+                stopped = true
+                if (audioBufferSource) {
+                    try {
+                        audioBufferSource.stop()
+                    } catch (e) {
+                        // ignore
+                    }
                 }
+                audioContext.close()
             },
             { once: true }
         )
 
-        let audioData = new ArrayBuffer(0)
-        let downloadAudio = false
-        let startSpeaking = false
-        ws.addEventListener('message', async (event) => {
-            if (typeof event.data === 'string') {
-                const { headers } = getHeadersAndData(event.data)
-                const path = headers['Path']
-                switch (path) {
-                    case 'turn.start':
-                        downloadAudio = true
-                        break
-                    case 'turn.end': {
-                        downloadAudio = false
-                        if (!audioData.byteLength || stopped) {
-                            return
-                        }
-                        const buffer = await audioContext.decodeAudioData(audioData)
-                        audioBufferSource.buffer = buffer
-                        audioBufferSource.connect(audioContext.destination)
-                        if (!startSpeaking) {
-                            startSpeaking = true
-                            onStartSpeaking?.()
-                        }
-                        audioBufferSource.start()
-                        audioBufferSource.addEventListener('ended', () => {
-                            onFinish?.()
-                            audioContext.close()
-                        })
-                        break
-                    }
-                }
-            } else if (event.data instanceof ArrayBuffer) {
-                if (!downloadAudio) {
-                    return
-                }
-                // See: https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/d071d11d1e9f34d6f79d0ab6114c90eecb02ba1f/src/common.speech/WebsocketMessageFormatter.ts#L46-L47
-                const dataview = new DataView(event.data)
-                const headerLength = dataview.getInt16(0)
-                if (event.data.byteLength > headerLength + 2) {
-                    const newBody = event.data.slice(2 + headerLength)
-                    const newAudioData = new ArrayBuffer(audioData.byteLength + newBody.byteLength)
-                    const mergedUint8Array = new Uint8Array(newAudioData)
-                    mergedUint8Array.set(new Uint8Array(audioData), 0)
-                    mergedUint8Array.set(new Uint8Array(newBody), audioData.byteLength)
-                    audioData = newAudioData
-                }
-            }
+        // Use edge-tts-universal to generate audio
+        const tts = new EdgeTTS(text, selectedVoice, {
+            rate: rateStr,
+            volume: volumeStr,
+            pitch: '+0Hz',
         })
+
+        // Generate audio data
+        const result = await tts.synthesize()
+
+        if (stopped || !result || !result.audio) {
+            return
+        }
+
+        // Convert Blob/Response to ArrayBuffer
+        const audioArrayBuffer = await result.audio.arrayBuffer()
+
+        if (stopped || !audioArrayBuffer || audioArrayBuffer.byteLength === 0) {
+            return
+        }
+
+        // Decode and play audio
+        const buffer = await audioContext.decodeAudioData(audioArrayBuffer)
+        audioBufferSource = audioContext.createBufferSource()
+        audioBufferSource.buffer = buffer
+        audioBufferSource.connect(audioContext.destination)
+
+        onStartSpeaking?.()
+        audioBufferSource.start()
+
+        audioBufferSource.addEventListener('ended', () => {
+            onFinish?.()
+            audioContext.close()
+        })
+    } catch (error) {
+        console.error('Edge TTS error:', error)
+        onFinish?.()
+        throw error
     }
 }
 
-const voiceListURL =
-    'https://speech.platform.bing.com/consumer/speech/synthesize/' +
-    'readaloud/voices/list?trustedclienttoken=' +
-    trustedClientToken
-
-interface EdgeVoice {
-    FriendlyName: string
-    Gender: string
-    Locale: string
-    ShortName: string
-    Name: string
-    SuggestedCodec: string
-}
 export async function fetchEdgeVoices() {
-    const fetcher = getUniversalFetch()
-    const response = await fetcher(voiceListURL, {})
-    const voices: EdgeVoice[] = await response.json()
-    return voices.map((voice) => ({
-        name: voice.FriendlyName,
-        lang: voice.Locale,
-        voiceURI: voice.Name,
-    })) as SpeechSynthesisVoice[]
+    try {
+        // Use edge-tts-universal to fetch voices
+        const voices = await listVoices()
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return voices.map((voice: any) => ({
+            name: voice.FriendlyName || voice.ShortName,
+            lang: voice.Locale,
+            voiceURI: voice.ShortName || voice.Name,
+        })) as SpeechSynthesisVoice[]
+    } catch (error) {
+        console.error('Failed to fetch Edge voices:', error)
+        // Fallback: return default voices from languageToDefaultVoice
+        return Object.entries(languageToDefaultVoice).map(([locale, voiceName]) => ({
+            name: voiceName,
+            lang: locale,
+            voiceURI: voiceName,
+        })) as SpeechSynthesisVoice[]
+    }
 }

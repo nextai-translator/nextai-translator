@@ -93,6 +93,32 @@ export abstract class AbstractOpenAI extends AbstractEngine {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async getBaseRequestBody(): Promise<Record<string, any>> {
         const model = await this.getAPIModel()
+        const modelLower = model.toLowerCase()
+
+        // Identify non-reasoning variants: chat models and instant models
+        // Examples: gpt-5-chat-latest, gpt-5.1-chat-latest, gpt-5.1-instant
+        const isNonReasoningVariant = modelLower.includes('-chat') || modelLower.includes('instant')
+
+        // Check if this is a reasoning model (GPT-5, o1, o3 series)
+        // But exclude chat/instant variants which are standard models
+        const isReasoningModel =
+            !isNonReasoningVariant &&
+            (modelLower.includes('gpt-5') || modelLower.includes('o1') || modelLower.includes('o3'))
+
+        // For reasoning models, only use minimal required parameters
+        // They don't support: temperature, top_p, frequency_penalty, presence_penalty
+        if (isReasoningModel) {
+            return {
+                model,
+                stream: true,
+                // Use minimal reasoning effort for speed-sensitive translation tasks
+                // This significantly reduces latency and time-to-first-token
+                reasoning_effort: 'minimal',
+            }
+        }
+
+        // For standard models (GPT-4, GPT-3.5, chat variants, instant variants, etc.)
+        // Use full parameters
         return {
             model,
             temperature: 0,
