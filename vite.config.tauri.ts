@@ -22,8 +22,8 @@ export default defineConfig({
     // https://tauri.studio/v1/api/config#buildconfig.beforedevcommand
     envPrefix: ['VITE_', 'TAURI_'],
     build: {
-        // Tauri supports es2021
-        target: ['es2015', 'safari11'],
+        // Tauri supports es2021, upgraded to es2020 for async generators
+        target: ['es2020', 'chrome87', 'safari14'],
         // don't minify for debug builds
         minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
         // produce sourcemaps for debug builds
