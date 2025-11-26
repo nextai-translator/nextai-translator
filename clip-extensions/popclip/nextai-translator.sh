@@ -1,5 +1,5 @@
 send_text() {
-    curl -d "$POPCLIP_TEXT" --unix-socket /tmp/nextai-translator.sock http://nextai-translator
+    curl -d "$POPCLIP_TEXT" --unix-socket /tmp/openai-translator.sock http://nextai-translator
 }
 
 if ! send_text; then
