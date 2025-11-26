@@ -2,343 +2,321 @@
 
 ## Executive Summary
 
-**Problem Statement**
-nextai translator currently lacks a centralized homepage or landing interface that welcomes users, provides quick access to core features, and offers an intuitive entry point into the application. Users are immediately directed to specific functionality without context or navigation options, which can create confusion for new users and limit discoverability of features.
+### Problem Statement
+NextAI Translator currently launches users directly into the translation interface without a central navigation hub. Users must navigate through settings icons or know specific pathways to access features like vocabulary, history, action management, and settings. This fragmented experience makes it harder for users to discover and utilize the full capabilities of the application.
 
-**Proposed Solution**
-Implement a homepage interface that serves as the primary entry point for the application, providing an overview of capabilities, quick access to translation/polishing/summarization features, recent activity, and navigation to settings and vocabulary management.
+### Proposed Solution
+Introduce a homepage as the central entry point that provides:
+- Quick access to core features (Translation, Vocabulary, History, Actions, Settings)
+- Overview of recent activity and statistics
+- Streamlined navigation across all platform targets (browser extension, desktop app)
 
-**Expected Impact**
-- Improved user onboarding experience for new users
-- Better feature discoverability through centralized navigation
-- Enhanced user engagement through quick-access shortcuts
-- Consistent user experience across desktop and browser extension platforms
+### Expected Impact
+- **Improved Feature Discovery**: Users will more easily find and use advanced features like vocabulary collection and custom actions
+- **Enhanced User Engagement**: Statistics and recent activity encourage continued usage
+- **Better Onboarding**: New users can understand application capabilities at a glance
+- **Consistent Cross-Platform Experience**: Unified entry point across all platforms
 
-**Success Metrics**
-- Homepage successfully implements across both Tauri desktop app and browser extension
-- Users can access all core features (translate, polish, summarize) from homepage
-- Navigation to settings and vocabulary features is functional
-- Initial load time remains under 1 second
-
----
+### Success Metrics
+- Increase in feature utilization (vocabulary, custom actions) by 25%
+- Reduction in support queries about "how to find X feature" by 30%
+- User satisfaction improvement measured via in-app feedback
 
 ## Requirements & Scope
 
 ### Functional Requirements
 
-**REQ-1: Homepage Landing Interface**
-The application shall display a homepage as the default/initial view when opened, featuring:
-- Application branding and logo
-- Brief description of capabilities
-- Quick action buttons for translation, polishing, and summarization
-- Navigation menu or links to other sections (Settings, Vocabulary, About)
-
-**REQ-2: Quick Action Cards**
-The homepage shall provide interactive quick-action cards that:
-- Allow users to immediately start a translation without navigating away
-- Support text input directly from the homepage
-- Display target language selection
-- Launch the respective feature interface (translate/polish/summarize)
-
-**REQ-3: Recent Activity Section**
-The homepage shall optionally display recent translation history:
-- Show last 3-5 translation/polishing/summarization activities
-- Display source and target language
-- Allow clicking to view full details or re-translate
-- Include option to clear history
-
-**REQ-4: Settings Access**
-The homepage shall provide clear navigation to:
-- API key configuration
-- Language preferences
-- LLM provider selection
-- Theme and UI customization
-
-**REQ-5: Multi-Platform Support**
-The homepage implementation shall work consistently across:
-- Tauri desktop application (Windows, macOS, Linux)
-- Browser extensions (Chrome, Firefox)
-
-**REQ-6: Responsive Design**
-The homepage interface shall:
-- Adapt to different window sizes
-- Maintain usability on smaller screens (min 800x600)
-- Follow existing BaseUI styling patterns
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| REQ-1 | Homepage displays quick-access cards/tiles for core features: Translate, Vocabulary, History, Actions, Settings | Must |
+| REQ-2 | Homepage shows summary statistics: total translations, words collected, recent activity count | Should |
+| REQ-3 | Homepage provides quick-translate input field for immediate translation without navigation | Must |
+| REQ-4 | Homepage displays recent translations (last 5) with one-click access to full history | Should |
+| REQ-5 | Homepage adapts layout responsively for popup (compact), options page (standard), and desktop (full) views | Must |
+| REQ-6 | Homepage respects current theme settings (light/dark/system) | Must |
+| REQ-7 | Homepage is accessible via keyboard navigation and screen readers | Should |
+| REQ-8 | Users can configure homepage as default landing page or skip directly to translator | Could |
 
 ### Non-Functional Requirements
 
-**NFR-1: Performance**
-- Homepage must load within 1 second on standard hardware
-- Smooth transitions between homepage and feature views
-- No blocking operations during initial render
-
-**NFR-2: Accessibility**
-- Support keyboard navigation for all interactive elements
-- Maintain WCAG 2.1 AA compliance for text contrast and sizing
-- Screen reader compatibility for key navigation elements
-
-**NFR-3: Internationalization**
-- All homepage text must be internationalized using existing i18next framework
-- Support all 55+ languages currently available in the application
-
-**NFR-4: Consistency**
-- Follow existing design patterns from BaseUI + Styletron
-- Maintain visual consistency with existing Settings and Translator windows
-- Use existing color schemes and typography
-
-**NFR-5: State Management**
-- Integrate with existing Jotai/Zustand state management
-- Persist user preferences (e.g., default language, show/hide recent activity)
-- Maintain state when navigating between homepage and other views
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| NFR-1 | Homepage loads within 200ms on typical hardware | Must |
+| NFR-2 | Homepage uses existing BaseUI component library for consistency | Must |
+| NFR-3 | Homepage component is reusable across all platform targets | Must |
+| NFR-4 | Statistics data fetching does not block initial render | Should |
+| NFR-5 | Homepage maintains accessibility standards (WCAG 2.1 AA) | Should |
 
 ### Out of Scope
-
-The following are explicitly **not** included in this PRD:
-- Marketing/promotional homepage for the project website
-- User authentication or account management features
-- Social sharing or community features
-- Advanced analytics or usage tracking
-- Customizable dashboard widgets beyond specified quick actions
-- Integration with external services beyond existing LLM providers
+- User accounts or cloud sync functionality
+- Onboarding wizard or tutorial system
+- Dashboard customization or widget arrangement
+- Analytics dashboard for detailed usage patterns
+- Social features or sharing capabilities
 
 ### Success Criteria
-
-The homepage feature will be considered complete when:
-1. Homepage component is implemented and integrated into both Tauri and browser extension entry points
-2. All functional requirements (REQ-1 through REQ-6) are implemented and tested
-3. All non-functional requirements (NFR-1 through NFR-5) are met
-4. Existing functionality remains unaffected (no regression)
-5. Documentation is updated to reflect new homepage navigation flow
-
----
+- Homepage component renders correctly on all three platforms (extension popup, extension options, desktop)
+- All navigation links function correctly and route to appropriate views
+- Theme switching applies correctly to homepage
+- Statistics load and display accurately from IndexedDB
+- Performance budget of 200ms initial render is met
 
 ## User Stories
 
 ### Personas
-1. **New User** - First-time user exploring the application's capabilities
-2. **Regular User** - Daily user who frequently translates text
-3. **Power User** - Advanced user managing vocabulary and customizing settings
+- **Language Learner**: Uses vocabulary collection and wants to review collected words
+- **Power User**: Frequently uses custom actions and wants quick access to all features
+- **Casual User**: Primarily translates text and wants the simplest path to translation
 
 ### Core User Stories
 
-**US-1: Quick Translation Access**
-*As a Regular User, I want to start translating text immediately from the homepage, so that I can quickly accomplish my task without navigating through menus.*
+**US-1: Quick Feature Access**
+- As a power user, I want to see all available features on one page, so that I can quickly navigate to any feature I need.
+- **Priority**: Must
+- **Related Requirements**: REQ-1
+- **Acceptance Criteria**:
+  - Given I open the application
+  - When the homepage loads
+  - Then I see clearly labeled cards/tiles for Translate, Vocabulary, History, Actions, and Settings
+  - And clicking any card navigates me to that feature
 
-**Acceptance Criteria:**
-- Given I am on the homepage
-- When I click the "Translate" quick action button
-- Then I should see a text input field for entering source text
-- And I should be able to select target language
-- And I should be able to initiate translation without leaving the homepage context
+**US-2: View Activity Summary**
+- As a language learner, I want to see my translation statistics at a glance, so that I can track my learning progress.
+- **Priority**: Should
+- **Related Requirements**: REQ-2
+- **Acceptance Criteria**:
+  - Given I am on the homepage
+  - When statistics are loaded
+  - Then I see total translations count, words collected count, and recent activity summary
+  - And the statistics reflect my actual usage data
 
-**Priority:** Must
-**Related Requirements:** REQ-1, REQ-2
+**US-3: Quick Translation**
+- As a casual user, I want to translate text directly from the homepage, so that I don't have to navigate to a separate page for simple translations.
+- **Priority**: Must
+- **Related Requirements**: REQ-3
+- **Acceptance Criteria**:
+  - Given I am on the homepage
+  - When I enter text in the quick-translate field and submit
+  - Then I see the translation result without leaving the homepage context
+  - Or I am navigated to the full translator with my text pre-filled
 
----
+**US-4: Resume Recent Work**
+- As a returning user, I want to see my recent translations, so that I can quickly continue where I left off.
+- **Priority**: Should
+- **Related Requirements**: REQ-4
+- **Acceptance Criteria**:
+  - Given I have previous translations in my history
+  - When I view the homepage
+  - Then I see up to 5 recent translations with source and target text preview
+  - And clicking a recent translation opens it in the translator
 
-**US-2: Feature Discovery**
-*As a New User, I want to see what the application can do from the homepage, so that I understand its full capabilities before diving into specific features.*
+**US-5: Responsive Experience**
+- As a browser extension user, I want the homepage to fit well in the popup, so that I can use it effectively in the compact popup window.
+- **Priority**: Must
+- **Related Requirements**: REQ-5
+- **Acceptance Criteria**:
+  - Given I open the extension popup
+  - When the homepage renders
+  - Then the layout is compact and scrollable within popup dimensions
+  - And all essential features remain accessible
 
-**Acceptance Criteria:**
-- Given I am a first-time user opening the application
-- When the homepage loads
-- Then I should see clear descriptions of core features (translate, polish, summarize)
-- And I should see visual indicators (icons/cards) for each feature
-- And I should understand how to access each feature
+**US-6: Consistent Theming**
+- As a user with dark mode enabled, I want the homepage to respect my theme preference, so that the experience is visually consistent.
+- **Priority**: Must
+- **Related Requirements**: REQ-6
+- **Acceptance Criteria**:
+  - Given I have set my theme preference to dark mode
+  - When I view the homepage
+  - Then all homepage elements render with dark theme colors
+  - And theme changes apply immediately without page refresh
 
-**Priority:** Must
-**Related Requirements:** REQ-1, NFR-3
+**US-7: Optional Homepage**
+- As a power user who primarily translates, I want to skip the homepage and go directly to the translator, so that I can save time on my most common task.
+- **Priority**: Could
+- **Related Requirements**: REQ-8
+- **Acceptance Criteria**:
+  - Given I access the settings
+  - When I configure "Start Page" preference
+  - Then I can choose between Homepage or Translator as my default landing page
+  - And the application respects this preference on subsequent launches
 
----
+## User Experience & Interface
 
-**US-3: Recent Activity Review**
-*As a Regular User, I want to see my recent translations on the homepage, so that I can quickly access previous work without searching.*
+### User Journey
+1. **Launch**: User opens extension popup, options page, or desktop application
+2. **Homepage View**: User sees homepage with feature cards, quick-translate, and recent activity
+3. **Navigation**: User clicks desired feature card or uses quick-translate
+4. **Feature Usage**: User completes their task in the selected feature view
+5. **Return**: User returns to homepage via back button or home icon for next action
 
-**Acceptance Criteria:**
-- Given I have used translation features previously
-- When I open the homepage
-- Then I should see my last 3-5 translation activities
-- And each item should show source/target language and preview text
-- And I should be able to click an item to view full details
-- And I should be able to clear the history
+### Interface Requirements
 
-**Priority:** Should
-**Related Requirements:** REQ-3, NFR-5
+#### Layout Structure (Desktop/Options Page)
+```
++------------------------------------------+
+|  [Logo]  NextAI Translator     [Theme]   |
++------------------------------------------+
+|  Quick Translate                         |
+|  [________________] [Translate]          |
++------------------------------------------+
+|  +--------+  +--------+  +--------+      |
+|  |Translate| |Vocabulary| |History|      |
+|  |   icon  | |  icon   | | icon  |      |
+|  +--------+  +--------+  +--------+      |
+|  +--------+  +--------+                  |
+|  |Actions | |Settings |                  |
+|  |  icon  | |  icon   |                  |
+|  +--------+  +--------+                  |
++------------------------------------------+
+|  Recent Translations                     |
+|  - "Hello" -> "Bonjour" (2 min ago)     |
+|  - "Thank you" -> "Merci" (1 hr ago)    |
+|  [View All History]                      |
++------------------------------------------+
+|  Stats: 150 translations | 45 words     |
++------------------------------------------+
+```
 
----
+#### Layout Structure (Popup - Compact)
+```
++------------------------+
+| [Logo] NextAI    [Gear]|
++------------------------+
+| [Quick translate...]   |
++------------------------+
+| [Trans] [Vocab] [Hist] |
+| [Acts]  [Sets]         |
++------------------------+
+| Recent: "Hello"->...   |
++------------------------+
+```
 
-**US-4: Settings Navigation**
-*As a Power User, I want to access settings quickly from the homepage, so that I can configure API keys and preferences without searching through the interface.*
-
-**Acceptance Criteria:**
-- Given I am on the homepage
-- When I look for settings access
-- Then I should see a clearly labeled settings link/button
-- And clicking it should navigate to the settings interface
-- And I should be able to return to homepage easily
-
-**Priority:** Must
-**Related Requirements:** REQ-4
-
----
-
-**US-5: Consistent Cross-Platform Experience**
-*As a User switching between desktop and browser extension, I want the homepage to work consistently, so that I don't need to relearn the interface.*
-
-**Acceptance Criteria:**
-- Given I use both desktop app and browser extension
-- When I open either version
-- Then I should see the same homepage layout and features
-- And all quick actions should behave identically
-- And navigation patterns should be consistent
-
-**Priority:** Must
-**Related Requirements:** REQ-5, NFR-4
-
----
+### Accessibility Considerations
+- All feature cards have descriptive aria-labels
+- Keyboard navigation follows logical tab order
+- Focus states are clearly visible
+- Statistics have appropriate ARIA live regions for screen readers
+- Color contrast meets WCAG 2.1 AA standards
 
 ## Technical Considerations
 
-### Integration with Existing Architecture
+### High-Level Approach
+Create a new `Homepage` component in `src/common/components/` that:
+- Uses existing BaseUI components for consistent styling
+- Fetches statistics from IndexedDB via existing Dexie services
+- Integrates with existing routing/navigation patterns per platform
+- Supports responsive breakpoints for different viewport sizes
 
-**Shared Component Layer**
-The homepage will be implemented as a new component in `src/common/components/` to ensure code reuse across platforms:
-- `HomePage.tsx` - Main homepage component with quick actions and navigation
-- `QuickActionCard.tsx` - Reusable card component for feature shortcuts
-- `RecentActivityList.tsx` - Component for displaying recent translation history
+### Integration Points
+- **IndexedDB Services**: `historyService`, `vocabularyService`, `actionService` for statistics
+- **Settings Store**: For theme and homepage preference settings
+- **Navigation**: Platform-specific navigation (window management in Tauri, routes in extension)
+- **Common Components**: Reuse `Settings`, `Vocabulary`, `TranslationHistory`, `ActionManager`, `Translator`
 
-**Platform-Specific Integration**
-- **Desktop (Tauri)**: Add `HomeWindow.tsx` in `src/tauri/windows/` or integrate into existing `App.tsx` routing
-- **Browser Extension**: Integrate homepage into extension popup (`src/browser-extension/popup/`) or create dedicated tab
+### Key Technical Constraints
+- Must work within browser extension popup size constraints (~400x600px)
+- Must not increase initial bundle size significantly (code-split if needed)
+- Statistics queries must be non-blocking to maintain render performance
+- Must maintain compatibility with all existing platform polyfills
 
-**State Management Integration**
-Leverage existing Jotai atoms and Zustand stores for:
-- Recent activity tracking and retrieval
-- User preference storage (default languages, visibility settings)
-- Navigation state management between homepage and feature views
+### Performance Considerations
+- Lazy load statistics after initial render
+- Use SWR for cached data fetching with stale-while-revalidate pattern
+- Consider virtualization if recent translations list grows
+- Minimize re-renders with proper memoization
 
-### UI Framework Consistency
+## Design Specification
 
-The homepage will utilize existing BaseUI components and Styletron styling:
-- Card components for quick action layout
-- Button components following existing design system
-- Typography and spacing consistent with current Settings and Translator windows
-- Theme support for existing light/dark mode functionality
+### Recommended Approach
+Implement homepage as a new shared React component (`Homepage.tsx`) in `src/common/components/` that integrates with existing platform entry points, using BaseUI's Card and Grid components for consistent layout.
 
-### Data Persistence
+### Key Technical Decisions
 
-Recent activity data will be stored using:
-- **Desktop**: Existing Tauri storage mechanisms via Rust backend
-- **Browser**: Chrome storage API or IndexedDB (Dexie) as currently used
-- Maximum 50 recent items stored, with FIFO eviction policy
+#### 1. Component Architecture
+- **Options Considered**: Single monolithic component vs. composable sub-components
+- **Tradeoffs**: Monolithic is simpler but harder to customize per platform; composable allows platform-specific layouts but adds complexity
+- **Recommendation**: Composable sub-components (HomepageStats, HomepageQuickTranslate, HomepageFeatureGrid, HomepageRecent) wrapped by a layout-aware parent component for maximum reusability.
 
-### Performance Optimization
+#### 2. Navigation Pattern
+- **Options Considered**: Replace current entry points vs. add as new route/window vs. conditional rendering based on settings
+- **Tradeoffs**: Replacement changes user expectations; new route adds complexity; conditional rendering is flexible but adds logic
+- **Recommendation**: Conditional rendering based on user setting, with homepage as default, allowing users to opt-out and go directly to translator.
 
-- Lazy loading of recent activity to prevent blocking initial render
-- Virtualization for long lists using react-window (already in dependencies)
-- Memoization of quick action components to prevent unnecessary re-renders
-- Preloading critical assets during application startup
+#### 3. Statistics Data Loading
+- **Options Considered**: Eager load on mount vs. lazy load after render vs. background sync
+- **Tradeoffs**: Eager blocks render; lazy shows loading states; background sync requires service worker complexity
+- **Recommendation**: Lazy load with SWR after initial render, showing skeleton placeholders for statistics while loading.
 
----
+#### 4. Responsive Layout Strategy
+- **Options Considered**: CSS-only responsive vs. JavaScript viewport detection vs. platform-specific components
+- **Tradeoffs**: CSS-only is cleanest but limited; JS detection allows logic changes; platform-specific duplicates code
+- **Recommendation**: CSS-based responsive design using BaseUI's responsive utilities, with minor JS detection for popup vs. full-page distinctions.
+
+### High-Level Architecture
+```mermaid
+graph TD
+    A[Platform Entry Points] --> B{Homepage Enabled?}
+    B -->|Yes| C[Homepage Component]
+    B -->|No| D[Translator Component]
+    C --> E[HomepageQuickTranslate]
+    C --> F[HomepageFeatureGrid]
+    C --> G[HomepageStats]
+    C --> H[HomepageRecent]
+    E --> D
+    F --> D
+    F --> I[Vocabulary]
+    F --> J[History]
+    F --> K[ActionManager]
+    F --> L[Settings]
+    G --> M[IndexedDB Services]
+    H --> M
+```
+
+### Key Considerations
+- **Performance**: Initial render under 200ms by deferring statistics loading; use React.memo and useMemo for feature cards
+- **Security**: No new external data sources; all data from local IndexedDB; no new permissions required
+- **Scalability**: Component architecture supports adding new feature cards without structural changes
+
+### Risk Management
+- **Platform Inconsistency Risk**: Different platforms may have subtle navigation differences; mitigate by thorough cross-platform testing and abstracted navigation hooks
+- **Performance Regression Risk**: Adding new entry point component could slow launch; mitigate by code-splitting and lazy loading non-critical sections
+
+### Success Criteria
+- Homepage renders in under 200ms on all platforms
+- All feature navigation works correctly across browser extension and desktop
+- Statistics load without blocking user interaction
+- Theme switching applies correctly without layout shifts
 
 ## Dependencies & Assumptions
 
-### Internal Dependencies
-- Existing translation/polishing/summarization services must remain functional
-- i18next internationalization framework for all text strings
-- BaseUI + Styletron design system for consistent styling
-- Jotai/Zustand state management integration
-- Existing storage mechanisms (Dexie for browser, Tauri storage for desktop)
+### Dependencies
+- Existing BaseUI component library and Styletron styling engine
+- IndexedDB services (`historyService`, `vocabularyService`, `actionService`)
+- Settings store and theme system
+- Platform-specific entry points (popup/index.tsx, options/index.tsx, Tauri windows)
 
-### Technical Assumptions
-1. No changes to LLM provider integration or API communication layer
-2. Existing routing/navigation patterns can accommodate homepage integration
-3. Current build process (Vite multi-config) supports adding new components
-4. BaseUI components provide sufficient primitives for homepage layout
-5. No backend API changes required - all data available locally
-
-### Resource Requirements
-- Frontend development: Component implementation, styling, integration testing
-- Testing: Unit tests, E2E tests for navigation flows
-- Design: UI/UX alignment with existing patterns (minimal design work)
-- Documentation: Usage guide updates, developer documentation
-
----
-
-## Risk Assessment
-
-### User Experience Risks
-
-**Risk: Homepage adds friction to quick workflows**
-*Impact: Medium* | *Likelihood: Low*
-- **Mitigation**: Provide keyboard shortcuts to bypass homepage and jump directly to translation
-- **Mitigation**: Allow users to set default landing page (homepage vs. translator)
-
-**Risk: Information overload on homepage**
-*Impact: Low* | *Likelihood: Medium*
-- **Mitigation**: Keep homepage focused on 3 core actions (translate, polish, summarize)
-- **Mitigation**: Use progressive disclosure for advanced features
-
-### Technical Risks
-
-**Risk: Performance degradation from additional rendering**
-*Impact: Medium* | *Likelihood: Low*
-- **Mitigation**: Implement lazy loading and code splitting for homepage
-- **Mitigation**: Profile and optimize render performance during development
-- **Mitigation**: Establish performance budgets (< 1s load time)
-
-**Risk: State management complexity**
-*Impact: Low* | *Likelihood: Medium*
-- **Mitigation**: Leverage existing Jotai/Zustand patterns without introducing new paradigms
-- **Mitigation**: Keep homepage state isolated from feature-specific state
-
-**Risk: Cross-platform inconsistencies**
-*Impact: Medium* | *Likelihood: Medium*
-- **Mitigation**: Develop homepage in shared `src/common/` layer first
-- **Mitigation**: Test on all platforms early and continuously
-- **Mitigation**: Use platform-specific wrappers only for necessary platform APIs
-
----
+### Assumptions
+- Users prefer a centralized navigation hub over direct feature access
+- Statistics from IndexedDB can be queried efficiently without performance impact
+- Existing component architecture can accommodate a new homepage without major refactoring
+- Browser extension popup dimensions (typically 400x600px) are sufficient for compact homepage layout
 
 ## Appendices
 
-### A. Navigation Flow Diagram
+### Reference: Existing Windows (Tauri Desktop)
+From `src/tauri/App.tsx`:
+- translator
+- action_manager
+- settings
+- thumb
+- updater
+- screenshot
+- history
 
-```
-Application Launch
-       ↓
-   [Homepage]
-       ↓
-   ┌───┴───┬───────┬─────────┐
-   ↓       ↓       ↓         ↓
-Translate Polish Summarize Settings
-   ↓       ↓       ↓         ↓
- (Back to Homepage via navigation)
-```
-
-### B. Related Documentation
-- BaseUI Component Library: https://baseweb.design/
-- Tauri Window Management: `src-tauri/src/windows.rs`
-- Browser Extension Architecture: `src/browser-extension/`
-- Internationalization Setup: `src/common/i18n/`
-
-### C. Design References
-- Existing Settings Window: `src/common/components/Settings.tsx`
-- Translator Window: `src/tauri/windows/TranslatorWindow.tsx`
-- Browser Extension Popup: `src/browser-extension/popup/index.tsx`
-
-### D. Requirement Traceability Matrix
-
-| Requirement ID | User Story | Technical Component | Priority |
-|---------------|------------|---------------------|----------|
-| REQ-1 | US-2, US-4 | HomePage.tsx | Must |
-| REQ-2 | US-1 | QuickActionCard.tsx | Must |
-| REQ-3 | US-3 | RecentActivityList.tsx | Should |
-| REQ-4 | US-4 | Navigation links | Must |
-| REQ-5 | US-5 | Platform integrations | Must |
-| REQ-6 | US-5 | Responsive layout | Must |
-| NFR-1 | US-1 | Performance optimization | Must |
-| NFR-2 | - | Accessibility features | Must |
-| NFR-3 | US-2 | i18next integration | Must |
-| NFR-4 | US-5 | BaseUI consistency | Must |
-| NFR-5 | US-3 | State management | Must |
+### Reference: Existing Feature Components
+From `src/common/components/`:
+- Translator.tsx - Main translation interface
+- Settings.tsx - Configuration panel
+- ActionManager.tsx - Custom actions management
+- Vocabulary.tsx - Word collection interface
+- TranslationHistory.tsx - History viewer

@@ -130,6 +130,12 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({ type, icon, on
                         <Input
                             value={text}
                             onChange={(e) => setText((e.target as HTMLInputElement).value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                    e.preventDefault()
+                                    handleSubmit()
+                                }
+                            }}
                             placeholder={t('homepage.quickActions.inputPlaceholder')}
                             overrides={{
                                 Root: {

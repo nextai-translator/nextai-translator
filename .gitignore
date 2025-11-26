@@ -18,3 +18,4 @@ npm-error.log
 /playwright-report/
 /playwright/.cache/
 .pnpm-store/
+.something/
