@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react'
 import { createUseStyles } from 'react-jss'
 import { useTranslation } from 'react-i18next'
-import { MdTranslate, MdHistory, MdSettings, MdMenuBook } from 'react-icons/md'
+import { MdTranslate, MdHistory, MdSettings, MdMenuBook, MdClose, MdLightbulb } from 'react-icons/md'
 import { useTheme } from '../hooks/useTheme'
 import { IThemedStyleProps } from '../types'
 import { Client as Styletron } from 'styletron-engine-atomic'
@@ -95,8 +95,8 @@ const useStyles = createUseStyles({
             props.layoutMode === 'compact'
                 ? 'repeat(2, 1fr)' // Compact: 2 columns but smaller
                 : props.layoutMode === 'expanded'
-                  ? 'repeat(4, 1fr)' // Expanded: 4 columns in a row
-                  : 'repeat(2, 1fr)', // Standard: 2x2 grid
+                ? 'repeat(4, 1fr)' // Expanded: 4 columns in a row
+                : 'repeat(2, 1fr)', // Standard: 2x2 grid
         gap: props.layoutMode === 'compact' ? '8px' : props.layoutMode === 'expanded' ? '24px' : '16px',
         width: '100%',
         maxWidth: props.layoutMode === 'compact' ? '280px' : props.layoutMode === 'expanded' ? '800px' : '320px',
@@ -137,6 +137,86 @@ const useStyles = createUseStyles({
         textOverflow: 'ellipsis',
         maxWidth: '100%',
     }),
+    // Onboarding styles
+    onboardingContainer: (props: StyleProps) => ({
+        width: '100%',
+        maxWidth: props.layoutMode === 'compact' ? '280px' : props.layoutMode === 'expanded' ? '800px' : '320px',
+        marginBottom: props.layoutMode === 'compact' ? '16px' : '24px',
+        padding: props.layoutMode === 'compact' ? '12px' : '16px',
+        borderRadius: '12px',
+        background:
+            props.themeType === 'dark'
+                ? `linear-gradient(135deg, ${props.theme.colors.accent}15, ${props.theme.colors.accent}08)`
+                : `linear-gradient(135deg, ${props.theme.colors.accent}12, ${props.theme.colors.accent}05)`,
+        border: `1px solid ${props.theme.colors.accent}30`,
+        position: 'relative',
+    }),
+    onboardingHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '12px',
+    },
+    onboardingWelcome: (props: StyleProps) => ({
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        fontSize: props.layoutMode === 'compact' ? '14px' : '16px',
+        fontWeight: 600,
+        color: props.theme.colors.contentPrimary,
+    }),
+    onboardingIcon: (props: StyleProps) => ({
+        fontSize: props.layoutMode === 'compact' ? '18px' : '22px',
+        color: props.theme.colors.accent,
+    }),
+    onboardingDismissBtn: (props: StyleProps) => ({
+        'display': 'flex',
+        'alignItems': 'center',
+        'justifyContent': 'center',
+        'padding': '4px',
+        'borderRadius': '50%',
+        'cursor': 'pointer',
+        'transition': 'background 0.2s ease',
+        'background': 'transparent',
+        'color': props.theme.colors.contentSecondary,
+        '&:hover': {
+            background: props.theme.colors.backgroundTertiary,
+        },
+    }),
+    onboardingTips: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+    },
+    onboardingTipItem: (props: StyleProps) => ({
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '8px',
+        fontSize: props.layoutMode === 'compact' ? '12px' : '13px',
+        color: props.theme.colors.contentSecondary,
+        lineHeight: 1.5,
+    }),
+    onboardingTipBullet: (props: StyleProps) => ({
+        width: '6px',
+        height: '6px',
+        borderRadius: '50%',
+        background: props.theme.colors.accent,
+        marginTop: '6px',
+        flexShrink: 0,
+    }),
+    onboardingEmptyState: (props: StyleProps) => ({
+        marginTop: '8px',
+        padding: '12px',
+        borderRadius: '8px',
+        background:
+            props.themeType === 'dark' ? props.theme.colors.backgroundSecondary : props.theme.colors.backgroundTertiary,
+        textAlign: 'center',
+    }),
+    onboardingEmptyStateText: (props: StyleProps) => ({
+        fontSize: props.layoutMode === 'compact' ? '12px' : '13px',
+        color: props.theme.colors.accent,
+        fontWeight: 500,
+    }),
 })
 
 interface NavigationItem {
@@ -148,9 +228,21 @@ interface NavigationItem {
 
 export interface InnerHomepageProps extends Omit<HomepageProps, 'engine'> {
     layoutModeOverride?: LayoutMode // For testing purposes
+    isNewUser?: boolean // Whether this is a new user (shows onboarding)
+    hasTranslationHistory?: boolean // Whether user has translation history
+    onboardingDismissed?: boolean // Whether onboarding has been dismissed
+    onDismissOnboarding?: () => void // Callback when onboarding is dismissed
 }
 
-export function InnerHomepage({ onNavigate, provider, layoutModeOverride }: InnerHomepageProps) {
+export function InnerHomepage({
+    onNavigate,
+    provider,
+    layoutModeOverride,
+    isNewUser = false,
+    hasTranslationHistory = true,
+    onboardingDismissed = false,
+    onDismissOnboarding,
+}: InnerHomepageProps) {
     const { theme, themeType } = useTheme()
     const { t } = useTranslation()
     const { layoutMode: detectedLayoutMode, windowWidth } = useWindowSize()
@@ -159,6 +251,14 @@ export function InnerHomepage({ onNavigate, provider, layoutModeOverride }: Inne
     const layoutMode = layoutModeOverride ?? detectedLayoutMode
 
     const styles = useStyles({ theme, themeType, layoutMode })
+
+    // Determine if onboarding should be shown
+    const showOnboarding = isNewUser && !onboardingDismissed
+
+    // Handle dismiss onboarding
+    const handleDismissOnboarding = useCallback(() => {
+        onDismissOnboarding?.()
+    }, [onDismissOnboarding])
 
     const navigationItems: NavigationItem[] = useMemo(
         () => [
@@ -213,6 +313,62 @@ export function InnerHomepage({ onNavigate, provider, layoutModeOverride }: Inne
                     <ProviderStatus provider={provider} />
                 </div>
             </div>
+
+            {/* Onboarding hints for new users */}
+            {showOnboarding && (
+                <div
+                    className={styles.onboardingContainer}
+                    data-testid='onboarding-hints'
+                    role='region'
+                    aria-label={t('Getting started tips')}
+                >
+                    <div className={styles.onboardingHeader}>
+                        <div className={styles.onboardingWelcome} data-testid='onboarding-welcome'>
+                            <MdLightbulb className={styles.onboardingIcon} />
+                            <span>{t('Welcome to NextAI Translator!')}</span>
+                        </div>
+                        <div
+                            className={styles.onboardingDismissBtn}
+                            data-testid='onboarding-dismiss-btn'
+                            role='button'
+                            tabIndex={0}
+                            aria-label={t('Dismiss onboarding tips')}
+                            onClick={handleDismissOnboarding}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    handleDismissOnboarding()
+                                }
+                            }}
+                        >
+                            <MdClose />
+                        </div>
+                    </div>
+                    <div className={styles.onboardingTips} data-testid='onboarding-tips'>
+                        <div className={styles.onboardingTipItem}>
+                            <span className={styles.onboardingTipBullet} />
+                            <span>{t('Select text on any webpage to translate instantly')}</span>
+                        </div>
+                        <div className={styles.onboardingTipItem}>
+                            <span className={styles.onboardingTipBullet} />
+                            <span>{t('Configure your AI provider in Settings for best results')}</span>
+                        </div>
+                        <div className={styles.onboardingTipItem}>
+                            <span className={styles.onboardingTipBullet} />
+                            <span>{t('Save words to Vocabulary to build your personal dictionary')}</span>
+                        </div>
+                    </div>
+                    {/* Empty state message when no translation history */}
+                    {!hasTranslationHistory && (
+                        <div className={styles.onboardingEmptyState} data-testid='onboarding-empty-state'>
+                            <span className={styles.onboardingEmptyStateText}>
+                                {t('Get started by clicking Translate!')}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+
             <nav
                 className={styles.navigationGrid}
                 data-testid='navigation-grid'

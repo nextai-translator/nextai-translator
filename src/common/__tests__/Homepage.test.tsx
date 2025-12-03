@@ -500,3 +500,258 @@ describe('Homepage AI Provider Status Display (REQ-6)', () => {
         expect(screen.getByText('AI-powered translation at your fingertips')).toBeInTheDocument()
     })
 })
+
+// REQ-10: First-Time User Onboarding Tests
+describe('Homepage First-Time User Onboarding (REQ-10)', () => {
+    let mockOnNavigate: ReturnType<typeof vi.fn>
+    let mockOnDismissOnboarding: ReturnType<typeof vi.fn>
+
+    beforeEach(() => {
+        mockOnNavigate = vi.fn()
+        mockOnDismissOnboarding = vi.fn()
+    })
+
+    // Test Case 1: Render Homepage with isNewUser=true - Display onboarding hints for new users
+    describe('New User Onboarding Display', () => {
+        it('should display onboarding hints when isNewUser is true', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Onboarding hints should be visible for new users
+            expect(screen.getByTestId('onboarding-hints')).toBeInTheDocument()
+        })
+
+        it('should show welcome message for new users', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Welcome message should be displayed
+            expect(screen.getByTestId('onboarding-welcome')).toBeInTheDocument()
+            expect(screen.getByText('Welcome to NextAI Translator!')).toBeInTheDocument()
+        })
+
+        it('should display getting started tips for new users', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Getting started tips should be present
+            expect(screen.getByTestId('onboarding-tips')).toBeInTheDocument()
+        })
+
+        it('should not display onboarding hints when isNewUser is false', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={false}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Onboarding hints should not be visible for returning users
+            expect(screen.queryByTestId('onboarding-hints')).not.toBeInTheDocument()
+        })
+    })
+
+    // Test Case 2: Render Homepage with empty translation history - Show helpful empty state
+    describe('Empty State with Getting Started Message', () => {
+        it('should show helpful empty state when hasTranslationHistory is false', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    hasTranslationHistory={false}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Empty state message should be shown
+            expect(screen.getByTestId('onboarding-empty-state')).toBeInTheDocument()
+        })
+
+        it('should display getting started instructions in empty state', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    hasTranslationHistory={false}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Getting started message should be displayed
+            expect(screen.getByText('Get started by clicking Translate!')).toBeInTheDocument()
+        })
+
+        it('should not show empty state when hasTranslationHistory is true', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    hasTranslationHistory={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Empty state should not be visible
+            expect(screen.queryByTestId('onboarding-empty-state')).not.toBeInTheDocument()
+        })
+    })
+
+    // Test Case 3: Dismiss onboarding hint - Hint is hidden and preference is saved
+    describe('Dismiss Onboarding Functionality', () => {
+        it('should render dismiss button in onboarding hints', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Dismiss button should be present
+            expect(screen.getByTestId('onboarding-dismiss-btn')).toBeInTheDocument()
+        })
+
+        it('should call onDismissOnboarding when dismiss button is clicked', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            const dismissBtn = screen.getByTestId('onboarding-dismiss-btn')
+            fireEvent.click(dismissBtn)
+
+            // Callback should be invoked to save preference
+            expect(mockOnDismissOnboarding).toHaveBeenCalledTimes(1)
+        })
+
+        it('should support keyboard dismissal with Enter key', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            const dismissBtn = screen.getByTestId('onboarding-dismiss-btn')
+            fireEvent.keyDown(dismissBtn, { key: 'Enter' })
+
+            expect(mockOnDismissOnboarding).toHaveBeenCalledTimes(1)
+        })
+
+        it('should have accessible dismiss button', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            const dismissBtn = screen.getByTestId('onboarding-dismiss-btn')
+            expect(dismissBtn).toHaveAttribute('role', 'button')
+            expect(dismissBtn).toHaveAttribute('tabIndex', '0')
+        })
+    })
+
+    // Test Case 4: Render Homepage after onboarding dismissed - Onboarding hints do not reappear
+    describe('Post-Dismissal State', () => {
+        it('should not show onboarding hints when onboardingDismissed is true', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onboardingDismissed={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Onboarding should not appear after dismissal
+            expect(screen.queryByTestId('onboarding-hints')).not.toBeInTheDocument()
+        })
+
+        it('should still show main navigation after onboarding dismissed', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onboardingDismissed={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Main navigation should still be accessible
+            expect(screen.getByTestId('nav-translate')).toBeInTheDocument()
+            expect(screen.getByTestId('nav-settings')).toBeInTheDocument()
+            expect(screen.getByTestId('nav-vocabulary')).toBeInTheDocument()
+            expect(screen.getByTestId('nav-history')).toBeInTheDocument()
+        })
+
+        it('should maintain full functionality after onboarding dismissed', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onboardingDismissed={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            const translateNav = screen.getByTestId('nav-translate')
+            fireEvent.click(translateNav)
+
+            expect(mockOnNavigate).toHaveBeenCalledWith('translator')
+        })
+    })
+
+    // Additional accessibility tests for onboarding
+    describe('Onboarding Accessibility', () => {
+        it('should have proper ARIA labels on onboarding elements', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            const onboardingHints = screen.getByTestId('onboarding-hints')
+            expect(onboardingHints).toHaveAttribute('role', 'region')
+            expect(onboardingHints).toHaveAttribute('aria-label', 'Getting started tips')
+        })
+
+        it('should render onboarding with proper semantic structure', () => {
+            render(
+                <InnerHomepage
+                    onNavigate={mockOnNavigate}
+                    isNewUser={true}
+                    onDismissOnboarding={mockOnDismissOnboarding}
+                />
+            )
+
+            // Verify semantic structure exists
+            expect(screen.getByTestId('onboarding-hints')).toBeInTheDocument()
+            expect(screen.getByTestId('onboarding-welcome')).toBeInTheDocument()
+            expect(screen.getByTestId('onboarding-tips')).toBeInTheDocument()
+        })
+    })
+})
