@@ -131,8 +131,9 @@ export abstract class AbstractOpenAI extends AbstractEngine {
             // We should check if the settings.apiURLPath is match `/deployments/{deployment-id}/chat/completions`.
             // If not, we should use the legacy parameters.
             if (req.rolePrompt) {
-                body['prompt'] =
-                    `<|im_start|>user\n${req.rolePrompt}\n\n${req.commandPrompt}\n<|im_end|>\n<|im_start|>assistant\n`
+                body[
+                    'prompt'
+                ] = `<|im_start|>user\n${req.rolePrompt}\n\n${req.commandPrompt}\n<|im_end|>\n<|im_start|>assistant\n`
             } else {
                 body['prompt'] = `<|im_start|>user\n${req.commandPrompt}\n<|im_end|>\n<|im_start|>assistant\n`
             }
