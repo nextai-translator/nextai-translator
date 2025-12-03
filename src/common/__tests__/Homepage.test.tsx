@@ -32,6 +32,15 @@ vi.mock('../components/LogoWithText', () => ({
     default: () => <div data-testid='logo-with-text'>NextAI Translator</div>,
 }))
 
+// Mock ProviderStatus component
+vi.mock('../components/ProviderStatus', () => ({
+    ProviderStatus: ({ provider }: { provider?: string }) => (
+        <div data-testid='provider-status' data-provider={provider || ''}>
+            {provider || 'Configure AI Provider'}
+        </div>
+    ),
+}))
+
 describe('Homepage Navigation', () => {
     let mockOnNavigate: ReturnType<typeof vi.fn>
 
@@ -434,5 +443,60 @@ describe('Homepage Responsive Layout', () => {
             expect(result1200.current.layoutMode).toBe('expanded')
             unmount1200()
         })
+    })
+})
+
+// REQ-6: AI Provider Status Display - Integration Tests
+describe('Homepage AI Provider Status Display (REQ-6)', () => {
+    let mockOnNavigate: ReturnType<typeof vi.fn>
+
+    beforeEach(() => {
+        mockOnNavigate = vi.fn()
+    })
+
+    // Test Case 1: Homepage with OpenAI configured as provider
+    it('should display OpenAI provider status when OpenAI is configured', () => {
+        render(<InnerHomepage onNavigate={mockOnNavigate} provider='OpenAI' />)
+
+        const providerStatus = screen.getByTestId('provider-status')
+        expect(providerStatus).toBeInTheDocument()
+        expect(providerStatus).toHaveAttribute('data-provider', 'OpenAI')
+        expect(screen.getByText('OpenAI')).toBeInTheDocument()
+    })
+
+    // Test Case 2: Homepage with no provider configured
+    it('should display configure provider message when no provider is set', () => {
+        render(<InnerHomepage onNavigate={mockOnNavigate} provider={undefined} />)
+
+        const providerStatus = screen.getByTestId('provider-status')
+        expect(providerStatus).toBeInTheDocument()
+        expect(screen.getByText('Configure AI Provider')).toBeInTheDocument()
+    })
+
+    // Test Case 3: Homepage with Claude configured as provider
+    it('should display Claude provider status when Claude is configured', () => {
+        render(<InnerHomepage onNavigate={mockOnNavigate} provider='Claude' />)
+
+        const providerStatus = screen.getByTestId('provider-status')
+        expect(providerStatus).toBeInTheDocument()
+        expect(providerStatus).toHaveAttribute('data-provider', 'Claude')
+        expect(screen.getByText('Claude')).toBeInTheDocument()
+    })
+
+    // Additional provider tests
+    it('should display Gemini provider status when Gemini is configured', () => {
+        render(<InnerHomepage onNavigate={mockOnNavigate} provider='Gemini' />)
+
+        const providerStatus = screen.getByTestId('provider-status')
+        expect(providerStatus).toHaveAttribute('data-provider', 'Gemini')
+    })
+
+    it('should render provider status component in the header section', () => {
+        render(<InnerHomepage onNavigate={mockOnNavigate} provider='OpenAI' />)
+
+        // Provider status should be present alongside other header elements
+        expect(screen.getByTestId('provider-status')).toBeInTheDocument()
+        expect(screen.getByTestId('logo-with-text')).toBeInTheDocument()
+        expect(screen.getByText('AI-powered translation at your fingertips')).toBeInTheDocument()
     })
 })

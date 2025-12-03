@@ -9,6 +9,8 @@ import { Provider as StyletronProvider } from 'styletron-react'
 import { BaseProvider } from 'baseui-sd'
 import { PREFIX } from '../constants'
 import LogoWithText from './LogoWithText'
+import { ProviderStatus } from './ProviderStatus'
+import { Provider } from '../engines'
 
 export type NavigationTarget = 'translator' | 'settings' | 'vocabulary' | 'history'
 
@@ -25,6 +27,7 @@ export interface HomepageProps {
     engine?: Styletron
     onNavigate?: (target: NavigationTarget) => void
     showLogo?: boolean
+    provider?: Provider
 }
 
 // Hook to get current window width and layout mode
@@ -83,14 +86,17 @@ const useStyles = createUseStyles({
         textAlign: 'center',
         padding: '0 8px',
     }),
+    providerStatusWrapper: {
+        marginTop: '16px',
+    },
     navigationGrid: (props: StyleProps) => ({
         display: 'grid',
         gridTemplateColumns:
             props.layoutMode === 'compact'
                 ? 'repeat(2, 1fr)' // Compact: 2 columns but smaller
                 : props.layoutMode === 'expanded'
-                ? 'repeat(4, 1fr)' // Expanded: 4 columns in a row
-                : 'repeat(2, 1fr)', // Standard: 2x2 grid
+                  ? 'repeat(4, 1fr)' // Expanded: 4 columns in a row
+                  : 'repeat(2, 1fr)', // Standard: 2x2 grid
         gap: props.layoutMode === 'compact' ? '8px' : props.layoutMode === 'expanded' ? '24px' : '16px',
         width: '100%',
         maxWidth: props.layoutMode === 'compact' ? '280px' : props.layoutMode === 'expanded' ? '800px' : '320px',
@@ -144,7 +150,7 @@ export interface InnerHomepageProps extends Omit<HomepageProps, 'engine'> {
     layoutModeOverride?: LayoutMode // For testing purposes
 }
 
-export function InnerHomepage({ onNavigate, layoutModeOverride }: InnerHomepageProps) {
+export function InnerHomepage({ onNavigate, provider, layoutModeOverride }: InnerHomepageProps) {
     const { theme, themeType } = useTheme()
     const { t } = useTranslation()
     const { layoutMode: detectedLayoutMode, windowWidth } = useWindowSize()
@@ -203,6 +209,9 @@ export function InnerHomepage({ onNavigate, layoutModeOverride }: InnerHomepageP
                 <p className={styles.tagline} data-testid='homepage-tagline'>
                     {t('AI-powered translation at your fingertips')}
                 </p>
+                <div className={styles.providerStatusWrapper}>
+                    <ProviderStatus provider={provider} />
+                </div>
             </div>
             <nav
                 className={styles.navigationGrid}
