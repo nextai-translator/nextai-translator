@@ -21,6 +21,9 @@ export interface Action {
     icon?: string
     rolePrompt?: string
     commandPrompt?: string
+    temperature?: string
+    frequencyPenalty?: string
+    presencePenalty?: string
     outputRenderingFormat?: ActionOutputRenderingFormat
     updatedAt: string
     createdAt: string
@@ -53,7 +56,7 @@ export class LocalDB extends Dexie {
         super('openai-translator')
         this.version(4).stores({
             vocabulary: 'word, reviewCount, description, updatedAt, createdAt',
-            action: '++id, idx, mode, name, icon, rolePrompt, commandPrompt, outputRenderingFormat, updatedAt, createdAt',
+            action: '++id, idx, mode, name, icon, rolePrompt, commandPrompt, temperature, frequencyPenalty, presencePenalty, outputRenderingFormat, updatedAt, createdAt',
         })
         this.version(5).stores({
             vocabulary: 'word, reviewCount, description, updatedAt, createdAt',
