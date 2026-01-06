@@ -12,9 +12,10 @@ describe('Homepage BaseUI Component Usage (NFR-2)', () => {
         // Dynamically import the Homepage component to check its imports
         const HomepageModule = await import('../components/Homepage')
 
-        // The Homepage component should exist
+        // The Homepage component should exist (memo-wrapped components are objects with $$typeof)
         expect(HomepageModule.Homepage).toBeDefined()
-        expect(typeof HomepageModule.Homepage).toBe('function')
+        // memo() returns an object, not a function - check it's a valid React component
+        expect(HomepageModule.Homepage).toHaveProperty('$$typeof')
     })
 
     it('should use Styletron engine from styletron-engine-atomic', async () => {
