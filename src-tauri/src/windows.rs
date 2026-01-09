@@ -143,6 +143,7 @@ pub async fn show_translator_window_with_selected_text_command() {
     let window = show_translator_window(false, true, true);
 
     if !selected_text.trim().is_empty() {
+        crate::mark_selected_text_hotkey_invoked();
         utils::send_text(selected_text);
     }
 
