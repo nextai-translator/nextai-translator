@@ -10,11 +10,23 @@ use tauri::Manager;
 #[specta::specta]
 pub fn cut_image(left: u32, top: u32, width: u32, height: u32) {
     use image::GenericImage;
-    let app_handle = crate::APP_HANDLE.get().unwrap();
-    let image_dir = app_handle
+    let app_handle = match crate::APP_HANDLE.get() {
+        Some(handle) => handle,
+        None => {
+            eprintln!("APP_HANDLE not initialized");
+            return;
+        }
+    };
+    let image_dir = match app_handle
         .path()
         .resolve("ocr_images", BaseDirectory::AppCache)
-        .unwrap();
+    {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("Failed to resolve ocr_images directory: {:?}", e);
+            return;
+        }
+    };
     let image_file_path = image_dir.join("fullscreen.png");
     if !image_file_path.exists() {
         return;
@@ -43,23 +55,59 @@ pub fn screenshot(x: i32, y: i32) {
     use screenshots::{Compression, Screen};
     use std::fs;
 
-    let screens = Screen::all().unwrap();
+    let screens = match Screen::all() {
+        Ok(screens) => screens,
+        Err(e) => {
+            eprintln!("Failed to get screens: {:?}", e);
+            return;
+        }
+    };
     for screen in screens {
         let info = screen.display_info;
         if info.x == x && info.y == y {
-            let app_handle = crate::APP_HANDLE.get().unwrap();
-            let image_dir = app_handle
+            let app_handle = match crate::APP_HANDLE.get() {
+                Some(handle) => handle,
+                None => {
+                    eprintln!("APP_HANDLE not initialized");
+                    return;
+                }
+            };
+            let image_dir = match app_handle
                 .path()
                 .resolve("ocr_images", BaseDirectory::AppCache)
-                .unwrap();
+            {
+                Ok(dir) => dir,
+                Err(e) => {
+                    eprintln!("Failed to resolve ocr_images directory: {:?}", e);
+                    return;
+                }
+            };
             if !image_dir.exists() {
-                std::fs::create_dir_all(&image_dir).unwrap();
+                if let Err(e) = std::fs::create_dir_all(&image_dir) {
+                    eprintln!("Failed to create ocr_images directory: {:?}", e);
+                    return;
+                }
             }
             let image_file_path = image_dir.join("fullscreen.png");
-            let image = screen.capture().unwrap();
-            let buffer = image.to_png(Compression::Fast).unwrap();
+            let image = match screen.capture() {
+                Ok(img) => img,
+                Err(e) => {
+                    eprintln!("Failed to capture screen: {:?}", e);
+                    return;
+                }
+            };
+            let buffer = match image.to_png(Compression::Fast) {
+                Ok(buf) => buf,
+                Err(e) => {
+                    eprintln!("Failed to convert image to PNG: {:?}", e);
+                    return;
+                }
+            };
             debug_println!("image_file_path: {:?}", image_file_path);
-            fs::write(image_file_path, buffer).unwrap();
+            if let Err(e) = fs::write(&image_file_path, buffer) {
+                eprintln!("Failed to write screenshot file: {:?}", e);
+                return;
+            }
             break;
         }
     }
@@ -139,17 +187,30 @@ pub fn do_ocr() -> Result<(), Box<dyn std::error::Error>> {
         rel_path = "resources/bin/ocr_apple".to_string();
     }
 
-    let app = APP_HANDLE.get().unwrap();
+    let app = APP_HANDLE.get().ok_or("APP_HANDLE not initialized")?;
 
     let bin_path = app
         .path()
-        .resolve(rel_path, BaseDirectory::Resource)
-        .expect("failed to resolve ocr binary resource");
+        .resolve(&rel_path, BaseDirectory::Resource)
+        .map_err(|e| {
+            format!(
+                "Failed to resolve ocr binary resource '{}': {:?}",
+                rel_path, e
+            )
+        })?;
 
-    let output = std::process::Command::new(bin_path)
+    if !bin_path.exists() {
+        return Err(format!(
+            "OCR binary not found at {:?}. Please ensure the binary is bundled correctly.",
+            bin_path
+        )
+        .into());
+    }
+
+    let output = std::process::Command::new(&bin_path)
         .args(["-l", "zh"])
         .output()
-        .expect("failed to execute ocr binary");
+        .map_err(|e| format!("Failed to execute ocr binary at {:?}: {:?}", bin_path, e))?;
 
     // check exit code
     if output.status.success() {
@@ -160,7 +221,13 @@ pub fn do_ocr() -> Result<(), Box<dyn std::error::Error>> {
         crate::windows::show_translator_window(false, true, true);
         Ok(())
     } else {
-        Err("ocr binary failed".into())
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Err(format!(
+            "OCR binary failed with exit code {:?}: {}",
+            output.status.code(),
+            stderr
+        )
+        .into())
     }
 }
 
@@ -171,7 +238,9 @@ pub fn start_ocr() {
 }
 
 pub fn ocr() {
-    do_ocr().unwrap();
+    if let Err(e) = do_ocr() {
+        eprintln!("OCR failed: {:?}", e);
+    }
 }
 
 #[tauri::command(async)]
@@ -182,11 +251,23 @@ pub fn finish_ocr() {
 
 #[cfg(target_os = "windows")]
 fn do_finish_ocr() {
-    let app_handle = crate::APP_HANDLE.get().unwrap();
-    let image_dir = app_handle
+    let app_handle = match crate::APP_HANDLE.get() {
+        Some(handle) => handle,
+        None => {
+            eprintln!("APP_HANDLE not initialized");
+            return;
+        }
+    };
+    let image_dir = match app_handle
         .path()
         .resolve("ocr_images", BaseDirectory::AppCache)
-        .unwrap();
+    {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("Failed to resolve ocr_images directory: {:?}", e);
+            return;
+        }
+    };
     let image_file_path = image_dir.join("cut.png");
     do_ocr_with_cut_file_path(&image_file_path);
 }
