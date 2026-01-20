@@ -187,14 +187,17 @@ pub fn do_ocr() -> Result<(), Box<dyn std::error::Error>> {
         rel_path = "resources/bin/ocr_apple".to_string();
     }
 
-    let app = APP_HANDLE
-        .get()
-        .ok_or("APP_HANDLE not initialized")?;
+    let app = APP_HANDLE.get().ok_or("APP_HANDLE not initialized")?;
 
     let bin_path = app
         .path()
         .resolve(&rel_path, BaseDirectory::Resource)
-        .map_err(|e| format!("Failed to resolve ocr binary resource '{}': {:?}", rel_path, e))?;
+        .map_err(|e| {
+            format!(
+                "Failed to resolve ocr binary resource '{}': {:?}",
+                rel_path, e
+            )
+        })?;
 
     if !bin_path.exists() {
         return Err(format!(
