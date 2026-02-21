@@ -1,11 +1,53 @@
 /* eslint-disable camelcase */
 import { urlJoin } from 'url-join-ts'
+import { getRecommendedOpenAIAPIPath, OPENAI_RESPONSES_API_PATH } from '../openai-api-path'
 import { getUniversalFetch } from '../universal-fetch'
-import { fetchSSE, getSettings } from '../utils'
+import { defaultAPIURL, defaultAPIURLPath, fetchSSE, getSettings } from '../utils'
 import { AbstractEngine } from './abstract-engine'
 import { IMessageRequest, IModel } from './interfaces'
 
 export abstract class AbstractOpenAI extends AbstractEngine {
+    private isResponsesAPIPath(apiURLPath: string): boolean {
+        return /\/responses\b/.test(apiURLPath)
+    }
+
+    private shouldUseResponsesAPI(apiURL: string, apiURLPath: string, model: string): boolean {
+        if (this.isResponsesAPIPath(apiURLPath)) {
+            return true
+        }
+
+        const normalizedAPIURL = apiURL.replace(/\/+$/, '')
+        const isOpenAIOfficialEndpoint = normalizedAPIURL === defaultAPIURL
+        const usesDefaultChatCompletionsPath = apiURLPath === defaultAPIURLPath
+        if (!isOpenAIOfficialEndpoint || !usesDefaultChatCompletionsPath) {
+            return false
+        }
+        return getRecommendedOpenAIAPIPath(model) === OPENAI_RESPONSES_API_PATH
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private extractResponseOutputText(resp: any): string {
+        if (typeof resp?.response?.output_text === 'string') {
+            return resp.response.output_text
+        }
+        if (!Array.isArray(resp?.response?.output)) {
+            return ''
+        }
+
+        const texts: string[] = []
+        for (const item of resp.response.output) {
+            if (!Array.isArray(item?.content)) {
+                continue
+            }
+            for (const part of item.content) {
+                if (part?.type === 'output_text' && typeof part?.text === 'string') {
+                    texts.push(part.text)
+                }
+            }
+        }
+        return texts.join('')
+    }
+
     async listModels(apiKey: string | undefined): Promise<IModel[]> {
         if (!apiKey) {
             return []
@@ -122,11 +164,39 @@ export abstract class AbstractOpenAI extends AbstractEngine {
     }
 
     async sendMessage(req: IMessageRequest): Promise<void> {
-        const url = urlJoin(await this.getAPIURL(), await this.getAPIURLPath())
+        const apiURL = await this.getAPIURL()
+        const apiURLPath = await this.getAPIURLPath()
+        const model = await this.getAPIModel()
+        const useResponsesAPI = this.shouldUseResponsesAPI(apiURL, apiURLPath, model)
+        const targetAPIURLPath = useResponsesAPI ? OPENAI_RESPONSES_API_PATH : apiURLPath
+        const url = urlJoin(apiURL, targetAPIURLPath)
         const headers = await this.getHeaders()
         const isChatAPI = await this.isChatAPI()
         const body = await this.getBaseRequestBody()
-        if (!isChatAPI) {
+        if (useResponsesAPI) {
+            if (body.reasoning_effort !== undefined) {
+                body['reasoning'] = {
+                    ...(typeof body.reasoning === 'object' ? body.reasoning : {}),
+                    effort: body.reasoning_effort,
+                }
+                delete body.reasoning_effort
+            }
+            if (body.max_tokens !== undefined && body.max_output_tokens === undefined) {
+                body.max_output_tokens = body.max_tokens
+                delete body.max_tokens
+            }
+            delete body.temperature
+            delete body.top_p
+            delete body.frequency_penalty
+            delete body.presence_penalty
+            body['input'] = req.commandPrompt
+            if (req.rolePrompt) {
+                body['instructions'] = req.rolePrompt
+            }
+            delete body['messages']
+            delete body['prompt']
+            delete body['stop']
+        } else if (!isChatAPI) {
             // Azure OpenAI Service supports multiple API.
             // We should check if the settings.apiURLPath is match `/deployments/{deployment-id}/chat/completions`.
             // If not, we should use the legacy parameters.
@@ -148,6 +218,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
             body['messages'] = messages
         }
         let finished = false // finished can be called twice because event.data is 1. "finish_reason":"stop"; 2. [DONE]
+        let responsesHasStreamedText = false
         await fetchSSE(url, {
             method: 'POST',
             headers,
@@ -167,6 +238,51 @@ export abstract class AbstractOpenAI extends AbstractEngine {
 
                     req.onFinished('stop')
                     finished = true
+                    return
+                }
+
+                if (useResponsesAPI) {
+                    const { type } = resp
+                    if (type === 'response.output_text.delta') {
+                        const { delta = '' } = resp
+                        responsesHasStreamedText = true
+                        if (delta) {
+                            await req.onMessage({ content: delta, role: 'assistant' })
+                        }
+                        return
+                    }
+                    if (type === 'response.output_text.done') {
+                        const { text = '' } = resp
+                        if (!responsesHasStreamedText && text) {
+                            await req.onMessage({ content: text, role: 'assistant' })
+                        }
+                        return
+                    }
+                    if (type === 'response.completed') {
+                        if (!responsesHasStreamedText) {
+                            const outputText = this.extractResponseOutputText(resp)
+                            if (outputText) {
+                                await req.onMessage({ content: outputText, role: 'assistant' })
+                            }
+                        }
+                        req.onFinished('stop')
+                        finished = true
+                        return
+                    }
+                    if (type === 'response.incomplete') {
+                        const reason = resp?.response?.incomplete_details?.reason ?? 'incomplete'
+                        req.onFinished(reason)
+                        finished = true
+                        return
+                    }
+                    if (type === 'response.failed' || type === 'error') {
+                        const errorMessage =
+                            resp?.response?.error?.message ?? resp?.error?.message ?? resp?.message ?? 'Unknown error'
+                        req.onError?.(errorMessage)
+                        req.onFinished('error')
+                        finished = true
+                        return
+                    }
                     return
                 }
 
