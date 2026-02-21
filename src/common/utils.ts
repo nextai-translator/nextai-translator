@@ -6,11 +6,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { listen, Event, emit } from '@tauri-apps/api/event'
 import { parse as bestEffortJSONParse } from 'best-effort-json-parser'
 import { commands } from '@/tauri/bindings'
+import { OPENAI_CHAT_COMPLETIONS_API_PATH, OPENAI_PREFERRED_DEFAULT_MODEL } from './openai-api-path'
 
 export const defaultAPIURL = 'https://api.openai.com'
-export const defaultAPIURLPath = '/v1/chat/completions'
+export const defaultAPIURLPath = OPENAI_CHAT_COMPLETIONS_API_PATH
 export const defaultProvider = 'OpenAI'
-export const defaultAPIModel = 'gpt-3.5-turbo'
+export const defaultAPIModel = OPENAI_PREFERRED_DEFAULT_MODEL
 
 export const defaultChatGPTAPIAuthSessionAPIURL = 'https://chat.openai.com/api/auth/session'
 export const defaultChatGPTWebAPI = 'https://chat.openai.com/backend-api'
