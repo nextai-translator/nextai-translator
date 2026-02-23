@@ -2751,6 +2751,19 @@ export function InnerSettings({
                                     onBlur={onBlur}
                                 />
                             </FormItem>
+                            <div
+                                style={{
+                                    display: values.azureAPIModel === CUSTOM_MODEL_ID ? 'block' : 'none',
+                                }}
+                            >
+                                <FormItem
+                                    name='azureCustomModelName'
+                                    label={t('Custom Model Name')}
+                                    required={values.provider === 'Azure' && values.azureAPIModel === CUSTOM_MODEL_ID}
+                                >
+                                    <Input autoComplete='off' size='compact' />
+                                </FormItem>
+                            </div>
                             <FormItem name='azureAPIURL' label={t('API URL')} required={values.provider === 'Azure'}>
                                 <Input size='compact' onBlur={onBlur} />
                             </FormItem>
