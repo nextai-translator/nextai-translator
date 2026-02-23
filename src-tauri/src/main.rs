@@ -24,6 +24,7 @@ use serde_json::json;
 use std::env;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::time::Instant;
 use sysinfo::{CpuExt, System, SystemExt};
 use tauri_plugin_aptabase::EventTracker;
 use tauri_plugin_autostart::MacosLauncher;
@@ -73,6 +74,20 @@ pub struct UpdateResult {
 }
 
 pub static UPDATE_RESULT: Mutex<Option<Option<UpdateResult>>> = Mutex::new(None);
+pub static LAST_SELECTED_TEXT_TRIGGERED_AT: Mutex<Option<Instant>> = Mutex::new(None);
+const CLIPBOARD_IPC_SUPPRESSION_WINDOW_MS: u64 = 800;
+
+pub(crate) fn mark_selected_text_hotkey_invoked() {
+    *LAST_SELECTED_TEXT_TRIGGERED_AT.lock() = Some(Instant::now());
+}
+
+fn should_suppress_clipboard_ipc_request() -> bool {
+    if let Some(last) = *LAST_SELECTED_TEXT_TRIGGERED_AT.lock() {
+        last.elapsed() < std::time::Duration::from_millis(CLIPBOARD_IPC_SUPPRESSION_WINDOW_MS)
+    } else {
+        false
+    }
+}
 
 fn init_tokio_runtime() -> &'static TokioRuntime {
     use std::sync::OnceLock;
@@ -128,6 +143,14 @@ fn launch_ipc_server(server: &Server) {
     for mut req in server.incoming_requests() {
         let mut selected_text = String::new();
         req.as_reader().read_to_string(&mut selected_text).unwrap();
+        if should_suppress_clipboard_ipc_request() {
+            debug_println!(
+                "Suppressed clipboard IPC request because a hotkey translation just ran"
+            );
+            let response = HttpResponse::from_string("ok");
+            req.respond(response).unwrap();
+            continue;
+        }
         utils::send_text(selected_text);
         remember_active_window();
         let window = windows::show_translator_window(false, true, false);
