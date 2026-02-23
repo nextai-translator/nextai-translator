@@ -1,7 +1,15 @@
 # Due to receiving a trademark ownership warning from OpenAI, this project and product has been renamed to nextai translator. We hope you understand.
 
 <p align="center">
-    <br> English | <a href="README-CN.md">中文</a>
+    <br> English | <a href="README-CN.md">中文</a> | 
+    <!-- Keep these links. Translations will automatically update with the README. -->
+    <a href="https://www.readme-i18n.com/openai-translator/openai-translator?lang=de">Deutsch</a> | 
+    <a href="https://www.readme-i18n.com/openai-translator/openai-translator?lang=es">Español</a> | 
+    <a href="https://www.readme-i18n.com/openai-translator/openai-translator?lang=fr">français</a> | 
+    <a href="https://www.readme-i18n.com/openai-translator/openai-translator?lang=ja">日本語</a> | 
+    <a href="https://www.readme-i18n.com/openai-translator/openai-translator?lang=ko">한국어</a> | 
+    <a href="https://www.readme-i18n.com/openai-translator/openai-translator?lang=pt">Português</a> | 
+    <a href="https://www.readme-i18n.com/openai-translator/openai-translator?lang=ru">Русский</a> | 
 </p>
 <p align="center">
     <em>The translator that does more than just translation</em>
