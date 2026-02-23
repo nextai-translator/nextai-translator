@@ -154,8 +154,8 @@ export abstract class AbstractOpenAI extends AbstractEngine {
             return { model, stream: true, reasoning_effort: 'low' }
         }
 
-        // Use `minimal` for gpt-5 series
-        if (/^gpt-5(\.0)?(-mini|-nano)?(\b|-)/.test(modelLower) && !/-pro|-chat|instant/.test(modelLower)) {
+        // Only gpt-5 / gpt-5-mini / gpt-5-nano support reasoning_effort 'minimal'
+        if (/^gpt-5(-mini|-nano)?(\b|-)/.test(modelLower) && !/^gpt-5\.\d/.test(modelLower) && !/-pro\b/.test(modelLower)) {
             return { model, stream: true, reasoning_effort: 'minimal' }
         }
 
