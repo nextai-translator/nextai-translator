@@ -72,7 +72,7 @@ What began as a translation tool has now evolved to include surprisingly effecti
 7. Available on all platforms (Windows, macOS, and Linux) for both browsers and Desktop
 8. Support screenshot translation
 9. Support for vocabulary books, as well as support for generating memory aids based on the words in the vocabulary books
-10. Supports both [OpenAI](https://openai.com/) and [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service) at the same time
+10. Supports [OpenAI](https://openai.com/), [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service), [MiniMax](https://www.minimaxi.com/), and other LLM providers
 
 # Preparation
 

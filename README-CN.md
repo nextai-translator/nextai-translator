@@ -69,7 +69,7 @@
 7. 有桌面端应用，全平台（Windows + macOS + Linux）支持！
 8. 支持截图翻译
 9. 支持生词本，同时支持基于生词本里的单词生成帮助记忆的内容
-10. 同时支持 [OpenAI](https://openai.com/) 和 [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service)
+10. 支持 [OpenAI](https://openai.com/)、[Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service)、[MiniMax](https://www.minimaxi.com/) 等多种 LLM 服务商
 
 # 使用准备
 
