@@ -6,6 +6,8 @@ export class MiniMax extends AbstractOpenAI {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listModels(_apiKey: string | undefined): Promise<IModel[]> {
         return [
+            { id: 'MiniMax-M2.7', name: 'MiniMax-M2.7' },
+            { id: 'MiniMax-M2.7-highspeed', name: 'MiniMax-M2.7-highspeed' },
             { id: 'MiniMax-M2.5', name: 'MiniMax-M2.5' },
             { id: 'MiniMax-M2.5-highspeed', name: 'MiniMax-M2.5-highspeed' },
         ]
