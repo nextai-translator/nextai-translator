@@ -1457,6 +1457,7 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
     const [useCustomModel, setUseCustomModel] = useState(false)
     const [actionProvider, setActionProvider] = useState<Provider | undefined>(undefined)
     const [actionModel, setActionModel] = useState<string | undefined>(undefined)
+    const [isCustomModelName, setIsCustomModelName] = useState(false)
 
     // When actions load, default to first action
     useEffect(() => {
@@ -1475,6 +1476,7 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
             setUseCustomModel(hasCustom)
             setActionProvider(action.provider || settings.provider)
             setActionModel(action.apiModel || '')
+            setIsCustomModelName(false)
         }
     }, [actions, selectedActionId, settings.provider])
 
@@ -1598,40 +1600,44 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
                                     currentProvider={actionProvider || settings.provider}
                                     provider={actionProvider || settings.provider}
                                     apiKey={apiKey}
-                                    value={actionModel}
+                                    value={isCustomModelName ? CUSTOM_MODEL_ID : actionModel}
                                     onChange={(model) => {
                                         if (model === CUSTOM_MODEL_ID) {
+                                            setIsCustomModelName(true)
                                             setActionModel('')
                                         } else {
+                                            setIsCustomModelName(false)
                                             setActionModel(model)
                                             handleSave(actionProvider, model, true)
                                         }
                                     }}
                                 />
                             </div>
-                            <div style={{ marginBottom: '8px' }}>
-                                <div
-                                    style={{
-                                        fontSize: '12px',
-                                        marginBottom: '4px',
-                                        color: theme.colors.contentSecondary,
-                                    }}
-                                >
-                                    {t('Custom Model Name')}
+                            {isCustomModelName && (
+                                <div style={{ marginBottom: '8px' }}>
+                                    <div
+                                        style={{
+                                            fontSize: '12px',
+                                            marginBottom: '4px',
+                                            color: theme.colors.contentSecondary,
+                                        }}
+                                    >
+                                        {t('Custom Model Name')}
+                                    </div>
+                                    <Input
+                                        size='compact'
+                                        placeholder='e.g. claude-sonnet-4-20250514'
+                                        value={actionModel || ''}
+                                        onChange={(e) => {
+                                            const val = (e.target as HTMLInputElement).value
+                                            setActionModel(val)
+                                        }}
+                                        onBlur={() => {
+                                            handleSave(actionProvider, actionModel, true)
+                                        }}
+                                    />
                                 </div>
-                                <Input
-                                    size='compact'
-                                    placeholder='e.g. claude-sonnet-4-20250514'
-                                    value={actionModel || ''}
-                                    onChange={(e) => {
-                                        const val = (e.target as HTMLInputElement).value
-                                        setActionModel(val)
-                                    }}
-                                    onBlur={() => {
-                                        handleSave(actionProvider, actionModel, true)
-                                    }}
-                                />
-                            </div>
+                            )}
                         </>
                     ) : (
                         <div
