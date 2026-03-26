@@ -65,6 +65,18 @@ export const isAWord = (langCode: string, text: string) => {
     return iterator.next().value?.segment === text
 }
 
+function getThinkingBudget(level: string): number {
+    switch (level) {
+        case 'low':
+            return 5000
+        case 'high':
+            return 20000
+        case 'medium':
+        default:
+            return 10000
+    }
+}
+
 export class QuoteProcessor {
     private quote: string
     public quoteStart: string
@@ -401,12 +413,25 @@ If you understand, say "yes", and then we will begin.`
     const effectiveProvider = (query.mode !== 'big-bang' && query.action?.provider) || settings.provider
     const effectiveModel = query.mode !== 'big-bang' ? query.action?.apiModel : undefined
 
+    // Resolve Claude thinking settings
+    let thinkingBudget: number | undefined
+    if (effectiveProvider === 'Claude') {
+        const actionThinking = query.mode !== 'big-bang' ? query.action?.thinking : undefined
+        const actionThinkingLevel = query.mode !== 'big-bang' ? query.action?.thinkingLevel : undefined
+        const isThinking = actionThinking ?? settings.claudeThinking
+        const thinkingLevel = actionThinkingLevel ?? settings.claudeThinkingLevel ?? 'medium'
+        if (isThinking) {
+            thinkingBudget = getThinkingBudget(thinkingLevel)
+        }
+    }
+
     const engine = getEngine(effectiveProvider)
     await engine.sendMessage({
         signal: query.signal,
         rolePrompt,
         commandPrompt,
         modelOverride: effectiveModel,
+        thinkingBudget,
         onMessage: async (message) => {
             await query.onMessage({ ...message, isWordMode })
         },

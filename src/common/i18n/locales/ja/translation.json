@@ -210,5 +210,11 @@
     "Using global settings": "グローバル設定を使用中",
     "Action Model": "アクションモデル",
     "Action Provider": "アクションプロバイダー",
-    "Custom Model Name": "カスタムモデル名"
+    "Custom Model Name": "カスタムモデル名",
+    "Enable Extended Thinking": "拡張思考を有効化",
+    "Thinking Level": "思考レベル",
+    "Low": "低",
+    "Medium": "中",
+    "High": "高",
+    "Enable": "有効化"
 }

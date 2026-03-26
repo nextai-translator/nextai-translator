@@ -224,5 +224,11 @@
     "Using global settings": "使用全局设置",
     "Action Model": "操作模型",
     "Action Provider": "操作服务商",
-    "Custom Model Name": "自定义模型名称"
+    "Custom Model Name": "自定义模型名称",
+    "Enable Extended Thinking": "启用扩展思考",
+    "Thinking Level": "思考级别",
+    "Low": "低",
+    "Medium": "中",
+    "High": "高",
+    "Enable": "启用"
 }

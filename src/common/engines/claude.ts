@@ -45,17 +45,26 @@ export class Claude extends AbstractEngine {
             'anthropic-beta': 'messages-2023-12-15',
             'x-api-key': apiKey,
         }
-        const body = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const body: Record<string, any> = {
             model,
             stream: true,
-            max_tokens: 4096,
-            temperature: 0,
             messages: [
                 {
                     role: 'user',
                     content: req.rolePrompt ? req.rolePrompt + '\n\n' + req.commandPrompt : req.commandPrompt,
                 },
             ],
+        }
+        if (req.thinkingBudget) {
+            body.thinking = {
+                type: 'enabled',
+                budget_tokens: req.thinkingBudget,
+            }
+            body.max_tokens = Math.max(16384, req.thinkingBudget + 4096)
+        } else {
+            body.temperature = 0
+            body.max_tokens = 4096
         }
 
         let hasError = false
@@ -79,6 +88,9 @@ export class Claude extends AbstractEngine {
                 const { type } = resp
                 if (type === 'content_block_delta') {
                     const { delta } = resp
+                    if (delta.type === 'thinking_delta') {
+                        return
+                    }
                     const { text } = delta
                     await req.onMessage({ content: text, role: '' })
                     return

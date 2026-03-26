@@ -224,5 +224,11 @@
     "Using global settings": "使用全域設定",
     "Action Model": "動作模型",
     "Action Provider": "動作服務商",
-    "Custom Model Name": "自訂模型名稱"
+    "Custom Model Name": "自訂模型名稱",
+    "Enable Extended Thinking": "啟用擴展思考",
+    "Thinking Level": "思考級別",
+    "Low": "低",
+    "Medium": "中",
+    "High": "高",
+    "Enable": "啟用"
 }

@@ -25,6 +25,8 @@ export interface Action {
     outputRenderingFormat?: ActionOutputRenderingFormat
     provider?: Provider
     apiModel?: string
+    thinking?: boolean
+    thinkingLevel?: 'low' | 'medium' | 'high'
     updatedAt: string
     createdAt: string
 }

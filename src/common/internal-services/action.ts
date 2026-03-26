@@ -12,6 +12,8 @@ export interface ICreateActionOption {
     outputRenderingFormat?: ActionOutputRenderingFormat
     provider?: Provider
     apiModel?: string
+    thinking?: boolean
+    thinkingLevel?: 'low' | 'medium' | 'high'
 }
 
 export interface IUpdateActionOption {
@@ -24,6 +26,8 @@ export interface IUpdateActionOption {
     outputRenderingFormat?: ActionOutputRenderingFormat
     provider?: Provider
     apiModel?: string
+    thinking?: boolean
+    thinkingLevel?: 'low' | 'medium' | 'high'
 }
 
 export interface IActionInternalService {
@@ -58,6 +62,8 @@ class ActionInternalService implements IActionInternalService {
                 outputRenderingFormat: opt.outputRenderingFormat,
                 provider: opt.provider,
                 apiModel: opt.apiModel,
+                thinking: opt.thinking,
+                thinkingLevel: opt.thinkingLevel,
                 createdAt: now,
                 updatedAt: now,
             }

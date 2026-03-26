@@ -228,6 +228,35 @@ function LanguageDetectionEngineSelector({ value, onChange, onBlur }: ILanguageD
     )
 }
 
+interface IThinkingLevelSelectorProps {
+    value?: string
+    onChange?: (value: string) => void
+    onBlur?: () => void
+}
+
+function ThinkingLevelSelector({ value, onChange, onBlur }: IThinkingLevelSelectorProps) {
+    const { t } = useTranslation()
+
+    return (
+        <Select
+            size='compact'
+            onBlur={onBlur}
+            searchable={false}
+            clearable={false}
+            value={value ? [{ id: value }] : [{ id: 'medium' }]}
+            onChange={(params) => {
+                onChange?.(params.value[0]?.id as string)
+                onBlur?.()
+            }}
+            options={[
+                { id: 'low', label: t('Low') },
+                { id: 'medium', label: t('Medium') },
+                { id: 'high', label: t('High') },
+            ]}
+        />
+    )
+}
+
 const useTTSSettingsStyles = createUseStyles({
     label: (props: IThemedStyleProps) => ({
         color: props.theme.colors.contentPrimary,
@@ -1448,23 +1477,33 @@ interface IPerActionModelConfigProps {
     settings: ISettings
 }
 
+// Persist selected action across Settings open/close cycles
+let lastSelectedActionId: number | undefined
+
 function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
     const { t } = useTranslation()
     const { theme } = useTheme()
     const actions = useLiveQuery(() => actionService.list(), [])
-    const [selectedActionId, setSelectedActionId] = useState<number | undefined>(undefined)
+    const [selectedActionId, setSelectedActionId] = useState<number | undefined>(lastSelectedActionId)
     const [selectedAction, setSelectedAction] = useState<Action | undefined>(undefined)
     const [useCustomModel, setUseCustomModel] = useState(false)
     const [actionProvider, setActionProvider] = useState<Provider | undefined>(undefined)
     const [actionModel, setActionModel] = useState<string | undefined>(undefined)
     const [isCustomModelName, setIsCustomModelName] = useState(false)
+    const [actionThinking, setActionThinking] = useState(false)
+    const [actionThinkingLevel, setActionThinkingLevel] = useState<string>('medium')
 
-    // When actions load, default to first action
+    // When actions load, default to first action (or restore last selection)
     useEffect(() => {
         if (actions && actions.length > 0 && selectedActionId === undefined) {
             setSelectedActionId(actions[0].id)
         }
     }, [actions, selectedActionId])
+
+    // Persist selected action for next Settings open
+    useEffect(() => {
+        lastSelectedActionId = selectedActionId
+    }, [selectedActionId])
 
     // When selected action changes, load its settings
     useEffect(() => {
@@ -1477,27 +1516,33 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
             setActionProvider(action.provider || settings.provider)
             setActionModel(action.apiModel || '')
             setIsCustomModelName(false)
+            setActionThinking(action.thinking ?? false)
+            setActionThinkingLevel(action.thinkingLevel ?? 'medium')
         }
     }, [actions, selectedActionId, settings.provider])
 
     const handleSave = useCallback(
-        async (provider?: Provider, model?: string, enabled?: boolean) => {
+        async (provider?: Provider, model?: string, enabled?: boolean, thinking?: boolean, thinkingLevel?: string) => {
             if (!selectedAction) return
             const shouldEnable = enabled !== undefined ? enabled : useCustomModel
             if (shouldEnable) {
                 await actionService.update(selectedAction, {
                     provider: provider ?? actionProvider,
                     apiModel: model ?? actionModel,
+                    thinking: thinking ?? actionThinking,
+                    thinkingLevel: (thinkingLevel ?? actionThinkingLevel) as 'low' | 'medium' | 'high',
                 })
             } else {
                 // Explicitly clear per-action overrides
                 await actionService.update(selectedAction, {
                     provider: undefined,
                     apiModel: undefined,
+                    thinking: undefined,
+                    thinkingLevel: undefined,
                 })
             }
         },
-        [selectedAction, useCustomModel, actionProvider, actionModel]
+        [selectedAction, useCustomModel, actionProvider, actionModel, actionThinking, actionThinkingLevel]
     )
 
     const actionOptions = useMemo(() => {
@@ -1637,6 +1682,57 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
                                         }}
                                     />
                                 </div>
+                            )}
+                            {actionProvider === 'Claude' && (
+                                <>
+                                    <div style={{ marginBottom: '8px' }}>
+                                        <Checkbox
+                                            checked={actionThinking}
+                                            onChange={(e) => {
+                                                const checked = (e.target as HTMLInputElement).checked
+                                                setActionThinking(checked)
+                                                handleSave(
+                                                    actionProvider,
+                                                    actionModel,
+                                                    true,
+                                                    checked,
+                                                    actionThinkingLevel
+                                                )
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '13px' }}>{t('Enable Extended Thinking')}</span>
+                                        </Checkbox>
+                                    </div>
+                                    {actionThinking && (
+                                        <div style={{ marginBottom: '8px' }}>
+                                            <div
+                                                style={{
+                                                    fontSize: '12px',
+                                                    marginBottom: '4px',
+                                                    color: theme.colors.contentSecondary,
+                                                }}
+                                            >
+                                                {t('Thinking Level')}
+                                            </div>
+                                            <Select
+                                                size='compact'
+                                                searchable={false}
+                                                clearable={false}
+                                                options={[
+                                                    { id: 'low', label: t('Low') },
+                                                    { id: 'medium', label: t('Medium') },
+                                                    { id: 'high', label: t('High') },
+                                                ]}
+                                                value={[{ id: actionThinkingLevel }]}
+                                                onChange={(params) => {
+                                                    const level = params.value[0]?.id as string
+                                                    setActionThinkingLevel(level)
+                                                    handleSave(actionProvider, actionModel, true, actionThinking, level)
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </>
                     ) : (
@@ -2559,6 +2655,18 @@ export function InnerSettings({
                                     required={values.provider === 'Claude' && values.claudeAPIModel === CUSTOM_MODEL_ID}
                                 >
                                     <Input autoComplete='off' size='compact' />
+                                </FormItem>
+                            </div>
+                            <FormItem name='claudeThinking' label={t('Enable Extended Thinking')}>
+                                <MyCheckbox onBlur={onBlur} />
+                            </FormItem>
+                            <div
+                                style={{
+                                    display: values.claudeThinking ? 'block' : 'none',
+                                }}
+                            >
+                                <FormItem name='claudeThinkingLevel' label={t('Thinking Level')}>
+                                    <ThinkingLevelSelector onBlur={onBlur} />
                                 </FormItem>
                             </div>
                             <FormItem
