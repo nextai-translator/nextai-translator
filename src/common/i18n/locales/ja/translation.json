@@ -209,5 +209,6 @@
     "Use custom model for this action": "このアクションにカスタムモデルを使用",
     "Using global settings": "グローバル設定を使用中",
     "Action Model": "アクションモデル",
-    "Action Provider": "アクションプロバイダー"
+    "Action Provider": "アクションプロバイダー",
+    "Custom Model Name": "カスタムモデル名"
 }

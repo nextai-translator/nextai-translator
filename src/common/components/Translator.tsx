@@ -2672,12 +2672,13 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                         <div className={styles.poweredBy}>
                             Powered by{' '}
                             <div className={styles.brand}>
-                                {React.createElement(engineIcons[settings.provider], {
+                                {React.createElement(engineIcons[activateAction?.provider || settings.provider], {
                                     size: 10,
                                 })}
-                                {settings.provider}
+                                {activateAction?.provider || settings.provider}
                             </div>
-                            {translateDeps.engineModel && ` ${translateDeps.engineModel}`}
+                            {(activateAction?.apiModel || translateDeps.engineModel) &&
+                                ` ${activateAction?.apiModel || translateDeps.engineModel}`}
                         </div>
                     )}
                     {!showSettings && (

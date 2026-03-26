@@ -223,5 +223,6 @@
     "Use custom model for this action": "为此操作使用自定义模型",
     "Using global settings": "使用全局设置",
     "Action Model": "操作模型",
-    "Action Provider": "操作服务商"
+    "Action Provider": "操作服务商",
+    "Custom Model Name": "自定义模型名称"
 }

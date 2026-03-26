@@ -208,5 +208,6 @@
     "Use custom model for this action": "Use custom model for this action",
     "Using global settings": "Using global settings",
     "Action Model": "Action Model",
-    "Action Provider": "Action Provider"
+    "Action Provider": "Action Provider",
+    "Custom Model Name": "Custom Model Name"
 }

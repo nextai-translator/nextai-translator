@@ -21,18 +21,13 @@ export class Claude extends AbstractEngine {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listModels(apiKey_: string | undefined): Promise<IModel[]> {
         return Promise.resolve([
-            {
-                id: 'claude-3-5-sonnet-20240620',
-                name: 'claude-3-5-sonnet-20240620',
-            },
-            {
-                id: 'claude-3-sonnet-20240229',
-                name: 'claude-3-sonnet-20240229',
-            },
-            {
-                id: 'claude-3-opus-20240229',
-                name: 'claude-3-opus-20240229',
-            },
+            { id: 'claude-opus-4-6', name: 'Claude Opus 4.6' },
+            { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6' },
+            { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5' },
+            { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4' },
+            { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet' },
+            { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
+            { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' },
         ])
     }
 

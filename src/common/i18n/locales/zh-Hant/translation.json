@@ -223,5 +223,6 @@
     "Use custom model for this action": "為此動作使用自訂模型",
     "Using global settings": "使用全域設定",
     "Action Model": "動作模型",
-    "Action Provider": "動作服務商"
+    "Action Provider": "動作服務商",
+    "Custom Model Name": "自訂模型名稱"
 }

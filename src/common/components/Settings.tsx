@@ -1506,6 +1506,8 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
         }))
     }, [actions, t])
 
+    const apiKey = actionProvider ? utils.getAPIKeyForProvider(actionProvider, settings) : undefined
+
     return (
         <div
             style={{
@@ -1591,6 +1593,31 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
                                     }}
                                 >
                                     {t('Action Model')}
+                                </div>
+                                <APIModelSelector
+                                    currentProvider={actionProvider || settings.provider}
+                                    provider={actionProvider || settings.provider}
+                                    apiKey={apiKey}
+                                    value={actionModel}
+                                    onChange={(model) => {
+                                        if (model === CUSTOM_MODEL_ID) {
+                                            setActionModel('')
+                                        } else {
+                                            setActionModel(model)
+                                            handleSave(actionProvider, model, true)
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <div style={{ marginBottom: '8px' }}>
+                                <div
+                                    style={{
+                                        fontSize: '12px',
+                                        marginBottom: '4px',
+                                        color: theme.colors.contentSecondary,
+                                    }}
+                                >
+                                    {t('Custom Model Name')}
                                 </div>
                                 <Input
                                     size='compact'
