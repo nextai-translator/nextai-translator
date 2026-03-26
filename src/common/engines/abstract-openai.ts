@@ -133,8 +133,8 @@ export abstract class AbstractOpenAI extends AbstractEngine {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async getBaseRequestBody(): Promise<Record<string, any>> {
-        const model = await this.getAPIModel()
+    async getBaseRequestBody(modelParam?: string): Promise<Record<string, any>> {
+        const model = modelParam || (await this.getAPIModel())
         const modelLower = model.toLowerCase()
 
         // Use standard parameters for traditional models
@@ -181,13 +181,13 @@ export abstract class AbstractOpenAI extends AbstractEngine {
     async sendMessage(req: IMessageRequest): Promise<void> {
         const apiURL = await this.getAPIURL()
         const apiURLPath = await this.getAPIURLPath()
-        const model = await this.getAPIModel()
+        const model = req.modelOverride || (await this.getAPIModel())
         const useResponsesAPI = this.shouldUseResponsesAPI(apiURL, apiURLPath, model)
         const targetAPIURLPath = useResponsesAPI ? OPENAI_RESPONSES_API_PATH : apiURLPath
         const url = urlJoin(apiURL, targetAPIURLPath)
         const headers = await this.getHeaders()
         const isChatAPI = await this.isChatAPI()
-        const body = await this.getBaseRequestBody()
+        const body = await this.getBaseRequestBody(model)
         if (useResponsesAPI) {
             if (body.reasoning_effort !== undefined) {
                 body['reasoning'] = {

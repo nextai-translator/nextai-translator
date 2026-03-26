@@ -217,5 +217,11 @@
     "The survival time of the Ollama model in memory": "Ollama 模型在記憶體中的存留時間",
     "No models API support": "不支援模型 API",
     "Some providers claiming to be compatible with OpenAI's API do not actually support OpenAI's standard model API. Therefore, we have no choice but to offer this option. If you choose this option (and then need to click the save button), we will not attempt to dynamically fetch the latest model list from the model API, but will only use a fixed model list and custom models.": "某些聲稱與 OpenAI 的 API 相容的供應商實際上不支援 OpenAI 的標準模型 API。因此，我們別無選擇，只能提供此選項。如果您選擇此選項（之後需要點選儲存按鈕），我們將不會嘗試從模型 API 動態取得最新的模型列表，而只會使用固定的模型列表和自訂模型。",
-    "If you find this tool helpful, you can buy me a cup of coffee.": "如果您覺得這個工具有幫助，可以請我喝杯咖啡。"
+    "If you find this tool helpful, you can buy me a cup of coffee.": "如果您覺得這個工具有幫助，可以請我喝杯咖啡。",
+    "Per-Action Model": "動作專屬模型",
+    "Select an action to configure its model": "選擇一個動作來配置其模型",
+    "Use custom model for this action": "為此動作使用自訂模型",
+    "Using global settings": "使用全域設定",
+    "Action Model": "動作模型",
+    "Action Provider": "動作服務商"
 }

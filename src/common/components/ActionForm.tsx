@@ -12,6 +12,9 @@ import { IThemedStyleProps } from '../types'
 import { useTheme } from '../hooks/useTheme'
 import { IconPicker } from './IconPicker'
 import { RenderingFormatSelector } from './RenderingFormatSelector'
+import { ProviderSelector, APIModelSelector } from './Settings'
+import { useSettings } from '../hooks/useSettings'
+import { getAPIKeyForProvider } from '../utils'
 
 const useStyles = createUseStyles({
     placeholder: (props: IThemedStyleProps) => ({
@@ -46,6 +49,7 @@ export function ActionForm(props: IActionFormProps) {
     const styles = useStyles({ theme, themeType })
 
     const { t } = useTranslation()
+    const { settings: settingsData } = useSettings()
 
     const [loading, setLoading] = useState(false)
 
@@ -127,43 +131,59 @@ export function ActionForm(props: IActionFormProps) {
 
     return (
         <Form initialValues={values} onValuesChange={handleValuesChange} onFinish={onSubmit}>
-            <FormItem required name='name' label={t('Name')}>
-                <Input size='compact' />
+            {!props.action?.mode && (
+                <>
+                    <FormItem required name='name' label={t('Name')}>
+                        <Input size='compact' />
+                    </FormItem>
+                    <FormItem required name='icon' label={t('Icon')}>
+                        <IconPicker />
+                    </FormItem>
+                    <FormItem name='rolePrompt' label={`${t('Role Prompt')} (Optional)`} caption={rolePromptCaption}>
+                        <Textarea
+                            rows={4}
+                            overrides={{
+                                Root: {
+                                    style: {
+                                        width: '100%',
+                                    },
+                                },
+                            }}
+                            size='compact'
+                            resize='vertical'
+                        />
+                    </FormItem>
+                    <FormItem required name='commandPrompt' label={t('Command Prompt')} caption={commandPromptCaption}>
+                        <Textarea
+                            rows={4}
+                            overrides={{
+                                Root: {
+                                    style: {
+                                        width: '100%',
+                                    },
+                                },
+                            }}
+                            size='compact'
+                            resize='vertical'
+                        />
+                    </FormItem>
+                    <FormItem name='outputRenderingFormat' label={t('Output rendering format')}>
+                        <RenderingFormatSelector />
+                    </FormItem>
+                </>
+            )}
+            <FormItem name='provider' label={`${t('Action Provider')} (Optional)`}>
+                <ProviderSelector />
             </FormItem>
-            <FormItem required name='icon' label={t('Icon')}>
-                <IconPicker />
-            </FormItem>
-            <FormItem name='rolePrompt' label={`${t('Role Prompt')} (Optional)`} caption={rolePromptCaption}>
-                <Textarea
-                    rows={4}
-                    overrides={{
-                        Root: {
-                            style: {
-                                width: '100%',
-                            },
-                        },
-                    }}
-                    size='compact'
-                    resize='vertical'
-                />
-            </FormItem>
-            <FormItem required name='commandPrompt' label={t('Command Prompt')} caption={commandPromptCaption}>
-                <Textarea
-                    rows={4}
-                    overrides={{
-                        Root: {
-                            style: {
-                                width: '100%',
-                            },
-                        },
-                    }}
-                    size='compact'
-                    resize='vertical'
-                />
-            </FormItem>
-            <FormItem name='outputRenderingFormat' label={t('Output rendering format')}>
-                <RenderingFormatSelector />
-            </FormItem>
+            {values?.provider && settingsData && (
+                <FormItem name='apiModel' label={`${t('Action Model')} (Optional)`}>
+                    <APIModelSelector
+                        currentProvider={values.provider}
+                        provider={values.provider}
+                        apiKey={getAPIKeyForProvider(values.provider, settingsData)}
+                    />
+                </FormItem>
+            )}
             <div
                 style={{
                     display: 'flex',

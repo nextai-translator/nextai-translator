@@ -161,7 +161,7 @@ export class ChatGPT extends AbstractEngine {
     }
 
     async sendMessage(req: IMessageRequest): Promise<void> {
-        const model = await this.getModel()
+        const model = req.modelOverride || (await this.getModel())
         const fetcher = getUniversalFetch()
         req.onStatusCode?.(200)
         let resp: Response | null = null

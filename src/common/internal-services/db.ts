@@ -1,6 +1,7 @@
 import Dexie, { Table } from 'dexie'
 import { TranslateMode } from '../translate'
 import { LangCode } from '../lang'
+import { Provider } from '../engines'
 
 export interface VocabularyItem {
     word: string
@@ -22,6 +23,8 @@ export interface Action {
     rolePrompt?: string
     commandPrompt?: string
     outputRenderingFormat?: ActionOutputRenderingFormat
+    provider?: Provider
+    apiModel?: string
     updatedAt: string
     createdAt: string
 }

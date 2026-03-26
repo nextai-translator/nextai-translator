@@ -397,11 +397,16 @@ If you understand, say "yes", and then we will begin.`
 
     const settings = await getSettings()
 
-    const engine = getEngine(settings.provider)
+    // Use per-action provider/model if configured, otherwise fall back to global settings
+    const effectiveProvider = (query.mode !== 'big-bang' && query.action?.provider) || settings.provider
+    const effectiveModel = query.mode !== 'big-bang' ? query.action?.apiModel : undefined
+
+    const engine = getEngine(effectiveProvider)
     await engine.sendMessage({
         signal: query.signal,
         rolePrompt,
         commandPrompt,
+        modelOverride: effectiveModel,
         onMessage: async (message) => {
             await query.onMessage({ ...message, isWordMode })
         },

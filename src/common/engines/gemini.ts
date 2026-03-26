@@ -66,7 +66,7 @@ export class Gemini extends AbstractEngine {
         const settings = await getSettings()
         const apiKey = settings.geminiAPIKey
         const geminiAPIURL = settings.geminiAPIURL
-        const model = await this.getModel()
+        const model = req.modelOverride || (await this.getModel())
         const url =
             urlJoin(geminiAPIURL, '/v1beta/models/', `${model}:streamGenerateContent`) +
             qs.stringify({ key: apiKey, alt: 'sse' }, { addQueryPrefix: true })

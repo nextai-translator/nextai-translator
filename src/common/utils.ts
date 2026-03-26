@@ -557,3 +557,38 @@ export function getAssetUrl(asset: string) {
 }
 export const isMacOS = navigator.userAgent.includes('Mac OS X')
 export const isWindows = navigator.userAgent.includes('Windows')
+
+/** Maps a provider name to its API key field in ISettings. */
+export function getAPIKeyForProvider(provider: string, settings: ISettings): string | undefined {
+    switch (provider) {
+        case 'OpenAI':
+            return settings.apiKeys
+        case 'Azure':
+            return settings.azureAPIKeys
+        case 'Claude':
+            return settings.claudeAPIKey
+        case 'Gemini':
+            return settings.geminiAPIKey
+        case 'Groq':
+            return settings.groqAPIKey
+        case 'DeepSeek':
+            return settings.deepSeekAPIKey
+        case 'Cerebras':
+            return settings.cerebrasAPIKey
+        case 'Moonshot':
+            return settings.moonshotAPIKey
+        case 'MiniMax':
+            return settings.miniMaxAPIKey
+        case 'Cohere':
+            return settings.cohereAPIKey
+        case 'Kimi':
+            return settings.kimiAccessToken
+        case 'ChatGLM':
+            return settings.chatglmAccessToken
+        case 'ChatGPT':
+        case 'Ollama':
+            return undefined
+        default:
+            return undefined
+    }
+}

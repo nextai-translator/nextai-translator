@@ -43,7 +43,7 @@ export class Cerebras extends AbstractEngine {
     async sendMessage(req: IMessageRequest): Promise<void> {
         const settings = await getSettings()
         const apiKey = settings.cerebrasAPIKey
-        const model = await this.getModel()
+        const model = req.modelOverride || (await this.getModel())
         const url = 'https://api.cerebras.ai/v1/chat/completions'
         const headers = {
             'Content-Type': 'application/json',

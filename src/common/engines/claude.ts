@@ -39,7 +39,7 @@ export class Claude extends AbstractEngine {
     async sendMessage(req: IMessageRequest): Promise<void> {
         const settings = await getSettings()
         const apiKey = settings.claudeAPIKey
-        const model = await this.getModel()
+        const model = req.modelOverride || (await this.getModel())
         const url = urlJoin(settings.claudeAPIURL, settings.claudeAPIURLPath)
         const headers = {
             'Content-Type': 'application/json',
