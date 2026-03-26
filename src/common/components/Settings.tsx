@@ -1482,10 +1482,18 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
         async (provider?: Provider, model?: string, enabled?: boolean) => {
             if (!selectedAction) return
             const shouldEnable = enabled !== undefined ? enabled : useCustomModel
-            await actionService.update(selectedAction, {
-                provider: shouldEnable ? provider || actionProvider : undefined,
-                apiModel: shouldEnable ? model || actionModel : undefined,
-            })
+            if (shouldEnable) {
+                await actionService.update(selectedAction, {
+                    provider: provider ?? actionProvider,
+                    apiModel: model ?? actionModel,
+                })
+            } else {
+                // Explicitly clear per-action overrides
+                await actionService.update(selectedAction, {
+                    provider: undefined,
+                    apiModel: undefined,
+                })
+            }
         },
         [selectedAction, useCustomModel, actionProvider, actionModel]
     )
@@ -1497,8 +1505,6 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
             label: action.mode ? t(action.name) : action.name,
         }))
     }, [actions, t])
-
-    const apiKey = actionProvider ? utils.getAPIKeyForProvider(actionProvider, settings) : undefined
 
     return (
         <div
@@ -1586,14 +1592,16 @@ function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
                                 >
                                     {t('Action Model')}
                                 </div>
-                                <APIModelSelector
-                                    currentProvider={actionProvider || settings.provider}
-                                    provider={actionProvider || settings.provider}
-                                    apiKey={apiKey}
-                                    value={actionModel}
-                                    onChange={(model) => {
-                                        setActionModel(model)
-                                        handleSave(actionProvider, model, true)
+                                <Input
+                                    size='compact'
+                                    placeholder='e.g. claude-sonnet-4-20250514'
+                                    value={actionModel || ''}
+                                    onChange={(e) => {
+                                        const val = (e.target as HTMLInputElement).value
+                                        setActionModel(val)
+                                    }}
+                                    onBlur={() => {
+                                        handleSave(actionProvider, actionModel, true)
                                     }}
                                 />
                             </div>

@@ -86,7 +86,9 @@ class ActionInternalService implements IActionInternalService {
                 ...opt,
                 updatedAt: now,
             }
-            await this.db.action.update(action.id as number, newAction)
+            // Use put() instead of update() so that undefined values properly
+            // clear fields (Dexie's update() silently ignores undefined properties)
+            await this.db.action.put(newAction)
             return newAction
         })
     }

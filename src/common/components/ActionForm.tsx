@@ -12,9 +12,7 @@ import { IThemedStyleProps } from '../types'
 import { useTheme } from '../hooks/useTheme'
 import { IconPicker } from './IconPicker'
 import { RenderingFormatSelector } from './RenderingFormatSelector'
-import { ProviderSelector, APIModelSelector } from './Settings'
-import { useSettings } from '../hooks/useSettings'
-import { getAPIKeyForProvider } from '../utils'
+import { ProviderSelector } from './Settings'
 
 const useStyles = createUseStyles({
     placeholder: (props: IThemedStyleProps) => ({
@@ -49,7 +47,6 @@ export function ActionForm(props: IActionFormProps) {
     const styles = useStyles({ theme, themeType })
 
     const { t } = useTranslation()
-    const { settings: settingsData } = useSettings()
 
     const [loading, setLoading] = useState(false)
 
@@ -175,13 +172,9 @@ export function ActionForm(props: IActionFormProps) {
             <FormItem name='provider' label={`${t('Action Provider')} (Optional)`}>
                 <ProviderSelector />
             </FormItem>
-            {values?.provider && settingsData && (
+            {values?.provider && (
                 <FormItem name='apiModel' label={`${t('Action Model')} (Optional)`}>
-                    <APIModelSelector
-                        currentProvider={values.provider}
-                        provider={values.provider}
-                        apiKey={getAPIKeyForProvider(values.provider, settingsData)}
-                    />
+                    <Input size='compact' placeholder='e.g. claude-sonnet-4-20250514' />
                 </FormItem>
             )}
             <div

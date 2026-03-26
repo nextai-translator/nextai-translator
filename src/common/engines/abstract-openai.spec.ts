@@ -265,6 +265,26 @@ describe('AbstractOpenAI', () => {
             expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
         })
 
+        it('should ignore empty string modelOverride and use getAPIModel', async () => {
+            const engine = new TestOpenAIEngine('gpt-4o')
+            const { req } = createMessageRequest()
+            req.modelOverride = ''
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const body = JSON.parse(options.body as string)
+                expect(body.model).toBe('gpt-4o')
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
         it('should apply correct request params for overridden model', async () => {
             // Engine is configured with gpt-4o, but override to o1
             // o1 is routed to Responses API, so reasoning_effort becomes reasoning.effort
