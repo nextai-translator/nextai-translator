@@ -154,8 +154,23 @@ export abstract class AbstractOpenAI extends AbstractEngine {
             return { model, stream: true, reasoning_effort: 'low' }
         }
 
-        // Use `minimal` for gpt-5 series
-        if (/^gpt-5(\.0)?(-mini|-nano)?(\b|-)/.test(modelLower) && !/-pro|-chat|instant/.test(modelLower)) {
+        // GPT-5 pro models are extended-reasoning — use 'low' like o-series
+        if (/^gpt-5(\.0)?(-mini|-nano)?-pro\b/.test(modelLower)) {
+            return { model, stream: true, reasoning_effort: 'low' }
+        }
+
+        // GPT-5 chat/code/instant models are non-reasoning — no reasoning_effort
+        if (/-chat|-code|instant/.test(modelLower) && /^gpt-5/.test(modelLower)) {
+            return { model, stream: true }
+        }
+
+        // GPT-5.1+ and future sub-versions — use minimal parameters to avoid deprecated param errors
+        if (/^gpt-5\.[1-9]/.test(modelLower)) {
+            return { model, stream: true }
+        }
+
+        // GPT-5 base/mini/nano models — use 'minimal' reasoning effort
+        if (/^gpt-5(\.0)?(-mini|-nano)?(\b|-)/.test(modelLower)) {
             return { model, stream: true, reasoning_effort: 'minimal' }
         }
 

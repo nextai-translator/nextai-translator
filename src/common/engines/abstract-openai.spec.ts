@@ -130,4 +130,92 @@ describe('AbstractOpenAI', () => {
         expect(onMessage).toHaveBeenCalledWith({ content: '你好', role: 'assistant' })
         expect(onFinished).toHaveBeenCalledWith('stop')
     })
+
+    it('does not send reasoning_effort for GPT-5 code models', async () => {
+        const engine = new TestOpenAIEngine('gpt-5-code')
+        const { req } = createMessageRequest()
+
+        vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+            expect(input).toBe('https://api.openai.com/v1/responses')
+            const payload = JSON.parse(options.body as string)
+            expect(payload.model).toBe('gpt-5-code')
+            expect(payload.stream).toBe(true)
+            expect(payload.reasoning_effort).toBeUndefined()
+            expect(payload.reasoning).toBeUndefined()
+
+            await options.onMessage(JSON.stringify({ type: 'response.completed', response: {} }))
+        })
+
+        await engine.sendMessage(req)
+    })
+
+    it('does not send reasoning_effort for GPT-5 mini code models', async () => {
+        const engine = new TestOpenAIEngine('gpt-5-mini-code')
+        const { req } = createMessageRequest()
+
+        vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+            expect(input).toBe('https://api.openai.com/v1/responses')
+            const payload = JSON.parse(options.body as string)
+            expect(payload.model).toBe('gpt-5-mini-code')
+            expect(payload.reasoning_effort).toBeUndefined()
+            expect(payload.reasoning).toBeUndefined()
+
+            await options.onMessage(JSON.stringify({ type: 'response.completed', response: {} }))
+        })
+
+        await engine.sendMessage(req)
+    })
+
+    it('sends reasoning effort low for GPT-5 pro models via Responses API', async () => {
+        const engine = new TestOpenAIEngine('gpt-5-pro')
+        const { req } = createMessageRequest()
+
+        vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+            expect(input).toBe('https://api.openai.com/v1/responses')
+            const payload = JSON.parse(options.body as string)
+            expect(payload.model).toBe('gpt-5-pro')
+            expect(payload.stream).toBe(true)
+            expect(payload.reasoning).toEqual({ effort: 'low' })
+            expect(payload.reasoning_effort).toBeUndefined()
+
+            await options.onMessage(JSON.stringify({ type: 'response.completed', response: {} }))
+        })
+
+        await engine.sendMessage(req)
+    })
+
+    it('sends reasoning effort low for GPT-5 mini pro models via Responses API', async () => {
+        const engine = new TestOpenAIEngine('gpt-5-mini-pro')
+        const { req } = createMessageRequest()
+
+        vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+            expect(input).toBe('https://api.openai.com/v1/responses')
+            const payload = JSON.parse(options.body as string)
+            expect(payload.model).toBe('gpt-5-mini-pro')
+            expect(payload.reasoning).toEqual({ effort: 'low' })
+            expect(payload.reasoning_effort).toBeUndefined()
+
+            await options.onMessage(JSON.stringify({ type: 'response.completed', response: {} }))
+        })
+
+        await engine.sendMessage(req)
+    })
+
+    it('does not send reasoning_effort for GPT-5 chat models', async () => {
+        const engine = new TestOpenAIEngine('gpt-5-chat')
+        const { req } = createMessageRequest()
+
+        vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+            expect(input).toBe('https://api.openai.com/v1/responses')
+            const payload = JSON.parse(options.body as string)
+            expect(payload.model).toBe('gpt-5-chat')
+            expect(payload.stream).toBe(true)
+            expect(payload.reasoning_effort).toBeUndefined()
+            expect(payload.reasoning).toBeUndefined()
+
+            await options.onMessage(JSON.stringify({ type: 'response.completed', response: {} }))
+        })
+
+        await engine.sendMessage(req)
+    })
 })
