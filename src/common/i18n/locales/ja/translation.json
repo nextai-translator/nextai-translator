@@ -203,5 +203,18 @@
     "The survival time of the Ollama model in memory": "Ollamaモデルのメモリ内の生存時間",
     "No models API support": "モデルAPIサポートなし",
     "Some providers claiming to be compatible with OpenAI's API do not actually support OpenAI's standard model API. Therefore, we have no choice but to offer this option. If you choose this option (and then need to click the save button), we will not attempt to dynamically fetch the latest model list from the model API, but will only use a fixed model list and custom models.": "OpenAIのAPIと互換性があると主張している一部のプロバイダーは、実際にはOpenAIの標準モデルAPIをサポートしていません。そのため、このオプションを提供する以外に選択肢はありません。このオプションを選択する場合（その後保存ボタンをクリックする必要があります）、最新のモデルリストをモデルAPIから動的に取得しようとはしませんが、固定のモデルリストとカスタムモデルのみを使用します。",
-    "If you find this tool helpful, you can buy me a cup of coffee.": "このツールが役に立ったら、コーヒーを買ってください。"
+    "If you find this tool helpful, you can buy me a cup of coffee.": "このツールが役に立ったら、コーヒーを買ってください。",
+    "Per-Action Model": "アクション別モデル",
+    "Select an action to configure its model": "モデルを設定するアクションを選択",
+    "Use custom model for this action": "このアクションにカスタムモデルを使用",
+    "Using global settings": "グローバル設定を使用中",
+    "Action Model": "アクションモデル",
+    "Action Provider": "アクションプロバイダー",
+    "Custom Model Name": "カスタムモデル名",
+    "Enable Extended Thinking": "拡張思考を有効化",
+    "Thinking Level": "思考レベル",
+    "Low": "低",
+    "Medium": "中",
+    "High": "高",
+    "Enable": "有効化"
 }

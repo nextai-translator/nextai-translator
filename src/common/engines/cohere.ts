@@ -47,7 +47,7 @@ export class Cohere extends AbstractEngine {
     async sendMessage(req: IMessageRequest): Promise<void> {
         const settings = await getSettings()
         const apiKey = settings.cohereAPIKey
-        const model = await this.getModel()
+        const model = req.modelOverride || (await this.getModel())
         const url = 'https://api.cohere.ai/v1/chat'
         const headers = {
             'Content-Type': 'application/json',

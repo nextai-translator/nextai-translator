@@ -16,8 +16,7 @@ import { StatefulTooltip } from 'baseui-sd/tooltip'
 import { detectLang, getLangConfig, sourceLanguages, targetLanguages, LangCode } from '../lang'
 import { translate, TranslateMode } from '../translate'
 import { Select, Value, Option } from 'baseui-sd/select'
-import { RxEraser, RxEnter, RxReload, RxStop } from 'react-icons/rx'
-import { LuStar, LuStarOff } from 'react-icons/lu'
+import { RxEraser, RxReload, RxStop } from 'react-icons/rx'
 import { clsx } from 'clsx'
 import { Button } from 'baseui-sd/button'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -843,7 +842,8 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     const [isWordMode, setIsWordMode] = useState(false)
     const isWordModeRef = useRef(false)
     const [isCollectedWord, setIsCollectedWord] = useState(false)
-    const [isAutoCollectOn, setIsAutoCollectOn] = useState(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isAutoCollectOn, _setIsAutoCollectOn] = useState(
         settings.autoCollect === undefined ? false : settings.autoCollect
     )
 
@@ -1535,6 +1535,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         setActionStr('Stopped')
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleInsertTranslatedText = useCallback(async () => {
         if (!translatedText || !isTauri()) {
             return
@@ -2225,6 +2226,13 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 </div>
                                             </Tooltip>
                                         )}
+                                        {!isLoading && translatedText && (
+                                            <Tooltip content={t('Retry')} placement='bottom'>
+                                                <div onClick={() => forceTranslate()} className={styles.actionButton}>
+                                                    <RxReload size={15} />
+                                                </div>
+                                            </Tooltip>
+                                        )}
                                         <Tooltip content={t('Speak')} placement='bottom'>
                                             <div className={styles.actionButton}>
                                                 <SpeakerIcon
@@ -2409,72 +2417,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 )}
                                             </div>
                                         </div>
-                                        {translatedText && (
-                                            <div ref={actionButtonsRef} className={styles.actionButtonsContainer}>
-                                                <div style={{ marginRight: 'auto' }} />
-                                                {!isLoading && (
-                                                    <Tooltip content={t('Retry')} placement='bottom'>
-                                                        <div
-                                                            onClick={() => forceTranslate()}
-                                                            className={styles.actionButton}
-                                                        >
-                                                            <RxReload size={15} />
-                                                        </div>
-                                                    </Tooltip>
-                                                )}
-                                                <Tooltip content={t('Speak')} placement='bottom'>
-                                                    <div className={styles.actionButton}>
-                                                        <SpeakerIcon
-                                                            size={15}
-                                                            provider={settings.tts?.provider}
-                                                            text={translatedText}
-                                                            lang={targetLang ?? 'en'}
-                                                            voice={
-                                                                settings.tts?.voices?.find(
-                                                                    (item) => item.lang === targetLang
-                                                                )?.voice
-                                                            }
-                                                            rate={settings.tts?.rate}
-                                                            volume={settings.tts?.volume}
-                                                        />
-                                                    </div>
-                                                </Tooltip>
-                                                {isWordMode && (
-                                                    <Tooltip content={t('Auto collect')} placement='bottom'>
-                                                        <div
-                                                            className={styles.actionButton}
-                                                            onClick={() => {
-                                                                setIsAutoCollectOn((prevState) => !prevState)
-                                                            }}
-                                                        >
-                                                            {isAutoCollectOn ? (
-                                                                <LuStar size={15} />
-                                                            ) : (
-                                                                <LuStarOff size={15} />
-                                                            )}
-                                                        </div>
-                                                    </Tooltip>
-                                                )}
-                                                {isTauri() && (
-                                                    <Tooltip
-                                                        content={t('Insert into previous input')}
-                                                        placement='bottom'
-                                                    >
-                                                        <div
-                                                            className={styles.actionButton}
-                                                            onClick={handleInsertTranslatedText}
-                                                        >
-                                                            <RxEnter size={15} />
-                                                        </div>
-                                                    </Tooltip>
-                                                )}
-                                                <Tooltip content={t('Copy to clipboard')} placement='bottom'>
-                                                    <div className={styles.actionButton}>
-                                                        <CopyButton text={translatedText} styles={styles}></CopyButton>
-                                                    </div>
-                                                </Tooltip>
-                                            </div>
-                                        )}
                                     </div>
                                 )}
                                 {isNotLogin && settings?.provider === 'ChatGPT' && (
@@ -2672,12 +2614,16 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                         <div className={styles.poweredBy}>
                             Powered by{' '}
                             <div className={styles.brand}>
-                                {React.createElement(engineIcons[settings.provider], {
+                                {React.createElement(engineIcons[activateAction?.provider || settings.provider], {
                                     size: 10,
                                 })}
-                                {settings.provider}
+                                {activateAction?.provider || settings.provider}
                             </div>
-                            {translateDeps.engineModel && ` ${translateDeps.engineModel}`}
+                            {(activateAction?.apiModel || translateDeps.engineModel) &&
+                                ` ${activateAction?.apiModel || translateDeps.engineModel}`}
+                            {(activateAction?.provider || settings.provider) === 'Claude' &&
+                                (activateAction?.thinking ?? settings.claudeThinking) &&
+                                ' · Thinking Mode'}
                         </div>
                     )}
                     {!showSettings && (

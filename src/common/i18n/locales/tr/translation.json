@@ -203,5 +203,18 @@
     "The survival time of the Ollama model in memory": "Ollama modelinin bellekteki yaşam süresi",
     "No models API support": "Model API desteği yok",
     "Some providers claiming to be compatible with OpenAI's API do not actually support OpenAI's standard model API. Therefore, we have no choice but to offer this option. If you choose this option (and then need to click the save button), we will not attempt to dynamically fetch the latest model list from the model API, but will only use a fixed model list and custom models.": "OpenAI'nin API'si ile uyumlu olduğunu iddia eden bazı sağlayıcılar, aslında OpenAI'nin standart model API'sini desteklemiyor. Bu nedenle, bu seçeneği sunmaktan başka çaremiz yok. Bu seçeneği seçerseniz (ve ardından kaydet düğmesine tıklamanız gerekir), model API'sinden en son model listesini dinamik olarak almaya çalışmayacağız, sadece sabit bir model listesi ve özel modeller kullanacağız.",
-    "If you find this tool helpful, you can buy me a cup of coffee.": "Bu aracı faydalı bulursanız, bana bir fincan kahve ısmarlayabilirsiniz."
+    "If you find this tool helpful, you can buy me a cup of coffee.": "Bu aracı faydalı bulursanız, bana bir fincan kahve ısmarlayabilirsiniz.",
+    "Per-Action Model": "Per-Action Model",
+    "Select an action to configure its model": "Select an action to configure its model",
+    "Use custom model for this action": "Use custom model for this action",
+    "Using global settings": "Using global settings",
+    "Action Model": "Action Model",
+    "Action Provider": "Action Provider",
+    "Custom Model Name": "Custom Model Name",
+    "Enable Extended Thinking": "Enable Extended Thinking",
+    "Thinking Level": "Thinking Level",
+    "Low": "Low",
+    "Medium": "Medium",
+    "High": "High",
+    "Enable": "Enable"
 }

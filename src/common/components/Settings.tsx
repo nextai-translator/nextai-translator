@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import _ from 'underscore'
 import { Tabs, Tab, StyledTabList, StyledTabPanel } from 'baseui-sd/tabs-motion'
 import icon from '../assets/images/icon-large.png'
@@ -35,6 +35,7 @@ import { useThemeType } from '../hooks/useThemeType'
 import { Slider } from 'baseui-sd/slider'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { actionService } from '../services/action'
+import { Action } from '../internal-services/db'
 import { GlobalSuspense } from './GlobalSuspense'
 import { Modal, ModalBody, ModalButton, ModalFooter, ModalHeader } from 'baseui-sd/modal'
 import { Provider, engineIcons, getEngine } from '../engines'
@@ -222,6 +223,35 @@ function LanguageDetectionEngineSelector({ value, onChange, onBlur }: ILanguageD
                 { label: t('Google'), id: 'google' },
                 { label: t('Bing'), id: 'bing' },
                 { label: t('Local'), id: 'local' },
+            ]}
+        />
+    )
+}
+
+interface IThinkingLevelSelectorProps {
+    value?: string
+    onChange?: (value: string) => void
+    onBlur?: () => void
+}
+
+function ThinkingLevelSelector({ value, onChange, onBlur }: IThinkingLevelSelectorProps) {
+    const { t } = useTranslation()
+
+    return (
+        <Select
+            size='compact'
+            onBlur={onBlur}
+            searchable={false}
+            clearable={false}
+            value={value ? [{ id: value }] : [{ id: 'medium' }]}
+            onChange={(params) => {
+                onChange?.(params.value[0]?.id as string)
+                onBlur?.()
+            }}
+            options={[
+                { id: 'low', label: t('Low') },
+                { id: 'medium', label: t('Medium') },
+                { id: 'high', label: t('High') },
             ]}
         />
     )
@@ -769,7 +799,14 @@ interface APIModelOption {
     id: string
 }
 
-function APIModelSelector({ currentProvider, provider, apiKey, value, onChange, onBlur }: APIModelSelectorProps) {
+export function APIModelSelector({
+    currentProvider,
+    provider,
+    apiKey,
+    value,
+    onChange,
+    onBlur,
+}: APIModelSelectorProps) {
     const { t } = useTranslation()
     const [isLoading, setIsLoading] = useState(false)
     const [options, setOptions] = useState<APIModelOption[]>([])
@@ -1330,7 +1367,7 @@ interface IProviderSelectorProps {
     hasPromotion?: boolean
 }
 
-function ProviderSelector({ value, onChange, hasPromotion }: IProviderSelectorProps) {
+export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSelectorProps) {
     const { theme } = useTheme()
     const { t } = useTranslation()
 
@@ -1433,6 +1470,285 @@ export function Settings({ engine, ...props }: ISettingsProps) {
                 </GlobalSuspense>
             </BaseProvider>
         </StyletronProvider>
+    )
+}
+
+interface IPerActionModelConfigProps {
+    settings: ISettings
+}
+
+// Persist selected action across Settings open/close cycles
+let lastSelectedActionId: number | undefined
+
+function PerActionModelConfig({ settings }: IPerActionModelConfigProps) {
+    const { t } = useTranslation()
+    const { theme } = useTheme()
+    const actions = useLiveQuery(() => actionService.list(), [])
+    const [selectedActionId, setSelectedActionId] = useState<number | undefined>(lastSelectedActionId)
+    const [selectedAction, setSelectedAction] = useState<Action | undefined>(undefined)
+    const [useCustomModel, setUseCustomModel] = useState(false)
+    const [actionProvider, setActionProvider] = useState<Provider | undefined>(undefined)
+    const [actionModel, setActionModel] = useState<string | undefined>(undefined)
+    const [isCustomModelName, setIsCustomModelName] = useState(false)
+    const [actionThinking, setActionThinking] = useState(false)
+    const [actionThinkingLevel, setActionThinkingLevel] = useState<string>('medium')
+
+    // When actions load, default to first action (or restore last selection)
+    useEffect(() => {
+        if (actions && actions.length > 0 && selectedActionId === undefined) {
+            setSelectedActionId(actions[0].id)
+        }
+    }, [actions, selectedActionId])
+
+    // Persist selected action for next Settings open
+    useEffect(() => {
+        lastSelectedActionId = selectedActionId
+    }, [selectedActionId])
+
+    // When selected action changes, load its settings
+    useEffect(() => {
+        if (!actions || selectedActionId === undefined) return
+        const action = actions.find((a) => a.id === selectedActionId)
+        setSelectedAction(action)
+        if (action) {
+            const hasCustom = !!(action.provider || action.apiModel)
+            setUseCustomModel(hasCustom)
+            setActionProvider(action.provider || settings.provider)
+            setActionModel(action.apiModel || '')
+            setIsCustomModelName(false)
+            setActionThinking(action.thinking ?? false)
+            setActionThinkingLevel(action.thinkingLevel ?? 'medium')
+        }
+    }, [actions, selectedActionId, settings.provider])
+
+    const handleSave = useCallback(
+        async (provider?: Provider, model?: string, enabled?: boolean, thinking?: boolean, thinkingLevel?: string) => {
+            if (!selectedAction) return
+            const shouldEnable = enabled !== undefined ? enabled : useCustomModel
+            if (shouldEnable) {
+                await actionService.update(selectedAction, {
+                    provider: provider ?? actionProvider,
+                    apiModel: model ?? actionModel,
+                    thinking: thinking ?? actionThinking,
+                    thinkingLevel: (thinkingLevel ?? actionThinkingLevel) as 'low' | 'medium' | 'high',
+                })
+            } else {
+                // Explicitly clear per-action overrides
+                await actionService.update(selectedAction, {
+                    provider: undefined,
+                    apiModel: undefined,
+                    thinking: undefined,
+                    thinkingLevel: undefined,
+                })
+            }
+        },
+        [selectedAction, useCustomModel, actionProvider, actionModel, actionThinking, actionThinkingLevel]
+    )
+
+    const actionOptions = useMemo(() => {
+        if (!actions) return []
+        return actions.map((action) => ({
+            id: action.id,
+            label: action.mode ? t(action.name) : action.name,
+        }))
+    }, [actions, t])
+
+    const apiKey = actionProvider ? utils.getAPIKeyForProvider(actionProvider, settings) : undefined
+
+    return (
+        <div
+            style={{
+                border: `1px solid ${theme.colors.borderOpaque}`,
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '16px',
+            }}
+        >
+            <div
+                style={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    marginBottom: '12px',
+                    color: theme.colors.contentPrimary,
+                }}
+            >
+                {t('Per-Action Model')}
+            </div>
+            <div style={{ marginBottom: '12px' }}>
+                <div
+                    style={{
+                        fontSize: '12px',
+                        marginBottom: '4px',
+                        color: theme.colors.contentSecondary,
+                    }}
+                >
+                    {t('Select an action to configure its model')}
+                </div>
+                <Select
+                    size='compact'
+                    searchable={false}
+                    clearable={false}
+                    value={selectedActionId !== undefined ? [{ id: selectedActionId }] : []}
+                    onChange={(params) => {
+                        const id = params.value[0]?.id as number
+                        setSelectedActionId(id)
+                    }}
+                    options={actionOptions}
+                />
+            </div>
+            {selectedAction && (
+                <>
+                    <div style={{ marginBottom: '12px' }}>
+                        <Checkbox
+                            checked={useCustomModel}
+                            onChange={(e) => {
+                                const checked = (e.target as HTMLInputElement).checked
+                                setUseCustomModel(checked)
+                                handleSave(actionProvider, actionModel, checked)
+                            }}
+                        >
+                            <span style={{ fontSize: '13px' }}>{t('Use custom model for this action')}</span>
+                        </Checkbox>
+                    </div>
+                    {useCustomModel ? (
+                        <>
+                            <div style={{ marginBottom: '8px' }}>
+                                <div
+                                    style={{
+                                        fontSize: '12px',
+                                        marginBottom: '4px',
+                                        color: theme.colors.contentSecondary,
+                                    }}
+                                >
+                                    {t('Action Provider')}
+                                </div>
+                                <ProviderSelector
+                                    value={actionProvider}
+                                    onChange={(provider) => {
+                                        setActionProvider(provider)
+                                        setActionModel('')
+                                        handleSave(provider, '', true)
+                                    }}
+                                />
+                            </div>
+                            <div style={{ marginBottom: '8px' }}>
+                                <div
+                                    style={{
+                                        fontSize: '12px',
+                                        marginBottom: '4px',
+                                        color: theme.colors.contentSecondary,
+                                    }}
+                                >
+                                    {t('Action Model')}
+                                </div>
+                                <APIModelSelector
+                                    currentProvider={actionProvider || settings.provider}
+                                    provider={actionProvider || settings.provider}
+                                    apiKey={apiKey}
+                                    value={isCustomModelName ? CUSTOM_MODEL_ID : actionModel}
+                                    onChange={(model) => {
+                                        if (model === CUSTOM_MODEL_ID) {
+                                            setIsCustomModelName(true)
+                                            setActionModel('')
+                                        } else {
+                                            setIsCustomModelName(false)
+                                            setActionModel(model)
+                                            handleSave(actionProvider, model, true)
+                                        }
+                                    }}
+                                />
+                            </div>
+                            {isCustomModelName && (
+                                <div style={{ marginBottom: '8px' }}>
+                                    <div
+                                        style={{
+                                            fontSize: '12px',
+                                            marginBottom: '4px',
+                                            color: theme.colors.contentSecondary,
+                                        }}
+                                    >
+                                        {t('Custom Model Name')}
+                                    </div>
+                                    <Input
+                                        size='compact'
+                                        placeholder='e.g. claude-sonnet-4-20250514'
+                                        value={actionModel || ''}
+                                        onChange={(e) => {
+                                            const val = (e.target as HTMLInputElement).value
+                                            setActionModel(val)
+                                        }}
+                                        onBlur={() => {
+                                            handleSave(actionProvider, actionModel, true)
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            {actionProvider === 'Claude' && (
+                                <>
+                                    <div style={{ marginBottom: '8px' }}>
+                                        <Checkbox
+                                            checked={actionThinking}
+                                            onChange={(e) => {
+                                                const checked = (e.target as HTMLInputElement).checked
+                                                setActionThinking(checked)
+                                                handleSave(
+                                                    actionProvider,
+                                                    actionModel,
+                                                    true,
+                                                    checked,
+                                                    actionThinkingLevel
+                                                )
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '13px' }}>{t('Enable Extended Thinking')}</span>
+                                        </Checkbox>
+                                    </div>
+                                    {actionThinking && (
+                                        <div style={{ marginBottom: '8px' }}>
+                                            <div
+                                                style={{
+                                                    fontSize: '12px',
+                                                    marginBottom: '4px',
+                                                    color: theme.colors.contentSecondary,
+                                                }}
+                                            >
+                                                {t('Thinking Level')}
+                                            </div>
+                                            <Select
+                                                size='compact'
+                                                searchable={false}
+                                                clearable={false}
+                                                options={[
+                                                    { id: 'low', label: t('Low') },
+                                                    { id: 'medium', label: t('Medium') },
+                                                    { id: 'high', label: t('High') },
+                                                ]}
+                                                value={[{ id: actionThinkingLevel }]}
+                                                onChange={(params) => {
+                                                    const level = params.value[0]?.id as string
+                                                    setActionThinkingLevel(level)
+                                                    handleSave(actionProvider, actionModel, true, actionThinking, level)
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <div
+                            style={{
+                                fontSize: '12px',
+                                color: theme.colors.contentTertiary,
+                                fontStyle: 'italic',
+                            }}
+                        >
+                            {t('Using global settings')}
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
     )
 }
 
@@ -2341,6 +2657,18 @@ export function InnerSettings({
                                     <Input autoComplete='off' size='compact' />
                                 </FormItem>
                             </div>
+                            <FormItem name='claudeThinking' label={t('Enable Extended Thinking')}>
+                                <MyCheckbox onBlur={onBlur} />
+                            </FormItem>
+                            <div
+                                style={{
+                                    display: values.claudeThinking ? 'block' : 'none',
+                                }}
+                            >
+                                <FormItem name='claudeThinkingLevel' label={t('Thinking Level')}>
+                                    <ThinkingLevelSelector onBlur={onBlur} />
+                                </FormItem>
+                            </div>
                             <FormItem
                                 name='claudeAPIURL'
                                 label={t('API URL')}
@@ -2902,6 +3230,7 @@ export function InnerSettings({
                         <FormItem name='defaultTranslateMode' label={t('Default Action')}>
                             <TranslateModeSelector onBlur={onBlur} />
                         </FormItem>
+                        <PerActionModelConfig settings={values} />
                         <FormItem name='defaultTargetLanguage' label={t('Default target language')}>
                             <LanguageSelector onBlur={onBlur} />
                         </FormItem>

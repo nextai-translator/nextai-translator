@@ -251,6 +251,24 @@ export function ActionManager({ draggable = true }: IActionManagerProps) {
                                     <div>{action.rolePrompt}</div>
                                     <div>{action.commandPrompt}</div>
                                 </div>
+                                {action.provider && (
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            fontSize: '11px',
+                                            background: theme.colors.backgroundTertiary,
+                                            padding: '1px 6px',
+                                            borderRadius: '4px',
+                                            marginTop: '2px',
+                                            color: theme.colors.contentSecondary,
+                                        }}
+                                    >
+                                        {action.provider}
+                                        {action.apiModel && ` / ${action.apiModel}`}
+                                    </div>
+                                )}
                                 <div className={styles.metadata}>
                                     <div>
                                         {t('Created at')} {format(+action?.createdAt, 'yyyy-MM-dd HH:mm:ss')}
@@ -305,7 +323,6 @@ export function ActionManager({ draggable = true }: IActionManagerProps) {
                                 <Button
                                     size='mini'
                                     startEnhancer={<FiEdit size={12} />}
-                                    disabled={!!action.mode}
                                     onClick={(e) => {
                                         e.preventDefault()
                                         e.stopPropagation()
