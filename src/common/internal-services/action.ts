@@ -1,4 +1,5 @@
 import { builtinActionModes } from '../constants'
+import { Provider } from '../engines'
 import { TranslateMode } from '../translate'
 import { Action, ActionOutputRenderingFormat, getLocalDB } from './db'
 
@@ -9,6 +10,10 @@ export interface ICreateActionOption {
     rolePrompt?: string
     commandPrompt?: string
     outputRenderingFormat?: ActionOutputRenderingFormat
+    provider?: Provider
+    apiModel?: string
+    thinking?: boolean
+    thinkingLevel?: 'low' | 'medium' | 'high'
 }
 
 export interface IUpdateActionOption {
@@ -19,6 +24,10 @@ export interface IUpdateActionOption {
     rolePrompt?: string
     commandPrompt?: string
     outputRenderingFormat?: ActionOutputRenderingFormat
+    provider?: Provider
+    apiModel?: string
+    thinking?: boolean
+    thinkingLevel?: 'low' | 'medium' | 'high'
 }
 
 export interface IActionInternalService {
@@ -51,6 +60,10 @@ class ActionInternalService implements IActionInternalService {
                 rolePrompt: opt.rolePrompt,
                 commandPrompt: opt.commandPrompt,
                 outputRenderingFormat: opt.outputRenderingFormat,
+                provider: opt.provider,
+                apiModel: opt.apiModel,
+                thinking: opt.thinking,
+                thinkingLevel: opt.thinkingLevel,
                 createdAt: now,
                 updatedAt: now,
             }
@@ -79,7 +92,9 @@ class ActionInternalService implements IActionInternalService {
                 ...opt,
                 updatedAt: now,
             }
-            await this.db.action.update(action.id as number, newAction)
+            // Use put() instead of update() so that undefined values properly
+            // clear fields (Dexie's update() silently ignores undefined properties)
+            await this.db.action.put(newAction)
             return newAction
         })
     }

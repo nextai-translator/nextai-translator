@@ -12,6 +12,9 @@ import { IThemedStyleProps } from '../types'
 import { useTheme } from '../hooks/useTheme'
 import { IconPicker } from './IconPicker'
 import { RenderingFormatSelector } from './RenderingFormatSelector'
+import { ProviderSelector } from './Settings'
+import { Checkbox } from 'baseui-sd/checkbox'
+import { Select } from 'baseui-sd/select'
 
 const useStyles = createUseStyles({
     placeholder: (props: IThemedStyleProps) => ({
@@ -40,6 +43,50 @@ export interface IActionFormProps {
 }
 
 const { Form, FormItem } = createForm<ICreateActionOption>()
+
+interface ThinkingCheckboxProps {
+    value?: boolean
+    onChange?: (value: boolean) => void
+}
+
+function ThinkingCheckbox({ value, onChange }: ThinkingCheckboxProps) {
+    const { t } = useTranslation()
+    return (
+        <Checkbox
+            checked={value}
+            onChange={(e) => {
+                onChange?.((e.target as HTMLInputElement).checked)
+            }}
+        >
+            <span style={{ fontSize: '13px' }}>{t('Enable')}</span>
+        </Checkbox>
+    )
+}
+
+interface ActionThinkingLevelSelectorProps {
+    value?: string
+    onChange?: (value: string) => void
+}
+
+function ActionThinkingLevelSelector({ value, onChange }: ActionThinkingLevelSelectorProps) {
+    const { t } = useTranslation()
+    return (
+        <Select
+            size='compact'
+            searchable={false}
+            clearable={false}
+            options={[
+                { id: 'low', label: t('Low') },
+                { id: 'medium', label: t('Medium') },
+                { id: 'high', label: t('High') },
+            ]}
+            value={value ? [{ id: value }] : [{ id: 'medium' }]}
+            onChange={(params) => {
+                onChange?.(params.value[0]?.id as string)
+            }}
+        />
+    )
+}
 
 export function ActionForm(props: IActionFormProps) {
     const { theme, themeType } = useTheme()
@@ -127,43 +174,67 @@ export function ActionForm(props: IActionFormProps) {
 
     return (
         <Form initialValues={values} onValuesChange={handleValuesChange} onFinish={onSubmit}>
-            <FormItem required name='name' label={t('Name')}>
-                <Input size='compact' />
+            {!props.action?.mode && (
+                <>
+                    <FormItem required name='name' label={t('Name')}>
+                        <Input size='compact' />
+                    </FormItem>
+                    <FormItem required name='icon' label={t('Icon')}>
+                        <IconPicker />
+                    </FormItem>
+                    <FormItem name='rolePrompt' label={`${t('Role Prompt')} (Optional)`} caption={rolePromptCaption}>
+                        <Textarea
+                            rows={4}
+                            overrides={{
+                                Root: {
+                                    style: {
+                                        width: '100%',
+                                    },
+                                },
+                            }}
+                            size='compact'
+                            resize='vertical'
+                        />
+                    </FormItem>
+                    <FormItem required name='commandPrompt' label={t('Command Prompt')} caption={commandPromptCaption}>
+                        <Textarea
+                            rows={4}
+                            overrides={{
+                                Root: {
+                                    style: {
+                                        width: '100%',
+                                    },
+                                },
+                            }}
+                            size='compact'
+                            resize='vertical'
+                        />
+                    </FormItem>
+                    <FormItem name='outputRenderingFormat' label={t('Output rendering format')}>
+                        <RenderingFormatSelector />
+                    </FormItem>
+                </>
+            )}
+            <FormItem name='provider' label={`${t('Action Provider')} (Optional)`}>
+                <ProviderSelector />
             </FormItem>
-            <FormItem required name='icon' label={t('Icon')}>
-                <IconPicker />
-            </FormItem>
-            <FormItem name='rolePrompt' label={`${t('Role Prompt')} (Optional)`} caption={rolePromptCaption}>
-                <Textarea
-                    rows={4}
-                    overrides={{
-                        Root: {
-                            style: {
-                                width: '100%',
-                            },
-                        },
-                    }}
-                    size='compact'
-                    resize='vertical'
-                />
-            </FormItem>
-            <FormItem required name='commandPrompt' label={t('Command Prompt')} caption={commandPromptCaption}>
-                <Textarea
-                    rows={4}
-                    overrides={{
-                        Root: {
-                            style: {
-                                width: '100%',
-                            },
-                        },
-                    }}
-                    size='compact'
-                    resize='vertical'
-                />
-            </FormItem>
-            <FormItem name='outputRenderingFormat' label={t('Output rendering format')}>
-                <RenderingFormatSelector />
-            </FormItem>
+            {values?.provider && (
+                <FormItem name='apiModel' label={`${t('Action Model')} (Optional)`}>
+                    <Input size='compact' placeholder='e.g. claude-sonnet-4-20250514' />
+                </FormItem>
+            )}
+            {values?.provider === 'Claude' && (
+                <>
+                    <FormItem name='thinking' label={t('Enable Extended Thinking')}>
+                        <ThinkingCheckbox />
+                    </FormItem>
+                    {values.thinking && (
+                        <FormItem name='thinkingLevel' label={t('Thinking Level')}>
+                            <ActionThinkingLevelSelector />
+                        </FormItem>
+                    )}
+                </>
+            )}
             <div
                 style={{
                     display: 'flex',
