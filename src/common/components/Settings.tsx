@@ -797,6 +797,7 @@ interface APIModelSelectorProps {
 interface APIModelOption {
     label: React.ReactNode
     id: string
+    name?: string
 }
 
 export function APIModelSelector({
@@ -858,6 +859,7 @@ export function APIModelSelector({
                             </div>
                         ),
                         id: model.id,
+                        name: model.name,
                     })),
                     ...(engine.supportCustomModel()
                         ? [
@@ -915,8 +917,19 @@ export function APIModelSelector({
                     isLoading={isLoading}
                     size='compact'
                     onBlur={onBlur}
-                    searchable={false}
+                    searchable={true}
                     clearable={false}
+                    backspaceRemoves={false}
+                    deleteRemoves={false}
+                    filterOptions={(options, filterValue) => {
+                        if (!filterValue) return options
+                        const filter = filterValue.toLowerCase()
+                        return options.filter((option) => {
+                            const id = (option.id as string)?.toLowerCase() ?? ''
+                            const name = (option.name as string)?.toLowerCase() ?? ''
+                            return id.includes(filter) || name.includes(filter)
+                        })
+                    }}
                     value={
                         value
                             ? [
