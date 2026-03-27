@@ -50,11 +50,16 @@ const useStyles = createUseStyles({
         paddingRight: '4px',
     },
     historyItem: {
-        borderRadius: '12px',
-        padding: '12px 16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
+        'borderRadius': '14px',
+        'padding': '14px 18px',
+        'display': 'flex',
+        'flexDirection': 'column',
+        'gap': '10px',
+        'transition': 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+            transform: 'translateY(-1px)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+        },
     },
     historyMeta: {
         display: 'flex',
@@ -71,10 +76,11 @@ const useStyles = createUseStyles({
         gap: '4px',
     },
     historyTextLabel: {
-        fontSize: '11px',
+        fontSize: '10px',
         textTransform: 'uppercase',
-        letterSpacing: '0.08em',
+        letterSpacing: '0.1em',
         fontWeight: 600,
+        opacity: 0.7,
     },
     historyTextBlock: {
         fontSize: '14px',
@@ -96,7 +102,8 @@ const useStyles = createUseStyles({
     empty: {
         fontSize: '14px',
         textAlign: 'center',
-        padding: '32px 0',
+        padding: '48px 0',
+        opacity: 0.6,
     },
     windowRoot: {
         display: 'flex',
@@ -109,8 +116,8 @@ const useStyles = createUseStyles({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'start',
-        padding: '36px 32px 16px 32px',
-        gap: '12px',
+        padding: '40px 32px 20px 32px',
+        gap: '14px',
     },
     windowTitleGroup: {
         display: 'flex',

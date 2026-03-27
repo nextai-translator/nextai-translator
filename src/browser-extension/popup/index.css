@@ -8,21 +8,47 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 * {
     transition-property: background-color, border-color, color, box-shadow, opacity;
-    transition-duration: 0.15s;
-    transition-timing-function: ease-out;
+    transition-duration: 0.2s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *:focus-visible {
-    outline: 2px solid rgba(66, 133, 244, 0.5);
-    outline-offset: 1px;
+    outline: 2px solid rgba(66, 133, 244, 0.4);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
 }
 
 @media (prefers-color-scheme: dark) {
     .popup {
         background: #1f1f1f;
+    }
+    *::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    *::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.25);
     }
 }

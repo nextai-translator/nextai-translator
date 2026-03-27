@@ -96,12 +96,20 @@ const useStyles = createUseStyles({
         'alignItems': 'center',
         'width': '30px',
         'height': '30px',
-        'borderRadius': '6px',
-        'opacity': 0.6,
+        'borderRadius': '8px',
+        'opacity': 0.5,
+        'transition': 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
             opacity: 1,
             background:
-                props.windowsTitlebarDisableDarkMode !== true && props.themeType === 'dark' ? '#353535' : '#e9e9e9',
+                props.windowsTitlebarDisableDarkMode !== true && props.themeType === 'dark'
+                    ? 'rgba(255,255,255,0.1)'
+                    : 'rgba(0,0,0,0.06)',
+            transform: 'scale(1.08)',
+        },
+        '&:active': {
+            transform: 'scale(0.92)',
+            opacity: 0.8,
         },
     }),
 })
@@ -197,7 +205,8 @@ export function InnerWindow(props: IWindowProps) {
             style={{
                 position: 'relative',
                 background: backgroundBlur ? 'transparent' : theme.colors.backgroundPrimary,
-                font: '14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
+                font: '14px/1.6 "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
+                letterSpacing: '-0.01em',
                 WebkitFontSmoothing: 'antialiased',
                 MozOsxFontSmoothing: 'grayscale',
                 textRendering: 'optimizeLegibility',

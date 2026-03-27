@@ -1,5 +1,5 @@
 .formItem {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .formItem:last-child {
@@ -9,12 +9,14 @@
 .error {
     color: #dc2626;
     font-size: 12px;
-    margin-top: 4px;
+    margin-top: 6px;
+    line-height: 1.4;
 }
 
 .help {
     color: #ea580c;
     font-size: 12px;
-    margin-top: 4px;
-    opacity: 0.85;
+    margin-top: 6px;
+    opacity: 0.8;
+    line-height: 1.4;
 }

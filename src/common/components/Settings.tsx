@@ -1122,9 +1122,9 @@ const useStyles = createUseStyles({
         return {
             'display': 'flex',
             'flexDirection': 'column',
-            'gap': '3px',
-            'borderRadius': '8px',
-            'padding': '6px 10px',
+            'gap': '4px',
+            'borderRadius': '12px',
+            'padding': '10px 14px',
             'color': props.themeType === 'dark' ? props.theme.colors.black : props.theme.colors.contentPrimary,
             'backgroundColor': props.theme.colors.warning100,
             '& p': {
@@ -1157,12 +1157,14 @@ const useStyles = createUseStyles({
                   cursor: 'pointer',
                   left: '0',
                   bottom: '0',
-                  paddingLeft: '10px',
+                  paddingLeft: '14px',
                   display: 'flex',
                   alignItems: 'center',
-                  background: props.themeType === 'dark' ? 'rgba(31, 31, 31, 0.5)' : 'rgba(255, 255, 255, 0.5)',
-                  backdropFilter: 'blur(16px)',
-                  borderTop: `1px solid ${props.theme.colors.borderTransparent}`,
+                  background: props.themeType === 'dark' ? 'rgba(31, 31, 31, 0.65)' : 'rgba(255, 255, 255, 0.65)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  borderTop: `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                  transition: 'background 0.3s ease',
               }
             : {
                   color: props.theme.colors.contentSecondary,
@@ -1177,15 +1179,16 @@ const useStyles = createUseStyles({
 const useHotkeyRecorderStyles = createUseStyles({
     'hotkeyRecorder': (props: IThemedStyleProps) => ({
         position: 'relative',
-        height: '32px',
-        lineHeight: '32px',
+        height: '34px',
+        lineHeight: '34px',
         padding: '0 14px',
-        borderRadius: '8px',
+        borderRadius: '10px',
         width: '300px',
         cursor: 'pointer',
         border: '1px dashed transparent',
-        backgroundColor: props.theme.colors.backgroundTertiary,
+        backgroundColor: props.themeType === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
         color: props.theme.colors.primary,
+        transition: 'all 0.2s ease',
     }),
     'clearHotkey': {
         position: 'absolute',
