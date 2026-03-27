@@ -5,6 +5,20 @@ html,
 body {
     padding: 0;
     margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+* {
+    transition-property: background-color, border-color, color, box-shadow, opacity;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
+}
+
+*:focus-visible {
+    outline: 2px solid rgba(66, 133, 244, 0.5);
+    outline-offset: 1px;
 }
 
 @media (prefers-color-scheme: dark) {

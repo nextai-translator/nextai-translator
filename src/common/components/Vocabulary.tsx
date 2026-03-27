@@ -81,16 +81,17 @@ const useStyles = createUseStyles({
             'user-select': 'text',
         },
     },
-    'diceArea': {
+    'diceArea': (props: IThemedStyleProps) => ({
         position: 'absolute',
         bottom: 0,
         left: '50%',
         transform: 'translateX(-50%) translateY(50%)',
         fontSize: '10px',
-        borderRadius: '4px',
-        padding: '0 12px',
-        background: '#FFF',
-    },
+        borderRadius: '10px',
+        padding: '2px 12px',
+        background: props.theme.colors.backgroundPrimary,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+    }),
     'diceIcon': {
         'cursor': 'pointer',
         '&:active': {
@@ -104,11 +105,17 @@ const useStyles = createUseStyles({
         gap: '12px',
     },
     'actionButton': (props: IThemedStyleProps) => ({
-        color: props.theme.colors.contentSecondary,
-        cursor: 'pointer',
-        display: 'flex',
-        paddingTop: '6px',
-        paddingBottom: '6px',
+        'color': props.theme.colors.contentSecondary,
+        'cursor': 'pointer',
+        'display': 'flex',
+        'alignItems': 'center',
+        'justifyContent': 'center',
+        'padding': '6px',
+        'borderRadius': '6px',
+        '&:hover': {
+            color: props.theme.colors.contentPrimary,
+            background: props.theme.colors.backgroundTertiary,
+        },
     }),
     'select': {
         display: 'flex',
@@ -127,14 +134,17 @@ const useStyles = createUseStyles({
         left: '50%',
         transform: 'translateX(-50%) translateY(50%)',
         fontSize: '10px',
-        padding: '2px 12px',
-        borderRadius: '4px',
+        padding: '3px 14px',
+        borderRadius: '10px',
         background: props.theme.colors.backgroundTertiary,
         color: props.theme.colors.contentSecondary,
+        fontWeight: 500,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
     }),
-    'error': {
-        background: '#f8d7da',
-    },
+    'error': (props: IThemedStyleProps) => ({
+        background: props.themeType === 'dark' ? 'rgba(220, 38, 38, 0.15)' : '#fef2f2',
+        color: props.themeType === 'dark' ? '#fca5a5' : '#dc2626',
+    }),
     'writing': {
         'marginLeft': '3px',
         'width': '10px',

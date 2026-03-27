@@ -96,7 +96,10 @@ const useStyles = createUseStyles({
         'alignItems': 'center',
         'width': '30px',
         'height': '30px',
+        'borderRadius': '6px',
+        'opacity': 0.6,
         '&:hover': {
+            opacity: 1,
             background:
                 props.windowsTitlebarDisableDarkMode !== true && props.themeType === 'dark' ? '#353535' : '#e9e9e9',
         },
@@ -194,7 +197,10 @@ export function InnerWindow(props: IWindowProps) {
             style={{
                 position: 'relative',
                 background: backgroundBlur ? 'transparent' : theme.colors.backgroundPrimary,
-                font: '14px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji',
+                font: '14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
+                textRendering: 'optimizeLegibility',
                 minHeight: '100vh',
             }}
             onClick={(e) => {

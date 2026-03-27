@@ -48,15 +48,15 @@
 }
 
 .yetone-hit-content mark {
-    padding: 1px 2px !important;
+    padding: 1px 3px !important;
     margin-left: -2px !important;
     margin-top: 1px !important;
     color: transparent !important;
-    border-radius: 0.2rem;
-    background-color: #f8c3cd !important;
+    border-radius: 4px;
+    background-color: rgba(248, 195, 205, 0.6) !important;
 }
 
 .yetone-dark .yetone-hit-content mark {
     color: rgb(203, 203, 203);
-    background-color: #b5495b !important;
+    background-color: rgba(181, 73, 91, 0.5) !important;
 }

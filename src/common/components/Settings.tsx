@@ -1123,8 +1123,8 @@ const useStyles = createUseStyles({
             'display': 'flex',
             'flexDirection': 'column',
             'gap': '3px',
-            'borderRadius': '0.31rem',
-            'padding': '0.15rem 0.4rem',
+            'borderRadius': '8px',
+            'padding': '6px 10px',
             'color': props.themeType === 'dark' ? props.theme.colors.black : props.theme.colors.contentPrimary,
             'backgroundColor': props.theme.colors.warning100,
             '& p': {
@@ -1157,11 +1157,12 @@ const useStyles = createUseStyles({
                   cursor: 'pointer',
                   left: '0',
                   bottom: '0',
-                  paddingLeft: '6px',
+                  paddingLeft: '10px',
                   display: 'flex',
                   alignItems: 'center',
                   background: props.themeType === 'dark' ? 'rgba(31, 31, 31, 0.5)' : 'rgba(255, 255, 255, 0.5)',
-                  backdropFilter: 'blur(10px)',
+                  backdropFilter: 'blur(16px)',
+                  borderTop: `1px solid ${props.theme.colors.borderTransparent}`,
               }
             : {
                   color: props.theme.colors.contentSecondary,
@@ -1179,7 +1180,7 @@ const useHotkeyRecorderStyles = createUseStyles({
         height: '32px',
         lineHeight: '32px',
         padding: '0 14px',
-        borderRadius: '4px',
+        borderRadius: '8px',
         width: '300px',
         cursor: 'pointer',
         border: '1px dashed transparent',
@@ -1191,11 +1192,11 @@ const useHotkeyRecorderStyles = createUseStyles({
         top: '10px',
         right: '12px',
     },
-    'caption': {
+    'caption': (props: IThemedStyleProps) => ({
         marginTop: '4px',
         fontSize: '11px',
-        color: '#999',
-    },
+        color: props.theme.colors.contentTertiary,
+    }),
     'recording': {
         animation: '$recording 2s infinite',
     },
@@ -1204,8 +1205,8 @@ const useHotkeyRecorderStyles = createUseStyles({
             backgroundColor: 'transparent',
         },
         '50%': {
-            backgroundColor: 'rgb(238, 238, 238)',
-            borderColor: '#999',
+            backgroundColor: 'rgba(128,128,128,0.12)',
+            borderColor: 'rgba(128,128,128,0.4)',
         },
         '100%': {
             backgroundColor: 'transparent',

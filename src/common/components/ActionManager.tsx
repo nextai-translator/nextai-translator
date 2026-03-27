@@ -260,7 +260,7 @@ export function ActionManager({ draggable = true }: IActionManagerProps) {
                                             fontSize: '11px',
                                             background: theme.colors.backgroundTertiary,
                                             padding: '1px 6px',
-                                            borderRadius: '4px',
+                                            borderRadius: '6px',
                                             marginTop: '2px',
                                             color: theme.colors.contentSecondary,
                                         }}
