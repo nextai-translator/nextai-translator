@@ -221,7 +221,7 @@ export async function getSettings(): Promise<ISettings> {
         settings.ollamaAPIURL = 'http://127.0.0.1:11434'
     }
     if (!settings.miniMaxAPIModel) {
-        settings.miniMaxAPIModel = 'MiniMax-M2.5'
+        settings.miniMaxAPIModel = 'MiniMax-M2.7'
     }
     if (!settings.groqAPIURL) {
         settings.groqAPIURL = 'https://api.groq.com'
