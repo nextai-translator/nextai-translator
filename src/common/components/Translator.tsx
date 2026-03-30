@@ -2227,16 +2227,14 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             <div className={styles.actionButtonsContainer}>
                                 <>
                                     <Tooltip content={t('Upload an image for OCR translation')} placement='bottom'>
-                                        <div className={styles.actionButton}>
-                                            <Dropzone onDrop={onDrop}>
-                                                {({ getRootProps, getInputProps }) => (
-                                                    <div {...getRootProps()} className={styles.actionButton}>
-                                                        <input {...getInputProps({ multiple: false })} />
-                                                        <BsTextareaT size={15} />
-                                                    </div>
-                                                )}
-                                            </Dropzone>
-                                        </div>
+                                        <Dropzone onDrop={onDrop}>
+                                            {({ getRootProps, getInputProps }) => (
+                                                <div {...getRootProps()} className={styles.actionButton}>
+                                                    <input {...getInputProps({ multiple: false })} />
+                                                    <BsTextareaT size={15} />
+                                                </div>
+                                            )}
+                                        </Dropzone>
                                     </Tooltip>
                                     {enableVocabulary && (
                                         <StatefulTooltip
@@ -2320,11 +2318,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 />
                                             </div>
                                         </Tooltip>
-                                        <Tooltip content={t('Copy to clipboard')} placement='bottom'>
-                                            <div className={styles.actionButton}>
-                                                <CopyButton text={editableText} styles={styles}></CopyButton>
-                                            </div>
-                                        </Tooltip>
+                                        <CopyButton text={editableText} styles={styles}></CopyButton>
                                         <Tooltip content={t('Clear input')} placement='bottom'>
                                             <div
                                                 className={styles.actionButton}
@@ -2340,9 +2334,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     editorRef.current?.focus()
                                                 }}
                                             >
-                                                <div className={styles.actionButton}>
-                                                    <RxEraser size={15} />
-                                                </div>
+                                                <RxEraser size={15} />
                                             </div>
                                         </Tooltip>
                                     </>
@@ -2546,11 +2538,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                         </div>
                                                     </Tooltip>
                                                 )}
-                                                <Tooltip content={t('Copy to clipboard')} placement='bottom'>
-                                                    <div className={styles.actionButton}>
-                                                        <CopyButton text={translatedText} styles={styles}></CopyButton>
-                                                    </div>
-                                                </Tooltip>
+                                                <CopyButton text={translatedText} styles={styles}></CopyButton>
                                             </div>
                                         )}
                                     </div>
