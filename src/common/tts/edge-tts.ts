@@ -188,18 +188,33 @@ export async function speak({
             pitch: '+0Hz',
         })
 
-        // Generate audio data
-        const result = await tts.synthesize()
+        // Generate audio data with timeout to prevent hanging on WebSocket failures
+        console.debug('Edge TTS: synthesizing...', { voice: selectedVoice, lang, rate: rateStr, volume: volumeStr })
+        const result = await Promise.race([
+            tts.synthesize(),
+            new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error('Edge TTS: synthesis timeout')), 15000)
+            ),
+        ])
+        console.debug('Edge TTS: synthesize done', { hasAudio: !!result?.audio })
 
-        if (stopped || !result || !result.audio) {
+        if (stopped) {
             return
+        }
+
+        if (!result || !result.audio) {
+            throw new Error('Edge TTS: no audio received')
         }
 
         // Convert Blob/Response to ArrayBuffer
         const audioArrayBuffer = await result.audio.arrayBuffer()
 
-        if (stopped || !audioArrayBuffer || audioArrayBuffer.byteLength === 0) {
+        if (stopped) {
             return
+        }
+
+        if (!audioArrayBuffer || audioArrayBuffer.byteLength === 0) {
+            throw new Error('Edge TTS: empty audio data')
         }
 
         // Decode and play audio

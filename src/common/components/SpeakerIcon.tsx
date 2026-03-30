@@ -65,6 +65,10 @@ export function SpeakerIcon({
                 setIsLoading(false)
             },
             signal,
+        }).catch((e) => {
+            console.error('TTS error:', e)
+            setIsLoading(false)
+            setIsSpeaking(false)
         })
     }, [lang, provider, rate, text, voice, volume])
 
