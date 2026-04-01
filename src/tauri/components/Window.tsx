@@ -19,7 +19,6 @@ import { isMacOS, isTauri, isWindows } from '@/common/utils'
 import { useSetAtom } from 'jotai'
 
 import { showSettingsAtom } from '@/common/store/setting'
-import { commands } from '../bindings'
 import { trackEvent } from '@aptabase/tauri'
 
 addEventListener('unhandledrejection', (e) => {
@@ -166,10 +165,6 @@ export function InnerWindow(props: IWindowProps) {
         if (!props.isTranslatorWindow) {
             return
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        commands.getTranslatorWindowAlwaysOnTop().then((pinned: any) => {
-            return setPinned(() => pinned)
-        })
     }, [props.isTranslatorWindow, setPinned])
 
     useEffect(() => {

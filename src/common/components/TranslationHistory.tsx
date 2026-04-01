@@ -241,8 +241,8 @@ export function TranslationHistory(props: TranslationHistoryProps) {
                     selectedActionId === ALL_ACTIONS_OPTION_ID
                         ? undefined
                         : typeof selectedActionData?.id === 'number'
-                        ? selectedActionData.id
-                        : undefined,
+                          ? selectedActionData.id
+                          : undefined,
                 actionMode: selectedActionId === ALL_ACTIONS_OPTION_ID ? undefined : selectedActionData?.mode,
             })
         },

@@ -188,6 +188,15 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         const headers = await this.getHeaders()
         const isChatAPI = await this.isChatAPI()
         const body = await this.getBaseRequestBody(model)
+        console.debug('[engine] sendMessage', {
+            provider: this.constructor?.name,
+            url,
+            apiURL,
+            apiURLPath: targetAPIURLPath,
+            model,
+            useResponsesAPI,
+            isChatAPI,
+        })
         if (useResponsesAPI) {
             if (body.reasoning_effort !== undefined) {
                 body['reasoning'] = {
@@ -216,9 +225,8 @@ export abstract class AbstractOpenAI extends AbstractEngine {
             // We should check if the settings.apiURLPath is match `/deployments/{deployment-id}/chat/completions`.
             // If not, we should use the legacy parameters.
             if (req.rolePrompt) {
-                body[
-                    'prompt'
-                ] = `<|im_start|>user\n${req.rolePrompt}\n\n${req.commandPrompt}\n<|im_end|>\n<|im_start|>assistant\n`
+                body['prompt'] =
+                    `<|im_start|>user\n${req.rolePrompt}\n\n${req.commandPrompt}\n<|im_end|>\n<|im_start|>assistant\n`
             } else {
                 body['prompt'] = `<|im_start|>user\n${req.commandPrompt}\n<|im_end|>\n<|im_start|>assistant\n`
             }
@@ -234,6 +242,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         }
         let finished = false // finished can be called twice because event.data is 1. "finish_reason":"stop"; 2. [DONE]
         let responsesHasStreamedText = false
+        let chatCompletionsHasStreamedText = false
         await fetchSSE(url, {
             method: 'POST',
             headers,
@@ -313,6 +322,22 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 }
                 const { finish_reason: finishReason } = choices[0]
                 if (finishReason) {
+                    // Some OpenAI-compatible endpoints may ignore `stream: true` and return a non-stream response
+                    // that contains the full content in `choices[0].message.content`. If so, flush it once here.
+                    if (!chatCompletionsHasStreamedText && isChatAPI) {
+                        const fullContent =
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            (choices[0] as any)?.message?.content ??
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            (choices[0] as any)?.delta?.content ??
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            (choices[0] as any)?.text ??
+                            ''
+                        if (typeof fullContent === 'string' && fullContent) {
+                            chatCompletionsHasStreamedText = true
+                            await req.onMessage({ content: fullContent, role: 'assistant' })
+                        }
+                    }
                     req.onFinished(finishReason)
                     finished = true
                     return
@@ -328,6 +353,9 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                     const { content = '', role } = choices[0].delta
 
                     targetTxt = content
+                    if (targetTxt) {
+                        chatCompletionsHasStreamedText = true
+                    }
 
                     await req.onMessage({ content: targetTxt, role })
                 }

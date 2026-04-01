@@ -1,11 +1,8 @@
 import * as Sentry from '@sentry/react'
 import ReactGA from 'react-ga4'
-import { getSettings, isDesktopApp, isUserscript } from './utils'
+import { getSettings, isDesktopApp } from './utils'
 
 export async function setupAnalysis() {
-    if (isUserscript()) {
-        return
-    }
     doSetupAnalysis()
 }
 

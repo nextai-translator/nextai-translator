@@ -68,26 +68,3 @@ jobs:
           path: |
             ${{ fromJSON(steps.tauri-action-mac.outputs.artifactPaths)[0] }}
             ${{ fromJSON(steps.tauri-action.outputs.artifactPaths)[0] }}
-
-
-  build-browser-extension:
-    runs-on: ubuntu-22.04
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8.6.0
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Build
-        run: make build-browser-extension
-      # todo: upload browser extension artifacts

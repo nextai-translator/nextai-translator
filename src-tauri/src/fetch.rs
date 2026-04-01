@@ -43,12 +43,26 @@ pub(crate) struct AbortEventPayload {
 #[specta::specta]
 pub async fn fetch_stream(id: String, url: String, options_str: String) -> Result<String, String> {
     let options: FetchOptions = serde_json::from_str(&options_str).unwrap();
+    debug_println!("[fetch_stream] id={} {} {}", id, options.method, url);
     let mut headers = HeaderMap::new();
     for (key, value) in options.headers {
         headers.insert(key.parse::<HeaderName>().unwrap(), value.parse().unwrap());
     }
 
     let mut client_builder = Client::builder().default_headers(headers);
+
+    // For local Ollama (and other local services), never route through a proxy.
+    // A misconfigured proxy often returns 502 with empty body.
+    let is_local_url = url
+        .parse::<reqwest::Url>()
+        .ok()
+        .and_then(|u| u.host_str().map(|h| h.eq_ignore_ascii_case("localhost") || h == "127.0.0.1"))
+        .unwrap_or(false);
+    if is_local_url {
+        // Also disable proxy from environment variables (HTTP_PROXY, etc).
+        client_builder = client_builder.no_proxy();
+        debug_println!("[fetch_stream] no_proxy enabled for local url");
+    }
 
     if let Ok(config) = get_config() {
         if let Some(proxy_config) = config.proxy {
@@ -57,6 +71,9 @@ pub async fn fetch_stream(id: String, url: String, options_str: String) -> Resul
                 && proxy_config.server.is_some()
                 && proxy_config.port.is_some()
             {
+                if is_local_url {
+                    debug_println!("[fetch_stream] proxy enabled but bypassed for local url");
+                } else {
                 let proxy_url = format!(
                     "{}:{}",
                     proxy_config.server.unwrap_or_default(),
@@ -66,6 +83,7 @@ pub async fn fetch_stream(id: String, url: String, options_str: String) -> Resul
                     ProxyProtocol::HTTP => format!("http://{}", proxy_url),
                     ProxyProtocol::HTTPS => format!("https://{}", proxy_url),
                 };
+                debug_println!("[fetch_stream] using proxy {}", proxy_url);
                 let mut proxy = reqwest::Proxy::all(&proxy_url).unwrap();
                 if let Some(basic_auth) = proxy_config.basic_auth {
                     let username = basic_auth.username.unwrap_or_default();
@@ -78,6 +96,7 @@ pub async fn fetch_stream(id: String, url: String, options_str: String) -> Resul
                     proxy = proxy.no_proxy(Some(reqwest::NoProxy::from_string(&no_proxy).unwrap()));
                 }
                 client_builder = client_builder.proxy(proxy);
+                }
             }
         }
     }
@@ -102,6 +121,7 @@ pub async fn fetch_stream(id: String, url: String, options_str: String) -> Resul
         .map_err(|err| format!("failed to call API: {}", err))?;
 
     let status = resp.status();
+    debug_println!("[fetch_stream] status={} for {}", status.as_u16(), url);
 
     let app_handle = APP_HANDLE.get().unwrap();
     app_handle
@@ -113,6 +133,44 @@ pub async fn fetch_stream(id: String, url: String, options_str: String) -> Resul
             },
         )
         .unwrap();
+
+    // If the request failed, try to read the response body once and forward it to the frontend
+    // so it can be surfaced via the existing `onError` path.
+    if !status.is_success() {
+        let err_text = resp
+            .text()
+            .await
+            .unwrap_or_else(|e| format!("failed to read error response body: {}", e));
+        debug_println!(
+            "[fetch_stream] error body len={} (showing up to 400 chars): {}",
+            err_text.len(),
+            err_text.chars().take(400).collect::<String>()
+        );
+        app_handle
+            .emit(
+                "fetch-stream-chunk",
+                StreamChunk {
+                    id: id.clone(),
+                    data: err_text,
+                    done: false,
+                    status: status.as_u16(),
+                },
+            )
+            .unwrap();
+        debug_println!("chunk done!");
+        app_handle
+            .emit(
+                "fetch-stream-chunk",
+                StreamChunk {
+                    id: id.clone(),
+                    data: "".to_string(),
+                    done: true,
+                    status: status.as_u16(),
+                },
+            )
+            .unwrap();
+        return Ok("".to_string());
+    }
 
     let stream = resp.bytes_stream();
 
@@ -134,6 +192,7 @@ pub async fn fetch_stream(id: String, url: String, options_str: String) -> Resul
         // debug_println!("chunk item: {:#?}", item);
         let chunk = item.map_err(|err| format!("failed to read response chunk: {}", err))?;
         let chunk_str = String::from_utf8_lossy(&chunk);
+        debug_println!("[fetch_stream] chunk len={}", chunk_str.len());
         // debug_println!("chunk: {}", chunk_str);
         app_handle
             .emit(

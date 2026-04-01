@@ -65,18 +65,6 @@ export const isAWord = (langCode: string, text: string) => {
     return iterator.next().value?.segment === text
 }
 
-function getThinkingBudget(level: string): number {
-    switch (level) {
-        case 'low':
-            return 5000
-        case 'high':
-            return 20000
-        case 'medium':
-        default:
-            return 10000
-    }
-}
-
 export class QuoteProcessor {
     private quote: string
     public quoteStart: string
@@ -203,13 +191,11 @@ export class QuoteProcessor {
     }
 }
 
-const chineseLangCodes = ['zh-Hans', 'zh-Hant', 'lzh', 'yue', 'jdbhw', 'xdbhw']
-
 export async function translate(query: TranslateQuery) {
     let rolePrompt = ''
     let commandPrompt = ''
     let contentPrompt = query.text
-    let isWordMode = false
+    const isWordMode = false
 
     if (query.mode === 'big-bang') {
         rolePrompt = oneLine`
@@ -227,7 +213,6 @@ export async function translate(query: TranslateQuery) {
         const targetLangName = getLangName(targetLangCode)
         console.debug('sourceLang', sourceLangName)
         console.debug('targetLang', targetLangName)
-        const toChinese = chineseLangCodes.indexOf(targetLangCode) >= 0
         const targetLangConfig = getLangConfig(targetLangCode)
         const sourceLangConfig = getLangConfig(sourceLangCode)
         console.debug('Source language is', sourceLangConfig)
@@ -259,90 +244,14 @@ export async function translate(query: TranslateQuery) {
                 }
                 break
             case 'translate':
-                commandPrompt = targetLangConfig.genCommandPrompt(sourceLangConfig)
+                // Minimal desktop build: always output pure translation only.
+                // No dictionary-mode, examples, etymology, or extra explanation.
+                rolePrompt = oneLineTrim`
+                You are a professional translation engine.
+                Translate the given text from ${sourceLangName} to ${targetLangName}.
+                Output ONLY the translated text, no explanation, no extra formatting.`
+                commandPrompt = ''
                 contentPrompt = query.text
-                if (!query.writing && query.text.length < 5 && toChinese) {
-                    // 当用户的默认语言为中文时，查询中文词组（不超过5个字），展示多种翻译结果，并阐述适用语境。
-                    rolePrompt = codeBlock`
-                    ${oneLineTrim`
-                    你是一个翻译引擎，
-                    请将给到的文本翻译成${targetLangName}。
-                    请列出3种（如果有）最常用翻译结果：单词或短语，
-                    并列出对应的适用语境（用中文阐述）、音标或转写、词性、双语示例。
-                    按照下面格式用中文阐述：`}
-                        ${oneLineTrim`
-                        <序号><单词或短语> · /<${targetLangConfig.phoneticNotation}>/
-                        `}
-                        [<词性缩写>] <适用语境（用中文阐述）>
-                        例句：<例句>(例句翻译)
-                    `
-                    commandPrompt = ''
-                }
-                if (!query.writing && isAWord(sourceLangCode, query.text.trim())) {
-                    isWordMode = true
-                    if (toChinese) {
-                        // 单词模式，可以更详细的翻译结果，包括：音标、词性、含义、双语示例。
-                        rolePrompt = codeBlock`
-                        ${oneLineTrim`
-                        你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。
-                        当且仅当文本只有一个单词时，
-                        请给出单词原始形态（如果有）、
-                        单词的语种、
-                        ${targetLangConfig.phoneticNotation && '对应的音标或转写、'}
-                        所有含义（含词性）、
-                        双语示例，至少三条例句。
-                        如果你认为单词拼写错误，请提示我最可能的正确拼写，
-                        否则请严格按照下面格式给到翻译结果：
-                        `}
-                            <单词>
-                            [<语种>]· / ${targetLangConfig.phoneticNotation && `<${targetLangConfig.phoneticNotation}>`}
-                            [<词性缩写>] <中文含义>]
-                            例句：
-                            <序号><例句>(例句翻译)
-                            词源：
-                            <词源>
-                        `
-                        commandPrompt = '好的，我明白了，请给我这个单词。'
-                        contentPrompt = `单词是：${query.text}`
-                    } else {
-                        const isSameLanguage = sourceLangCode === targetLangCode
-                        rolePrompt = codeBlock`${oneLine`
-                            You are a professional translation engine.
-                            Please translate the text into ${targetLangName} without explanation.
-                            When the text has only one word,
-                            please act as a professional
-                            ${sourceLangName}-${targetLangName} dictionary,
-                            and list the original form of the word (if any),
-                            the language of the word,
-                            ${
-                                targetLangConfig.phoneticNotation &&
-                                'the corresponding phonetic notation or transcription, '
-                            }
-                            all senses with parts of speech,
-                            ${isSameLanguage ? '' : 'bilingual '}
-                            sentence examples (at least 3) and etymology.
-                            If you think there is a spelling mistake,
-                            please tell me the most possible correct word
-                            otherwise reply in the following format:
-                            `}
-<word> (<original form>)
-${oneLine`
-[<language>]· /
-${targetLangConfig.phoneticNotation && `<${targetLangConfig.phoneticNotation}>`}
-`}
-${oneLine`
-[<part of speech>]
-${isSameLanguage ? '' : '<translated meaning> / '}
-<meaning in source language>
-`}
-Examples:
-<index>. <sentence>(<sentence translation>)
-Etymology:
-<etymology>`
-                        commandPrompt = 'I understand. Please give me the word.'
-                        contentPrompt = `The word is: ${query.text}`
-                    }
-                }
                 if (!query.writing && query.selectedWord) {
                     rolePrompt = codeBlock`
 ${oneLine`
@@ -412,18 +321,11 @@ If you understand, say "yes", and then we will begin.`
     // Use per-action provider/model if configured, otherwise fall back to global settings
     const effectiveProvider = (query.mode !== 'big-bang' && query.action?.provider) || settings.provider
     const effectiveModel = query.mode !== 'big-bang' ? query.action?.apiModel : undefined
-
-    // Resolve Claude thinking settings
-    let thinkingBudget: number | undefined
-    if (effectiveProvider === 'Claude') {
-        const actionThinking = query.mode !== 'big-bang' ? query.action?.thinking : undefined
-        const actionThinkingLevel = query.mode !== 'big-bang' ? query.action?.thinkingLevel : undefined
-        const isThinking = actionThinking ?? settings.claudeThinking
-        const thinkingLevel = actionThinkingLevel ?? settings.claudeThinkingLevel ?? 'medium'
-        if (isThinking) {
-            thinkingBudget = getThinkingBudget(thinkingLevel)
-        }
-    }
+    console.debug('[translate] dispatch', {
+        mode: query.mode,
+        provider: effectiveProvider,
+        modelOverride: effectiveModel,
+    })
 
     const engine = getEngine(effectiveProvider)
     await engine.sendMessage({
@@ -431,7 +333,6 @@ If you understand, say "yes", and then we will begin.`
         rolePrompt,
         commandPrompt,
         modelOverride: effectiveModel,
-        thinkingBudget,
         onMessage: async (message) => {
             await query.onMessage({ ...message, isWordMode })
         },

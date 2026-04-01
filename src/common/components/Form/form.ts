@@ -31,8 +31,10 @@ export type FormInstance<S extends {} = Store, K extends keyof S = keyof S> = {
     submit: () => void
 }
 
-export interface FormProps<S extends {} = Store, V = S>
-    extends Omit<RcFormProps, 'form' | 'onFinish' | 'onValuesChange'> {
+export interface FormProps<S extends {} = Store, V = S> extends Omit<
+    RcFormProps,
+    'form' | 'onFinish' | 'onValuesChange'
+> {
     form?: FormInstance<S>
     initialValues?: Partial<V>
     onFinish?: (values: V) => void

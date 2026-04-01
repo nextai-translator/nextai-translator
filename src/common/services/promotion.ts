@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { isDesktopApp, isUserscript } from '../utils'
+import { isDesktopApp } from '../utils'
 import { backgroundGetItem, backgroundRemoveItem, backgroundSetItem } from '../background/local-storage'
 
 export interface II18nPromotionContent {
@@ -106,7 +106,7 @@ const lastShowPromotionItemTimestampKey = 'promotion:last-show-timestamp'
 
 export async function checkShouldShowPromotionNotification() {
     let timestamp: string | null
-    if (isDesktopApp() || isUserscript()) {
+    if (isDesktopApp()) {
         timestamp = localStorage.getItem(lastShowPromotionItemTimestampKey)
     } else {
         timestamp = await backgroundGetItem(lastShowPromotionItemTimestampKey)
@@ -126,7 +126,7 @@ export async function isPromotionItemShowed(item?: IPromotionItem): Promise<bool
         return true
     }
     const key = getPromotionItemShowedKey(item)
-    if (isDesktopApp() || isUserscript()) {
+    if (isDesktopApp()) {
         return localStorage.getItem(key) === 'true'
     }
     return (await backgroundGetItem(key)) === 'true'
@@ -137,7 +137,7 @@ export async function setPromotionItemShowed(item?: IPromotionItem) {
         return
     }
     const key = getPromotionItemShowedKey(item)
-    if (isDesktopApp() || isUserscript()) {
+    if (isDesktopApp()) {
         localStorage.setItem(key, 'true')
         localStorage.setItem(lastShowPromotionItemTimestampKey, dayjs().toISOString())
         return
@@ -151,7 +151,7 @@ export async function unsetPromotionItemShowed(item?: IPromotionItem) {
         return
     }
     const key = getPromotionItemShowedKey(item)
-    if (isDesktopApp() || isUserscript()) {
+    if (isDesktopApp()) {
         localStorage.removeItem(key)
         return
     }
@@ -163,7 +163,7 @@ export async function isPromotionItemNeverDisplay(item?: IPromotionItem): Promis
         return true
     }
     const key = getPromotionItemNeverDisplayKey(item)
-    if (isDesktopApp() || isUserscript()) {
+    if (isDesktopApp()) {
         return localStorage.getItem(key) === 'true'
     }
     return (await backgroundGetItem(key)) === 'true'
@@ -174,7 +174,7 @@ export async function setPromotionItemNeverDisplay(item?: IPromotionItem) {
         return
     }
     const key = getPromotionItemNeverDisplayKey(item)
-    if (isDesktopApp() || isUserscript()) {
+    if (isDesktopApp()) {
         localStorage.setItem(key, 'true')
         return
     }
@@ -186,7 +186,7 @@ export async function unsetPromotionItemNeverDisplay(item?: IPromotionItem) {
         return
     }
     const key = getPromotionItemNeverDisplayKey(item)
-    if (isDesktopApp() || isUserscript()) {
+    if (isDesktopApp()) {
         localStorage.removeItem(key)
         return
     }

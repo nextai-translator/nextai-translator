@@ -1,12 +1,10 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Translator } from '../../common/components/Translator'
 import { Client as Styletron } from 'styletron-engine-atomic'
 import { listen, type Event, type UnlistenFn } from '@tauri-apps/api/event'
-import { bindDisplayWindowHotkey, bindHotkey, bindOCRHotkey, bindWritingHotkey, onSettingsSave } from '../utils'
+import { bindDisplayWindowHotkey, bindHotkey, onSettingsSave } from '../utils'
 import { v4 as uuidv4 } from 'uuid'
 import { PREFIX } from '../../common/constants'
-import { translate } from '../../common/translate'
-import { detectLang, intoLangCode } from '../../common/lang'
 import { useSettings } from '../../common/hooks/useSettings'
 import { setupAnalysis } from '../../common/analysis'
 import { Window } from '../components/Window'
@@ -24,48 +22,6 @@ const engine = new Styletron({
 export function TranslatorWindow() {
     const [uuid, setUUID] = useState('')
     const [showSettings, setShowSettings] = useState(false)
-    const writingQueue = useRef<Array<string | number>>([])
-    const isWriting = useRef(false)
-
-    const [writingFlag, writing] = useReducer((x: number) => x + 1, 0)
-
-    useEffect(() => {
-        if (isWriting.current) {
-            return
-        }
-        if (writingQueue.current.length > 0) {
-            isWriting.current = true
-            const buffer = []
-            let isFinished = false
-            while (writingQueue.current.length > 0) {
-                const text = writingQueue.current.shift()
-                if (typeof text === 'string') {
-                    buffer.push(text)
-                } else {
-                    isFinished = true
-                    break
-                }
-            }
-            if (buffer.length > 0) {
-                commands.writeToInput(buffer.join('')).finally(() => {
-                    if (isFinished) {
-                        commands.finishWriting().finally(() => {
-                            isWriting.current = false
-                            writing()
-                        })
-                    } else {
-                        isWriting.current = false
-                        writing()
-                    }
-                })
-            } else if (isFinished) {
-                commands.finishWriting().finally(() => {
-                    isWriting.current = false
-                    writing()
-                })
-            }
-        }
-    }, [writingFlag])
 
     const { settings } = useSettings()
 
@@ -105,77 +61,6 @@ export function TranslatorWindow() {
             unlisten?.()
         }
     }, [])
-
-    useEffect(() => {
-        let unlisten: UnlistenFn | undefined
-        ;(async () => {
-            unlisten = await listen('writing-text', async (event: Event<string>) => {
-                const ensureFinish = () => {
-                    writingQueue.current.push(0)
-                    writing()
-                }
-                if (!settings?.writingTargetLanguage) {
-                    commands.finishWriting().catch(console.error)
-                    return
-                }
-                const inputText = event.payload
-                if (!inputText) {
-                    commands.finishWriting().catch(console.error)
-                    return
-                }
-
-                const controller = new AbortController()
-                const { signal } = controller
-                let hasEnqueuedFinish = false
-                const enqueueFinish = () => {
-                    if (hasEnqueuedFinish) {
-                        return
-                    }
-                    hasEnqueuedFinish = true
-                    ensureFinish()
-                }
-
-                try {
-                    const sourceLang = await detectLang(inputText)
-                    const targetLang = intoLangCode(settings.writingTargetLanguage)
-                    await translate({
-                        writing: true,
-                        action: {
-                            idx: 0,
-                            name: 'writing',
-                            mode: 'translate',
-                            updatedAt: Date.now() + '',
-                            createdAt: Date.now() + '',
-                        },
-                        signal,
-                        text: inputText,
-                        detectFrom: sourceLang,
-                        detectTo: targetLang,
-                        onMessage: async (message) => {
-                            if (!message.content) {
-                                return
-                            }
-                            writingQueue.current.push(message.content)
-                            writing()
-                        },
-                        onFinish: () => {
-                            enqueueFinish()
-                        },
-                        onError: () => {
-                            enqueueFinish()
-                        },
-                    })
-                    enqueueFinish()
-                } catch (error) {
-                    console.error(error)
-                    enqueueFinish()
-                }
-            })
-        })()
-        return () => {
-            unlisten?.()
-        }
-    }, [settings?.writingTargetLanguage])
 
     useEffect(() => {
         let unlisten: UnlistenFn | undefined
@@ -225,8 +110,6 @@ export function TranslatorWindow() {
     useEffect(() => {
         bindHotkey()
         bindDisplayWindowHotkey()
-        bindOCRHotkey()
-        bindWritingHotkey()
     }, [])
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false)

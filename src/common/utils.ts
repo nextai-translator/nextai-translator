@@ -10,7 +10,7 @@ import { OPENAI_CHAT_COMPLETIONS_API_PATH, OPENAI_PREFERRED_DEFAULT_MODEL } from
 
 export const defaultAPIURL = 'https://api.openai.com'
 export const defaultAPIURLPath = OPENAI_CHAT_COMPLETIONS_API_PATH
-export const defaultProvider = 'OpenAI'
+export const defaultProvider = 'Ollama'
 export const defaultAPIModel = OPENAI_PREFERRED_DEFAULT_MODEL
 
 export const defaultChatGPTAPIAuthSessionAPIURL = 'https://chat.openai.com/api/auth/session'
@@ -172,25 +172,7 @@ export async function getSettings(): Promise<ISettings> {
     if (!settings.themeType) {
         settings.themeType = 'followTheSystem'
     }
-    if (settings.provider === 'Azure') {
-        if (!settings.azureAPIKeys) {
-            settings.azureAPIKeys = settings.apiKeys
-        }
-        if (!settings.azureAPIURL) {
-            settings.azureAPIURL = settings.apiURL
-        }
-        if (!settings.azureAPIURLPath) {
-            settings.azureAPIURLPath = settings.apiURLPath
-        }
-        if (!settings.azureAPIModel) {
-            settings.azureAPIModel = settings.apiModel
-        }
-    }
-    if (settings.provider === 'ChatGPT') {
-        if (!settings.chatgptModel) {
-            settings.chatgptModel = settings.apiModel
-        }
-    }
+    // Provider-specific defaults removed in Ollama-only build.
     if (settings.automaticCheckForUpdates === undefined || settings.automaticCheckForUpdates === null) {
         settings.automaticCheckForUpdates = true
     }
@@ -202,7 +184,7 @@ export async function getSettings(): Promise<ISettings> {
         }
     }
     if (!settings.languageDetectionEngine) {
-        settings.languageDetectionEngine = 'baidu'
+        settings.languageDetectionEngine = 'local'
     }
     if (!settings.proxy) {
         settings.proxy = {
@@ -271,10 +253,7 @@ export async function getBrowser(): Promise<IBrowser> {
     if (isTauri()) {
         return (await import('./polyfills/tauri')).tauriBrowser
     }
-    if (isUserscript()) {
-        return (await import('./polyfills/userscript')).userscriptBrowser
-    }
-    return (await import('webextension-polyfill')).default
+    throw new Error('Browser APIs are not available in the desktop-only build.')
 }
 
 export const isElectron = () => {
@@ -307,8 +286,7 @@ export const isDesktopApp = () => {
 }
 
 export const isUserscript = () => {
-    // eslint-disable-next-line camelcase
-    return typeof GM_info !== 'undefined'
+    return false
 }
 
 export const isDarkMode = async () => {
@@ -322,13 +300,11 @@ export const isDarkMode = async () => {
 export const isFirefox = () => /firefox/i.test(navigator.userAgent)
 
 export const isUsingOpenAIOfficialAPIEndpoint = async () => {
-    const settings = await getSettings()
-    return settings.provider === defaultProvider && settings.apiURL === defaultAPIURL
+    return false
 }
 
 export const isUsingOpenAIOfficial = async () => {
-    const settings = await getSettings()
-    return settings.provider === 'ChatGPT' || (await isUsingOpenAIOfficialAPIEndpoint())
+    return false
 }
 
 // js to csv
@@ -475,9 +451,6 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
                     if (payload.id !== id) {
                         return
                     }
-                    if (payload.done) {
-                        return
-                    }
                     if (payload.status !== 200) {
                         try {
                             const data = JSON.parse(payload.data)
@@ -487,6 +460,8 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
                         }
                         return
                     }
+                    // In Tauri fetchStream, the final chunk may include data with `done: true`.
+                    // We must not drop it, otherwise non-SSE JSON responses will be ignored.
                     if (isJSONStream) {
                         partialJSONParser({ value: payload.data, done: payload.done })
                         return

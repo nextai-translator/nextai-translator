@@ -1,31 +1,52 @@
 import { IActionInternalService, ICreateActionOption, IUpdateActionOption } from '../../internal-services/action'
 import { Action } from '../../internal-services/db'
-import { callMethod } from './base'
 
 class BackgroundActionService implements IActionInternalService {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     create(opt: ICreateActionOption): Promise<Action> {
-        return callMethod('actionService', 'create', [opt])
+        return Promise.reject(
+            new Error('BackgroundActionService is not available in desktop-only build.')
+        ) as Promise<Action>
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     update(action: Action, opt: IUpdateActionOption): Promise<Action> {
-        return callMethod('actionService', 'update', [action, opt])
+        return Promise.reject(
+            new Error('BackgroundActionService is not available in desktop-only build.')
+        ) as Promise<Action>
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     bulkPut(actions: Action[]): Promise<void> {
-        return callMethod('actionService', 'bulkPut', [actions])
+        return Promise.reject(
+            new Error('BackgroundActionService is not available in desktop-only build.')
+        ) as Promise<void>
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     get(id: number): Promise<Action | undefined> {
-        return callMethod('actionService', 'get', [id])
+        return Promise.reject(new Error('BackgroundActionService is not available in desktop-only build.')) as Promise<
+            Action | undefined
+        >
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getByMode(mode: string): Promise<Action | undefined> {
-        return callMethod('actionService', 'getByMode', [mode])
+        return Promise.reject(new Error('BackgroundActionService is not available in desktop-only build.')) as Promise<
+            Action | undefined
+        >
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     delete(id: number): Promise<void> {
-        return callMethod('actionService', 'delete', [id])
+        return Promise.reject(
+            new Error('BackgroundActionService is not available in desktop-only build.')
+        ) as Promise<void>
     }
     list(): Promise<Action[]> {
-        return callMethod('actionService', 'list', [])
+        return Promise.reject(new Error('BackgroundActionService is not available in desktop-only build.')) as Promise<
+            Action[]
+        >
     }
     count(): Promise<number> {
-        return callMethod('actionService', 'count', [])
+        return Promise.reject(
+            new Error('BackgroundActionService is not available in desktop-only build.')
+        ) as Promise<number>
     }
 }
 

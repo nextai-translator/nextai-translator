@@ -74,56 +74,8 @@ export async function bindDisplayWindowHotkey(oldHotKey?: string) {
     })
 }
 
-export async function bindOCRHotkey(oldOCRHotKey?: string) {
-    if (oldOCRHotKey && !isMissingNormalKey(oldOCRHotKey) && (await isRegistered(oldOCRHotKey))) {
-        await unregister(oldOCRHotKey)
-    }
-    const settings = await getSettings()
-    if (!settings.ocrHotkey) return
-    if (isMissingNormalKey(settings.ocrHotkey)) {
-        sendNotification({
-            title: 'Cannot bind hotkey',
-            body: `Hotkey must contain at least one normal key: ${settings.ocrHotkey}`,
-        })
-        return
-    }
-    if (await isRegistered(settings.ocrHotkey)) {
-        await unregister(settings.ocrHotkey)
-    }
-    await register(settings.ocrHotkey, () => {
-        return commands.startOcr()
-    }).then(() => {
-        console.log('OCR hotkey registered')
-    })
-}
-
-export async function bindWritingHotkey(oldWritingHotKey?: string) {
-    if (oldWritingHotKey && !isMissingNormalKey(oldWritingHotKey) && (await isRegistered(oldWritingHotKey))) {
-        await unregister(oldWritingHotKey)
-    }
-    const settings = await getSettings()
-    if (!settings.writingHotkey) return
-    if (isMissingNormalKey(settings.writingHotkey)) {
-        sendNotification({
-            title: 'Cannot bind hotkey',
-            body: `Hotkey must contain at least one normal key: ${settings.writingHotkey}`,
-        })
-        return
-    }
-    if (await isRegistered(settings.writingHotkey)) {
-        await unregister(settings.writingHotkey)
-    }
-    await register(settings.writingHotkey, () => {
-        return commands.writingCommand()
-    }).then(() => {
-        console.log('writing hotkey registered')
-    })
-}
-
 export function onSettingsSave(oldSettings: ISettings) {
     events.configUpdatedEvent.emit()
     bindHotkey(oldSettings.hotkey)
     bindDisplayWindowHotkey(oldSettings.displayWindowHotkey)
-    bindOCRHotkey(oldSettings.ocrHotkey)
-    bindWritingHotkey(oldSettings.writingHotkey)
 }

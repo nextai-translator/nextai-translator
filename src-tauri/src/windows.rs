@@ -1,32 +1,17 @@
 use crate::config;
 use crate::insertion::remember_active_window;
 use crate::utils;
-use crate::UpdateResult;
-use crate::ALWAYS_ON_TOP;
 use crate::APP_HANDLE;
-use active_win_pos_rs::get_active_window;
 #[cfg(target_os = "macos")]
 use cocoa::appkit::NSWindow;
 use debug_print::debug_println;
-use enigo::*;
 use get_selected_text::get_selected_text;
 use mouse_position::mouse_position::Mouse;
-use serde_json::json;
-use std::sync::atomic::Ordering;
-use std::time::Duration;
-use tauri::{Emitter, Listener, LogicalPosition, Manager, PhysicalPosition};
-use tauri_plugin_updater::UpdaterExt;
-use tauri_specta::Event;
-use tokio::time::sleep;
+use tauri::{LogicalPosition, Manager, PhysicalPosition};
 
 pub const TRANSLATOR_WIN_NAME: &str = "translator";
 pub const SETTINGS_WIN_NAME: &str = "settings";
-pub const ACTION_MANAGER_WIN_NAME: &str = "action_manager";
-pub const UPDATER_WIN_NAME: &str = "updater";
-pub const THUMB_WIN_NAME: &str = "thumb";
 pub const HISTORY_WIN_NAME: &str = "history";
-#[cfg(target_os = "windows")]
-pub const SCREENSHOT_WIN_NAME: &str = "screenshot";
 
 fn get_dummy_window() -> tauri::WebviewWindow {
     let app_handle = APP_HANDLE.get().unwrap();
@@ -94,30 +79,6 @@ pub fn get_mouse_location() -> Result<(i32, i32), String> {
     }
 }
 
-pub fn set_translator_window_always_on_top() -> bool {
-    let handle = APP_HANDLE.get().unwrap();
-    if let Some(window) = handle.get_webview_window(TRANSLATOR_WIN_NAME) {
-        let always_on_top = ALWAYS_ON_TOP.load(Ordering::Acquire);
-
-        if !always_on_top {
-            window.set_always_on_top(true).unwrap();
-            ALWAYS_ON_TOP.store(true, Ordering::Release);
-        } else {
-            window.set_always_on_top(false).unwrap();
-            ALWAYS_ON_TOP.store(false, Ordering::Release);
-        }
-        ALWAYS_ON_TOP.load(Ordering::Acquire)
-    } else {
-        false
-    }
-}
-
-#[tauri::command]
-#[specta::specta]
-pub fn get_translator_window_always_on_top() -> bool {
-    ALWAYS_ON_TOP.load(Ordering::Acquire)
-}
-
 #[tauri::command]
 #[specta::specta]
 pub async fn show_translator_window_with_selected_text_command() {
@@ -153,13 +114,6 @@ pub async fn show_translator_window_with_selected_text_command() {
     utils::show();
 }
 
-fn is_translator_foreground() -> bool {
-    match get_active_window() {
-        Ok(window) => window.process_id == std::process::id() as u64,
-        Err(_) => false,
-    }
-}
-
 pub fn do_hide_translator_window() {
     if let Some(handle) = APP_HANDLE.get() {
         match handle.get_webview_window(TRANSLATOR_WIN_NAME) {
@@ -183,124 +137,6 @@ pub fn do_hide_translator_window() {
 #[specta::specta]
 pub async fn hide_translator_window() {
     do_hide_translator_window();
-}
-
-pub fn delete_thumb() {
-    match APP_HANDLE.get() {
-        Some(handle) => match handle.get_webview_window(THUMB_WIN_NAME) {
-            Some(window) => {
-                window.close().unwrap();
-            }
-            None => {}
-        },
-        None => {}
-    }
-}
-
-pub fn close_thumb() {
-    match APP_HANDLE.get() {
-        Some(handle) => match handle.get_webview_window(THUMB_WIN_NAME) {
-            Some(window) => {
-                window
-                    .set_position(LogicalPosition::new(-100.0, -100.0))
-                    .unwrap();
-                window.set_always_on_top(false).unwrap();
-                window.hide().unwrap();
-            }
-            None => {}
-        },
-        None => {}
-    }
-}
-
-pub fn show_thumb(x: i32, y: i32) {
-    let window = get_thumb_window(x, y);
-    window.show().unwrap();
-}
-
-pub fn get_thumb_window(x: i32, y: i32) -> tauri::WebviewWindow {
-    let handle = APP_HANDLE.get().unwrap();
-    let position_offset = 7.0 as f64;
-    let window = match handle.get_webview_window(THUMB_WIN_NAME) {
-        Some(window) => {
-            debug_println!("Thumb window already exists");
-            window.unminimize().unwrap();
-            window.set_always_on_top(true).unwrap();
-            window
-        }
-        None => {
-            debug_println!("Thumb window does not exist");
-            #[cfg_attr(not(target_os = "windows"), allow(unused_mut))]
-            let mut builder = tauri::WebviewWindowBuilder::new(
-                handle,
-                THUMB_WIN_NAME,
-                tauri::WebviewUrl::App("src/tauri/index.html".into()),
-            )
-            .fullscreen(false)
-            .focused(false)
-            .inner_size(20.0, 20.0)
-            .min_inner_size(20.0, 20.0)
-            .max_inner_size(20.0, 20.0)
-            .visible(false)
-            .resizable(false)
-            .skip_taskbar(true)
-            .minimizable(false)
-            .maximizable(false)
-            .closable(false)
-            .decorations(false);
-
-            #[cfg(target_os = "windows")]
-            {
-                builder = builder.shadow(false);
-            }
-
-            let window = builder.build().unwrap();
-            #[cfg(target_os = "windows")]
-            {
-                // use SetWindowLongPtrW in tao page to disable minimize, maximize and close buttons
-                use windows::Win32::UI::WindowsAndMessaging::{
-                    SetWindowLongPtrW, GWL_STYLE, WS_POPUP,
-                };
-                let hwnd = window.hwnd().unwrap();
-                unsafe {
-                    // let mut style = GetWindowLongPtrW(hwnd, GWL_STYLE);
-                    // style = style & !(0x00020000 | 0x00010000 | 0x00080000); // WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU
-                    let style: u32 = WS_POPUP.0;
-                    SetWindowLongPtrW(hwnd, GWL_STYLE, style as isize);
-                }
-                window
-                    .set_size(tauri::LogicalSize {
-                        width: 20.0,
-                        height: 20.0,
-                    })
-                    .unwrap();
-            }
-            post_process_window(&window);
-
-            window.unminimize().unwrap();
-            window.set_always_on_top(true).unwrap();
-
-            window
-        }
-    };
-
-    if cfg!(target_os = "macos") {
-        window
-            .set_position(LogicalPosition::new(
-                x as f64 + position_offset,
-                y as f64 + position_offset,
-            ))
-            .unwrap();
-    } else {
-        window
-            .set_position(PhysicalPosition::new(
-                x as f64 + position_offset,
-                y as f64 + position_offset,
-            ))
-            .unwrap();
-    }
-
-    window
 }
 
 pub fn post_process_window<R: tauri::Runtime>(window: &tauri::WebviewWindow<R>) {
@@ -428,20 +264,7 @@ fn focus_translator_window(window: &tauri::WebviewWindow) {
         eprintln!("Error focusing translator window: {}", e);
     }
 
-    let should_restore_on_top = !ALWAYS_ON_TOP.load(Ordering::Acquire);
-    if let Err(e) = window.set_always_on_top(true) {
-        eprintln!("Error enabling always on top for translator window: {}", e);
-        return;
-    }
-
-    if should_restore_on_top {
-        if let Err(e) = window.set_always_on_top(false) {
-            eprintln!(
-                "Error disabling temporary always on top for translator window: {}",
-                e
-            );
-        }
-    }
+    // In the minimal desktop build, pinning is managed by the renderer.
 }
 
 pub fn get_translator_window(
@@ -544,43 +367,6 @@ pub fn get_translator_window(
 
 #[tauri::command]
 #[specta::specta]
-pub async fn show_action_manager_window() {
-    let window = get_action_manager_window();
-    window.center().unwrap();
-    window.show().unwrap();
-}
-
-pub fn get_action_manager_window() -> tauri::WebviewWindow {
-    let handle = APP_HANDLE.get().unwrap();
-    let window = match handle.get_webview_window(ACTION_MANAGER_WIN_NAME) {
-        Some(window) => {
-            window.unminimize().unwrap();
-            window.set_focus().unwrap();
-            window
-        }
-        None => {
-            let builder = tauri::WebviewWindowBuilder::new(
-                handle,
-                ACTION_MANAGER_WIN_NAME,
-                tauri::WebviewUrl::App("src/tauri/index.html".into()),
-            )
-            .title("NextAI Translator Action Manager")
-            .fullscreen(false)
-            .inner_size(700.0, 700.0)
-            .min_inner_size(660.0, 600.0)
-            .resizable(true)
-            .skip_taskbar(true)
-            .focused(true);
-
-            return build_window(builder);
-        }
-    };
-
-    window
-}
-
-#[tauri::command]
-#[specta::specta]
 pub async fn show_history_window() {
     let window = get_history_window();
     window.center().unwrap();
@@ -647,132 +433,6 @@ pub fn get_settings_window() -> tauri::WebviewWindow {
             return build_window(builder);
         }
     };
-
-    window
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, specta::Type, tauri_specta::Event)]
-pub struct CheckUpdateResultEvent(UpdateResult);
-
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, specta::Type, tauri_specta::Event)]
-pub struct CheckUpdateEvent;
-
-pub fn show_updater_window() {
-    let window = get_updater_window();
-    window.center().unwrap();
-    window.show().unwrap();
-
-    let handle = APP_HANDLE.get().unwrap();
-    CheckUpdateEvent::listen(handle, move |event| {
-        let window_clone = window.clone();
-        tauri::async_runtime::spawn(async move {
-            let builder = handle.updater_builder();
-            let updater = builder.build().unwrap();
-
-            match updater.check().await {
-                Ok(Some(update)) => {
-                    CheckUpdateResultEvent(UpdateResult {
-                        version: update.version,
-                        current_version: update.current_version,
-                        body: update.body,
-                    })
-                    .emit(handle)
-                    .unwrap();
-                }
-                Ok(None) => {
-                    handle
-                        .emit(
-                            "update_result",
-                            json!({
-                                "result": None::<UpdateResult>
-                            }),
-                        )
-                        .unwrap();
-                }
-                Err(_) => {}
-            }
-            window_clone.unlisten(event.id)
-        });
-    });
-}
-
-pub fn get_updater_window() -> tauri::WebviewWindow {
-    let handle = APP_HANDLE.get().unwrap();
-    let window = match handle.get_webview_window(UPDATER_WIN_NAME) {
-        Some(window) => {
-            window.unminimize().unwrap();
-            window.set_focus().unwrap();
-            window
-        }
-        None => {
-            let builder = tauri::WebviewWindowBuilder::new(
-                handle,
-                UPDATER_WIN_NAME,
-                tauri::WebviewUrl::App("src/tauri/index.html".into()),
-            )
-            .title("NextAI Translator Updater")
-            .fullscreen(false)
-            .inner_size(500.0, 500.0)
-            .min_inner_size(200.0, 200.0)
-            .resizable(true)
-            .skip_taskbar(true)
-            .focused(true);
-
-            return build_window(builder);
-        }
-    };
-
-    window
-}
-
-#[cfg(target_os = "windows")]
-pub fn show_screenshot_window() {
-    let _ = get_screenshot_window();
-    // window.show().unwrap();
-}
-
-#[cfg(target_os = "windows")]
-pub fn get_screenshot_window() -> tauri::WebviewWindow {
-    let handle = APP_HANDLE.get().unwrap();
-    let current_monitor = get_current_monitor();
-    let dpi = current_monitor.scale_factor();
-    let physical_position = current_monitor.position();
-    let position: tauri::LogicalPosition<f64> = physical_position.to_logical(dpi);
-
-    let window = match handle.get_webview_window(SCREENSHOT_WIN_NAME) {
-        Some(window) => {
-            window.set_focus().unwrap();
-            window
-        }
-        None => {
-            let builder = tauri::WebviewWindowBuilder::new(
-                handle,
-                SCREENSHOT_WIN_NAME,
-                tauri::WebviewUrl::App("src/tauri/index.html".into()),
-            )
-            .title("NextAI Translator Screenshot")
-            .position(position.x, position.y)
-            .visible(false)
-            .focused(true);
-
-            let window = build_window(builder);
-            window
-        }
-    };
-
-    window.set_resizable(false).unwrap();
-    window.set_skip_taskbar(true).unwrap();
-    #[cfg(target_os = "macos")]
-    {
-        let size = current_monitor.size();
-        window.set_decorations(false).unwrap();
-        window.set_size(*size).unwrap();
-    }
-
-    #[cfg(not(target_os = "macos"))]
-    window.set_fullscreen(true).unwrap();
-
-    window.set_always_on_top(true).unwrap();
 
     window
 }

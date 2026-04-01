@@ -1,38 +1,59 @@
 import { VocabularyItem } from '../../internal-services/db'
 import { IVocabularyInternalService } from '../../internal-services/vocabulary'
-import { callMethod } from './base'
 
 class BackgroundVocabularyService implements IVocabularyInternalService {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async putItem(item: VocabularyItem): Promise<void> {
-        return await callMethod('vocabularyService', 'putItem', [item])
+        return await (Promise.reject(
+            new Error('BackgroundVocabularyService is not available in desktop-only build.')
+        ) as Promise<void>)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getItem(word: string): Promise<VocabularyItem | undefined> {
-        return await callMethod('vocabularyService', 'getItem', [word])
+        return await (Promise.reject(
+            new Error('BackgroundVocabularyService is not available in desktop-only build.')
+        ) as Promise<VocabularyItem | undefined>)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async deleteItem(word: string): Promise<void> {
-        return await callMethod('vocabularyService', 'deleteItem', [word])
+        return await (Promise.reject(
+            new Error('BackgroundVocabularyService is not available in desktop-only build.')
+        ) as Promise<void>)
     }
 
     async countItems(): Promise<number> {
-        return await callMethod('vocabularyService', 'countItems', [])
+        return await (Promise.reject(
+            new Error('BackgroundVocabularyService is not available in desktop-only build.')
+        ) as Promise<number>)
     }
 
     async listItems(): Promise<VocabularyItem[]> {
-        return await callMethod('vocabularyService', 'listItems', [])
+        return await (Promise.reject(
+            new Error('BackgroundVocabularyService is not available in desktop-only build.')
+        ) as Promise<VocabularyItem[]>)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listRandomItems(limit: number): Promise<VocabularyItem[]> {
-        return await callMethod('vocabularyService', 'listRandomItems', [limit])
+        return await (Promise.reject(
+            new Error('BackgroundVocabularyService is not available in desktop-only build.')
+        ) as Promise<VocabularyItem[]>)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listFrequencyItems(limit: number): Promise<VocabularyItem[]> {
-        return await callMethod('vocabularyService', 'listFrequencyItems', [limit])
+        return await (Promise.reject(
+            new Error('BackgroundVocabularyService is not available in desktop-only build.')
+        ) as Promise<VocabularyItem[]>)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async isCollected(word: string): Promise<boolean> {
-        return await callMethod('vocabularyService', 'isCollected', [word])
+        return await (Promise.reject(
+            new Error('BackgroundVocabularyService is not available in desktop-only build.')
+        ) as Promise<boolean>)
     }
 }
 

@@ -6,9 +6,6 @@ export const commands = {
     async getConfigContent(): Promise<string> {
         return await TAURI_INVOKE('get_config_content')
     },
-    async getUpdateResult(): Promise<[boolean, UpdateResult | null]> {
-        return await TAURI_INVOKE('get_update_result')
-    },
     async clearConfigCache(): Promise<void> {
         await TAURI_INVOKE('clear_config_cache')
     },
@@ -18,35 +15,12 @@ export const commands = {
     async showTranslatorWindowWithSelectedTextCommand(): Promise<void> {
         await TAURI_INVOKE('show_translator_window_with_selected_text_command')
     },
-    async showActionManagerWindow(): Promise<void> {
-        await TAURI_INVOKE('show_action_manager_window')
-    },
     async showHistoryWindow(): Promise<void> {
         await TAURI_INVOKE('show_history_window')
-    },
-    async getTranslatorWindowAlwaysOnTop(): Promise<boolean> {
-        return await TAURI_INVOKE('get_translator_window_always_on_top')
     },
     async fetchStream(id: string, url: string, optionsStr: string): Promise<Result<string, string>> {
         try {
             return { status: 'ok', data: await TAURI_INVOKE('fetch_stream', { id, url, optionsStr }) }
-        } catch (e) {
-            if (e instanceof Error) throw e
-            else return { status: 'error', error: e as any }
-        }
-    },
-    async writingCommand(): Promise<void> {
-        await TAURI_INVOKE('writing_command')
-    },
-    async writeToInput(text: string): Promise<void> {
-        await TAURI_INVOKE('write_to_input', { text })
-    },
-    async finishWriting(): Promise<void> {
-        await TAURI_INVOKE('finish_writing')
-    },
-    async insertTranslationIntoPreviousInput(text: string): Promise<Result<null, string>> {
-        try {
-            return { status: 'ok', data: await TAURI_INVOKE('insert_translation_into_previous_input', { text }) }
         } catch (e) {
             if (e instanceof Error) throw e
             else return { status: 'error', error: e as any }
@@ -58,49 +32,24 @@ export const commands = {
     async detectLang(text: string): Promise<string> {
         return await TAURI_INVOKE('detect_lang', { text })
     },
-    async screenshot(x: number, y: number): Promise<void> {
-        await TAURI_INVOKE('screenshot', { x, y })
-    },
     async hideTranslatorWindow(): Promise<void> {
         await TAURI_INVOKE('hide_translator_window')
-    },
-    async startOcr(): Promise<void> {
-        await TAURI_INVOKE('start_ocr')
-    },
-    async finishOcr(): Promise<void> {
-        await TAURI_INVOKE('finish_ocr')
-    },
-    async cutImage(left: number, top: number, width: number, height: number): Promise<void> {
-        await TAURI_INVOKE('cut_image', { left, top, width, height })
     },
 }
 
 /** user-defined events **/
 
 export const events = __makeEvents__<{
-    checkUpdateEvent: CheckUpdateEvent
-    checkUpdateResultEvent: CheckUpdateResultEvent
     configUpdatedEvent: ConfigUpdatedEvent
-    pinnedFromTrayEvent: PinnedFromTrayEvent
-    pinnedFromWindowEvent: PinnedFromWindowEvent
 }>({
-    checkUpdateEvent: 'check-update-event',
-    checkUpdateResultEvent: 'check-update-result-event',
     configUpdatedEvent: 'config-updated-event',
-    pinnedFromTrayEvent: 'pinned-from-tray-event',
-    pinnedFromWindowEvent: 'pinned-from-window-event',
 })
 
 /** user-defined constants **/
 
 /** user-defined types **/
 
-export type CheckUpdateEvent = null
-export type CheckUpdateResultEvent = UpdateResult
 export type ConfigUpdatedEvent = null
-export type PinnedFromTrayEvent = { pinned: boolean }
-export type PinnedFromWindowEvent = { pinned: boolean }
-export type UpdateResult = { version: string; currentVersion: string; body: string | null }
 
 /** tauri-specta globals **/
 

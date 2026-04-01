@@ -1,73 +1,27 @@
-use std::sync::atomic::{AtomicBool, Ordering};
-
-use crate::config::get_config;
 use crate::insertion::remember_active_window;
-use crate::ocr::ocr;
-use crate::windows::{
-    set_translator_window_always_on_top, show_settings_window, show_updater_window,
-    TRANSLATOR_WIN_NAME,
-};
-use crate::{ALWAYS_ON_TOP, UPDATE_RESULT};
-
-use serde::{Deserialize, Serialize};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, TrayIconEvent},
     Manager, Runtime,
 };
-use tauri_specta::Event;
+use crate::windows::{show_settings_window, TRANSLATOR_WIN_NAME};
 
-#[derive(Serialize, Deserialize, Debug, Clone, specta::Type, tauri_specta::Event)]
-pub struct PinnedFromTrayEvent {
-    pinned: bool,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, specta::Type, tauri_specta::Event)]
-pub struct PinnedFromWindowEvent {
-    pinned: bool,
-}
-
-impl PinnedFromWindowEvent {
-    pub fn pinned(&self) -> &bool {
-        &self.pinned
-    }
-}
-
-pub static TRAY_EVENT_REGISTERED: AtomicBool = AtomicBool::new(false);
+static mut TRAY_EVENT_REGISTERED: bool = false;
 
 pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
-    let config = get_config().unwrap();
-    let check_for_updates_i = MenuItem::with_id(
-        app,
-        "check_for_updates",
-        "Check for Updates...",
-        true,
-        None::<String>,
-    )?;
-    if let Some(Some(_)) = *UPDATE_RESULT.lock() {
-        check_for_updates_i
-            .set_text("💡 New version available!")
-            .unwrap();
-    }
     let settings_i = MenuItem::with_id(app, "settings", "Settings", true, Some("CmdOrCtrl+,"))?;
-    let ocr_i = MenuItem::with_id(app, "ocr", "OCR", true, config.ocr_hotkey)?;
-    let show_i = MenuItem::with_id(app, "show", "Show", true, config.display_window_hotkey)?;
+    let history_i = MenuItem::with_id(app, "history", "History", true, None::<String>)?;
+    let show_i = MenuItem::with_id(app, "show", "Show", true, None::<String>)?;
     let hide_i = PredefinedMenuItem::hide(app, Some("Hide"))?;
-    let pin_i = MenuItem::with_id(app, "pin", "Pin", true, None::<String>)?;
-    if ALWAYS_ON_TOP.load(Ordering::Acquire) {
-        pin_i.set_text("Unpin").unwrap();
-    }
     let quit_i = PredefinedMenuItem::quit(app, Some("Quit"))?;
     let separator_i = PredefinedMenuItem::separator(app)?;
     let menu = Menu::with_items(
         app,
         &[
-            &check_for_updates_i,
             &settings_i,
-            &ocr_i,
+            &history_i,
             &show_i,
             &hide_i,
-            &pin_i,
             &separator_i,
             &quit_i,
         ],
@@ -75,19 +29,20 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
 
     let tray = app.tray_by_id("tray").unwrap();
     tray.set_menu(Some(menu.clone()))?;
-    if TRAY_EVENT_REGISTERED.load(Ordering::Acquire) {
-        return Ok(());
-    }
-    TRAY_EVENT_REGISTERED.store(true, Ordering::Release);
-    tray.on_menu_event(move |app, event| match event.id.as_ref() {
-        "check_for_updates" => {
-            show_updater_window();
+    unsafe {
+        if TRAY_EVENT_REGISTERED {
+            return Ok(());
         }
+        TRAY_EVENT_REGISTERED = true;
+    }
+    tray.on_menu_event(move |app, event| match event.id.as_ref() {
         "settings" => {
             show_settings_window();
         }
-        "ocr" => {
-            ocr();
+        "history" => {
+            tauri::async_runtime::spawn(async move {
+                crate::windows::show_history_window().await;
+            });
         }
         "show" => {
             remember_active_window();
@@ -99,13 +54,6 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
                 window.unminimize().unwrap();
                 window.hide().unwrap();
             }
-        }
-        "pin" => {
-            let pinned = set_translator_window_always_on_top();
-            let handle = app.app_handle();
-            let pinned_from_tray_event = PinnedFromTrayEvent { pinned };
-            pinned_from_tray_event.emit(handle).unwrap_or_default();
-            create_tray(app).unwrap();
         }
         "quit" => app.exit(0),
         _ => {}
