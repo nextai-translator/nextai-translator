@@ -26,6 +26,7 @@ const useStyles = createUseStyles({
         color: props.themeType === 'dark' ? props.theme.colors.contentSecondary : props.theme.colors.contentPrimary,
         fontSize: '12px',
         fontWeight: 600,
+        letterSpacing: '0.01em',
         cursor: 'unset',
         userSelect: 'none',
     }),

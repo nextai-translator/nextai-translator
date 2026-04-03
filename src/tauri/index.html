@@ -14,17 +14,44 @@
                 margin: 0px;
                 padding: 0px;
                 overscroll-behavior: none;
-                scrollbar-width: none;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(0,0,0,0.15) transparent;
                 -ms-overflow-style: none;
                 -ms-user-select: none;
                 -webkit-user-select: none;
                 user-select: none;
                 background: transparent;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
             }
 
-            /* custom scrollbar */
+            /* custom scrollbar - refined thin style */
             *::-webkit-scrollbar {
-                display: none;
+                width: 6px;
+                height: 6px;
+            }
+
+            *::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            *::-webkit-scrollbar-thumb {
+                background-color: rgba(0, 0, 0, 0.12);
+                border-radius: 3px;
+            }
+
+            *::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(0, 0, 0, 0.22);
+            }
+
+            @media (prefers-color-scheme: dark) {
+                *::-webkit-scrollbar-thumb {
+                    background-color: rgba(255, 255, 255, 0.12);
+                }
+                *::-webkit-scrollbar-thumb:hover {
+                    background-color: rgba(255, 255, 255, 0.22);
+                }
             }
 
             textarea::-webkit-resizer {
@@ -33,7 +60,7 @@
 
             textarea::-webkit-scrollbar {
                 display: block;
-                width: 20px;
+                width: 8px;
             }
 
             textarea::-webkit-scrollbar-corner {
@@ -49,14 +76,14 @@
             }
 
             textarea::-webkit-scrollbar-thumb {
-                background-color: #d6dee1;
-                border-radius: 20px;
-                border: 6px solid transparent;
+                background-color: rgba(0, 0, 0, 0.12);
+                border-radius: 4px;
+                border: 2px solid transparent;
                 background-clip: content-box;
             }
 
             textarea::-webkit-scrollbar-thumb:hover {
-                background-color: #a8bbbf;
+                background-color: rgba(0, 0, 0, 0.22);
             }
 
             *, a, button {
@@ -74,6 +101,11 @@
             [data-baseweb='modal'],
             [data-baseweb='popover'] {
                 z-index: 1000;
+            }
+
+            /* Smooth transitions for interactive elements */
+            button, [role="button"] {
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             }
         </style>
     </head>

@@ -16,7 +16,8 @@ import { StatefulTooltip } from 'baseui-sd/tooltip'
 import { detectLang, getLangConfig, sourceLanguages, targetLanguages, LangCode } from '../lang'
 import { translate, TranslateMode } from '../translate'
 import { Select, Value, Option } from 'baseui-sd/select'
-import { RxEraser, RxReload, RxStop } from 'react-icons/rx'
+import { RxEraser, RxEnter, RxReload, RxStop } from 'react-icons/rx'
+import { LuStar, LuStarOff } from 'react-icons/lu'
 import { clsx } from 'clsx'
 import { Button } from 'baseui-sd/button'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -133,12 +134,15 @@ const useStyles = createUseStyles({
         height: '42px',
         left: '0',
         bottom: '0',
-        paddingLeft: '6px',
-        paddingRight: '6px',
+        paddingLeft: '14px',
+        paddingRight: '14px',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        backdropFilter: 'blur(10px)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop: `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+        transition: 'background 0.3s ease',
     }),
     'footerActions': {
         marginLeft: 'auto',
@@ -165,20 +169,24 @@ const useStyles = createUseStyles({
         props.isDesktopApp
             ? {
                   'position': 'fixed',
-                  'backdropFilter': 'blur(10px)',
+                  'backdropFilter': 'blur(20px)',
+                  'WebkitBackdropFilter': 'blur(20px)',
                   'zIndex': 1,
                   'left': 0,
                   'top': 0,
                   'width': '100%',
                   'boxSizing': 'border-box',
-                  'padding': isMacOS ? '30px 16px 8px' : '8px 16px',
-                  'background': props.themeType === 'dark' ? 'rgba(31, 31, 31, 0.5)' : 'rgba(255, 255, 255, 0.5)',
+                  'padding': isMacOS ? '30px 16px 10px' : '10px 16px',
+                  'background': props.themeType === 'dark' ? 'rgba(31, 31, 31, 0.65)' : 'rgba(255, 255, 255, 0.65)',
                   'display': 'flex',
                   'flexDirection': 'row',
                   'flexFlow': 'row nowrap',
                   'cursor': 'move',
                   'alignItems': 'center',
-                  'borderBottom': `1px solid ${props.theme.colors.borderTransparent}`,
+                  'borderBottom': `1px solid ${
+                      props.themeType === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
+                  }`,
+                  'transition': 'background 0.3s ease',
                   '-ms-user-select': 'none',
                   '-webkit-user-select': 'none',
                   'user-select': 'none',
@@ -188,8 +196,10 @@ const useStyles = createUseStyles({
                   'flexDirection': 'row',
                   'cursor': 'move',
                   'alignItems': 'center',
-                  'padding': '8px 16px',
-                  'borderBottom': `1px solid ${props.theme.colors.borderTransparent}`,
+                  'padding': '10px 16px',
+                  'borderBottom': `1px solid ${
+                      props.themeType === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
+                  }`,
                   'minWidth': '612px',
                   '-ms-user-select': 'none',
                   '-webkit-user-select': 'none',
@@ -205,7 +215,7 @@ const useStyles = createUseStyles({
         'display': 'flex',
         'flexDirection': 'row',
         'alignItems': 'center',
-        'gap': '5px',
+        'gap': '4px',
         'marginLeft': '10px',
         '@media screen and (max-width: 460px)': {
             marginLeft: props.isDesktopApp ? '5px' : undefined,
@@ -219,10 +229,24 @@ const useStyles = createUseStyles({
     }),
     'popupCardHeaderMoreActionsBtn': (props: IThemedStyleProps) => ({
         'cursor': 'pointer',
+        'display': 'flex',
+        'alignItems': 'center',
+        'justifyContent': 'center',
+        'padding': '5px',
+        'borderRadius': '8px',
+        'transition': 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         '& *': {
             fill: props.theme.colors.contentPrimary,
             color: props.theme.colors.contentPrimary,
             stroke: props.theme.colors.contentPrimary,
+            transition: 'all 0.2s ease',
+        },
+        '&:hover': {
+            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+            transform: 'scale(1.05)',
+        },
+        '&:active': {
+            transform: 'scale(0.95)',
         },
     }),
     'popupCardHeaderActionsContainer': (props: IThemedStyleProps) => ({
@@ -238,23 +262,34 @@ const useStyles = createUseStyles({
             gap: props.isDesktopApp ? '5px' : undefined,
         },
     }),
-    'from': {
+    'from': (props: IThemedStyleProps) => ({
         display: 'flex',
-        color: '#999',
+        color: props.theme.colors.contentTertiary,
         fontSize: '12px',
         flexShrink: 0,
-    },
-    'arrow': {
+    }),
+    'arrow': (props: IThemedStyleProps) => ({
+        'display': 'flex',
+        'color': props.theme.colors.contentTertiary,
+        'cursor': 'pointer',
+        'borderRadius': '8px',
+        'padding': '5px',
+        'transition': 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+            color: props.theme.colors.contentPrimary,
+            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+            transform: 'scale(1.1)',
+        },
+        '&:active': {
+            transform: 'scale(0.9)',
+        },
+    }),
+    'to': (props: IThemedStyleProps) => ({
         display: 'flex',
-        color: '#999',
-        cursor: 'pointer',
-    },
-    'to': {
-        display: 'flex',
-        color: '#999',
+        color: props.theme.colors.contentTertiary,
         fontSize: '12px',
         flexShrink: 0,
-    },
+    }),
     'popupCardContentContainer': (props: IThemedStyleProps) => ({
         paddingTop: props.isDesktopApp ? '52px' : undefined,
         display: 'flex',
@@ -270,21 +305,22 @@ const useStyles = createUseStyles({
     'popupCardEditorContainer': {
         display: 'flex',
         flexDirection: 'column',
-        padding: '16px',
+        padding: '18px 18px 14px',
     },
     'popupCardTranslatedContainer': (props: IThemedStyleProps) => ({
         'position': 'relative',
-        'padding': '26px 16px 16px 16px',
-        'border-top': `1px solid ${props.theme.colors.borderTransparent}`,
+        'padding': '30px 18px 18px 18px',
+        'border-top': `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
         '-ms-user-select': 'none',
         '-webkit-user-select': 'none',
         'user-select': 'none',
     }),
-    'tokenCount': {
-        color: '#999',
-        fontSize: '14px',
+    'tokenCount': (props: IThemedStyleProps) => ({
+        color: props.theme.colors.contentTertiary,
+        fontSize: '12px',
         fontFamily: 'monospace',
-    },
+        opacity: 0.7,
+    }),
     'actionStr': (props: IThemedStyleProps) => ({
         position: 'absolute',
         display: 'flex',
@@ -295,20 +331,26 @@ const useStyles = createUseStyles({
         left: '50%',
         transform: 'translateX(-50%) translateY(-50%)',
         fontSize: '10px',
-        padding: '2px 12px',
-        borderRadius: '4px',
+        padding: '4px 16px',
+        borderRadius: '12px',
         background: props.theme.colors.backgroundTertiary,
         color: props.theme.colors.contentSecondary,
+        fontWeight: 500,
+        letterSpacing: '0.03em',
     }),
-    'error': {
-        background: '#f8d7da',
-    },
+    'error': (props: IThemedStyleProps) => ({
+        background: props.themeType === 'dark' ? 'rgba(220, 38, 38, 0.15)' : '#fef2f2',
+        color: props.themeType === 'dark' ? '#fca5a5' : '#dc2626',
+    }),
     'caret': {
         marginLeft: '4px',
-        borderRight: '0.2em solid #777',
-        animation: '$caret 500ms steps(44) infinite',
+        borderRight: '0.2em solid #888',
+        animation: '$caret 600ms ease-in-out infinite',
     },
     '@keyframes caret': {
+        '0%, 100%': {
+            borderColor: '#888',
+        },
         '50%': {
             borderColor: 'transparent',
         },
@@ -327,43 +369,62 @@ const useStyles = createUseStyles({
             width: '100%',
         },
     }),
-    'errorMessage': {
+    'errorMessage': (props: IThemedStyleProps) => ({
         'display': 'flex',
-        'color': 'red',
+        'color': props.themeType === 'dark' ? '#fca5a5' : '#dc2626',
         'alignItems': 'center',
-        'gap': '4px',
+        'gap': '8px',
+        'fontSize': '13px',
+        'padding': '10px 14px',
+        'borderRadius': '10px',
+        'background': props.themeType === 'dark' ? 'rgba(220, 38, 38, 0.1)' : 'rgba(220, 38, 38, 0.05)',
+        'border': `1px solid ${props.themeType === 'dark' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(220, 38, 38, 0.08)'}`,
         '& *': {
             '-ms-user-select': 'text',
             '-webkit-user-select': 'text',
             'user-select': 'text',
         },
-    },
+    }),
     'actionButtonsContainer': {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: '12px',
+        gap: '4px',
+        marginTop: '4px',
     },
     'actionButton': (props: IThemedStyleProps) => ({
-        color: props.theme.colors.contentSecondary,
-        cursor: 'pointer',
-        display: 'flex',
-        paddingTop: '6px',
-        paddingBottom: '6px',
+        'color': props.theme.colors.contentSecondary,
+        'cursor': 'pointer',
+        'display': 'flex',
+        'alignItems': 'center',
+        'justifyContent': 'center',
+        'padding': '6px',
+        'borderRadius': '8px',
+        'transition': 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+            color: props.theme.colors.contentPrimary,
+            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+            transform: 'scale(1.08)',
+        },
+        '&:active': {
+            transform: 'scale(0.92)',
+        },
     }),
     'actionButtonDisabled': (props: IThemedStyleProps) => ({
         color: props.theme.colors.buttonDisabledText,
         cursor: 'default',
         display: 'flex',
-        paddingTop: '6px',
-        paddingBottom: '6px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '6px',
+        borderRadius: '8px',
+        opacity: 0.4,
     }),
-    'enterHint': {
-        color: '#999',
-        fontSize: '14px',
-        transform: 'scale(0.9)',
-        marginRight: '-16px',
-    },
+    'enterHint': (props: IThemedStyleProps) => ({
+        color: props.theme.colors.contentTertiary,
+        fontSize: '11px',
+        opacity: 0.7,
+    }),
     'writing': {
         'marginLeft': '3px',
         'width': '10px',
@@ -385,24 +446,31 @@ const useStyles = createUseStyles({
         'justifyContent': 'center',
         'padding-left': '3px',
         'padding-right': '3px',
-        'borderRadius': '0.75rem',
+        'borderRadius': '12px',
         'cursor': 'pointer',
+        'transition': 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         '-ms-user-select': 'none',
         '-webkit-user-select': 'none',
         'user-select': 'none',
-        'border': `1px dashed ${props.theme.colors.borderTransparent}`,
-        'background': props.theme.colors.backgroundTertiary,
+        'border': `1.5px dashed ${props.themeType === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
+        'background': props.themeType === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
         'color': props.theme.colors.contentSecondary,
+        '&:hover': {
+            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+            borderColor: props.themeType === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+        },
     }),
     'fileDragArea': (props: IThemedStyleProps) => ({
-        padding: '10px',
+        padding: '16px',
         display: 'flex',
         justifyContent: 'center',
         marginBottom: '10px',
-        fontSize: '11px',
-        border: `2px dashed ${props.theme.colors.borderTransparent}`,
-        background: props.theme.colors.backgroundTertiary,
+        fontSize: '12px',
+        borderRadius: '12px',
+        border: `2px dashed ${props.themeType === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
+        background: props.themeType === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
         color: props.theme.colors.contentSecondary,
+        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
     }),
     'OCRStatusBar': (props: IThemedStyleProps) => ({
         color: props.theme.colors.contentSecondary,
@@ -416,7 +484,9 @@ const useStyles = createUseStyles({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        background: 'rgba(0,0,0,0.3)',
+        background: 'rgba(0,0,0,0.35)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
     },
     'flexPlaceHolder': {
         marginRight: 'auto',
@@ -843,7 +913,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     const isWordModeRef = useRef(false)
     const [isCollectedWord, setIsCollectedWord] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [isAutoCollectOn, _setIsAutoCollectOn] = useState(
+    const [isAutoCollectOn, setIsAutoCollectOn] = useState(
         settings.autoCollect === undefined ? false : settings.autoCollect
     )
 
@@ -2049,7 +2119,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     style: {
                                                         fontSize: `${settings.fontSize}px !important`,
                                                         width: '100%',
-                                                        borderRadius: '0px',
+                                                        borderRadius: '8px',
                                                         background: settings.enableBackgroundBlur
                                                             ? 'transparent !important'
                                                             : undefined,
@@ -2157,16 +2227,14 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             <div className={styles.actionButtonsContainer}>
                                 <>
                                     <Tooltip content={t('Upload an image for OCR translation')} placement='bottom'>
-                                        <div className={styles.actionButton}>
-                                            <Dropzone onDrop={onDrop}>
-                                                {({ getRootProps, getInputProps }) => (
-                                                    <div {...getRootProps()} className={styles.actionButton}>
-                                                        <input {...getInputProps({ multiple: false })} />
-                                                        <BsTextareaT size={15} />
-                                                    </div>
-                                                )}
-                                            </Dropzone>
-                                        </div>
+                                        <Dropzone onDrop={onDrop}>
+                                            {({ getRootProps, getInputProps }) => (
+                                                <div {...getRootProps()} className={styles.actionButton}>
+                                                    <input {...getInputProps({ multiple: false })} />
+                                                    <BsTextareaT size={15} />
+                                                </div>
+                                            )}
+                                        </Dropzone>
                                     </Tooltip>
                                     {enableVocabulary && (
                                         <StatefulTooltip
@@ -2250,11 +2318,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 />
                                             </div>
                                         </Tooltip>
-                                        <Tooltip content={t('Copy to clipboard')} placement='bottom'>
-                                            <div className={styles.actionButton}>
-                                                <CopyButton text={editableText} styles={styles}></CopyButton>
-                                            </div>
-                                        </Tooltip>
+                                        <CopyButton text={editableText} styles={styles}></CopyButton>
                                         <Tooltip content={t('Clear input')} placement='bottom'>
                                             <div
                                                 className={styles.actionButton}
@@ -2270,9 +2334,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     editorRef.current?.focus()
                                                 }}
                                             >
-                                                <div className={styles.actionButton}>
-                                                    <RxEraser size={15} />
-                                                </div>
+                                                <RxEraser size={15} />
                                             </div>
                                         </Tooltip>
                                     </>
@@ -2417,6 +2479,68 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 )}
                                             </div>
                                         </div>
+                                        {translatedText && (
+                                            <div ref={actionButtonsRef} className={styles.actionButtonsContainer}>
+                                                <div style={{ marginRight: 'auto' }} />
+                                                {!isLoading && (
+                                                    <Tooltip content={t('Retry')} placement='bottom'>
+                                                        <div
+                                                            onClick={() => forceTranslate()}
+                                                            className={styles.actionButton}
+                                                        >
+                                                            <RxReload size={15} />
+                                                        </div>
+                                                    </Tooltip>
+                                                )}
+                                                <Tooltip content={t('Speak')} placement='bottom'>
+                                                    <div className={styles.actionButton}>
+                                                        <SpeakerIcon
+                                                            size={15}
+                                                            provider={settings.tts?.provider}
+                                                            text={translatedText}
+                                                            lang={targetLang ?? 'en'}
+                                                            voice={
+                                                                settings.tts?.voices?.find(
+                                                                    (item) => item.lang === targetLang
+                                                                )?.voice
+                                                            }
+                                                            rate={settings.tts?.rate}
+                                                            volume={settings.tts?.volume}
+                                                        />
+                                                    </div>
+                                                </Tooltip>
+                                                {isWordMode && (
+                                                    <Tooltip content={t('Auto collect')} placement='bottom'>
+                                                        <div
+                                                            className={styles.actionButton}
+                                                            onClick={() => {
+                                                                setIsAutoCollectOn((prevState) => !prevState)
+                                                            }}
+                                                        >
+                                                            {isAutoCollectOn ? (
+                                                                <LuStar size={15} />
+                                                            ) : (
+                                                                <LuStarOff size={15} />
+                                                            )}
+                                                        </div>
+                                                    </Tooltip>
+                                                )}
+                                                {isTauri() && (
+                                                    <Tooltip
+                                                        content={t('Insert into previous input')}
+                                                        placement='bottom'
+                                                    >
+                                                        <div
+                                                            className={styles.actionButton}
+                                                            onClick={handleInsertTranslatedText}
+                                                        >
+                                                            <RxEnter size={15} />
+                                                        </div>
+                                                    </Tooltip>
+                                                )}
+                                                <CopyButton text={translatedText} styles={styles}></CopyButton>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                                 {isNotLogin && settings?.provider === 'ChatGPT' && (

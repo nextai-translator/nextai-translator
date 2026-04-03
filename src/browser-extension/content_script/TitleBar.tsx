@@ -15,19 +15,32 @@ const useStyles = createUseStyles({
     container: ({ theme }: IThemedStyleProps) => ({
         display: 'flex',
         background: theme.colors.backgroundPrimary,
-        padding: '8px 16px 4px 16px',
+        padding: '10px 16px 8px 16px',
         cursor: 'move',
         justifyContent: 'space-between',
+        alignItems: 'center',
     }),
     actionsContainer: {
         display: 'flex',
-        gap: '8px',
+        gap: '4px',
     },
     actionIconContainer: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: '2px',
-        cursor: 'pointer',
+        'display': 'flex',
+        'alignItems': 'center',
+        'justifyContent': 'center',
+        'padding': '5px',
+        'cursor': 'pointer',
+        'borderRadius': '8px',
+        'transition': 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        'opacity': 0.6,
+        '&:hover': {
+            opacity: 1,
+            background: 'rgba(0,0,0,0.06)',
+            transform: 'scale(1.08)',
+        },
+        '&:active': {
+            transform: 'scale(0.92)',
+        },
     },
     pinIcon: {
         rotate: '-45deg',
