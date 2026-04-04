@@ -91,6 +91,7 @@ const settingKeys: Record<keyof ISettings, number> = {
     ollamaAPIModel: 1,
     ollamaCustomModelName: 1,
     ollamaModelLifetimeInMemory: 1,
+    thinkingEnabled: 1,
     groqAPIURL: 1,
     groqAPIURLPath: 1,
     groqAPIModel: 1,
@@ -255,6 +256,9 @@ export async function getSettings(): Promise<ISettings> {
     }
     if (settings.ollamaModelLifetimeInMemory === undefined || settings.ollamaModelLifetimeInMemory === null) {
         settings.ollamaModelLifetimeInMemory = '5m'
+    }
+    if (settings.thinkingEnabled === undefined || settings.thinkingEnabled === null) {
+        settings.thinkingEnabled = false
     }
     return settings
 }

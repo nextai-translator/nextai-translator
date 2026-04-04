@@ -3244,6 +3244,15 @@ export function InnerSettings({
                                 />
                             </FormItem>
                         </div>
+                        <FormItem
+                            name='thinkingEnabled'
+                            label={t('Enable Thinking')}
+                            caption={t(
+                                'Disable thinking for faster translations. Reasoning models think by default, which significantly slows down simple tasks.'
+                            )}
+                        >
+                            <MyCheckbox onBlur={onBlur} />
+                        </FormItem>
                         <FormItem name='defaultTranslateMode' label={t('Default Action')}>
                             <TranslateModeSelector onBlur={onBlur} />
                         </FormItem>
