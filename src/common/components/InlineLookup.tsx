@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { createUseStyles } from 'react-jss'
 import { Markdown } from './Markdown'
 import { SpinnerIcon } from './SpinnerIcon'
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import LogoWithText from './LogoWithText'
 import { RxCross2 } from 'react-icons/rx'
 import { isDesktopApp } from '../utils'
+import { LogicalSize } from '@tauri-apps/api/dpi'
 
 const useStyles = createUseStyles({
     'container': (props: IThemedStyleProps) => ({
@@ -17,6 +18,9 @@ const useStyles = createUseStyles({
         'flexDirection': 'column',
         'overflow': 'hidden',
         'position': 'relative',
+        'width': 'max-content',
+        'minWidth': '180px',
+        'maxWidth': '500px',
         'background': props.theme.colors.backgroundPrimary,
         'transition': 'background 0.3s ease',
         '&::-webkit-scrollbar': {
@@ -24,8 +28,8 @@ const useStyles = createUseStyles({
         },
     }),
     'resultArea': (props: IThemedStyleProps) => ({
-        'flex': 1,
         'padding': '14px 16px',
+        'maxHeight': '340px',
         'overflowY': 'auto',
         'color': props.themeType === 'dark' ? props.theme.colors.contentSecondary : props.theme.colors.contentPrimary,
         'fontSize': '14px',
@@ -127,6 +131,24 @@ export function InlineLookup({ translatedText = '', isLoading = false, onClose }
     const { settings } = useSettings()
     const styles = useStyles({ theme, themeType })
     const isDesktop = isDesktopApp()
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (!isDesktop || !containerRef.current) return
+        const el = containerRef.current
+        const observer = new ResizeObserver(async (entries) => {
+            const { width, height } = entries[0].contentRect
+            try {
+                const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+                const appWindow = WebviewWindow.getCurrent()
+                await appWindow.setSize(new LogicalSize(Math.ceil(width), Math.ceil(height)))
+            } catch {
+                // ignore
+            }
+        })
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [isDesktop])
 
     const handleResize = useCallback(
         async (direction: string) => {
@@ -153,7 +175,7 @@ export function InlineLookup({ translatedText = '', isLoading = false, onClose }
     )
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} ref={containerRef}>
             {isDesktop && (
                 <>
                     <div
