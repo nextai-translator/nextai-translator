@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import LogoWithText from './LogoWithText'
 import { RxCross2 } from 'react-icons/rx'
 import { isDesktopApp } from '../utils'
-import { LogicalSize } from '@tauri-apps/api/dpi'
+import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi'
 
 const useStyles = createUseStyles({
     'container': (props: IThemedStyleProps) => ({
@@ -141,7 +141,25 @@ export function InlineLookup({ translatedText = '', isLoading = false, onClose }
             try {
                 const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow')
                 const appWindow = WebviewWindow.getCurrent()
-                await appWindow.setSize(new LogicalSize(Math.ceil(width), Math.ceil(height)))
+                const w = Math.ceil(width)
+                const h = Math.ceil(height)
+                await appWindow.setSize(new LogicalSize(w, h))
+
+                // Reposition if window bottom passes 5/6 zone
+                const { currentMonitor } = await import('@tauri-apps/api/window')
+                const mon = await currentMonitor()
+                const pos = await appWindow.outerPosition()
+                const scale = await appWindow.scaleFactor()
+                if (!mon) return
+                const mp = mon.position
+                const ms = mon.size
+                const physH = Math.ceil(h * scale)
+                const zone56 = mp.y + (ms.height * 5) / 6
+                if (pos.y + physH > zone56) {
+                    const zone16 = mp.y + ms.height / 6
+                    const newY = Math.max(zone16, pos.y - physH)
+                    await appWindow.setPosition(new PhysicalPosition(pos.x, newY))
+                }
             } catch {
                 // ignore
             }
@@ -156,8 +174,8 @@ export function InlineLookup({ translatedText = '', isLoading = false, onClose }
             try {
                 const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow')
                 const appWindow = WebviewWindow.getCurrent()
-                await appWindow.startResizing({
-                    direction: direction as
+                await appWindow.startResizeDragging(
+                    direction as
                         | 'North'
                         | 'South'
                         | 'East'
@@ -165,8 +183,8 @@ export function InlineLookup({ translatedText = '', isLoading = false, onClose }
                         | 'NorthEast'
                         | 'NorthWest'
                         | 'SouthEast'
-                        | 'SouthWest',
-                })
+                        | 'SouthWest'
+                )
             } catch {
                 // ignore
             }

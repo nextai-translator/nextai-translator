@@ -77,25 +77,6 @@ export function InlineLookupWindow() {
         }
     }, [])
 
-    useEffect(() => {
-        let unlisten: UnlistenFn | undefined
-        ;(async () => {
-            const appWindow = (await import('@tauri-apps/api/webviewWindow')).WebviewWindow.getCurrent()
-            appWindow
-                .onFocusChanged(({ payload: focused }: Event<boolean>) => {
-                    if (!focused) {
-                        commands.hideInlineLookupWindow()
-                    }
-                })
-                .then((cb: UnlistenFn) => {
-                    unlisten = cb
-                })
-        })()
-        return () => {
-            unlisten?.()
-        }
-    }, [])
-
     const handleClose = () => {
         commands.hideInlineLookupWindow()
     }

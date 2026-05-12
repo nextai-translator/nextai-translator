@@ -786,6 +786,8 @@ pub fn show_inline_lookup_window(
         }
 
         let mut window_physical_position = mouse_physical_position;
+
+        // Horizontal: clamp to right edge
         if window_physical_position.x + (window_physical_size.width as i32)
             > monitor_physical_position.x + (monitor_physical_size.width as i32)
         {
@@ -793,12 +795,26 @@ pub fn show_inline_lookup_window(
                 + (monitor_physical_size.width as i32)
                 - (window_physical_size.width as i32);
         }
-        if window_physical_position.y + (window_physical_size.height as i32)
-            > monitor_physical_position.y + (monitor_physical_size.height as i32)
-        {
-            window_physical_position.y = monitor_physical_position.y
-                + (monitor_physical_size.height as i32)
-                - (window_physical_size.height as i32);
+
+        // Vertical: screen divided into 6 zones
+        // Flip above if bottom crosses 5/6 line, flip below if top crosses 1/6 line
+        let h = monitor_physical_size.height as i32;
+        let top_edge = monitor_physical_position.y;
+        let zone_1_6 = top_edge + h / 6;
+        let zone_5_6 = top_edge + h * 5 / 6;
+
+        // Default: place below mouse with small gap
+        let gap = 8i32;
+        window_physical_position.y = mouse_physical_position.y + gap;
+        let would_be_bottom = window_physical_position.y + (window_physical_size.height as i32);
+        if would_be_bottom > zone_5_6 {
+            // Flip above mouse with gap
+            let above_y = mouse_physical_position.y - (window_physical_size.height as i32) - gap;
+            if above_y >= zone_1_6 {
+                window_physical_position.y = above_y;
+            } else {
+                window_physical_position.y = zone_1_6;
+            }
         }
         let _ = window.set_position(window_physical_position);
     }
