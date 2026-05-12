@@ -155,6 +155,8 @@
     "Baidu": "Baidu",
     "Bing": "Bing",
     "Auto hide window when out of focus": "ซ่อนหน้าต่างอัตโนมัติเมื่อไม่ได้รับการสนับสนุน",
+    "Compact inline lookup mode": "โหมดการแปลแบบกะทัดรัด",
+    "When enabled, text selection translation shows a compact popup with only the translated result": "เมื่อเปิดใช้งาน การแปลข้อความที่เลือกจะแสดงป๊อปอัพแบบกะทัดรัดที่มีเฉพาะผลการแปล",
     "Proxy": "พร็อกซี",
     "Enabled": "เปิดใช้งาน",
     "Protocol": "โปรโตคอล",

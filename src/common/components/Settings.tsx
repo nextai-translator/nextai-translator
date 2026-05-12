@@ -1106,6 +1106,25 @@ function RunAtStartupCheckbox({ value, onChange, onBlur }: RunAtStartupCheckboxP
     )
 }
 
+interface UseCompactLookupCheckboxProps {
+    value?: boolean
+    onChange?: (value: boolean) => void
+    onBlur?: () => void
+}
+
+function UseCompactLookupCheckbox({ value, onChange, onBlur }: UseCompactLookupCheckboxProps) {
+    return (
+        <Checkbox
+            checkmarkType='toggle_round'
+            checked={value}
+            onChange={(e) => {
+                onChange?.(e.target.checked)
+                onBlur?.()
+            }}
+        />
+    )
+}
+
 const useStyles = createUseStyles({
     headerPromotion: (props: IThemedStyleProps) => {
         return {
@@ -3338,6 +3357,15 @@ export function InnerSettings({
                             label={t('Auto hide window when out of focus')}
                         >
                             <MyCheckbox onBlur={onBlur} />
+                        </FormItem>
+                        <FormItem
+                            name='useCompactLookup'
+                            label={t('Compact inline lookup mode')}
+                            caption={t(
+                                'When enabled, text selection translation shows a compact popup with only the translated result'
+                            )}
+                        >
+                            <UseCompactLookupCheckbox onBlur={onBlur} />
                         </FormItem>
                         <FormItem
                             style={{

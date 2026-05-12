@@ -170,6 +170,8 @@
     "Baidu": "Baidu",
     "Bing": "Bing",
     "Auto hide window when out of focus": "Auto hide window when out of focus",
+    "Compact inline lookup mode": "Compact inline lookup mode",
+    "When enabled, text selection translation shows a compact popup with only the translated result": "When enabled, text selection translation shows a compact popup with only the translated result",
     "Proxy": "Proxy",
     "Enabled": "Enabled",
     "Protocol": "Protocol",

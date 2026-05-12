@@ -16,6 +16,7 @@ import { createUseStyles } from 'react-jss'
 
 type Props = {
     reference: ReferenceElement
+    compact?: boolean
 } & PropsWithChildren
 
 const useStyles = createUseStyles({
@@ -37,7 +38,7 @@ const useStyles = createUseStyles({
     },
 })
 
-export default function InnerContainer({ children, reference }: Props) {
+export default function InnerContainer({ children, reference, compact }: Props) {
     const styles = useStyles()
 
     const draggedRef = useRef(false)
@@ -93,6 +94,19 @@ export default function InnerContainer({ children, reference }: Props) {
             resizeObserver.disconnect()
         }
     }, [reference, updatePosition])
+
+    if (compact) {
+        return (
+            <div
+                ref={draggableRef}
+                className={styles.container}
+                id={popupCardInnerContainerId}
+                style={{ minWidth: 'auto', minHeight: 'auto', width: 'max-content' }}
+            >
+                {children}
+            </div>
+        )
+    }
 
     return (
         <Draggable

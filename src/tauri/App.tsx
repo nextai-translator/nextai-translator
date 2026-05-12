@@ -7,6 +7,7 @@ import { ThumbWindow } from './windows/ThumbWindow'
 import { UpdaterWindow } from './windows/UpdaterWindow'
 import { ScreenshotWindow } from './windows/ScreenshotWindow'
 import { HistoryWindow } from './windows/HistoryWindow'
+import { InlineLookupWindow } from './windows/InlineLookupWindow'
 
 const windowsMap: Record<string, typeof TranslatorWindow> = {
     translator: TranslatorWindow,
@@ -16,6 +17,7 @@ const windowsMap: Record<string, typeof TranslatorWindow> = {
     updater: UpdaterWindow,
     screenshot: ScreenshotWindow,
     history: HistoryWindow,
+    inline_lookup: InlineLookupWindow,
 }
 
 export function App() {

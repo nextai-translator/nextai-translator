@@ -78,7 +78,7 @@ import Toaster from './Toaster'
 import { readFile } from '@tauri-apps/plugin-fs'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDeepCompareCallback } from 'use-deep-compare'
-import { useTranslatorStore } from '../store'
+import { useTranslatorStore, setStoreTranslatedText, setStoreIsTranslating } from '../store'
 import useSWR from 'swr'
 import {
     IPromotionResponse,
@@ -916,6 +916,23 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     const [isAutoCollectOn, setIsAutoCollectOn] = useState(
         settings.autoCollect === undefined ? false : settings.autoCollect
     )
+
+    useEffect(() => {
+        setStoreTranslatedText(translatedText)
+    }, [translatedText])
+
+    useEffect(() => {
+        setStoreIsTranslating(isLoading)
+    }, [isLoading])
+
+    // Emit streaming translation to inline lookup window (desktop only)
+    useEffect(() => {
+        if (!isDesktopApp()) return
+        const done = !isLoading && translatedText !== ''
+        import('@tauri-apps/api/event').then(({ emitTo }) => {
+            emitTo('inline_lookup', 'translated-text-chunk', { text: translatedText, done })
+        })
+    }, [translatedText, isLoading])
 
     const [translateDeps, setTranslateDeps] = useState<{
         sourceLang?: LangCode

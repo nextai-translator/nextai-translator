@@ -117,6 +117,7 @@ const settingKeys: Record<keyof ISettings, number> = {
     noModelsAPISupport: 1,
     claudeThinking: 1,
     claudeThinkingLevel: 1,
+    useCompactLookup: 1,
 }
 
 export async function getSettings(): Promise<ISettings> {
