@@ -18,7 +18,6 @@ const useStyles = createUseStyles({
         'overflow': 'hidden',
         'position': 'relative',
         'background': props.theme.colors.backgroundPrimary,
-        'borderRadius': '14px',
         'transition': 'background 0.3s ease',
         '&::-webkit-scrollbar': {
             display: 'none',
@@ -50,7 +49,7 @@ const useStyles = createUseStyles({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '6px 12px 4px 12px',
-        borderBottom: `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+        borderBottom: `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}`,
     }),
     'closeBtn': (props: IThemedStyleProps) => ({
         'display': 'flex',

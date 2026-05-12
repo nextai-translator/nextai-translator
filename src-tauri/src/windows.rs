@@ -752,25 +752,9 @@ pub fn get_inline_lookup_window() -> tauri::WebviewWindow {
             .maximizable(false)
             .closable(false)
             .decorations(false)
-            .transparent(true);
-
-            #[cfg(target_os = "windows")]
-            {
-                builder = builder.shadow(false);
-            }
+            .shadow(true);
 
             let window = builder.build().unwrap();
-            #[cfg(target_os = "windows")]
-            {
-                use windows::Win32::UI::WindowsAndMessaging::{
-                    SetWindowLongPtrW, GWL_STYLE, WS_POPUP,
-                };
-                let hwnd = window.hwnd().unwrap();
-                unsafe {
-                    let style: u32 = WS_POPUP.0;
-                    SetWindowLongPtrW(hwnd, GWL_STYLE, style as isize);
-                }
-            }
             post_process_window(&window);
 
             window
