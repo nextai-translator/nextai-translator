@@ -37,10 +37,10 @@ use crate::fetch::fetch_stream;
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
 use crate::windows::{
-    get_translator_window_always_on_top, hide_translator_window, show_action_manager_window,
-    show_history_window, show_inline_lookup_window_command, show_translator_window_command,
-    show_translator_window_with_selected_text_command, show_updater_window, TRANSLATOR_WIN_NAME,
-    hide_inline_lookup_window,
+    get_translator_window_always_on_top, hide_inline_lookup_window, hide_translator_window,
+    show_action_manager_window, show_history_window, show_inline_lookup_window_command,
+    show_translator_window_command, show_translator_window_with_selected_text_command,
+    show_updater_window, TRANSLATOR_WIN_NAME,
 };
 use crate::writing::{finish_writing, write_to_input, writing_command};
 
