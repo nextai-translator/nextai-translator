@@ -170,6 +170,8 @@
     "Baidu": "百度",
     "Bing": "Bing",
     "Auto hide window when out of focus": "失去焦點時自動隱藏視窗",
+    "Compact inline lookup mode": "劃詞翻譯簡潔模式",
+    "When enabled, text selection translation shows a compact popup with only the translated result": "開啟後，劃詞翻譯將僅顯示譯文的簡潔彈窗",
     "Proxy": "代理伺服器",
     "Enabled": "啟用",
     "Protocol": "協定",

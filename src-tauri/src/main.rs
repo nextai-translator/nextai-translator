@@ -37,9 +37,10 @@ use crate::fetch::fetch_stream;
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
 use crate::windows::{
-    get_translator_window_always_on_top, hide_translator_window, show_action_manager_window,
-    show_history_window, show_translator_window_command,
-    show_translator_window_with_selected_text_command, show_updater_window, TRANSLATOR_WIN_NAME,
+    get_translator_window_always_on_top, hide_inline_lookup_window, hide_translator_window,
+    show_action_manager_window, show_history_window, show_inline_lookup_window_command,
+    show_translator_window_command, show_translator_window_with_selected_text_command,
+    show_updater_window, TRANSLATOR_WIN_NAME,
 };
 use crate::writing::{finish_writing, write_to_input, writing_command};
 
@@ -128,11 +129,21 @@ fn launch_ipc_server(server: &Server) {
     for mut req in server.incoming_requests() {
         let mut selected_text = String::new();
         req.as_reader().read_to_string(&mut selected_text).unwrap();
-        utils::send_text(selected_text);
-        remember_active_window();
-        let window = windows::show_translator_window(false, true, false);
-        window.set_focus().unwrap();
-        utils::show();
+        let use_compact = config::get_config()
+            .ok()
+            .and_then(|c| c.use_compact_lookup)
+            .unwrap_or(false);
+        if use_compact {
+            let window = windows::show_inline_lookup_window(false, true, false);
+            utils::send_text(selected_text);
+            let _ = window.set_focus();
+        } else {
+            utils::send_text(selected_text);
+            remember_active_window();
+            let window = windows::show_translator_window(false, true, false);
+            window.set_focus().unwrap();
+            utils::show();
+        }
         let response = HttpResponse::from_string("ok");
         req.respond(response).unwrap();
     }
@@ -293,10 +304,20 @@ fn bind_mouse_hook() {
                     windows::close_thumb();
                     let selected_text = (*SELECTED_TEXT.lock()).to_string();
                     if !selected_text.is_empty() {
-                        remember_active_window();
-                        let window = windows::show_translator_window(false, true, false);
-                        utils::send_text(selected_text);
-                        window.set_focus().unwrap();
+                        let use_compact = config::get_config()
+                            .ok()
+                            .and_then(|c| c.use_compact_lookup)
+                            .unwrap_or(false);
+                        if use_compact {
+                            let window = windows::show_inline_lookup_window(false, true, false);
+                            utils::send_text(selected_text);
+                            let _ = window.set_focus();
+                        } else {
+                            remember_active_window();
+                            let window = windows::show_translator_window(false, true, false);
+                            utils::send_text(selected_text);
+                            window.set_focus().unwrap();
+                        }
                     }
                 }
             }
@@ -344,6 +365,8 @@ fn main() {
             detect_lang,
             screenshot,
             hide_translator_window,
+            hide_inline_lookup_window,
+            show_inline_lookup_window_command,
             start_ocr,
             finish_ocr,
             cut_image,

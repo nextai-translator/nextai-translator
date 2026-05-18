@@ -147,4 +147,5 @@ export interface ISettings {
     noModelsAPISupport: boolean
     claudeThinking: boolean
     claudeThinkingLevel: 'low' | 'medium' | 'high'
+    useCompactLookup?: boolean
 }

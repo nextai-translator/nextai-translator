@@ -156,6 +156,8 @@
     "Baidu": "Baidu",
     "Bing": "Bing",
     "Auto hide window when out of focus": "Odak dışındayken pencereyi otomatik gizle",
+    "Compact inline lookup mode": "Kompakt satır içi arama modu",
+    "When enabled, text selection translation shows a compact popup with only the translated result": "Etkinleştirildiğinde, metin seçimi çevirisi yalnızca çeviri sonucunu içeren kompat bir popup gösterir",
     "Proxy": "Proxy",
     "Enabled": "Etkin",
     "Protocol": "Protokol",

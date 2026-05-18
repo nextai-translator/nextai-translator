@@ -25,6 +25,7 @@ pub const ACTION_MANAGER_WIN_NAME: &str = "action_manager";
 pub const UPDATER_WIN_NAME: &str = "updater";
 pub const THUMB_WIN_NAME: &str = "thumb";
 pub const HISTORY_WIN_NAME: &str = "history";
+pub const INLINE_LOOKUP_WIN_NAME: &str = "inline_lookup";
 #[cfg(target_os = "windows")]
 pub const SCREENSHOT_WIN_NAME: &str = "screenshot";
 
@@ -723,6 +724,123 @@ pub fn get_updater_window() -> tauri::WebviewWindow {
     };
 
     window
+}
+
+pub fn get_inline_lookup_window() -> tauri::WebviewWindow {
+    let handle = APP_HANDLE.get().unwrap();
+    let window = match handle.get_webview_window(INLINE_LOOKUP_WIN_NAME) {
+        Some(window) => {
+            window.unminimize().unwrap();
+            window
+        }
+        None => {
+            #[cfg_attr(not(target_os = "windows"), allow(unused_mut))]
+            let mut builder = tauri::WebviewWindowBuilder::new(
+                handle,
+                INLINE_LOOKUP_WIN_NAME,
+                tauri::WebviewUrl::App("src/tauri/index.html".into()),
+            )
+            .title("")
+            .fullscreen(false)
+            .inner_size(240.0, 60.0)
+            .min_inner_size(180.0, 48.0)
+            .max_inner_size(500.0, 400.0)
+            .visible(false)
+            .resizable(true)
+            .skip_taskbar(true)
+            .minimizable(false)
+            .maximizable(false)
+            .closable(false)
+            .decorations(false)
+            .shadow(true);
+
+            let window = builder.build().unwrap();
+            post_process_window(&window);
+
+            window
+        }
+    };
+
+    window
+}
+
+pub fn show_inline_lookup_window(
+    _center: bool,
+    to_mouse_position: bool,
+    _set_focus: bool,
+) -> tauri::WebviewWindow {
+    let window = get_inline_lookup_window();
+    if to_mouse_position {
+        let (mouse_logical_x, mouse_logical_y): (i32, i32) = get_mouse_location().unwrap();
+        let scale_factor = window.scale_factor().unwrap_or(1.0);
+        let current_monitor = get_current_monitor();
+        let monitor_physical_size = current_monitor.size();
+        let monitor_physical_position = current_monitor.position();
+        let window_physical_size = window.outer_size().unwrap_or_default();
+
+        let mut mouse_physical_position = PhysicalPosition::new(mouse_logical_x, mouse_logical_y);
+        if cfg!(target_os = "macos") {
+            mouse_physical_position =
+                LogicalPosition::new(mouse_logical_x as f64, mouse_logical_y as f64)
+                    .to_physical(scale_factor);
+        }
+
+        let mut window_physical_position = mouse_physical_position;
+
+        // Horizontal: clamp to right edge
+        if window_physical_position.x + (window_physical_size.width as i32)
+            > monitor_physical_position.x + (monitor_physical_size.width as i32)
+        {
+            window_physical_position.x = monitor_physical_position.x
+                + (monitor_physical_size.width as i32)
+                - (window_physical_size.width as i32);
+        }
+
+        // Vertical: screen divided into 6 zones
+        // Flip above if bottom crosses 5/6 line, flip below if top crosses 1/6 line
+        let h = monitor_physical_size.height as i32;
+        let top_edge = monitor_physical_position.y;
+        let zone_1_6 = top_edge + h / 6;
+        let zone_5_6 = top_edge + h * 5 / 6;
+
+        // Default: place below mouse with small gap
+        let gap = 8i32;
+        window_physical_position.y = mouse_physical_position.y + gap;
+        let would_be_bottom = window_physical_position.y + (window_physical_size.height as i32);
+        if would_be_bottom > zone_5_6 {
+            // Flip above mouse with gap
+            let above_y = mouse_physical_position.y - (window_physical_size.height as i32) - gap;
+            if above_y >= zone_1_6 {
+                window_physical_position.y = above_y;
+            } else {
+                window_physical_position.y = zone_1_6;
+            }
+        }
+        let _ = window.set_position(window_physical_position);
+    }
+    window.show().unwrap();
+    window
+}
+
+pub fn close_inline_lookup_window() {
+    if let Some(handle) = APP_HANDLE.get() {
+        if let Some(window) = handle.get_webview_window(INLINE_LOOKUP_WIN_NAME) {
+            let _ = window.set_always_on_top(false);
+            let _ = window.hide();
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn hide_inline_lookup_window() {
+    close_inline_lookup_window();
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn show_inline_lookup_window_command() {
+    show_inline_lookup_window(false, true, true);
 }
 
 #[cfg(target_os = "windows")]

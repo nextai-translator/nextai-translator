@@ -4,6 +4,7 @@ import React from 'react'
 import icon from '@/common/assets/images/icon.png'
 import { popupCardID, popupCardOffset, popupThumbID, zIndex } from './consts'
 import { Translator } from '@/common/components/Translator'
+import { InlineLookupContainer } from './InlineLookupContainer'
 import { getContainer, queryPopupCardElement, queryPopupThumbElement } from './utils'
 import { create } from 'jss'
 import preset from 'jss-preset-default'
@@ -111,25 +112,34 @@ async function showPopupCard(reference: ReferenceElement, text: string, autoFocu
     const isUserscript = utils.isUserscript()
     const JSS = JssProvider
     root = createRoot($popupCard)
+    const isCompact = settings.useCompactLookup ?? false
     root.render(
         <React.StrictMode>
             <GlobalSuspense>
                 <JSS jss={jss} generateId={generateId} classNamePrefix='__yetone-nextai-translator-jss-'>
-                    <InnerContainer reference={reference}>
-                        <TitleBar pinned={settings.pinned} onClose={hidePopupCard} engine={engine} />
-                        <Translator
-                            engine={engine}
-                            autoFocus={autoFocus}
-                            showSettingsIcon
-                            defaultShowSettings={isUserscript}
-                            showLogo={false}
-                        />
+                    <InnerContainer reference={reference} compact={isCompact}>
+                        {isCompact ? (
+                            <InlineLookupContainer text={text} onClose={hidePopupCard} />
+                        ) : (
+                            <>
+                                <TitleBar pinned={settings.pinned} onClose={hidePopupCard} engine={engine} />
+                                <Translator
+                                    engine={engine}
+                                    autoFocus={autoFocus}
+                                    showSettingsIcon
+                                    defaultShowSettings={isUserscript}
+                                    showLogo={false}
+                                />
+                            </>
+                        )}
                     </InnerContainer>
                 </JSS>
             </GlobalSuspense>
         </React.StrictMode>
     )
-    setExternalOriginalText(text)
+    if (!isCompact) {
+        setExternalOriginalText(text)
+    }
 }
 
 async function showPopupThumb(text: string, x: number, y: number) {

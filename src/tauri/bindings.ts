@@ -64,6 +64,12 @@ export const commands = {
     async hideTranslatorWindow(): Promise<void> {
         await TAURI_INVOKE('hide_translator_window')
     },
+    async hideInlineLookupWindow(): Promise<void> {
+        await TAURI_INVOKE('hide_inline_lookup_window')
+    },
+    async showInlineLookupWindowCommand(): Promise<void> {
+        await TAURI_INVOKE('show_inline_lookup_window_command')
+    },
     async startOcr(): Promise<void> {
         await TAURI_INVOKE('start_ocr')
     },
