@@ -412,6 +412,165 @@ pub fn is_valid_selected_frame() -> Result<bool, Box<dyn std::error::Error>> {
     }
 }
 
+/// Reads the *currently selected* text of the focused UI element via the
+/// macOS Accessibility API (kAXSelectedTextAttribute). Returns `None` if AX
+/// isn't available, no element is focused, the selection is empty, or the
+/// attribute is unsupported by the element (common in custom widgets). This is
+/// the preferred read path because it does NOT touch the clipboard, fire
+/// keystrokes, or move the cursor.
+#[cfg(target_os = "macos")]
+pub fn get_selected_text_via_ax() -> Option<String> {
+    use accessibility_ng::{AXAttribute, AXUIElement};
+    use accessibility_sys_ng::{kAXFocusedUIElementAttribute, kAXSelectedTextAttribute};
+    use core_foundation::base::{CFType, TCFType};
+    use core_foundation::string::CFString;
+
+    let system = AXUIElement::system_wide();
+    let focused = system
+        .attribute(&AXAttribute::new(&CFString::from_static_string(
+            kAXFocusedUIElementAttribute,
+        )))
+        .ok()
+        .and_then(|v: CFType| v.downcast_into::<AXUIElement>())?;
+
+    let value = focused
+        .attribute(&AXAttribute::new(&CFString::from_static_string(
+            kAXSelectedTextAttribute,
+        )))
+        .ok()?;
+    let s: CFString = value.downcast::<CFString>()?;
+    let text = s.to_string();
+    if text.is_empty() {
+        None
+    } else {
+        Some(text)
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn get_selected_text_via_ax() -> Option<String> {
+    None
+}
+
+/// Reads the entire value of the focused UI element via the macOS
+/// Accessibility API (kAXValueAttribute). Returns `None` if AX isn't available,
+/// no element is focused, the value is empty, or the element doesn't expose
+/// a string value (e.g. password fields). Like `get_selected_text_via_ax`,
+/// this does NOT touch clipboard or fire keystrokes — the previous select-all
+/// + Cmd+C dance was visually disruptive on every trigger.
+#[cfg(target_os = "macos")]
+pub fn get_focused_text_via_ax() -> Option<String> {
+    use accessibility_ng::{AXAttribute, AXUIElement};
+    use accessibility_sys_ng::{kAXFocusedUIElementAttribute, kAXValueAttribute};
+    use core_foundation::base::{CFType, TCFType};
+    use core_foundation::string::CFString;
+
+    let system = AXUIElement::system_wide();
+    let focused = system
+        .attribute(&AXAttribute::new(&CFString::from_static_string(
+            kAXFocusedUIElementAttribute,
+        )))
+        .ok()
+        .and_then(|v: CFType| v.downcast_into::<AXUIElement>())?;
+
+    let value = focused
+        .attribute(&AXAttribute::new(&CFString::from_static_string(
+            kAXValueAttribute,
+        )))
+        .ok()?;
+    let s: CFString = value.downcast::<CFString>()?;
+    let text = s.to_string();
+    if text.is_empty() {
+        None
+    } else {
+        Some(text)
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn get_focused_text_via_ax() -> Option<String> {
+    None
+}
+
+/// Anchor rect for the floating writing-indicator panel, in macOS *logical* screen
+/// points (top-left origin), i.e. the same coordinate space that AX position/size
+/// attributes use. Returns `None` if neither the current selection bounds nor the
+/// focused element frame are available; the caller should fall back to the mouse
+/// position in that case.
+#[cfg(target_os = "macos")]
+pub fn get_writing_anchor_rect() -> Option<(f64, f64, f64, f64)> {
+    if let Ok(rect) = get_selected_text_frame_by_ax() {
+        if rect.size.width > 0.0 && rect.size.height > 0.0 {
+            return Some((
+                rect.origin.x,
+                rect.origin.y,
+                rect.size.width,
+                rect.size.height,
+            ));
+        }
+    }
+    if let Ok(rect) = get_focused_element_frame_by_ax() {
+        if rect.size.width > 0.0 && rect.size.height > 0.0 {
+            return Some((
+                rect.origin.x,
+                rect.origin.y,
+                rect.size.width,
+                rect.size.height,
+            ));
+        }
+    }
+    None
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn get_writing_anchor_rect() -> Option<(f64, f64, f64, f64)> {
+    None
+}
+
+#[cfg(target_os = "macos")]
+fn get_focused_element_frame_by_ax() -> Result<CGRect, Box<dyn std::error::Error>> {
+    use accessibility_ng::{AXAttribute, AXUIElement, AXValue};
+    use accessibility_sys_ng::{
+        kAXFocusedUIElementAttribute, kAXPositionAttribute, kAXSizeAttribute,
+    };
+    use core_foundation::string::CFString;
+    use core_graphics::geometry::{CGPoint, CGSize};
+
+    let system_element = AXUIElement::system_wide();
+    let Some(focused_element) = system_element
+        .attribute(&AXAttribute::new(&CFString::from_static_string(
+            kAXFocusedUIElementAttribute,
+        )))
+        .map(|element| element.downcast_into::<AXUIElement>())
+        .ok()
+        .flatten()
+    else {
+        return Ok(CGRect::default());
+    };
+
+    let position = focused_element
+        .attribute(&AXAttribute::new(&CFString::from_static_string(
+            kAXPositionAttribute,
+        )))
+        .map(|v| v.downcast_into::<AXValue>())
+        .ok()
+        .flatten()
+        .and_then(|v| v.get_value::<CGPoint>().ok())
+        .unwrap_or(CGPoint::new(0.0, 0.0));
+
+    let size = focused_element
+        .attribute(&AXAttribute::new(&CFString::from_static_string(
+            kAXSizeAttribute,
+        )))
+        .map(|v| v.downcast_into::<AXValue>())
+        .ok()
+        .flatten()
+        .and_then(|v| v.get_value::<CGSize>().ok())
+        .unwrap_or(CGSize::new(0.0, 0.0));
+
+    Ok(CGRect::new(&position, &size))
+}
+
 pub fn send_text(text: String) {
     match APP_HANDLE.get() {
         Some(handle) => handle.emit("change-text", text).unwrap_or_default(),

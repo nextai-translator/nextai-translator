@@ -26,6 +26,8 @@ pub const UPDATER_WIN_NAME: &str = "updater";
 pub const THUMB_WIN_NAME: &str = "thumb";
 pub const HISTORY_WIN_NAME: &str = "history";
 pub const INLINE_LOOKUP_WIN_NAME: &str = "inline_lookup";
+pub const QUICK_TRANSLATOR_WIN_NAME: &str = "quick_translator";
+pub const WRITING_INDICATOR_WIN_NAME: &str = "writing_indicator";
 #[cfg(target_os = "windows")]
 pub const SCREENSHOT_WIN_NAME: &str = "screenshot";
 
@@ -893,4 +895,380 @@ pub fn get_screenshot_window() -> tauri::WebviewWindow {
     window.set_always_on_top(true).unwrap();
 
     window
+}
+
+#[cfg(target_os = "macos")]
+fn apply_quick_translator_panel_traits(window: &tauri::WebviewWindow) {
+    // We intentionally do NOT change the NSWindow class to NSPanel here.
+    // Tao installs its own NSWindow subclass with method overrides; replacing
+    // its class with NSPanel at runtime corrupts the responder chain and
+    // crashes the process the next time AppKit dispatches certain selectors.
+    //
+    // The "doesn't steal focus" behaviour we need is already covered by:
+    //   * the WebviewWindowBuilder is built with .focused(false)
+    //   * we never call window.set_focus() for this window
+    //   * the app activation policy is Accessory on macOS
+    // What we still tweak natively here is the window level (so the panel
+    // floats above the previously active app's windows) and behaviour on
+    // app deactivation (don't hide when our app loses focus).
+    use cocoa::base::{id, NO};
+    use objc::{msg_send, sel, sel_impl};
+
+    const NS_FLOATING_WINDOW_LEVEL: i64 = 3;
+
+    let Some(ns_win) = window.ns_window().ok().map(|p| p as id) else {
+        return;
+    };
+
+    unsafe {
+        let _: () = msg_send![ns_win, setLevel: NS_FLOATING_WINDOW_LEVEL];
+        let _: () = msg_send![ns_win, setHidesOnDeactivate: NO];
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn apply_quick_translator_panel_traits(_window: &tauri::WebviewWindow) {}
+
+pub fn get_quick_translator_window() -> tauri::WebviewWindow {
+    let handle = APP_HANDLE.get().unwrap();
+    if let Some(window) = handle.get_webview_window(QUICK_TRANSLATOR_WIN_NAME) {
+        let _ = window.unminimize();
+        return window;
+    }
+
+    let builder = tauri::WebviewWindowBuilder::new(
+        handle,
+        QUICK_TRANSLATOR_WIN_NAME,
+        tauri::WebviewUrl::App("src/tauri/index.html".into()),
+    )
+    .title("")
+    .fullscreen(false)
+    .inner_size(560.0, 320.0)
+    .min_inner_size(420.0, 220.0)
+    .max_inner_size(820.0, 620.0)
+    .visible(false)
+    .resizable(true)
+    .skip_taskbar(true)
+    .minimizable(false)
+    .maximizable(false)
+    .closable(false)
+    .focused(false)
+    .decorations(false)
+    .transparent(true)
+    .shadow(true);
+
+    let window = builder.build().unwrap();
+    post_process_window(&window);
+    apply_quick_translator_panel_traits(&window);
+
+    #[cfg(target_os = "macos")]
+    {
+        use tauri::utils::config::WindowEffectsConfig;
+        use tauri::utils::{WindowEffect, WindowEffectState};
+        let _ = window.set_effects(WindowEffectsConfig {
+            effects: vec![WindowEffect::HudWindow],
+            state: Some(WindowEffectState::Active),
+            radius: Some(14.0),
+            color: None,
+        });
+    }
+    window
+}
+
+fn position_quick_translator_window(window: &tauri::WebviewWindow) {
+    // Anchor the Quick Translator panel to the bottom-horizontal-center of the
+    // monitor that currently holds the mouse cursor, with a comfortable gap
+    // from the bottom edge (Dock-aware fallback uses a fixed margin).
+    let current_monitor = get_current_monitor();
+    let window_outer_size = match window.outer_size() {
+        Ok(size) => size,
+        Err(_) => return,
+    };
+
+    let monitor_physical_size = current_monitor.size();
+    let monitor_physical_position = current_monitor.position();
+    let scale_factor = window.scale_factor().unwrap_or(1.0);
+    let bottom_margin_logical = 96.0_f64;
+    let bottom_margin_physical = (bottom_margin_logical * scale_factor).round() as i32;
+
+    let x = monitor_physical_position.x
+        + ((monitor_physical_size.width as i32) - (window_outer_size.width as i32)) / 2;
+    let y = monitor_physical_position.y + (monitor_physical_size.height as i32)
+        - (window_outer_size.height as i32)
+        - bottom_margin_physical;
+
+    let clamped_x = x.max(monitor_physical_position.x);
+    let clamped_y = y.max(monitor_physical_position.y);
+    let _ = window.set_position(PhysicalPosition::new(clamped_x, clamped_y));
+}
+
+pub fn show_quick_translator_window() -> tauri::WebviewWindow {
+    let window = get_quick_translator_window();
+    position_quick_translator_window(&window);
+    let _ = window.show();
+    let _ = window.set_always_on_top(true);
+    if let Err(e) = APP_HANDLE
+        .get()
+        .map(|h| h.emit("quick-translator-shown", ()))
+        .transpose()
+    {
+        eprintln!("failed to emit quick-translator-shown: {}", e);
+    }
+    window
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn show_quick_translator_window_command() {
+    remember_active_window();
+    show_quick_translator_window();
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn hide_quick_translator_window() {
+    if let Some(handle) = APP_HANDLE.get() {
+        if let Some(window) = handle.get_webview_window(QUICK_TRANSLATOR_WIN_NAME) {
+            let _ = window.set_always_on_top(false);
+            let _ = window.hide();
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Writing indicator panel
+//
+// A small floating, focus-less, click-through HUD anchored just below the
+// currently focused input box (or the selection bounds, if a selection drove
+// the writing command). Shows the "translating to <lang>" shimmer animation
+// while the Writing flow streams text into the input — replacing the old
+// behaviour where a placeholder like `<Translating ✍️>` was typed INTO the
+// input and later backspaced away (which was the root cause of over-deletion
+// when emoji grapheme widths, IME state or autocomplete made the backspace
+// count wrong).
+// ---------------------------------------------------------------------------
+
+const WRITING_INDICATOR_WIDTH: f64 = 220.0;
+const WRITING_INDICATOR_HEIGHT: f64 = 44.0;
+const WRITING_INDICATOR_ANCHOR_GAP: f64 = 8.0;
+
+#[cfg(target_os = "macos")]
+fn apply_writing_indicator_panel_traits(window: &tauri::WebviewWindow) {
+    // Same rationale as `apply_quick_translator_panel_traits`: don't reclass
+    // NSWindow to NSPanel (tao's subclass breaks). Just bump the level so the
+    // HUD floats above the previously active app, keep it visible when our app
+    // is in the background, and make it click-through so it never accidentally
+    // intercepts the user's clicks.
+    use cocoa::base::{id, NO, YES};
+    use objc::{class, msg_send, sel, sel_impl};
+
+    const NS_FLOATING_WINDOW_LEVEL: i64 = 3;
+
+    let Some(ns_win) = window.ns_window().ok().map(|p| p as id) else {
+        return;
+    };
+
+    unsafe {
+        let _: () = msg_send![ns_win, setLevel: NS_FLOATING_WINDOW_LEVEL];
+        let _: () = msg_send![ns_win, setHidesOnDeactivate: NO];
+        let _: () = msg_send![ns_win, setIgnoresMouseEvents: YES];
+        // Tauri's `.transparent(true)` alone leaves a faint background in the
+        // corners outside the React-rendered rounded card on some macOS
+        // versions. Force the NSWindow itself to draw absolutely nothing so
+        // only our rounded card is visible.
+        let clear_color: id = msg_send![class!(NSColor), clearColor];
+        let _: () = msg_send![ns_win, setBackgroundColor: clear_color];
+        let _: () = msg_send![ns_win, setOpaque: NO];
+        let _: () = msg_send![ns_win, setHasShadow: NO];
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn apply_writing_indicator_panel_traits(_window: &tauri::WebviewWindow) {}
+
+pub fn get_writing_indicator_window() -> tauri::WebviewWindow {
+    let handle = APP_HANDLE.get().unwrap();
+    if let Some(window) = handle.get_webview_window(WRITING_INDICATOR_WIN_NAME) {
+        return window;
+    }
+
+    let builder = tauri::WebviewWindowBuilder::new(
+        handle,
+        WRITING_INDICATOR_WIN_NAME,
+        tauri::WebviewUrl::App("src/tauri/index.html".into()),
+    )
+    .title("")
+    .fullscreen(false)
+    .inner_size(WRITING_INDICATOR_WIDTH, WRITING_INDICATOR_HEIGHT)
+    .visible(false)
+    .resizable(false)
+    .skip_taskbar(true)
+    .minimizable(false)
+    .maximizable(false)
+    .closable(false)
+    .focused(false)
+    .decorations(false)
+    .transparent(true)
+    .shadow(false);
+
+    let window = builder.build().unwrap();
+    post_process_window(&window);
+    apply_writing_indicator_panel_traits(&window);
+
+    // Native macOS HUD vibrancy material. With the NSWindow background set to
+    // clearColor (above) the effect material is what the user actually sees
+    // outside the React content — giving a true frosted-glass appearance that
+    // looks at home on macOS instead of a flat CSS rgba background.
+    #[cfg(target_os = "macos")]
+    {
+        use tauri::utils::config::WindowEffectsConfig;
+        use tauri::utils::{WindowEffect, WindowEffectState};
+        let _ = window.set_effects(WindowEffectsConfig {
+            effects: vec![WindowEffect::HudWindow],
+            state: Some(WindowEffectState::Active),
+            radius: Some(14.0),
+            color: None,
+        });
+    }
+
+    window
+}
+
+/// Position the indicator window centered horizontally under the anchor rect
+/// and `WRITING_INDICATOR_ANCHOR_GAP` pixels below it. Anchor coords are in
+/// macOS logical screen points (top-left origin), matching AX coordinates.
+fn position_writing_indicator_window_at_anchor(
+    window: &tauri::WebviewWindow,
+    anchor_x: f64,
+    anchor_y: f64,
+    anchor_w: f64,
+    anchor_h: f64,
+) {
+    let scale = window.scale_factor().unwrap_or(1.0);
+    let outer = match window.outer_size() {
+        Ok(s) => s,
+        Err(_) => return,
+    };
+
+    // Convert the desired logical top-left into physical pixels.
+    let outer_logical_w = (outer.width as f64) / scale;
+    let center_logical_x = anchor_x + anchor_w / 2.0;
+    let top_logical_x = center_logical_x - outer_logical_w / 2.0;
+    let top_logical_y = anchor_y + anchor_h + WRITING_INDICATOR_ANCHOR_GAP;
+
+    let physical = LogicalPosition::new(top_logical_x, top_logical_y).to_physical::<i32>(scale);
+
+    // Clamp to the monitor that holds the anchor's center (best effort).
+    let monitor = get_current_monitor();
+    let m_pos = monitor.position();
+    let m_size = monitor.size();
+    let max_x = m_pos.x + (m_size.width as i32) - (outer.width as i32);
+    let max_y = m_pos.y + (m_size.height as i32) - (outer.height as i32);
+    let x = physical.x.clamp(m_pos.x, max_x.max(m_pos.x));
+    let y = physical.y.clamp(m_pos.y, max_y.max(m_pos.y));
+
+    let _ = window.set_position(PhysicalPosition::new(x, y));
+}
+
+fn position_writing_indicator_window_near_mouse(window: &tauri::WebviewWindow) {
+    let (mouse_logical_x, mouse_logical_y) = match get_mouse_location() {
+        Ok(p) => p,
+        Err(_) => return,
+    };
+    // Treat the mouse position as a 1x1 anchor so the "below + center" math
+    // collapses to "below + center on cursor".
+    position_writing_indicator_window_at_anchor(
+        window,
+        mouse_logical_x as f64,
+        mouse_logical_y as f64,
+        1.0,
+        1.0,
+    );
+}
+
+// Cached "currently-showing" target language. We mirror it in a Mutex (in
+// addition to emitting the `writing-indicator-start` event) so that the React
+// panel can recover the state by polling at mount time. Without this, the very
+// first show often loses the event: the panel's `listen('writing-indicator-
+// -start', ...)` registers asynchronously inside useEffect, and the Rust emit
+// can race past it.
+pub static WRITING_INDICATOR_PENDING_LANG: parking_lot::Mutex<Option<String>> =
+    parking_lot::Mutex::new(None);
+
+#[tauri::command]
+#[specta::specta]
+pub async fn show_writing_indicator(target_language: String) {
+    debug_println!(
+        "[indicator] show_writing_indicator(target_language={:?})",
+        target_language
+    );
+    let window = get_writing_indicator_window();
+    match crate::writing::peek_cached_anchor() {
+        Some((x, y, w, h)) => {
+            debug_println!(
+                "[indicator] anchor (logical pts): ({},{},{},{})",
+                x,
+                y,
+                w,
+                h
+            );
+            position_writing_indicator_window_at_anchor(&window, x, y, w, h)
+        }
+        None => {
+            debug_println!("[indicator] no AX anchor — falling back to mouse position");
+            position_writing_indicator_window_near_mouse(&window);
+        }
+    }
+
+    // Mirror state for the React mount-time poll.
+    *WRITING_INDICATOR_PENDING_LANG.lock() = Some(target_language.clone());
+
+    let _ = window.show();
+    let _ = window.set_always_on_top(true);
+    if let Some(handle) = APP_HANDLE.get() {
+        // Broadcast (not emit_to). Targeted delivery to a webview that may
+        // still be hidden has been observed to drop silently on some Tauri 2
+        // builds; broadcast always reaches whoever is listening, and only the
+        // indicator listens for this event name.
+        match handle.emit(
+            "writing-indicator-start",
+            serde_json::json!({ "targetLanguage": target_language }),
+        ) {
+            Ok(_) => {
+                debug_println!("[indicator] emitted writing-indicator-start");
+            }
+            Err(e) => {
+                debug_println!("[indicator] FAILED to emit start: {:?}", e);
+            }
+        }
+    }
+}
+
+/// Returns the target language of the currently-showing indicator, if any.
+/// React calls this on mount to recover from the case where the
+/// `writing-indicator-start` event was emitted before its listener was wired.
+#[tauri::command]
+#[specta::specta]
+pub async fn get_writing_indicator_pending_lang() -> Option<String> {
+    WRITING_INDICATOR_PENDING_LANG.lock().clone()
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn hide_writing_indicator() {
+    debug_println!("[indicator] hide_writing_indicator called");
+    *WRITING_INDICATOR_PENDING_LANG.lock() = None;
+    if let Some(handle) = APP_HANDLE.get() {
+        if let Some(window) = handle.get_webview_window(WRITING_INDICATOR_WIN_NAME) {
+            let _ = window.set_always_on_top(false);
+            match window.hide() {
+                Ok(_) => {
+                    debug_println!("[indicator] window hidden");
+                }
+                Err(e) => {
+                    debug_println!("[indicator] window.hide() failed: {:?}", e);
+                }
+            }
+        }
+    }
 }

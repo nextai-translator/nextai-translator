@@ -97,6 +97,29 @@ export async function bindOCRHotkey(oldOCRHotKey?: string) {
     })
 }
 
+export async function bindQuickTranslatorHotkey(oldHotKey?: string) {
+    if (oldHotKey && !isMissingNormalKey(oldHotKey) && (await isRegistered(oldHotKey))) {
+        await unregister(oldHotKey)
+    }
+    const settings = await getSettings()
+    if (!settings.quickTranslatorHotkey) return
+    if (isMissingNormalKey(settings.quickTranslatorHotkey)) {
+        sendNotification({
+            title: 'Cannot bind hotkey',
+            body: `Hotkey must contain at least one normal key: ${settings.quickTranslatorHotkey}`,
+        })
+        return
+    }
+    if (await isRegistered(settings.quickTranslatorHotkey)) {
+        await unregister(settings.quickTranslatorHotkey)
+    }
+    await register(settings.quickTranslatorHotkey, () => {
+        return commands.showQuickTranslatorWindowCommand()
+    }).then(() => {
+        console.log('quick translator hotkey registered')
+    })
+}
+
 export async function bindWritingHotkey(oldWritingHotKey?: string) {
     if (oldWritingHotKey && !isMissingNormalKey(oldWritingHotKey) && (await isRegistered(oldWritingHotKey))) {
         await unregister(oldWritingHotKey)
@@ -125,5 +148,6 @@ export function onSettingsSave(oldSettings: ISettings) {
     bindHotkey(oldSettings.hotkey)
     bindDisplayWindowHotkey(oldSettings.displayWindowHotkey)
     bindOCRHotkey(oldSettings.ocrHotkey)
+    bindQuickTranslatorHotkey(oldSettings.quickTranslatorHotkey)
     bindWritingHotkey(oldSettings.writingHotkey)
 }
