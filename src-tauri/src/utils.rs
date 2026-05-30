@@ -501,12 +501,22 @@ pub fn get_focused_text_via_ax() -> Option<String> {
 pub fn get_writing_anchor_rect() -> Option<(f64, f64, f64, f64)> {
     if let Ok(rect) = get_selected_text_frame_by_ax() {
         if rect.size.width > 0.0 && rect.size.height > 0.0 {
-            return Some((rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+            return Some((
+                rect.origin.x,
+                rect.origin.y,
+                rect.size.width,
+                rect.size.height,
+            ));
         }
     }
     if let Ok(rect) = get_focused_element_frame_by_ax() {
         if rect.size.width > 0.0 && rect.size.height > 0.0 {
-            return Some((rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+            return Some((
+                rect.origin.x,
+                rect.origin.y,
+                rect.size.width,
+                rect.size.height,
+            ));
         }
     }
     None

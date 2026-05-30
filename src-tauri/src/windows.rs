@@ -963,8 +963,8 @@ pub fn get_quick_translator_window() -> tauri::WebviewWindow {
 
     #[cfg(target_os = "macos")]
     {
-        use tauri::utils::{WindowEffect, WindowEffectState};
         use tauri::utils::config::WindowEffectsConfig;
+        use tauri::utils::{WindowEffect, WindowEffectState};
         let _ = window.set_effects(WindowEffectsConfig {
             effects: vec![WindowEffect::HudWindow],
             state: Some(WindowEffectState::Active),
@@ -993,8 +993,7 @@ fn position_quick_translator_window(window: &tauri::WebviewWindow) {
 
     let x = monitor_physical_position.x
         + ((monitor_physical_size.width as i32) - (window_outer_size.width as i32)) / 2;
-    let y = monitor_physical_position.y
-        + (monitor_physical_size.height as i32)
+    let y = monitor_physical_position.y + (monitor_physical_size.height as i32)
         - (window_outer_size.height as i32)
         - bottom_margin_physical;
 
@@ -1206,7 +1205,13 @@ pub async fn show_writing_indicator(target_language: String) {
     let window = get_writing_indicator_window();
     match crate::writing::peek_cached_anchor() {
         Some((x, y, w, h)) => {
-            debug_println!("[indicator] anchor (logical pts): ({},{},{},{})", x, y, w, h);
+            debug_println!(
+                "[indicator] anchor (logical pts): ({},{},{},{})",
+                x,
+                y,
+                w,
+                h
+            );
             position_writing_indicator_window_at_anchor(&window, x, y, w, h)
         }
         None => {

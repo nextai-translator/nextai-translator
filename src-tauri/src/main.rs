@@ -33,11 +33,11 @@ use tauri_specta::Event;
 use tray::{PinnedFromTrayEvent, PinnedFromWindowEvent};
 use windows::{get_translator_window, CheckUpdateEvent, CheckUpdateResultEvent};
 
+use crate::ax_context::{read_ax_context_narrow, read_ax_context_wide};
 use crate::config::{clear_config_cache, get_config_content, ConfigUpdatedEvent};
 use crate::fetch::fetch_stream;
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
-use crate::ax_context::{read_ax_context_narrow, read_ax_context_wide};
 use crate::windows::{
     get_translator_window_always_on_top, get_writing_indicator_pending_lang,
     hide_inline_lookup_window, hide_quick_translator_window, hide_translator_window,

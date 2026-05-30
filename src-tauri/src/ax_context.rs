@@ -133,12 +133,7 @@ mod macos_impl {
             }
             let app = AXUIElement::wrap_under_create_rule(app_ref);
             let mut out: AXUIElementRef = std::ptr::null_mut();
-            let err = AXUIElementCopyElementAtPosition(
-                app.as_concrete_TypeRef(),
-                x,
-                y,
-                &mut out,
-            );
+            let err = AXUIElementCopyElementAtPosition(app.as_concrete_TypeRef(), x, y, &mut out);
             if err != accessibility_sys_ng::kAXErrorSuccess || out.is_null() {
                 return None;
             }
@@ -180,8 +175,7 @@ mod macos_impl {
                 if ptr.is_null() {
                     continue;
                 }
-                let child =
-                    unsafe { AXUIElement::wrap_under_get_rule(ptr as AXUIElementRef) };
+                let child = unsafe { AXUIElement::wrap_under_get_rule(ptr as AXUIElementRef) };
                 if !walk(&child, depth + 1, out, total) {
                     return false;
                 }
