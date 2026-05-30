@@ -1622,7 +1622,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         setActionStr('Stopped')
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleInsertTranslatedText = useCallback(async () => {
         if (!translatedText || !isTauri()) {
             return
@@ -1642,6 +1641,33 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             })
         }
     }, [t, translatedText])
+
+    // Window-level keyboard shortcut for "Insert into previous input"
+    // — ⇧⌘↩ on macOS, Ctrl+Shift+Enter elsewhere. Mirrors the toolbar button.
+    useEffect(() => {
+        if (!isTauri()) {
+            return
+        }
+        const handler = (e: KeyboardEvent) => {
+            const accel = isMacOS ? e.metaKey : e.ctrlKey
+            if (!accel || !e.shiftKey) {
+                return
+            }
+            if (e.key !== 'Enter') {
+                return
+            }
+            if (!translatedText) {
+                return
+            }
+            e.preventDefault()
+            e.stopPropagation()
+            handleInsertTranslatedText()
+        }
+        document.addEventListener('keydown', handler)
+        return () => {
+            document.removeEventListener('keydown', handler)
+        }
+    }, [translatedText, handleInsertTranslatedText])
 
     const [isScrolledToTop, setIsScrolledToTop] = useState(false)
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(false)
@@ -2544,7 +2570,9 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 )}
                                                 {isTauri() && (
                                                     <Tooltip
-                                                        content={t('Insert into previous input')}
+                                                        content={`${t('Insert into previous input')} (${
+                                                            isMacOS ? '⇧⌘↩' : 'Ctrl+Shift+Enter'
+                                                        })`}
                                                         placement='bottom'
                                                     >
                                                         <div
