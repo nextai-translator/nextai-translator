@@ -123,6 +123,7 @@ export interface ISettings {
     ollamaAPIModel: string
     ollamaCustomModelName: string
     ollamaModelLifetimeInMemory: string
+    thinkingEnabled: boolean
     groqAPIURL: string
     groqAPIURLPath: string
     groqAPIModel: string

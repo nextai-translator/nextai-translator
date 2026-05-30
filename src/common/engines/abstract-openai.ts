@@ -188,6 +188,10 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         const headers = await this.getHeaders()
         const isChatAPI = await this.isChatAPI()
         const body = await this.getBaseRequestBody(model)
+        const settings = await getSettings()
+        if (!settings.thinkingEnabled) {
+            body['reasoning_effort'] = 'none'
+        }
         if (useResponsesAPI) {
             if (body.reasoning_effort !== undefined) {
                 body['reasoning'] = {
