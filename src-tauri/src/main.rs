@@ -3,6 +3,7 @@
     windows_subsystem = "windows"
 )]
 
+mod ax_context;
 mod config;
 mod fetch;
 mod insertion;
@@ -32,15 +33,18 @@ use tauri_specta::Event;
 use tray::{PinnedFromTrayEvent, PinnedFromWindowEvent};
 use windows::{get_translator_window, CheckUpdateEvent, CheckUpdateResultEvent};
 
+use crate::ax_context::{read_ax_context_narrow, read_ax_context_wide};
 use crate::config::{clear_config_cache, get_config_content, ConfigUpdatedEvent};
 use crate::fetch::fetch_stream;
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
 use crate::windows::{
-    get_translator_window_always_on_top, hide_inline_lookup_window, hide_translator_window,
-    show_action_manager_window, show_history_window, show_inline_lookup_window_command,
+    get_translator_window_always_on_top, get_writing_indicator_pending_lang,
+    hide_inline_lookup_window, hide_quick_translator_window, hide_translator_window,
+    hide_writing_indicator, show_action_manager_window, show_history_window,
+    show_inline_lookup_window_command, show_quick_translator_window_command,
     show_translator_window_command, show_translator_window_with_selected_text_command,
-    show_updater_window, TRANSLATOR_WIN_NAME,
+    show_updater_window, show_writing_indicator, TRANSLATOR_WIN_NAME,
 };
 use crate::writing::{finish_writing, write_to_input, writing_command};
 
@@ -360,6 +364,9 @@ fn main() {
             writing_command,
             write_to_input,
             finish_writing,
+            show_writing_indicator,
+            hide_writing_indicator,
+            get_writing_indicator_pending_lang,
             insert_translation_into_previous_input,
             remember_active_window_command,
             detect_lang,
@@ -367,6 +374,10 @@ fn main() {
             hide_translator_window,
             hide_inline_lookup_window,
             show_inline_lookup_window_command,
+            show_quick_translator_window_command,
+            hide_quick_translator_window,
+            read_ax_context_narrow,
+            read_ax_context_wide,
             start_ocr,
             finish_ocr,
             cut_image,
@@ -438,6 +449,17 @@ fn main() {
             app_handle.plugin(tauri_plugin_updater::Builder::new().build())?;
             // create thumb window
             let _ = windows::get_thumb_window(0, 0);
+            // Pre-create the Quick Translator panel on the main thread.
+            // Window creation + raw cocoa msg_send calls (setLevel:, etc.) must
+            // run on the AppKit main thread; if we let it happen lazily inside
+            // an async Tauri command (which runs on a tokio worker thread),
+            // macOS aborts the process with
+            // "Must only be used from the main thread" / EXC_BREAKPOINT.
+            let _ = windows::get_quick_translator_window();
+            // Same main-thread-only reasoning as the Quick Translator: pre-create
+            // the writing-indicator panel here so its NSWindow + setLevel calls
+            // happen on the AppKit main thread instead of inside a tokio worker.
+            let _ = windows::get_writing_indicator_window();
             if silently {
                 // create translator window
                 let _ = get_translator_window(false, false, false);

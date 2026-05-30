@@ -44,6 +44,20 @@ export const commands = {
     async finishWriting(): Promise<void> {
         await TAURI_INVOKE('finish_writing')
     },
+    async showWritingIndicator(targetLanguage: string): Promise<void> {
+        await TAURI_INVOKE('show_writing_indicator', { targetLanguage })
+    },
+    async hideWritingIndicator(): Promise<void> {
+        await TAURI_INVOKE('hide_writing_indicator')
+    },
+    /**
+     * Returns the target language of the currently-showing indicator, if any.
+     * React calls this on mount to recover from the case where the
+     * `writing-indicator-start` event was emitted before its listener was wired.
+     */
+    async getWritingIndicatorPendingLang(): Promise<string | null> {
+        return await TAURI_INVOKE('get_writing_indicator_pending_lang')
+    },
     async insertTranslationIntoPreviousInput(text: string): Promise<Result<null, string>> {
         try {
             return { status: 'ok', data: await TAURI_INVOKE('insert_translation_into_previous_input', { text }) }
@@ -69,6 +83,18 @@ export const commands = {
     },
     async showInlineLookupWindowCommand(): Promise<void> {
         await TAURI_INVOKE('show_inline_lookup_window_command')
+    },
+    async showQuickTranslatorWindowCommand(): Promise<void> {
+        await TAURI_INVOKE('show_quick_translator_window_command')
+    },
+    async hideQuickTranslatorWindow(): Promise<void> {
+        await TAURI_INVOKE('hide_quick_translator_window')
+    },
+    async readAxContextNarrow(): Promise<AxContext> {
+        return await TAURI_INVOKE('read_ax_context_narrow')
+    },
+    async readAxContextWide(): Promise<AxContext> {
+        return await TAURI_INVOKE('read_ax_context_wide')
     },
     async startOcr(): Promise<void> {
         await TAURI_INVOKE('start_ocr')
@@ -101,6 +127,19 @@ export const events = __makeEvents__<{
 
 /** user-defined types **/
 
+export type AxContext = {
+    focusedText: string
+    focusedRole: string
+    selectedText: string
+    hoveredText: string
+    hoveredRole: string
+    appName: string
+    appBundleId: string
+    mouseX: number
+    mouseY: number
+    paragraphs: string[]
+    truncated: boolean
+}
 export type CheckUpdateEvent = null
 export type CheckUpdateResultEvent = UpdateResult
 export type ConfigUpdatedEvent = null
