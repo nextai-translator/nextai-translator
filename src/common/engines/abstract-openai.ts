@@ -178,6 +178,14 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         return { model, stream: true }
     }
 
+    // `reasoning_effort: 'none'` is only a valid value for OpenAI's GPT-5.1+ reasoning models.
+    // AbstractOpenAI is the shared base class for many OpenAI-compatible providers (DeepSeek,
+    // Groq, Moonshot, MiniMax, Ollama, …) whose APIs reject `none`, so this gate keeps the
+    // thinking-disable override from leaking into request bodies that can't accept it.
+    private modelSupportsReasoningEffortNone(model: string): boolean {
+        return /^gpt-5\.[1-9]/.test(model.toLowerCase())
+    }
+
     async sendMessage(req: IMessageRequest): Promise<void> {
         const apiURL = await this.getAPIURL()
         const apiURLPath = await this.getAPIURLPath()
@@ -189,7 +197,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         const isChatAPI = await this.isChatAPI()
         const body = await this.getBaseRequestBody(model)
         const settings = await getSettings()
-        if (!settings.thinkingEnabled) {
+        if (!settings.thinkingEnabled && this.modelSupportsReasoningEffortNone(model)) {
             body['reasoning_effort'] = 'none'
         }
         if (useResponsesAPI) {

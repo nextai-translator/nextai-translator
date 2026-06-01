@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AbstractOpenAI } from './abstract-openai'
 import { IMessageRequest } from './interfaces'
-import { fetchSSE } from '../utils'
+import { fetchSSE, getSettings } from '../utils'
 
 vi.mock('../utils', () => {
     return {
@@ -304,6 +304,72 @@ describe('AbstractOpenAI', () => {
             })
 
             await engine.sendMessage(req)
+        })
+    })
+
+    describe('thinkingEnabled reasoning_effort gating', () => {
+        it('does not inject reasoning_effort:none for non-OpenAI providers (e.g. DeepSeek)', async () => {
+            // Regression test for #1879: `reasoning_effort: 'none'` is only valid for OpenAI
+            // GPT-5.1+ models. Other providers (DeepSeek, etc.) reject it.
+            vi.mocked(getSettings).mockResolvedValueOnce({ thinkingEnabled: false } as never)
+            const engine = new TestOpenAIEngine('deepseek-chat', 'https://api.deepseek.com', '/v1/chat/completions')
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('deepseek-chat')
+                expect(payload.reasoning_effort).toBeUndefined()
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
+        it('injects reasoning_effort:none for GPT-5.1+ when thinking is disabled', async () => {
+            vi.mocked(getSettings).mockResolvedValueOnce({ thinkingEnabled: false } as never)
+            const engine = new TestOpenAIEngine('gpt-5.1', 'https://example.com', '/v1/chat/completions')
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('gpt-5.1')
+                expect(payload.reasoning_effort).toBe('none')
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
+        it('does not inject reasoning_effort:none for GPT-5.1+ when thinking is enabled', async () => {
+            vi.mocked(getSettings).mockResolvedValueOnce({ thinkingEnabled: true } as never)
+            const engine = new TestOpenAIEngine('gpt-5.1', 'https://example.com', '/v1/chat/completions')
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const payload = JSON.parse(options.body as string)
+                expect(payload.reasoning_effort).toBeUndefined()
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
         })
     })
 })
