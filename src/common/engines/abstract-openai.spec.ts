@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AbstractOpenAI } from './abstract-openai'
+import { Ollama } from './ollama'
 import { IMessageRequest } from './interfaces'
 import { fetchSSE, getSettings } from '../utils'
 
@@ -360,6 +361,36 @@ describe('AbstractOpenAI', () => {
             vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
                 const payload = JSON.parse(options.body as string)
                 expect(payload.reasoning_effort).toBeUndefined()
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
+        it('injects reasoning_effort:none for Ollama so thinking can be disabled (#1881)', async () => {
+            // Regression test for #1881: Ollama / LM Studio servers honor `reasoning_effort: 'none'`
+            // to turn off thinking on hybrid models like Qwen3, so the Ollama engine must keep
+            // sending it even though the conservative base default only allows GPT-5.1+.
+            vi.mocked(getSettings).mockResolvedValue({
+                thinkingEnabled: false,
+                ollamaAPIURL: 'http://localhost:11434',
+                ollamaAPIModel: 'qwen3',
+                ollamaModelLifetimeInMemory: '5m',
+            } as never)
+            const engine = new Ollama()
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                expect(input).toBe('http://localhost:11434/v1/chat/completions')
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('qwen3')
+                expect(payload.reasoning_effort).toBe('none')
                 await options.onMessage(
                     JSON.stringify({
                         // eslint-disable-next-line camelcase
