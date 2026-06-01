@@ -44,6 +44,13 @@ export class Ollama extends AbstractOpenAI {
         }
     }
 
+    // Ollama / LM Studio's OpenAI-compatible servers tolerate `reasoning_effort: 'none'` for
+    // non-reasoning models and honor it for hybrid reasoning models (e.g. Qwen3) to turn
+    // thinking off, so always allow it here to disable thinking (regression fix for #1881).
+    protected supportsReasoningEffortNone(): boolean {
+        return true
+    }
+
     async getAPIModel(): Promise<string> {
         const settings = await getSettings()
         if (settings.ollamaAPIModel === CUSTOM_MODEL_ID) {
