@@ -162,10 +162,13 @@ const PulsingDots = () => (
 export function WritingIndicatorWindow() {
     const [lang, setLang] = useState<string>('')
     const [done, setDone] = useState(false)
-    // Render content immediately on mount. The native window itself is hidden
-    // by default and Rust only `window.show()`s during an active writing
-    // trigger, so the panel only reaches the screen during real work.
-    const [visible, setVisible] = useState(true)
+    // Start hidden: this window is pre-created at app startup and lives
+    // forever, so the infinite pen/dots animations must NOT run until a
+    // writing trigger actually shows the panel. Hidden WebView2 windows on
+    // Windows keep compositing CSS animations at full frame rate, which
+    // burned CPU from launch (#1883). The `writing-indicator-start` event
+    // (or the pending-lang recovery poll below) flips this on.
+    const [visible, setVisible] = useState(false)
     const fadeTimer = useRef<number | null>(null)
 
     useEffect(() => {
@@ -241,9 +244,14 @@ export function WritingIndicatorWindow() {
     return (
         <div style={PANEL_STYLE}>
             <div style={row}>
-                <span style={ICON_WRAPPER}>{done ? <CheckIcon /> : <PenIcon />}</span>
+                {/* Mount the infinitely-animating pen/dots only while the
+                    panel is logically visible — otherwise they keep the
+                    hidden WebView2 window compositing forever (#1883). The
+                    check icon's animation is finite, so it may stay mounted
+                    through the fade-out. */}
+                <span style={ICON_WRAPPER}>{done ? <CheckIcon /> : visible ? <PenIcon /> : null}</span>
                 <span style={LABEL_STYLE}>{done ? 'Done' : languageLabel(lang)}</span>
-                {!done && <PulsingDots />}
+                {!done && visible && <PulsingDots />}
             </div>
         </div>
     )
