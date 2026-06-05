@@ -54,7 +54,15 @@ export function QuickTranslatorWindow() {
             <StyletronProvider value={engine}>
                 <BaseProvider theme={theme}>
                     <GlobalSuspense>
-                        <QuickTranslator key={tick} fetchContext={fetchContext} onClose={hide} onHide={hide} />
+                        {/* This window is pre-created (hidden) at app startup; don't
+                            mount QuickTranslator — which immediately runs the context
+                            picker (AX reads, history query, model call) — until the
+                            panel is actually shown for the first time (#1883). Rust
+                            emits `quick-translator-shown` on every show, so tick > 0
+                            exactly means "has been shown at least once". */}
+                        {tick > 0 && (
+                            <QuickTranslator key={tick} fetchContext={fetchContext} onClose={hide} onHide={hide} />
+                        )}
                     </GlobalSuspense>
                 </BaseProvider>
             </StyletronProvider>
