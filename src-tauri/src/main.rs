@@ -449,17 +449,23 @@ fn main() {
             app_handle.plugin(tauri_plugin_updater::Builder::new().build())?;
             // create thumb window
             let _ = windows::get_thumb_window(0, 0);
-            // Pre-create the Quick Translator panel on the main thread.
-            // Window creation + raw cocoa msg_send calls (setLevel:, etc.) must
-            // run on the AppKit main thread; if we let it happen lazily inside
-            // an async Tauri command (which runs on a tokio worker thread),
-            // macOS aborts the process with
+            // Pre-create the Quick Translator and writing-indicator panels —
+            // but ONLY on macOS. There the raw cocoa msg_send calls (setLevel:,
+            // etc.) must run on the AppKit main thread; if we let creation
+            // happen lazily inside an async Tauri command (which runs on a
+            // tokio worker thread), macOS aborts the process with
             // "Must only be used from the main thread" / EXC_BREAKPOINT.
-            let _ = windows::get_quick_translator_window();
-            // Same main-thread-only reasoning as the Quick Translator: pre-create
-            // the writing-indicator panel here so its NSWindow + setLevel calls
-            // happen on the AppKit main thread instead of inside a tokio worker.
-            let _ = windows::get_writing_indicator_window();
+            //
+            // On Windows neither constraint applies, and pre-creating these
+            // hidden transparent WebView2 windows kept their renderers
+            // compositing at full frame rate from launch, burning CPU while
+            // the app idled in the tray (#1883, #1886). They are created
+            // lazily on first use instead.
+            #[cfg(target_os = "macos")]
+            {
+                let _ = windows::get_quick_translator_window();
+                let _ = windows::get_writing_indicator_window();
+            }
             if silently {
                 // create translator window
                 let _ = get_translator_window(false, false, false);

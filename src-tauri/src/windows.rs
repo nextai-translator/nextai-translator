@@ -331,6 +331,24 @@ pub fn post_process_window<R: tauri::Runtime>(window: &tauri::WebviewWindow<R>) 
     }
 }
 
+/// Tauri/wry never propagate native window visibility to the WebView2
+/// controller on Windows: a window created with `.visible(false)` — or hidden
+/// later via `window.hide()` — keeps `ICoreWebView2Controller.IsVisible ==
+/// TRUE`, so its renderer keeps compositing frames. For the transparent,
+/// always-alive panel windows (Quick Translator, writing indicator) that
+/// meant constant WebView2 CPU usage while the app sat idle in the tray
+/// (#1883, #1886). Explicitly sync the controller whenever those panels are
+/// created hidden, shown, or hidden again.
+#[cfg(target_os = "windows")]
+pub fn set_webview_visibility(window: &tauri::WebviewWindow, visible: bool) {
+    let _ = window.with_webview(move |webview| unsafe {
+        let _ = webview.controller().SetIsVisible(visible);
+    });
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn set_webview_visibility(_window: &tauri::WebviewWindow, _visible: bool) {}
+
 pub fn build_window<'a, R: tauri::Runtime, M: tauri::Manager<R>>(
     builder: tauri::WebviewWindowBuilder<'a, R, M>,
 ) -> tauri::WebviewWindow<R> {
@@ -960,6 +978,8 @@ pub fn get_quick_translator_window() -> tauri::WebviewWindow {
     let window = builder.build().unwrap();
     post_process_window(&window);
     apply_quick_translator_panel_traits(&window);
+    // Created hidden — suspend the WebView2 renderer until first show.
+    set_webview_visibility(&window, false);
 
     #[cfg(target_os = "macos")]
     {
@@ -1005,6 +1025,7 @@ fn position_quick_translator_window(window: &tauri::WebviewWindow) {
 pub fn show_quick_translator_window() -> tauri::WebviewWindow {
     let window = get_quick_translator_window();
     position_quick_translator_window(&window);
+    set_webview_visibility(&window, true);
     let _ = window.show();
     let _ = window.set_always_on_top(true);
     if let Err(e) = APP_HANDLE
@@ -1031,6 +1052,7 @@ pub async fn hide_quick_translator_window() {
         if let Some(window) = handle.get_webview_window(QUICK_TRANSLATOR_WIN_NAME) {
             let _ = window.set_always_on_top(false);
             let _ = window.hide();
+            set_webview_visibility(&window, false);
         }
     }
 }
@@ -1114,6 +1136,8 @@ pub fn get_writing_indicator_window() -> tauri::WebviewWindow {
     let window = builder.build().unwrap();
     post_process_window(&window);
     apply_writing_indicator_panel_traits(&window);
+    // Created hidden — suspend the WebView2 renderer until first show.
+    set_webview_visibility(&window, false);
 
     // Native macOS HUD vibrancy material. With the NSWindow background set to
     // clearColor (above) the effect material is what the user actually sees
@@ -1223,6 +1247,7 @@ pub async fn show_writing_indicator(target_language: String) {
     // Mirror state for the React mount-time poll.
     *WRITING_INDICATOR_PENDING_LANG.lock() = Some(target_language.clone());
 
+    set_webview_visibility(&window, true);
     let _ = window.show();
     let _ = window.set_always_on_top(true);
     if let Some(handle) = APP_HANDLE.get() {
@@ -1269,6 +1294,7 @@ pub async fn hide_writing_indicator() {
                     debug_println!("[indicator] window.hide() failed: {:?}", e);
                 }
             }
+            set_webview_visibility(&window, false);
         }
     }
 }

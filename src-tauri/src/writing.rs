@@ -314,6 +314,7 @@ pub fn finish_writing() {
             {
                 let _ = window.set_always_on_top(false);
                 let _ = window.hide();
+                crate::windows::set_webview_visibility(&window, false);
                 debug_println!("[writing] indicator window hidden by Rust authoritative path");
             }
         });

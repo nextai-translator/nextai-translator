@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { listen, type UnlistenFn } from '@tauri-apps/api/event'
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { Client as Styletron } from 'styletron-engine-atomic'
 import { Provider as StyletronProvider } from 'styletron-react'
 import { BaseProvider } from 'baseui-sd'
@@ -39,12 +40,26 @@ export function QuickTranslatorWindow() {
 
     useEffect(() => {
         let unlisten: UnlistenFn | undefined
+        let cancelled = false
         ;(async () => {
             unlisten = await listen('quick-translator-shown', () => {
                 setTick((n) => n + 1)
             })
+            // Race recovery: on Windows this window is created lazily on the
+            // first hotkey press, so the first `quick-translator-shown` emit
+            // happens before this listener is wired up. If the window is
+            // already visible at mount, treat that as the missed first show.
+            try {
+                const visible = await WebviewWindow.getCurrent().isVisible()
+                if (!cancelled && visible) {
+                    setTick((n) => (n === 0 ? 1 : n))
+                }
+            } catch {
+                // ignore — worst case the panel stays empty until the next show
+            }
         })()
         return () => {
+            cancelled = true
             unlisten?.()
         }
     }, [])
