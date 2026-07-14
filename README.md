@@ -39,18 +39,6 @@
   </a>
 </p>
 
-<h2 align="center">❤️ Sponsor</h2>
-
-<p align="center">
-  <a href="https://teamorouter.com/?utm_source=nextai_translator&amp;utm_medium=referral&amp;utm_campaign=ai_directory" target="_blank">
-    <img src="docs/sponsors/teamorouter.png" alt="TeamoRouter — Agent-Native LLM Router" width="100%" />
-  </a>
-</p>
-
-<p>
-  TeamoRouter is an agentic LLM unified gateway for enterprises and professionals — no subscription required. Run popular agents like Claude Code and Codex across hundreds of first-party and vetted third-party providers (OpenAI, Claude, Gemini, AWS Bedrock), at discounts of up to 90% off. Unlike typical relays that rotate account pools — crippling prompt cache and quietly swapping in weaker models — TeamoRouter enforces 100% agent-protocol compatibility, cache-rate checks, and full token-level source traceability, delivering near-100% cache hit rates, millisecond-aligned TTFT, and 99.5%+ SLA. It already processes tens of billions of tokens a day for AskManyAI's millions of users. <a href="https://teamorouter.com/?utm_source=nextai_translator&amp;utm_medium=referral&amp;utm_campaign=ai_directory" target="_blank">Click here to start using TeamoRouter</a>
-</p>
-
 # Why Yet another Translator
 
 I have developed a [Bob](https://bobtranslate.com/) [plugin](https://github.com/yetone/bob-plugin-nextai-translator) that utilizes ChatGPT API to provide global word translation on macOS. However, since not all users have access to macOS to benefit from the plugin, I have created this project!
@@ -84,10 +72,11 @@ What began as a translation tool has now evolved to include surprisingly effecti
 7. Available on all platforms (Windows, macOS, and Linux) for both browsers and Desktop
 8. Support screenshot translation
 9. Support for vocabulary books, as well as support for generating memory aids based on the words in the vocabulary books
-10. Supports [OpenAI](https://openai.com/), [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service), [MiniMax](https://www.minimaxi.com/), and other LLM providers
+10. Supports [OpenAI](https://openai.com/), [TeamoRouter](https://teamorouter.com/?utm_source=nextai_translator&utm_medium=referral&utm_campaign=ai_directory), [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service), [MiniMax](https://www.minimaxi.com/), and other LLM providers
 
 # Preparation
 
+-   (recommended) Use [**TeamoRouter**](https://teamorouter.com/?utm_source=nextai_translator&utm_medium=referral&utm_campaign=ai_directory) — an OpenAI-compatible LLM gateway that gives you OpenAI, Claude, Gemini and more through a single API key, at up to 90% off. It's built in: just select **TeamoRouter** as the provider in Settings and paste your API key.
 -   (required) Apply for an OpenAI API key [here](https://platform.openai.com/account/api-keys) or [Azure OpenAI Service API Key](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/chatgpt-quickstart?tabs=command-line&pivots=rest-api#retrieve-key-and-endpoint)
 -   (optional) If you cannot access OpenAI, you can use the OpenAI API Proxy.
 
