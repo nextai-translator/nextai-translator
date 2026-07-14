@@ -27,7 +27,7 @@ import { DeepSeekIcon } from '@/common/components/icons/DeepSeekIcon'
 import { DeepSeek } from './deepseek'
 import { CerebrasIcon } from '@/common/components/icons/CerebrasIcon'
 import { Cerebras } from './cerebras'
-import { TbRouter } from 'react-icons/tb'
+import { TeamoRouterIcon } from '@/common/components/icons/TeamoRouterIcon'
 import { TeamoRouter } from './teamorouter'
 
 export type Provider =
@@ -62,7 +62,7 @@ export const engineIcons: Record<Provider, IconType> = {
     Cohere: CohereIcon,
     DeepSeek: DeepSeekIcon,
     Cerebras: CerebrasIcon,
-    TeamoRouter: TbRouter,
+    TeamoRouter: TeamoRouterIcon,
 }
 
 export const providerToEngine: Record<Provider, { new (): IEngine }> = {
