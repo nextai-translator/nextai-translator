@@ -50,6 +50,7 @@ const settingKeys: Record<keyof ISettings, number> = {
     azureAPIURL: 1,
     azureAPIURLPath: 1,
     azureAPIModel: 1,
+    azureCustomModelName: 1,
     azMaxWords: 1,
     enableMica: 1,
     enableBackgroundBlur: 1,
