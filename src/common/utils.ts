@@ -113,6 +113,8 @@ const settingKeys: Record<keyof ISettings, number> = {
     deepSeekAPIModel: 1,
     cerebrasAPIKey: 1,
     cerebrasAPIModel: 1,
+    teamoRouterAPIKey: 1,
+    teamoRouterAPIModel: 1,
     fontSize: 1,
     uiFontSize: 1,
     iconSize: 1,
@@ -583,6 +585,8 @@ export function getAPIKeyForProvider(provider: string, settings: ISettings): str
             return settings.deepSeekAPIKey
         case 'Cerebras':
             return settings.cerebrasAPIKey
+        case 'TeamoRouter':
+            return settings.teamoRouterAPIKey
         case 'Moonshot':
             return settings.moonshotAPIKey
         case 'MiniMax':

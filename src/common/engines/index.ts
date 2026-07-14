@@ -27,6 +27,8 @@ import { DeepSeekIcon } from '@/common/components/icons/DeepSeekIcon'
 import { DeepSeek } from './deepseek'
 import { CerebrasIcon } from '@/common/components/icons/CerebrasIcon'
 import { Cerebras } from './cerebras'
+import { TbRouter } from 'react-icons/tb'
+import { TeamoRouter } from './teamorouter'
 
 export type Provider =
     | 'OpenAI'
@@ -43,6 +45,7 @@ export type Provider =
     | 'Cohere'
     | 'DeepSeek'
     | 'Cerebras'
+    | 'TeamoRouter'
 
 export const engineIcons: Record<Provider, IconType> = {
     OpenAI: RiOpenaiFill,
@@ -59,6 +62,7 @@ export const engineIcons: Record<Provider, IconType> = {
     Cohere: CohereIcon,
     DeepSeek: DeepSeekIcon,
     Cerebras: CerebrasIcon,
+    TeamoRouter: TbRouter,
 }
 
 export const providerToEngine: Record<Provider, { new (): IEngine }> = {
@@ -76,6 +80,7 @@ export const providerToEngine: Record<Provider, { new (): IEngine }> = {
     Cohere: Cohere,
     DeepSeek: DeepSeek,
     Cerebras: Cerebras,
+    TeamoRouter: TeamoRouter,
 }
 
 export function getEngine(provider: Provider): IEngine {

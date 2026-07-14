@@ -1422,6 +1422,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
     const options = utils.isDesktopApp()
         ? ([
               { label: 'OpenAI', id: 'OpenAI' },
+              { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -1441,6 +1442,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
           }[])
         : ([
               { label: 'OpenAI', id: 'OpenAI' },
+              { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -3260,6 +3262,45 @@ export function InnerSettings({
                                     provider='Cerebras'
                                     currentProvider={values.provider}
                                     apiKey={values.cerebrasAPIKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'TeamoRouter' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'TeamoRouter'}
+                                name='teamoRouterAPIKey'
+                                label='TeamoRouter API Key'
+                                caption={
+                                    <div>
+                                        {t('Go to the')}{' '}
+                                        <a
+                                            target='_blank'
+                                            href='https://teamorouter.com/?utm_source=nextai_translator&utm_medium=referral&utm_campaign=ai_directory'
+                                            rel='noreferrer'
+                                            style={linkStyle}
+                                        >
+                                            TeamoRouter Page
+                                        </a>{' '}
+                                        {t('to get your API Key.')}
+                                    </div>
+                                }
+                            >
+                                <Input autoFocus type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='teamoRouterAPIModel'
+                                label={t('API Model')}
+                                required={values.provider === 'TeamoRouter'}
+                            >
+                                <APIModelSelector
+                                    provider='TeamoRouter'
+                                    currentProvider={values.provider}
+                                    apiKey={values.teamoRouterAPIKey}
                                     onBlur={onBlur}
                                 />
                             </FormItem>
