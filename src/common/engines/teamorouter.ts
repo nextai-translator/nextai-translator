@@ -1,4 +1,5 @@
 import { urlJoin } from 'url-join-ts'
+import { getUniversalFetch } from '../universal-fetch'
 import { getSettings } from '../utils'
 import { AbstractOpenAI } from './abstract-openai'
 import { IModel } from './interfaces'
@@ -14,7 +15,8 @@ export class TeamoRouter extends AbstractOpenAI {
             return []
         }
         const url = urlJoin(apiURL, '/v1/models')
-        const response = await fetch(url, {
+        const fetcher = getUniversalFetch()
+        const response = await fetcher(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
