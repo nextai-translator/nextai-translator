@@ -54,7 +54,7 @@ use mouce::{Mouse, MouseActions};
 use once_cell::sync::OnceCell;
 #[cfg(debug_assertions)]
 use specta_typescript::{formatter::prettier, Typescript};
-use tauri::{AppHandle, LogicalPosition, LogicalSize};
+use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize};
 use tauri::{Manager, PhysicalPosition, PhysicalSize};
 use tauri_plugin_notification::NotificationExt;
 use tiny_http::{Response as HttpResponse, Server};
@@ -80,6 +80,11 @@ pub struct UpdateResult {
 }
 
 pub static UPDATE_RESULT: Mutex<Option<Option<UpdateResult>>> = Mutex::new(None);
+
+fn set_update_result(app: &AppHandle, update_result: Option<UpdateResult>) {
+    *UPDATE_RESULT.lock() = Some(update_result.clone());
+    let _ = app.emit("update-status-changed", update_result);
+}
 
 fn init_tokio_runtime() -> &'static TokioRuntime {
     use std::sync::OnceLock;
@@ -361,6 +366,7 @@ fn main() {
             show_translator_window_with_selected_text_command,
             show_action_manager_window,
             show_history_window,
+            show_updater_window,
             get_translator_window_always_on_top,
             fetch_stream,
             writing_command,
@@ -516,21 +522,21 @@ fn main() {
 
                     match updater.check().await {
                         Ok(Some(update)) => {
-                            *UPDATE_RESULT.lock() = Some(Some(UpdateResult {
-                                version: update.version,
-                                current_version: update.current_version,
-                                body: update.body,
-                            }));
+                            set_update_result(
+                                &handle,
+                                Some(UpdateResult {
+                                    version: update.version,
+                                    current_version: update.current_version,
+                                    body: update.body,
+                                }),
+                            );
                             tray::create_tray(&handle).unwrap();
                         }
                         Ok(None) => {
-                            if UPDATE_RESULT.lock().is_some() {
-                                if let Some(Some(_)) = *UPDATE_RESULT.lock() {
-                                    *UPDATE_RESULT.lock() = Some(None);
-                                    tray::create_tray(&handle).unwrap();
-                                }
-                            } else {
-                                *UPDATE_RESULT.lock() = Some(None);
+                            let had_update = matches!(*UPDATE_RESULT.lock(), Some(Some(_)));
+                            set_update_result(&handle, None);
+                            if had_update {
+                                tray::create_tray(&handle).unwrap();
                             }
                         }
                         Err(_) => {}
@@ -580,11 +586,14 @@ fn main() {
 
                 match updater.check().await {
                     Ok(Some(update)) => {
-                        *UPDATE_RESULT.lock() = Some(Some(UpdateResult {
-                            version: update.version,
-                            current_version: update.current_version,
-                            body: update.body,
-                        }));
+                        set_update_result(
+                            &handle,
+                            Some(UpdateResult {
+                                version: update.version,
+                                current_version: update.current_version,
+                                body: update.body,
+                            }),
+                        );
                         tray::create_tray(&handle).unwrap();
                         let config = get_config().unwrap();
                         if config.automatic_check_for_updates.is_none()
@@ -597,13 +606,10 @@ fn main() {
                         }
                     }
                     Ok(None) => {
-                        if UPDATE_RESULT.lock().is_some() {
-                            if let Some(Some(_)) = *UPDATE_RESULT.lock() {
-                                *UPDATE_RESULT.lock() = Some(None);
-                                tray::create_tray(&handle).unwrap();
-                            }
-                        } else {
-                            *UPDATE_RESULT.lock() = Some(None);
+                        let had_update = matches!(*UPDATE_RESULT.lock(), Some(Some(_)));
+                        set_update_result(&handle, None);
+                        if had_update {
+                            tray::create_tray(&handle).unwrap();
                         }
                     }
                     Err(_) => {}

@@ -24,6 +24,9 @@ export const commands = {
     async showHistoryWindow(): Promise<void> {
         await TAURI_INVOKE('show_history_window')
     },
+    async showUpdaterWindow(): Promise<void> {
+        await TAURI_INVOKE('show_updater_window')
+    },
     async getTranslatorWindowAlwaysOnTop(): Promise<boolean> {
         return await TAURI_INVOKE('get_translator_window_always_on_top')
     },

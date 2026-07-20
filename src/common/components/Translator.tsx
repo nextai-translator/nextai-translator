@@ -10,7 +10,7 @@ import { AiOutlineFileSync } from 'react-icons/ai'
 import { IoSettingsOutline } from 'react-icons/io5'
 import { TiArrowBack } from 'react-icons/ti'
 import { TbArrowsExchange, TbCsv } from 'react-icons/tb'
-import { MdOutlineGrade, MdGrade, MdHistory } from 'react-icons/md'
+import { MdOutlineGrade, MdGrade, MdHistory, MdBrowserUpdated } from 'react-icons/md'
 import * as mdIcons from 'react-icons/md'
 import { StatefulTooltip } from 'baseui-sd/tooltip'
 import { detectLang, getLangConfig, sourceLanguages, targetLanguages, LangCode } from '../lang'
@@ -152,6 +152,48 @@ const useStyles = createUseStyles({
         flexDirection: 'row',
         alignItems: 'center',
         gap: '8px',
+    },
+    'updateButton': (props: IThemedStyleProps) => ({
+        'height': '27px',
+        'padding': '0 10px',
+        'border': `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
+        'borderRadius': '9px',
+        'background': props.themeType === 'dark' ? 'rgba(255,255,255,0.065)' : 'rgba(0,0,0,0.045)',
+        'boxShadow':
+            props.themeType === 'dark'
+                ? 'inset 0 1px 0 rgba(255,255,255,0.055), 0 1px 3px rgba(0,0,0,0.16)'
+                : 'inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 3px rgba(0,0,0,0.08)',
+        'color': props.theme.colors.contentPrimary,
+        'cursor': 'pointer',
+        'display': 'flex',
+        'alignItems': 'center',
+        'gap': '5px',
+        'fontFamily': 'inherit',
+        'fontSize': '11px',
+        'fontWeight': 600,
+        'lineHeight': 1,
+        'whiteSpace': 'nowrap',
+        'transition': 'transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease',
+        '&:hover': {
+            transform: 'translateY(-1px)',
+            borderColor: props.themeType === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.075)',
+            boxShadow:
+                props.themeType === 'dark'
+                    ? 'inset 0 1px 0 rgba(255,255,255,0.07), 0 3px 8px rgba(0,0,0,0.2)'
+                    : 'inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 8px rgba(0,0,0,0.11)',
+        },
+        '&:active': {
+            transform: 'translateY(0) scale(0.98)',
+        },
+        '&:focus-visible': {
+            outline: `2px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.46)' : 'rgba(0,0,0,0.42)'}`,
+            outlineOffset: '2px',
+        },
+    }),
+    'updateVersion': {
+        opacity: 0.68,
+        fontWeight: 500,
     },
     'poweredBy': (props: IThemedStyleProps) => ({
         fontSize: props.theme.sizing.scale300,
@@ -618,6 +660,42 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
     const [showActionManager, setShowActionManager] = useState(false)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+    const [availableUpdate, setAvailableUpdate] = useState<{ version: string } | null>(null)
+
+    useEffect(() => {
+        if (!isTauri()) {
+            return undefined
+        }
+
+        let disposed = false
+        let unlistenUpdateStatus: UnlistenFn | undefined
+
+        listen<{ version: string } | null>('update-status-changed', ({ payload }) => {
+            if (!disposed) {
+                setAvailableUpdate(payload)
+            }
+        }).then((unlisten) => {
+            if (disposed) {
+                unlisten()
+                return
+            }
+            unlistenUpdateStatus = unlisten
+        })
+
+        import('@/tauri/bindings')
+            .then(({ commands }) => commands.getUpdateResult())
+            .then(([hasChecked, result]) => {
+                if (!disposed && hasChecked) {
+                    setAvailableUpdate(result)
+                }
+            })
+            .catch((error) => console.error('Failed to read update status', error))
+
+        return () => {
+            disposed = true
+            unlistenUpdateStatus?.()
+        }
+    }, [])
 
     const [translationFlag, forceTranslate] = useReducer((x: number) => x + 1, 0)
     const translationIDRef = useRef(0)
@@ -2891,6 +2969,28 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     )}
                     {!showSettings && (
                         <div className={styles.footerActions}>
+                            {availableUpdate && (
+                                <Tooltip
+                                    content={`${t('A new version is available!')} v${availableUpdate.version}`}
+                                    placement='top'
+                                >
+                                    <button
+                                        type='button'
+                                        className={styles.updateButton}
+                                        aria-label={`${t('Update')} v${availableUpdate.version}`}
+                                        onClick={async (event) => {
+                                            event.stopPropagation()
+                                            event.preventDefault()
+                                            const { commands } = await import('@/tauri/bindings')
+                                            await commands.showUpdaterWindow()
+                                        }}
+                                    >
+                                        <MdBrowserUpdated size={13} />
+                                        <span>{t('Update')}</span>
+                                        <span className={styles.updateVersion}>v{availableUpdate.version}</span>
+                                    </button>
+                                </Tooltip>
+                            )}
                             <Tooltip content={t('History')} placement='top'>
                                 <Button
                                     size='mini'
