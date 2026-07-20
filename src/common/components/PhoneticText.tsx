@@ -217,9 +217,10 @@ export function PhoneticText({
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
+                                alignSelf: 'center',
                                 cursor: 'pointer',
                                 position: 'relative',
-                                top: 2,
+                                top: segment.kind === 'phonetic' ? 2 : 0,
                             }}
                         >
                             <SpeakerIcon
