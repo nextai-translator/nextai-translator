@@ -220,7 +220,7 @@ export function PhoneticText({
                                 alignSelf: 'center',
                                 cursor: 'pointer',
                                 position: 'relative',
-                                top: segment.kind === 'phonetic' ? 2 : 0,
+                                top: segment.kind === 'phonetic' ? 2 : 1,
                             }}
                         >
                             <SpeakerIcon
