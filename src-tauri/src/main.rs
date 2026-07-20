@@ -10,6 +10,7 @@ mod insertion;
 mod lang;
 mod ocr;
 mod tray;
+mod tts;
 mod utils;
 mod windows;
 mod writing;
@@ -38,6 +39,7 @@ use crate::config::{clear_config_cache, get_config_content, ConfigUpdatedEvent};
 use crate::fetch::fetch_stream;
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
+use crate::tts::synthesize_local_tts;
 use crate::windows::{
     get_translator_window_always_on_top, get_writing_indicator_pending_lang,
     hide_inline_lookup_window, hide_quick_translator_window, hide_translator_window,
@@ -381,6 +383,7 @@ fn main() {
             start_ocr,
             finish_ocr,
             cut_image,
+            synthesize_local_tts,
         ])
         .events(tauri_specta::collect_events![
             CheckUpdateEvent,

@@ -1,6 +1,7 @@
-import { useToaster } from 'react-hot-toast/headless'
+import { resolveValue, useToaster } from 'react-hot-toast/headless'
 import { createUseStyles } from 'react-jss'
 import clsx from 'clsx'
+import { TTSDownloadNotifier } from './TTSDownloadNotifier'
 
 const useStyles = createUseStyles({
     'rootContainer': {
@@ -83,42 +84,45 @@ export default function Toaster() {
     const styles = useStyles()
 
     return (
-        <div onMouseEnter={startPause} onMouseLeave={endPause} className={styles.rootContainer}>
-            {toasts.map((toast) => {
-                const offset = calculateOffset(toast, {
-                    reverseOrder: false,
-                    gutter: 8,
-                })
+        <>
+            <TTSDownloadNotifier />
+            <div onMouseEnter={startPause} onMouseLeave={endPause} className={styles.rootContainer}>
+                {toasts.map((toast) => {
+                    const offset = calculateOffset(toast, {
+                        reverseOrder: false,
+                        gutter: 8,
+                    })
 
-                const ref = (el: HTMLDivElement | null) => {
-                    if (el && typeof toast.height !== 'number') {
-                        const height = el.getBoundingClientRect().height
-                        updateHeight(toast.id, height)
+                    const ref = (el: HTMLDivElement | null) => {
+                        if (el && typeof toast.height !== 'number') {
+                            const height = el.getBoundingClientRect().height
+                            updateHeight(toast.id, height)
+                        }
                     }
-                }
 
-                return (
-                    <div
-                        key={toast.id}
-                        ref={ref}
-                        {...toast.ariaProps}
-                        className={styles.container}
-                        style={{ transform: `translateY(${offset}px)` }}
-                    >
+                    return (
                         <div
-                            className={clsx(styles.innerContainer, {
-                                [styles.enterAnimation]: toast.visible,
-                                [styles.exitAnimation]: !toast.visible,
-                            })}
+                            key={toast.id}
+                            ref={ref}
+                            {...toast.ariaProps}
+                            className={styles.container}
+                            style={{ transform: `translateY(${offset}px)` }}
                         >
-                            <div className={styles.icon}>{toast.icon}</div>
-                            <div className={styles.message} role='status' aria-live='polite'>
-                                {toast.message?.toString()}
+                            <div
+                                className={clsx(styles.innerContainer, {
+                                    [styles.enterAnimation]: toast.visible,
+                                    [styles.exitAnimation]: !toast.visible,
+                                })}
+                            >
+                                {toast.icon && <div className={styles.icon}>{toast.icon}</div>}
+                                <div className={styles.message} role='status' aria-live='polite'>
+                                    {resolveValue(toast.message, toast)}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )
-            })}
-        </div>
+                    )
+                })}
+            </div>
+        </>
     )
 }

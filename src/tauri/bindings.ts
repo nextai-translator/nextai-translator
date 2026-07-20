@@ -105,6 +105,14 @@ export const commands = {
     async cutImage(left: number, top: number, width: number, height: number): Promise<void> {
         await TAURI_INVOKE('cut_image', { left, top, width, height })
     },
+    async synthesizeLocalTts(text: string, lang: string, rate: number): Promise<Result<string, string>> {
+        try {
+            return { status: 'ok', data: await TAURI_INVOKE('synthesize_local_tts', { text, lang, rate }) }
+        } catch (e) {
+            if (e instanceof Error) throw e
+            else return { status: 'error', error: e as any }
+        }
+    },
 }
 
 /** user-defined events **/

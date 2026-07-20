@@ -1,9 +1,11 @@
-import { DoSpeakOptions, SpeakOptions } from './types'
+import { DoSpeakOptions, SpeakOptions, TTSProvider } from './types'
 import { getSettings } from '../utils'
 import { speak as edgeSpeak } from './edge-tts'
+import { isLocalTTSLanguage, speak as localSpeak } from './local-tts'
 import { LangCode } from '../lang'
+import * as utils from '../utils'
 
-export const defaultTTSProvider = 'EdgeTTS'
+export const defaultTTSProvider: TTSProvider = 'LocalTTS'
 
 export const langCode2TTSLang: Partial<Record<LangCode, string>> = {
     'en': 'en-US',
@@ -105,6 +107,30 @@ export async function doSpeak({
     onStartSpeaking,
 }: DoSpeakOptions) {
     const rate = (rate_ ?? 10) / 10
+
+    if (provider === 'LocalTTS') {
+        if (utils.isTauri() && isLocalTTSLanguage(lang)) {
+            return localSpeak({
+                text,
+                lang,
+                onFinish,
+                rate,
+                volume: volume ?? 100,
+                signal,
+                onStartSpeaking,
+            })
+        }
+        return edgeSpeak({
+            text,
+            lang,
+            onFinish,
+            voice,
+            rate,
+            volume: volume ?? 100,
+            signal,
+            onStartSpeaking,
+        })
+    }
 
     if (provider === 'EdgeTTS') {
         return edgeSpeak({

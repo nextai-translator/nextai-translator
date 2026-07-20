@@ -30,6 +30,7 @@ export function SpeakerIcon({
     const [isLoading, setIsLoading] = useState(false)
     const [isSpeaking, setIsSpeaking] = useState(false)
     const stopRef = useRef<() => void>()
+    const iconSize = iconProps.size ?? '1em'
 
     useEffect(() => {
         return () => {
@@ -75,6 +76,15 @@ export function SpeakerIcon({
     return (
         <div
             ref={divRef}
+            style={{
+                alignItems: 'center',
+                display: 'inline-flex',
+                flexShrink: 0,
+                height: iconSize,
+                justifyContent: 'center',
+                lineHeight: 0,
+                width: iconSize,
+            }}
             onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -87,10 +97,12 @@ export function SpeakerIcon({
         >
             {isLoading && (
                 <SpinnerIcon
+                    {...iconProps}
+                    size='80%'
                     style={{
+                        ...iconProps.style,
                         display: 'block',
                     }}
-                    {...iconProps}
                 />
             )}
             {!isLoading &&

@@ -218,5 +218,13 @@
     "Low": "Low",
     "Medium": "Medium",
     "High": "High",
-    "Enable": "Enable"
+    "Enable": "Enable",
+    "MeloTTS Chinese voice": "MeloTTS Çince sesi",
+    "Kokoro English voice": "Kokoro İngilizce sesi",
+    "Downloading {{voice}}": "{{voice}} indiriliyor",
+    "Installing {{voice}}": "{{voice}} yükleniyor",
+    "Download progress for {{voice}}": "{{voice}} indirme ilerlemesi",
+    "Verifying and extracting…": "Doğrulanıyor ve arşivden çıkarılıyor…",
+    "{{voice}} is ready": "{{voice}} hazır",
+    "Failed to download {{voice}}": "{{voice}} indirilemedi"
 }

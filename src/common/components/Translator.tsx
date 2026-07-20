@@ -75,6 +75,7 @@ import { GlobalSuspense } from './GlobalSuspense'
 import { useLazyEffect } from '../usehooks'
 import LogoWithText, { type LogoWithTextRef } from './LogoWithText'
 import Toaster from './Toaster'
+import { PhoneticText } from './PhoneticText'
 import { readFile } from '@tauri-apps/plugin-fs'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDeepCompareCallback } from 'use-deep-compare'
@@ -2462,7 +2463,22 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 {currentTranslateMode === 'explain-code' ||
                                                 activateAction?.outputRenderingFormat === 'markdown' ? (
                                                     <>
-                                                        <Markdown>{translatedText}</Markdown>
+                                                        <Markdown
+                                                            speechLang={isWordMode ? sourceLang : targetLang ?? 'en'}
+                                                            speechText={editableText}
+                                                            ttsProvider={settings.tts?.provider}
+                                                            ttsVoice={
+                                                                settings.tts?.voices?.find(
+                                                                    (item) =>
+                                                                        item.lang ===
+                                                                        (isWordMode ? sourceLang : targetLang ?? 'en')
+                                                                )?.voice
+                                                            }
+                                                            ttsRate={settings.tts?.rate}
+                                                            ttsVolume={settings.tts?.volume}
+                                                        >
+                                                            {translatedText}
+                                                        </Markdown>
                                                         {isLoading && <span className={styles.caret} />}
                                                     </>
                                                 ) : activateAction?.outputRenderingFormat === 'latex' ? (
@@ -2482,7 +2498,19 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                                             gap: '5px',
                                                                         }}
                                                                     >
-                                                                        {line}
+                                                                        <PhoneticText
+                                                                            text={line}
+                                                                            fallbackText={editableText}
+                                                                            lang={sourceLang}
+                                                                            provider={settings.tts?.provider}
+                                                                            voice={
+                                                                                settings.tts?.voices?.find(
+                                                                                    (item) => item.lang === sourceLang
+                                                                                )?.voice
+                                                                            }
+                                                                            rate={settings.tts?.rate}
+                                                                            volume={settings.tts?.volume}
+                                                                        />
                                                                         {!isLoading && (
                                                                             <StatefulTooltip
                                                                                 content={
@@ -2511,7 +2539,25 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                                         )}
                                                                     </div>
                                                                 ) : (
-                                                                    line
+                                                                    <PhoneticText
+                                                                        text={line}
+                                                                        fallbackText={editableText}
+                                                                        lang={
+                                                                            isWordMode ? sourceLang : targetLang ?? 'en'
+                                                                        }
+                                                                        provider={settings.tts?.provider}
+                                                                        voice={
+                                                                            settings.tts?.voices?.find(
+                                                                                (item) =>
+                                                                                    item.lang ===
+                                                                                    (isWordMode
+                                                                                        ? sourceLang
+                                                                                        : targetLang ?? 'en')
+                                                                            )?.voice
+                                                                        }
+                                                                        rate={settings.tts?.rate}
+                                                                        volume={settings.tts?.volume}
+                                                                    />
                                                                 )}
                                                                 {isLoading && i === translatedLines.length - 1 && (
                                                                     <span className={styles.caret} />
