@@ -15,6 +15,8 @@ interface ISpeakerIconProps extends IconBaseProps {
     rate?: number
     volume?: number
     text?: string
+    onWordBoundary?: (wordIndex: number) => void
+    onPlaybackEnd?: () => void
 }
 
 export function SpeakerIcon({
@@ -25,6 +27,8 @@ export function SpeakerIcon({
     voice,
     rate,
     volume,
+    onWordBoundary,
+    onPlaybackEnd,
     ...iconProps
 }: ISpeakerIconProps) {
     const [isLoading, setIsLoading] = useState(false)
@@ -51,6 +55,7 @@ export function SpeakerIcon({
             controller.abort()
             setIsSpeaking(false)
             setIsLoading(false)
+            onPlaybackEnd?.()
         }
         doSpeak({
             provider,
@@ -61,17 +66,20 @@ export function SpeakerIcon({
             rate: rate,
             onFinish: () => {
                 setIsSpeaking(false)
+                onPlaybackEnd?.()
             },
             onStartSpeaking: () => {
                 setIsLoading(false)
             },
             signal,
+            onWordBoundary,
         }).catch((e) => {
             console.error('TTS error:', e)
             setIsLoading(false)
             setIsSpeaking(false)
+            onPlaybackEnd?.()
         })
-    }, [lang, provider, rate, text, voice, volume])
+    }, [lang, onPlaybackEnd, onWordBoundary, provider, rate, text, voice, volume])
 
     return (
         <div

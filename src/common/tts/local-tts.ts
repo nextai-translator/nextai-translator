@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { LangCode } from '../lang'
 import { SpeakOptions } from './types'
+import { getSpeechWordStarts, segmentSpeechText } from './speech-segments'
 
 interface LocalTTSOptions extends SpeakOptions {
     lang: LangCode
@@ -176,6 +177,7 @@ export async function speak({
     signal,
     onFinish,
     onStartSpeaking,
+    onWordBoundary,
 }: LocalTTSOptions): Promise<void> {
     activePlayback?.stop()
 
@@ -191,6 +193,7 @@ export async function speak({
     gain.connect(context.destination)
 
     const sources: AudioBufferSourceNode[] = []
+    const boundaryTimers: number[] = []
     let stopped = false
     let finished = false
     const finish = (tearDown = true) => {
@@ -200,6 +203,9 @@ export async function speak({
         finished = true
         if (activePlayback?.stop === stop) {
             activePlayback = null
+        }
+        for (const timer of boundaryTimers) {
+            window.clearTimeout(timer)
         }
         onFinish?.()
         if (tearDown) {
@@ -248,6 +254,12 @@ export async function speak({
     }
 
     const lookahead = 3
+    const wordOffsets: number[] = []
+    let wordCount = 0
+    for (const chunk of chunks) {
+        wordOffsets.push(wordCount)
+        wordCount += segmentSpeechText(chunk, lang).filter((part) => part.isWordLike).length
+    }
     const pending: Array<Promise<SynthesisResult> | undefined> = new Array(chunks.length)
     const queue = (index: number) => {
         if (index < chunks.length && !pending[index]) {
@@ -300,6 +312,18 @@ export async function speak({
             const startAt = Math.max(nextStart, context.currentTime)
             source.start(startAt)
             nextStart = startAt + buffer.duration
+            if (onWordBoundary) {
+                for (const [wordIndex, fraction] of getSpeechWordStarts(chunks[index], lang).entries()) {
+                    const delay = Math.max(0, (startAt + buffer.duration * fraction - context.currentTime) * 1000)
+                    boundaryTimers.push(
+                        window.setTimeout(() => {
+                            if (!stopped) {
+                                onWordBoundary(wordOffsets[index] + wordIndex)
+                            }
+                        }, delay)
+                    )
+                }
+            }
             sources.push(source)
             activeSources++
             source.onended = () => {

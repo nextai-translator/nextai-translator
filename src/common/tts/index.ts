@@ -105,6 +105,7 @@ export async function doSpeak({
     onFinish,
     signal,
     onStartSpeaking,
+    onWordBoundary,
 }: DoSpeakOptions) {
     const rate = (rate_ ?? 10) / 10
 
@@ -118,6 +119,7 @@ export async function doSpeak({
                 volume: volume ?? 100,
                 signal,
                 onStartSpeaking,
+                onWordBoundary,
             })
         }
         return edgeSpeak({
@@ -129,6 +131,7 @@ export async function doSpeak({
             volume: volume ?? 100,
             signal,
             onStartSpeaking,
+            onWordBoundary,
         })
     }
 
@@ -142,6 +145,7 @@ export async function doSpeak({
             volume: volume ?? 100,
             signal,
             onStartSpeaking,
+            onWordBoundary,
         })
     }
 
@@ -156,6 +160,18 @@ export async function doSpeak({
     utterance.lang = ttsLang
     utterance.rate = rate
     utterance.volume = volume ? volume / 100 : 1
+    if (onWordBoundary) {
+        const { findSpeechWordIndex } = await import('./speech-segments')
+        utterance.addEventListener('boundary', (event) => {
+            if (event.name !== 'word') {
+                return
+            }
+            const wordIndex = findSpeechWordIndex(text, lang, event.charIndex)
+            if (wordIndex !== undefined) {
+                onWordBoundary(wordIndex)
+            }
+        })
+    }
 
     const defaultVoice = supportVoices.find((v) => v.lang === ttsLang) ?? null
     const settingsVoice = supportVoices.find((v) => v.voiceURI === voice)

@@ -6,6 +6,7 @@ export interface SpeakOptions {
     signal: AbortSignal
     onFinish?: () => void
     onStartSpeaking?: () => void
+    onWordBoundary?: (wordIndex: number) => void
 }
 
 export type TTSProvider = 'LocalTTS' | 'WebSpeech' | 'EdgeTTS'

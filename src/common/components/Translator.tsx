@@ -76,6 +76,7 @@ import { useLazyEffect } from '../usehooks'
 import LogoWithText, { type LogoWithTextRef } from './LogoWithText'
 import Toaster from './Toaster'
 import { PhoneticText } from './PhoneticText'
+import { segmentSpeechText } from '../tts/speech-segments'
 import { readFile } from '@tauri-apps/plugin-fs'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDeepCompareCallback } from 'use-deep-compare'
@@ -711,18 +712,24 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     }, [])
 
     const [highlightWords, setHighlightWords] = useState<string[]>([])
+    const [speakingInputRange, setSpeakingInputRange] = useState<[number, number]>()
 
     useEffect(() => {
         if (!highlightRef.current?.highlight) {
             return
         }
-        if (selectedWord) {
+        if (speakingInputRange) {
+            highlightRef.current.highlight.highlight = {
+                highlight: speakingInputRange,
+                className: 'yetone-hit-speaking',
+            }
+        } else if (selectedWord) {
             highlightRef.current.highlight.highlight = [selectedWord]
         } else {
             highlightRef.current.highlight.highlight = [...highlightWords]
         }
         highlightRef.current.handleInput()
-    }, [selectedWord, highlightWords])
+    }, [selectedWord, highlightWords, speakingInputRange])
 
     const [activateAction, setActivateAction] = useState<Action>()
 
@@ -910,6 +917,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     const [tokenCount, setTokenCount] = useState(0)
     const [translatedText, setTranslatedText] = useState('')
     const [translatedLines, setTranslatedLines] = useState<string[]>([])
+    const [speakingOutputRange, setSpeakingOutputRange] = useState<[number, number]>()
     const [isWordMode, setIsWordMode] = useState(false)
     const isWordModeRef = useRef(false)
     const [isCollectedWord, setIsCollectedWord] = useState(false)
@@ -2359,6 +2367,22 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     }
                                                     rate={settings.tts?.rate}
                                                     volume={settings.tts?.volume}
+                                                    onWordBoundary={(wordIndex) => {
+                                                        const spokenText = selectedWord || editableText
+                                                        const offset = selectedWord
+                                                            ? editableText.indexOf(selectedWord)
+                                                            : 0
+                                                        const word = segmentSpeechText(spokenText, sourceLang).find(
+                                                            (part) => part.wordIndex === wordIndex
+                                                        )
+                                                        if (word && offset >= 0) {
+                                                            setSpeakingInputRange([
+                                                                offset + word.start,
+                                                                offset + word.end,
+                                                            ])
+                                                        }
+                                                    }}
+                                                    onPlaybackEnd={() => setSpeakingInputRange(undefined)}
                                                 />
                                             </div>
                                         </Tooltip>
@@ -2488,6 +2512,18 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     </>
                                                 ) : (
                                                     translatedLines.map((line, i) => {
+                                                        const lineStart = translatedLines
+                                                            .slice(0, i)
+                                                            .reduce((length, item) => length + item.length + 1, 0)
+                                                        const lineHighlightRange = speakingOutputRange
+                                                            ? ([
+                                                                  Math.max(0, speakingOutputRange[0] - lineStart),
+                                                                  Math.min(
+                                                                      line.length,
+                                                                      speakingOutputRange[1] - lineStart
+                                                                  ),
+                                                              ] as [number, number])
+                                                            : undefined
                                                         return (
                                                             <div className={styles.paragraph} key={`p-${i}`}>
                                                                 {isWordMode && i === 0 ? (
@@ -2501,6 +2537,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                                         <PhoneticText
                                                                             text={line}
                                                                             fallbackText={editableText}
+                                                                            highlightRange={lineHighlightRange}
                                                                             lang={sourceLang}
                                                                             provider={settings.tts?.provider}
                                                                             voice={
@@ -2542,6 +2579,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                                     <PhoneticText
                                                                         text={line}
                                                                         fallbackText={editableText}
+                                                                        highlightRange={lineHighlightRange}
                                                                         lang={
                                                                             isWordMode ? sourceLang : targetLang ?? 'en'
                                                                         }
@@ -2595,6 +2633,16 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                             }
                                                             rate={settings.tts?.rate}
                                                             volume={settings.tts?.volume}
+                                                            onWordBoundary={(wordIndex) => {
+                                                                const word = segmentSpeechText(
+                                                                    translatedText,
+                                                                    targetLang ?? 'en'
+                                                                ).find((part) => part.wordIndex === wordIndex)
+                                                                if (word) {
+                                                                    setSpeakingOutputRange([word.start, word.end])
+                                                                }
+                                                            }}
+                                                            onPlaybackEnd={() => setSpeakingOutputRange(undefined)}
                                                         />
                                                     </div>
                                                 </Tooltip>

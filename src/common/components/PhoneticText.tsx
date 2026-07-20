@@ -1,7 +1,8 @@
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { LangCode } from '../lang'
 import { TTSProvider } from '../tts/types'
 import { SpeakerIcon } from './SpeakerIcon'
+import { segmentSpeechText } from '../tts/speech-segments'
 
 export type PhoneticSegment =
     | { kind: 'text'; text: string }
@@ -122,6 +123,7 @@ export function parsePhoneticSegments(text: string, fallbackText = ''): Phonetic
 interface PhoneticTextProps {
     text: string
     fallbackText?: string
+    highlightRange?: [number, number]
     lang: LangCode
     provider?: TTSProvider
     voice?: string
@@ -129,14 +131,57 @@ interface PhoneticTextProps {
     volume?: number
 }
 
-export function PhoneticText({ text, fallbackText, lang, provider, voice, rate, volume }: PhoneticTextProps) {
-    const segments = parsePhoneticSegments(text, fallbackText)
+const activeWordStyle = {
+    backgroundColor: 'rgba(255, 193, 7, 0.28)',
+    borderRadius: 2,
+    boxDecorationBreak: 'clone' as const,
+    WebkitBoxDecorationBreak: 'clone' as const,
+}
+
+function renderHighlightedRange(text: string, offset: number, range?: [number, number]) {
+    if (!range) {
+        return text
+    }
+    const start = Math.max(0, range[0] - offset)
+    const end = Math.min(text.length, range[1] - offset)
+    if (start >= end) {
+        return text
+    }
     return (
         <>
-            {segments.map((segment, index) =>
-                segment.kind === 'text' ? (
-                    <Fragment key={index}>{segment.text}</Fragment>
-                ) : (
+            {text.slice(0, start)}
+            <span style={activeWordStyle}>{text.slice(start, end)}</span>
+            {text.slice(end)}
+        </>
+    )
+}
+
+export function PhoneticText({
+    text,
+    fallbackText,
+    highlightRange,
+    lang,
+    provider,
+    voice,
+    rate,
+    volume,
+}: PhoneticTextProps) {
+    const segments = parsePhoneticSegments(text, fallbackText)
+    const [activeWord, setActiveWord] = useState<{ segmentIndex: number; wordIndex: number }>()
+    let segmentOffset = 0
+    return (
+        <>
+            {segments.map((segment, index) => {
+                const currentOffset = segmentOffset
+                segmentOffset += segment.text.length
+                if (segment.kind === 'text') {
+                    return (
+                        <Fragment key={index}>
+                            {renderHighlightedRange(segment.text, currentOffset, highlightRange)}
+                        </Fragment>
+                    )
+                }
+                return (
                     <span
                         key={index}
                         style={{
@@ -147,7 +192,25 @@ export function PhoneticText({ text, fallbackText, lang, provider, voice, rate, 
                             whiteSpace: 'nowrap',
                         }}
                     >
-                        <span>{segment.text}</span>
+                        <span>
+                            {highlightRange
+                                ? renderHighlightedRange(segment.text, currentOffset, highlightRange)
+                                : segment.kind === 'example'
+                                ? segmentSpeechText(segment.text, lang).map((part, partIndex) => (
+                                      <span
+                                          key={partIndex}
+                                          style={
+                                              activeWord?.segmentIndex === index &&
+                                              activeWord.wordIndex === part.wordIndex
+                                                  ? activeWordStyle
+                                                  : undefined
+                                          }
+                                      >
+                                          {part.text}
+                                      </span>
+                                  ))
+                                : segment.text}
+                        </span>
                         <span
                             title={`播放 ${segment.speechText}`}
                             aria-label={`播放 ${segment.speechText}`}
@@ -167,11 +230,15 @@ export function PhoneticText({ text, fallbackText, lang, provider, voice, rate, 
                                 voice={voice}
                                 rate={rate}
                                 volume={volume}
+                                onWordBoundary={(wordIndex) => setActiveWord({ segmentIndex: index, wordIndex })}
+                                onPlaybackEnd={() =>
+                                    setActiveWord((current) => (current?.segmentIndex === index ? undefined : current))
+                                }
                             />
                         </span>
                     </span>
                 )
-            )}
+            })}
         </>
     )
 }
