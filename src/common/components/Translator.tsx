@@ -89,6 +89,7 @@ import {
 } from '../services/promotion'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
 import { SpeakerIcon } from './SpeakerIcon'
+import { HoverableText, WordHoverProvider } from './WordHoverCard'
 import { Provider, engineIcons, getEngine, providerToEngine } from '../engines'
 import color from 'color'
 import { useAtom } from 'jotai'
@@ -1642,6 +1643,32 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         }
     }, [t, translatedText])
 
+    const handleOpenWordDetails = useCallback(
+        async (word: string) => {
+            const translateAction = actions?.find((action) => action.mode === 'translate') ?? activateAction
+            if (!translateAction) {
+                return
+            }
+            setSelectedWord('')
+            setHighlightWords([])
+            setVocabularyType('hide')
+            setShowSettings(false)
+            setEditableText(word)
+            if (translateAction.id !== activateAction?.id || translateAction.mode !== activateAction?.mode) {
+                setActivateAction(translateAction)
+            }
+            const newTranslateDeps = await getTranslateDeps(word, translateAction)
+            setTranslateDeps({
+                ...newTranslateDeps,
+                action: translateAction,
+            })
+            editorRef.current?.focus()
+        },
+        [actions, activateAction, getTranslateDeps, setShowSettings]
+    )
+
+    const renderHoverableText = useCallback((text: string) => <HoverableText>{text}</HoverableText>, [])
+
     // Window-level keyboard shortcut for "Insert into previous input"
     // — ⇧⌘↩ on macOS, Ctrl+Shift+Enter elsewhere. Mirrors the toolbar button.
     useEffect(() => {
@@ -2451,77 +2478,83 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                             width: '100%',
                                         }}
                                     >
-                                        <div
-                                            ref={translatedContentRef}
-                                            className={styles.popupCardTranslatedContentContainer}
-                                            style={{
-                                                fontSize: settings.fontSize,
-                                            }}
-                                        >
-                                            <div>
-                                                {currentTranslateMode === 'explain-code' ||
-                                                activateAction?.outputRenderingFormat === 'markdown' ? (
-                                                    <>
-                                                        <Markdown>{translatedText}</Markdown>
-                                                        {isLoading && <span className={styles.caret} />}
-                                                    </>
-                                                ) : activateAction?.outputRenderingFormat === 'latex' ? (
-                                                    <>
-                                                        <Latex>{translatedText}</Latex>
-                                                        {isLoading && <span className={styles.caret} />}
-                                                    </>
-                                                ) : (
-                                                    translatedLines.map((line, i) => {
-                                                        return (
-                                                            <div className={styles.paragraph} key={`p-${i}`}>
-                                                                {isWordMode && i === 0 ? (
-                                                                    <div
-                                                                        style={{
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            gap: '5px',
-                                                                        }}
-                                                                    >
-                                                                        {line}
-                                                                        {!isLoading && (
-                                                                            <StatefulTooltip
-                                                                                content={
-                                                                                    isCollectedWord
-                                                                                        ? t('Remove from collection')
-                                                                                        : t('Add to collection')
-                                                                                }
-                                                                                showArrow
-                                                                                placement='right'
-                                                                            >
-                                                                                <div
-                                                                                    className={styles.actionButton}
-                                                                                    onClick={() =>
-                                                                                        onWordCollection(
-                                                                                            isCollectedWord
-                                                                                        )
+                                        <WordHoverProvider enabled={!isLoading} onOpenDetails={handleOpenWordDetails}>
+                                            <div
+                                                ref={translatedContentRef}
+                                                className={styles.popupCardTranslatedContentContainer}
+                                                style={{
+                                                    fontSize: settings.fontSize,
+                                                }}
+                                            >
+                                                <div>
+                                                    {currentTranslateMode === 'explain-code' ||
+                                                    activateAction?.outputRenderingFormat === 'markdown' ? (
+                                                        <>
+                                                            <Markdown renderText={renderHoverableText}>
+                                                                {translatedText}
+                                                            </Markdown>
+                                                            {isLoading && <span className={styles.caret} />}
+                                                        </>
+                                                    ) : activateAction?.outputRenderingFormat === 'latex' ? (
+                                                        <>
+                                                            <Latex>{translatedText}</Latex>
+                                                            {isLoading && <span className={styles.caret} />}
+                                                        </>
+                                                    ) : (
+                                                        translatedLines.map((line, i) => {
+                                                            return (
+                                                                <div className={styles.paragraph} key={`p-${i}`}>
+                                                                    {isWordMode && i === 0 ? (
+                                                                        <div
+                                                                            style={{
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                gap: '5px',
+                                                                            }}
+                                                                        >
+                                                                            <HoverableText>{line}</HoverableText>
+                                                                            {!isLoading && (
+                                                                                <StatefulTooltip
+                                                                                    content={
+                                                                                        isCollectedWord
+                                                                                            ? t(
+                                                                                                  'Remove from collection'
+                                                                                              )
+                                                                                            : t('Add to collection')
                                                                                     }
+                                                                                    showArrow
+                                                                                    placement='right'
                                                                                 >
-                                                                                    {isCollectedWord ? (
-                                                                                        <MdGrade size={15} />
-                                                                                    ) : (
-                                                                                        <MdOutlineGrade size={15} />
-                                                                                    )}
-                                                                                </div>
-                                                                            </StatefulTooltip>
-                                                                        )}
-                                                                    </div>
-                                                                ) : (
-                                                                    line
-                                                                )}
-                                                                {isLoading && i === translatedLines.length - 1 && (
-                                                                    <span className={styles.caret} />
-                                                                )}
-                                                            </div>
-                                                        )
-                                                    })
-                                                )}
+                                                                                    <div
+                                                                                        className={styles.actionButton}
+                                                                                        onClick={() =>
+                                                                                            onWordCollection(
+                                                                                                isCollectedWord
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        {isCollectedWord ? (
+                                                                                            <MdGrade size={15} />
+                                                                                        ) : (
+                                                                                            <MdOutlineGrade size={15} />
+                                                                                        )}
+                                                                                    </div>
+                                                                                </StatefulTooltip>
+                                                                            )}
+                                                                        </div>
+                                                                    ) : (
+                                                                        <HoverableText>{line}</HoverableText>
+                                                                    )}
+                                                                    {isLoading && i === translatedLines.length - 1 && (
+                                                                        <span className={styles.caret} />
+                                                                    )}
+                                                                </div>
+                                                            )
+                                                        })
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
+                                        </WordHoverProvider>
                                         {translatedText && (
                                             <div ref={actionButtonsRef} className={styles.actionButtonsContainer}>
                                                 <div style={{ marginRight: 'auto' }} />
