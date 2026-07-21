@@ -1,19 +1,55 @@
 import ReactMarkdown from 'react-markdown'
 import { CodeBlock } from './CodeBlock'
 import { useTheme } from '../hooks/useTheme'
-import { HTMLAttributeAnchorTarget } from 'react'
+import { Children, createElement, HTMLAttributeAnchorTarget, HTMLAttributes, ReactNode, useMemo } from 'react'
 
 export interface IMarkdownProps {
     children: string
     linkTarget?: HTMLAttributeAnchorTarget
+    renderText?: (text: string) => ReactNode
 }
 
-export function Markdown({ children, linkTarget }: IMarkdownProps) {
+interface MarkdownElementProps extends HTMLAttributes<HTMLElement> {
+    node?: unknown
+}
+
+export function Markdown({ children, linkTarget, renderText }: IMarkdownProps) {
     const { theme } = useTheme()
+    const renderedTextComponents = useMemo(() => {
+        if (!renderText) return {}
+        const renderChildren = (value: ReactNode) =>
+            Children.map(value, (child) => (typeof child === 'string' ? renderText(child) : child))
+        const withRenderedText = (tag: keyof JSX.IntrinsicElements) => {
+            return function RenderedTextElement(componentProps: MarkdownElementProps) {
+                const { children: elementChildren } = componentProps
+                const props = { ...componentProps }
+                // eslint-disable-next-line react/prop-types
+                delete props.node
+                delete props.children
+                return createElement(tag, props, renderChildren(elementChildren as ReactNode))
+            }
+        }
+        return {
+            p: withRenderedText('p'),
+            li: withRenderedText('li'),
+            h1: withRenderedText('h1'),
+            h2: withRenderedText('h2'),
+            h3: withRenderedText('h3'),
+            h4: withRenderedText('h4'),
+            h5: withRenderedText('h5'),
+            h6: withRenderedText('h6'),
+            strong: withRenderedText('strong'),
+            em: withRenderedText('em'),
+            del: withRenderedText('del'),
+            td: withRenderedText('td'),
+            th: withRenderedText('th'),
+        }
+    }, [renderText])
 
     return (
         <ReactMarkdown
             components={{
+                ...renderedTextComponents,
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 a({ node, className, children, ...props }) {
                     const newProps = {
