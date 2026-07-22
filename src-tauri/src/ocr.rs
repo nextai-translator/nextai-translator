@@ -90,7 +90,10 @@ pub fn screenshot(x: i32, y: i32) {
     {
         Some(screen) => screen,
         None => {
-            eprintln!("No screen found at ({}, {}), falling back to the first screen", x, y);
+            eprintln!(
+                "No screen found at ({}, {}), falling back to the first screen",
+                x, y
+            );
             match screens.first() {
                 Some(screen) => screen,
                 None => {
@@ -212,7 +215,10 @@ fn recognize_cut_file(image_file_path: &Path) -> Result<String, String> {
         .map_err(|e| format!("failed to recognize: {}", e))?;
 
     let mut content = String::new();
-    for line in result.Lines().map_err(|e| format!("failed to read lines: {}", e))? {
+    for line in result
+        .Lines()
+        .map_err(|e| format!("failed to read lines: {}", e))?
+    {
         if let Ok(text) = line.Text() {
             content.push_str(text.to_string_lossy().trim());
             content.push('\n');
