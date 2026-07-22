@@ -678,6 +678,8 @@ pub struct CheckUpdateResultEvent(UpdateResult);
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, specta::Type, tauri_specta::Event)]
 pub struct CheckUpdateEvent;
 
+#[tauri::command]
+#[specta::specta]
 pub fn show_updater_window() {
     let window = get_updater_window();
     window.center().unwrap();

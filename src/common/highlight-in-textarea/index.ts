@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import styles from './index.css?inline'
 
+type HighlightRange = [number, number]
+
+interface CustomHighlight {
+    highlight: HighlightRange
+    className: string
+}
+
 interface IConfig {
-    highlight: string | RegExp | string[]
+    highlight: string | RegExp | string[] | HighlightRange | CustomHighlight
 }
 
 export class HighlightInTextarea {
@@ -39,7 +46,7 @@ export class HighlightInTextarea {
 
         this.highlights = document.createElement('div')
         this.highlights.classList.add(this.ID + '-highlights', this.ID + '-content')
-        this.highlights.style.fontSize = window.getComputedStyle(this.el, null).getPropertyValue('font-size')
+        this.syncTypography()
 
         this.backdrop = document.createElement('div')
         this.backdrop.classList.add(this.ID + '-backdrop')
@@ -148,6 +155,7 @@ export class HighlightInTextarea {
     }
 
     public handleInput() {
+        this.syncTypography()
         if (!this.hasActiveHighlight()) {
             if (this.highlights) {
                 this.highlights.innerHTML = ''
@@ -392,6 +400,31 @@ export class HighlightInTextarea {
             return
         }
         this.container.scrollLeft = 0
+    }
+
+    private syncTypography() {
+        if (!this.el || !this.highlights) {
+            return
+        }
+        const computed = window.getComputedStyle(this.el)
+        const properties = [
+            'font-family',
+            'font-size',
+            'font-style',
+            'font-variant',
+            'font-weight',
+            'font-stretch',
+            'line-height',
+            'letter-spacing',
+            'word-spacing',
+            'text-align',
+            'text-indent',
+            'text-transform',
+            'tab-size',
+        ]
+        for (const property of properties) {
+            this.highlights.style.setProperty(property, computed.getPropertyValue(property))
+        }
     }
 
     destroy() {

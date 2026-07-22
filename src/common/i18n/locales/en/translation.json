@@ -237,5 +237,13 @@
     "Low": "Low",
     "Medium": "Medium",
     "High": "High",
-    "Enable": "Enable"
+    "Enable": "Enable",
+    "MeloTTS Chinese voice": "MeloTTS Chinese voice",
+    "Kokoro English voice": "Kokoro English voice",
+    "Downloading {{voice}}": "Downloading {{voice}}",
+    "Installing {{voice}}": "Installing {{voice}}",
+    "Download progress for {{voice}}": "Download progress for {{voice}}",
+    "Verifying and extracting…": "Verifying and extracting…",
+    "{{voice}} is ready": "{{voice}} is ready",
+    "Failed to download {{voice}}": "Failed to download {{voice}}"
 }

@@ -217,5 +217,13 @@
     "Low": "Low",
     "Medium": "Medium",
     "High": "High",
-    "Enable": "Enable"
+    "Enable": "Enable",
+    "MeloTTS Chinese voice": "เสียงภาษาจีน MeloTTS",
+    "Kokoro English voice": "เสียงภาษาอังกฤษ Kokoro",
+    "Downloading {{voice}}": "กำลังดาวน์โหลด {{voice}}",
+    "Installing {{voice}}": "กำลังติดตั้ง {{voice}}",
+    "Download progress for {{voice}}": "ความคืบหน้าการดาวน์โหลด {{voice}}",
+    "Verifying and extracting…": "กำลังตรวจสอบและแตกไฟล์…",
+    "{{voice}} is ready": "{{voice}} พร้อมใช้งานแล้ว",
+    "Failed to download {{voice}}": "ดาวน์โหลด {{voice}} ไม่สำเร็จ"
 }

@@ -5,7 +5,7 @@ import icon from '../assets/images/icon-large.png'
 import beams from '../assets/images/beams.jpg'
 import wechat from '../assets/images/wechat.png'
 import alipay from '../assets/images/alipay.png'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import * as utils from '../utils'
 import { Client as Styletron } from 'styletron-engine-atomic'
 import { Provider as StyletronProvider } from 'styletron-react'
@@ -31,6 +31,7 @@ import { RiDeleteBin5Line } from 'react-icons/ri'
 import { IoIosHelpCircleOutline, IoIosSave, IoMdAdd } from 'react-icons/io'
 import { TTSProvider } from '../tts/types'
 import { fetchEdgeVoices } from '../tts/edge-tts'
+import { fetchLocalVoices } from '../tts/local-tts'
 import { useThemeType } from '../hooks/useThemeType'
 import { Slider } from 'baseui-sd/slider'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -58,6 +59,7 @@ import type { UnlistenFn } from '@tauri-apps/api/event'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
 import { Skeleton } from 'baseui-sd/skeleton'
 import { SpeakerIcon } from './SpeakerIcon'
+import Toaster from './Toaster'
 import { RxSpeakerLoud } from 'react-icons/rx'
 import { Notification } from 'baseui-sd/notification'
 import { usePromotionNeverDisplay } from '../hooks/usePromotionNeverDisplay'
@@ -340,6 +342,7 @@ const ttsProviderOptions: {
     label: string
     id: TTSProvider
 }[] = [
+    { label: 'Local TTS (MeloTTS / Kokoro)', id: 'LocalTTS' },
     { label: 'Edge TTS', id: 'EdgeTTS' },
     { label: 'System Default', id: 'WebSpeech' },
 ]
@@ -358,6 +361,11 @@ function TTSVoicesSettings({ value, onChange, onBlur }: ITTSVoicesSettingsProps)
 
     const provider = value?.provider ?? defaultTTSProvider
 
+    const { data: localVoices, isLoading: isLocalVoicesLoading } = useSWR(
+        provider === 'LocalTTS' ? 'localTTSVoices' : null,
+        fetchLocalVoices
+    )
+
     const { data: edgeVoices, isLoading: isEdgeVoicesLoading } = useSWR(
         provider === 'EdgeTTS' ? 'edgeVoices' : null,
         fetchEdgeVoices
@@ -370,10 +378,13 @@ function TTSVoicesSettings({ value, onChange, onBlur }: ITTSVoicesSettingsProps)
         }
     )
 
-    const isVoicesLoading = isEdgeVoicesLoading || isWebSpeechVoicesLoading
+    const isVoicesLoading = isLocalVoicesLoading || isEdgeVoicesLoading || isWebSpeechVoicesLoading
 
     useEffect(() => {
         switch (provider) {
+            case 'LocalTTS':
+                setSupportedVoices(localVoices ?? [])
+                break
             case 'EdgeTTS':
                 setSupportedVoices(edgeVoices ?? [])
                 break
@@ -384,7 +395,7 @@ function TTSVoicesSettings({ value, onChange, onBlur }: ITTSVoicesSettingsProps)
                 setSupportedVoices(edgeVoices ?? [])
                 break
         }
-    }, [edgeVoices, provider, webSpeechVoices])
+    }, [edgeVoices, localVoices, provider, webSpeechVoices])
 
     const getLangOptions = useCallback(
         (lang: string) => {
@@ -543,7 +554,7 @@ function TTSVoicesSettings({ value, onChange, onBlur }: ITTSVoicesSettingsProps)
                     clearable={false}
                     searchable={false}
                     options={ttsProviderOptions}
-                    value={[{ id: value?.provider ?? 'EdgeTTS' }]}
+                    value={[{ id: value?.provider ?? defaultTTSProvider }]}
                     onChange={({ option }) => handleChangeProvider(option?.id as TTSProvider)}
                     onBlur={onBlur}
                 />

@@ -1,6 +1,7 @@
 import { langCode2TTSLang } from '.'
 import { SpeakOptions } from './types'
 import { EdgeTTS, listVoices } from 'edge-tts-universal'
+import { getSpeechWordStarts } from './speech-segments'
 
 // https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/e6faf6b7fc1febb45993b940617719e8ed1358b2/src/sdk/SpeechSynthesizer.ts#L216
 const languageToDefaultVoice: { [key: string]: string } = {
@@ -150,6 +151,7 @@ export async function speak({
     volume = 100,
     signal,
     onStartSpeaking,
+    onWordBoundary,
 }: EdgeTTSOptions) {
     const lang = langCode2TTSLang[lang_ ?? 'en'] ?? 'en-US'
     const selectedVoice = voice ?? languageToDefaultVoice[lang] ?? 'en-US-JennyNeural'
@@ -164,11 +166,15 @@ export async function speak({
         const audioContext = new AudioContext()
         let audioBufferSource: AudioBufferSourceNode | null = null
         let stopped = false
+        const boundaryTimers: number[] = []
 
         signal.addEventListener(
             'abort',
             () => {
                 stopped = true
+                for (const timer of boundaryTimers) {
+                    window.clearTimeout(timer)
+                }
                 if (audioBufferSource) {
                     try {
                         audioBufferSource.stop()
@@ -225,8 +231,25 @@ export async function speak({
 
         onStartSpeaking?.()
         audioBufferSource.start()
+        if (onWordBoundary) {
+            for (const [wordIndex, fraction] of getSpeechWordStarts(text, lang_ ?? 'en').entries()) {
+                boundaryTimers.push(
+                    window.setTimeout(
+                        () => {
+                            if (!stopped) {
+                                onWordBoundary(wordIndex)
+                            }
+                        },
+                        buffer.duration * fraction * 1000
+                    )
+                )
+            }
+        }
 
         audioBufferSource.addEventListener('ended', () => {
+            for (const timer of boundaryTimers) {
+                window.clearTimeout(timer)
+            }
             onFinish?.()
             audioContext.close()
         })

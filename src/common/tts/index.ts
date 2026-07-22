@@ -1,9 +1,11 @@
-import { DoSpeakOptions, SpeakOptions } from './types'
+import { DoSpeakOptions, SpeakOptions, TTSProvider } from './types'
 import { getSettings } from '../utils'
 import { speak as edgeSpeak } from './edge-tts'
+import { isLocalTTSLanguage, speak as localSpeak } from './local-tts'
 import { LangCode } from '../lang'
+import * as utils from '../utils'
 
-export const defaultTTSProvider = 'EdgeTTS'
+export const defaultTTSProvider: TTSProvider = 'LocalTTS'
 
 export const langCode2TTSLang: Partial<Record<LangCode, string>> = {
     'en': 'en-US',
@@ -103,8 +105,35 @@ export async function doSpeak({
     onFinish,
     signal,
     onStartSpeaking,
+    onWordBoundary,
 }: DoSpeakOptions) {
     const rate = (rate_ ?? 10) / 10
+
+    if (provider === 'LocalTTS') {
+        if (utils.isTauri() && isLocalTTSLanguage(lang)) {
+            return localSpeak({
+                text,
+                lang,
+                onFinish,
+                rate,
+                volume: volume ?? 100,
+                signal,
+                onStartSpeaking,
+                onWordBoundary,
+            })
+        }
+        return edgeSpeak({
+            text,
+            lang,
+            onFinish,
+            voice,
+            rate,
+            volume: volume ?? 100,
+            signal,
+            onStartSpeaking,
+            onWordBoundary,
+        })
+    }
 
     if (provider === 'EdgeTTS') {
         return edgeSpeak({
@@ -116,6 +145,7 @@ export async function doSpeak({
             volume: volume ?? 100,
             signal,
             onStartSpeaking,
+            onWordBoundary,
         })
     }
 
@@ -130,6 +160,18 @@ export async function doSpeak({
     utterance.lang = ttsLang
     utterance.rate = rate
     utterance.volume = volume ? volume / 100 : 1
+    if (onWordBoundary) {
+        const { findSpeechWordIndex } = await import('./speech-segments')
+        utterance.addEventListener('boundary', (event) => {
+            if (event.name !== 'word') {
+                return
+            }
+            const wordIndex = findSpeechWordIndex(text, lang, event.charIndex)
+            if (wordIndex !== undefined) {
+                onWordBoundary(wordIndex)
+            }
+        })
+    }
 
     const defaultVoice = supportVoices.find((v) => v.lang === ttsLang) ?? null
     const settingsVoice = supportVoices.find((v) => v.voiceURI === voice)

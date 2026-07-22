@@ -237,5 +237,13 @@
     "Low": "低",
     "Medium": "中",
     "High": "高",
-    "Enable": "启用"
+    "Enable": "启用",
+    "MeloTTS Chinese voice": "MeloTTS 中文语音",
+    "Kokoro English voice": "Kokoro 英文语音",
+    "Downloading {{voice}}": "正在下载 {{voice}}",
+    "Installing {{voice}}": "正在安装 {{voice}}",
+    "Download progress for {{voice}}": "{{voice}}下载进度",
+    "Verifying and extracting…": "校验并解压中…",
+    "{{voice}} is ready": "{{voice}}已就绪",
+    "Failed to download {{voice}}": "{{voice}}下载失败"
 }

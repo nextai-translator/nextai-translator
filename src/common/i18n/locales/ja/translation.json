@@ -218,5 +218,13 @@
     "Low": "低",
     "Medium": "中",
     "High": "高",
-    "Enable": "有効化"
+    "Enable": "有効化",
+    "MeloTTS Chinese voice": "MeloTTS 中国語音声",
+    "Kokoro English voice": "Kokoro 英語音声",
+    "Downloading {{voice}}": "{{voice}}をダウンロード中",
+    "Installing {{voice}}": "{{voice}}をインストール中",
+    "Download progress for {{voice}}": "{{voice}}のダウンロード進捗",
+    "Verifying and extracting…": "検証・展開中…",
+    "{{voice}} is ready": "{{voice}}の準備ができました",
+    "Failed to download {{voice}}": "{{voice}}のダウンロードに失敗しました"
 }

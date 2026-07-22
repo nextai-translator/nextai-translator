@@ -2,18 +2,37 @@ import ReactMarkdown from 'react-markdown'
 import { CodeBlock } from './CodeBlock'
 import { useTheme } from '../hooks/useTheme'
 import { Children, createElement, HTMLAttributeAnchorTarget, HTMLAttributes, ReactNode, useMemo } from 'react'
+import { LangCode } from '../lang'
+import { TTSProvider } from '../tts/types'
+import { PhoneticText } from './PhoneticText'
 
 export interface IMarkdownProps {
     children: string
     linkTarget?: HTMLAttributeAnchorTarget
     renderText?: (text: string) => ReactNode
+    speechLang?: LangCode
+    speechText?: string
+    ttsProvider?: TTSProvider
+    ttsVoice?: string
+    ttsRate?: number
+    ttsVolume?: number
 }
 
 interface MarkdownElementProps extends HTMLAttributes<HTMLElement> {
     node?: unknown
 }
 
-export function Markdown({ children, linkTarget, renderText }: IMarkdownProps) {
+export function Markdown({
+    children,
+    linkTarget,
+    renderText,
+    speechLang,
+    speechText,
+    ttsProvider,
+    ttsVoice,
+    ttsRate,
+    ttsVolume,
+}: IMarkdownProps) {
     const { theme } = useTheme()
     const renderedTextComponents = useMemo(() => {
         if (!renderText) return {}
@@ -46,10 +65,39 @@ export function Markdown({ children, linkTarget, renderText }: IMarkdownProps) {
         }
     }, [renderText])
 
+    const renderPhonetics = (content: ReactNode) => {
+        const renderChild = (child: string): ReactNode => {
+            if (!speechLang) {
+                return renderText ? renderText(child) : child
+            }
+            return (
+                <PhoneticText
+                    text={child}
+                    fallbackText={speechText}
+                    lang={speechLang}
+                    provider={ttsProvider}
+                    voice={ttsVoice}
+                    rate={ttsRate}
+                    volume={ttsVolume}
+                    renderText={renderText}
+                />
+            )
+        }
+        return Children.map(content, (child) => (typeof child === 'string' ? renderChild(child) : child))
+    }
+
     return (
         <ReactMarkdown
             components={{
                 ...renderedTextComponents,
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                p({ node, children, ...props }) {
+                    return <p {...props}>{renderPhonetics(children)}</p>
+                },
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                li({ node, children, ...props }) {
+                    return <li {...props}>{renderPhonetics(children)}</li>
+                },
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 a({ node, className, children, ...props }) {
                     const newProps = {

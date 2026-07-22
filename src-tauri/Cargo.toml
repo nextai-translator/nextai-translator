@@ -48,6 +48,11 @@ active-win-pos-rs = "0.8"
 reqwest = { version = "0.11.24", features = [ "json", "stream" ] }
 tokio = { version = "1", features = [ "full" ] }
 futures-util = "0.3.29"
+base64 = "0.22.1"
+bzip2 = "0.4.4"
+sha2 = "0.10.9"
+sherpa-onnx = "1.13.4"
+tar = "0.4.44"
 tauri-plugin-aptabase = "1.0.0"
 screenshots = "0.7.2"
 image = "0.24.7"

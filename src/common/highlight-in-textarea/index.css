@@ -48,15 +48,21 @@
 }
 
 .yetone-hit-content mark {
-    padding: 1px 3px !important;
-    margin-left: -2px !important;
-    margin-top: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
     color: transparent !important;
-    border-radius: 4px;
+    border-radius: 2px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
     background-color: rgba(248, 195, 205, 0.6) !important;
 }
 
 .yetone-dark .yetone-hit-content mark {
     color: rgb(203, 203, 203);
     background-color: rgba(181, 73, 91, 0.5) !important;
+}
+
+.yetone-hit-content mark.yetone-hit-speaking,
+.yetone-dark .yetone-hit-content mark.yetone-hit-speaking {
+    background-color: rgba(255, 193, 7, 0.28) !important;
 }
