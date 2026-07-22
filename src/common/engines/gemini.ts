@@ -76,11 +76,22 @@ export class Gemini extends AbstractEngine {
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36 Edg/91.0.864.41',
         }
 
-        // 2.5 Pro cannot disable thinking: remove 0 or use -1
-        // https://ai.google.dev/gemini-api/docs/thinking#set-budget
-        const thinkingConfig = /-pro($|[-:])/i.test(model)
-            ? { thinkingBudget: -1 } // dynamic thinking
-            : { thinkingBudget: 0 }
+        // Configure thinking based on user preference and model capabilities.
+        // When thinkingEnabled is true: let the model think naturally.
+        // When false: suppress/minimize thinking for faster translations.
+        // Gemini 3.x: use thinkingLevel (minimal/low/medium/high)
+        // Gemini 2.x: use thinkingBudget (legacy, token-based)
+        // See: https://ai.google.dev/gemini-api/docs/thinking
+        //      https://ai.google.dev/gemini-api/docs/thinking-mode
+        const isGen3 = /gemini-3/i.test(model)
+        const isPro = /-pro($|[-:])/i.test(model)
+        const thinkingConfig = settings.thinkingEnabled
+            ? isGen3
+              ? { thinkingLevel: 'medium' }  // balanced thinking
+              : { thinkingBudget: -1 }       // dynamic thinking
+            : isGen3
+              ? { thinkingLevel: isPro ? 'low' : 'minimal' }
+              : { thinkingBudget: isPro ? -1 : 0 }
 
         const body = {
             contents: [
