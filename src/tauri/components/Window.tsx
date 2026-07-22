@@ -145,21 +145,32 @@ export function InnerWindow(props: IWindowProps) {
     const [backgroundBlur, setBackgroundBlur] = useState(false)
     useEffect(() => {
         const appWindow = WebviewWindow.getCurrent()
-        if (settings.enableBackgroundBlur) {
-            //  TODO: It currently seems that the light/dark mode of the mica cannot be manually adjusted.
-            // link: https://beta.tauri.app/references/v2/js/core/namespacewindow/#mica
-            if (isMacOS) {
-                appWindow.setEffects({ effects: [Effect.WindowBackground] })
-            } else if (isWindows) {
-                appWindow.setEffects({ effects: [Effect.Mica] })
+        const applyEffects = async () => {
+            if (!isMacOS && !isWindows) {
+                setBackgroundBlur(false)
+                return
             }
-            setBackgroundBlur(true)
-        } else {
-            if (isMacOS || isWindows) {
-                appWindow.clearEffects()
+            // Always clear before applying: re-applying stacks another native
+            // blur view each time (window-vibrancy never dedupes), and a stale
+            // stacked backdrop can end up poking out of the window corner as a
+            // gray artifact.
+            await appWindow.clearEffects()
+            if (settings.enableBackgroundBlur) {
+                //  TODO: It currently seems that the light/dark mode of the mica cannot be manually adjusted.
+                // link: https://beta.tauri.app/references/v2/js/core/namespacewindow/#mica
+                if (isMacOS) {
+                    // The radius keeps the blur view's corners inside the
+                    // rounded window shape; without it the view is square.
+                    await appWindow.setEffects({ effects: [Effect.WindowBackground], radius: 12 })
+                } else {
+                    await appWindow.setEffects({ effects: [Effect.Mica] })
+                }
+                setBackgroundBlur(true)
+            } else {
+                setBackgroundBlur(false)
             }
-            setBackgroundBlur(false)
         }
+        void applyEffects()
     }, [settings.enableBackgroundBlur, settings.themeType])
 
     useEffect(() => {
