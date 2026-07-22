@@ -343,7 +343,8 @@ const ttsProviderOptions: {
     id: TTSProvider
 }[] = [
     { label: 'Local TTS (MeloTTS / Kokoro)', id: 'LocalTTS' },
-    { label: 'Edge TTS', id: 'EdgeTTS' },
+    // Edge TTS is hidden while its public endpoint is unusable; stored
+    // 'EdgeTTS' selections are migrated to 'LocalTTS' in getSettings.
     { label: 'System Default', id: 'WebSpeech' },
 ]
 

@@ -177,6 +177,11 @@ export async function getSettings(): Promise<ISettings> {
     if (!settings.themeType) {
         settings.themeType = 'followTheSystem'
     }
+    if (settings.tts?.provider === 'EdgeTTS') {
+        // The Edge TTS public endpoint no longer works, so route users who
+        // had selected it onto the local engine.
+        settings.tts = { ...settings.tts, provider: 'LocalTTS' }
+    }
     if (settings.provider === 'Azure') {
         if (!settings.azureAPIKeys) {
             settings.azureAPIKeys = settings.apiKeys
