@@ -126,9 +126,14 @@ export function ScreenshotWindow() {
                     if (width <= 0 || height <= 0) {
                         await appWindow.close()
                     } else {
-                        await commands.cutImage(left, top, width, height)
-                        await commands.finishOcr()
-                        await appWindow.close()
+                        try {
+                            await commands.cutImage(left, top, width, height)
+                            await commands.finishOcr()
+                        } catch (error) {
+                            console.error('OCR failed:', error)
+                        } finally {
+                            await appWindow.close()
+                        }
                     }
                 }}
             />

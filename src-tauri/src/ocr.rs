@@ -9,7 +9,7 @@ use tauri::Manager;
 #[tauri::command(async)]
 #[specta::specta]
 pub fn cut_image(left: u32, top: u32, width: u32, height: u32) {
-    use image::GenericImage;
+    use image::{GenericImage, GenericImageView};
     let app_handle = match crate::APP_HANDLE.get() {
         Some(handle) => handle,
         None => {
@@ -27,8 +27,13 @@ pub fn cut_image(left: u32, top: u32, width: u32, height: u32) {
             return;
         }
     };
+    let new_image_file_path = image_dir.join("cut.png");
+    // Remove any stale cut so downstream OCR cannot silently pick up the
+    // previous selection when this command fails (#1872).
+    let _ = std::fs::remove_file(&new_image_file_path);
     let image_file_path = image_dir.join("fullscreen.png");
     if !image_file_path.exists() {
+        eprintln!("fullscreen.png does not exist, cannot cut image");
         return;
     }
     let mut img = match image::open(&image_file_path) {
@@ -38,13 +43,27 @@ pub fn cut_image(left: u32, top: u32, width: u32, height: u32) {
             return;
         }
     };
+    // Clamp the DPI-scaled selection to the image bounds: sub_image panics
+    // on out-of-range rectangles (#1872).
+    let (img_width, img_height) = img.dimensions();
+    if left >= img_width || top >= img_height {
+        eprintln!(
+            "cut rectangle ({}, {}) is outside the screenshot ({}x{})",
+            left, top, img_width, img_height
+        );
+        return;
+    }
+    let width = width.min(img_width - left);
+    let height = height.min(img_height - top);
+    if width == 0 || height == 0 {
+        eprintln!("cut rectangle is empty");
+        return;
+    }
     let img2 = img.sub_image(left, top, width, height);
-    let new_image_file_path = image_dir.join("cut.png");
     match img2.to_image().save(&new_image_file_path) {
         Ok(_) => {}
         Err(e) => {
             eprintln!("{:?}", e.to_string());
-            return;
         }
     }
 }
@@ -62,54 +81,69 @@ pub fn screenshot(x: i32, y: i32) {
             return;
         }
     };
-    for screen in screens {
-        let info = screen.display_info;
-        if info.x == x && info.y == y {
-            let app_handle = match crate::APP_HANDLE.get() {
-                Some(handle) => handle,
+    // Silently doing nothing when no display matches leaves a stale
+    // fullscreen.png in place and OCR appears to randomly fail (#1872), so
+    // fall back to the first screen instead.
+    let screen = match screens
+        .iter()
+        .find(|screen| screen.display_info.x == x && screen.display_info.y == y)
+    {
+        Some(screen) => screen,
+        None => {
+            eprintln!("No screen found at ({}, {}), falling back to the first screen", x, y);
+            match screens.first() {
+                Some(screen) => screen,
                 None => {
-                    eprintln!("APP_HANDLE not initialized");
-                    return;
-                }
-            };
-            let image_dir = match app_handle
-                .path()
-                .resolve("ocr_images", BaseDirectory::AppCache)
-            {
-                Ok(dir) => dir,
-                Err(e) => {
-                    eprintln!("Failed to resolve ocr_images directory: {:?}", e);
-                    return;
-                }
-            };
-            if !image_dir.exists() {
-                if let Err(e) = std::fs::create_dir_all(&image_dir) {
-                    eprintln!("Failed to create ocr_images directory: {:?}", e);
+                    eprintln!("No screens available");
                     return;
                 }
             }
-            let image_file_path = image_dir.join("fullscreen.png");
-            let image = match screen.capture() {
-                Ok(img) => img,
-                Err(e) => {
-                    eprintln!("Failed to capture screen: {:?}", e);
-                    return;
-                }
-            };
-            let buffer = match image.to_png(Compression::Fast) {
-                Ok(buf) => buf,
-                Err(e) => {
-                    eprintln!("Failed to convert image to PNG: {:?}", e);
-                    return;
-                }
-            };
-            debug_println!("image_file_path: {:?}", image_file_path);
-            if let Err(e) = fs::write(&image_file_path, buffer) {
-                eprintln!("Failed to write screenshot file: {:?}", e);
-                return;
-            }
-            break;
         }
+    };
+    let app_handle = match crate::APP_HANDLE.get() {
+        Some(handle) => handle,
+        None => {
+            eprintln!("APP_HANDLE not initialized");
+            return;
+        }
+    };
+    let image_dir = match app_handle
+        .path()
+        .resolve("ocr_images", BaseDirectory::AppCache)
+    {
+        Ok(dir) => dir,
+        Err(e) => {
+            eprintln!("Failed to resolve ocr_images directory: {:?}", e);
+            return;
+        }
+    };
+    if !image_dir.exists() {
+        if let Err(e) = std::fs::create_dir_all(&image_dir) {
+            eprintln!("Failed to create ocr_images directory: {:?}", e);
+            return;
+        }
+    }
+    let image_file_path = image_dir.join("fullscreen.png");
+    // Remove the previous capture so a failure below cannot leave it in
+    // place to be silently reused (#1872).
+    let _ = fs::remove_file(&image_file_path);
+    let image = match screen.capture() {
+        Ok(img) => img,
+        Err(e) => {
+            eprintln!("Failed to capture screen: {:?}", e);
+            return;
+        }
+    };
+    let buffer = match image.to_png(Compression::Fast) {
+        Ok(buf) => buf,
+        Err(e) => {
+            eprintln!("Failed to convert image to PNG: {:?}", e);
+            return;
+        }
+    };
+    debug_println!("image_file_path: {:?}", image_file_path);
+    if let Err(e) = fs::write(&image_file_path, buffer) {
+        eprintln!("Failed to write screenshot file: {:?}", e);
     }
 }
 
@@ -126,56 +160,86 @@ pub fn do_ocr() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[cfg(target_os = "windows")]
-pub fn do_ocr_with_cut_file_path(image_file_path: &Path) {
+fn recognize_cut_file(image_file_path: &Path) -> Result<String, String> {
     use windows::core::HSTRING;
     use windows::Graphics::Imaging::BitmapDecoder;
     use windows::Media::Ocr::OcrEngine;
     use windows::Storage::{FileAccessMode, StorageFile};
 
+    if !image_file_path.exists() {
+        return Err(format!("OCR image not found at {:?}", image_file_path));
+    }
+
     let path = image_file_path.to_string_lossy().replace("\\\\?\\", "");
     debug_println!("ocr image file path: {:?}", path);
 
     let file = StorageFile::GetFileFromPathAsync(&HSTRING::from(path))
-        .unwrap()
+        .map_err(|e| format!("failed to open storage file: {}", e))?
         .get()
-        .unwrap();
+        .map_err(|e| format!("failed to open storage file: {}", e))?;
 
-    let bitmap = BitmapDecoder::CreateWithIdAsync(
-        BitmapDecoder::PngDecoderId().unwrap(),
-        &file.OpenAsync(FileAccessMode::Read).unwrap().get().unwrap(),
-    )
-    .unwrap()
-    .get()
-    .unwrap();
+    let stream = file
+        .OpenAsync(FileAccessMode::Read)
+        .map_err(|e| format!("failed to open stream: {}", e))?
+        .get()
+        .map_err(|e| format!("failed to open stream: {}", e))?;
 
-    let bitmap = bitmap.GetSoftwareBitmapAsync().unwrap().get().unwrap();
+    let decoder_id =
+        BitmapDecoder::PngDecoderId().map_err(|e| format!("failed to get png decoder: {}", e))?;
+    let decoder = BitmapDecoder::CreateWithIdAsync(decoder_id, &stream)
+        .map_err(|e| format!("failed to create decoder: {}", e))?
+        .get()
+        .map_err(|e| format!("failed to create decoder: {}", e))?;
 
-    let engine = OcrEngine::TryCreateFromUserProfileLanguages();
+    let bitmap = decoder
+        .GetSoftwareBitmapAsync()
+        .map_err(|e| format!("failed to decode bitmap: {}", e))?
+        .get()
+        .map_err(|e| format!("failed to decode bitmap: {}", e))?;
 
-    match engine {
-        Ok(engine) => {
-            let result = engine.RecognizeAsync(&bitmap).unwrap().get().unwrap();
-
-            let mut content = String::new();
-            for line in result.Lines().unwrap() {
-                content.push_str(&line.Text().unwrap().to_string_lossy().trim());
-                content.push('\n');
-            }
-
-            debug_println!("ocr content: {:?}", content);
-            crate::utils::send_text(content);
-            remember_active_window();
-            crate::windows::show_translator_window(false, true, true);
+    let engine = OcrEngine::TryCreateFromUserProfileLanguages().map_err(|e| {
+        if e.to_string().contains("0x00000000") {
+            "Language package not installed!\n\nSee: https://learn.microsoft.com/zh-cn/windows/powertoys/text-extractor#supported-languages".to_string()
+        } else {
+            e.to_string()
         }
-        Err(e) => {
-            debug_println!("ocr error: {:?}", e);
-            if e.to_string().contains("0x00000000") {
-                eprintln!("{}", "Language package not installed!\n\nSee: https://learn.microsoft.com/zh-cn/windows/powertoys/text-extractor#supported-languages".to_string());
-            } else {
-                eprintln!("{}", e.to_string());
-            }
+    })?;
+
+    let result = engine
+        .RecognizeAsync(&bitmap)
+        .map_err(|e| format!("failed to recognize: {}", e))?
+        .get()
+        .map_err(|e| format!("failed to recognize: {}", e))?;
+
+    let mut content = String::new();
+    for line in result.Lines().map_err(|e| format!("failed to read lines: {}", e))? {
+        if let Ok(text) = line.Text() {
+            content.push_str(text.to_string_lossy().trim());
+            content.push('\n');
         }
     }
+    Ok(content)
+}
+
+#[cfg(target_os = "windows")]
+pub fn do_ocr_with_cut_file_path(image_file_path: &Path) {
+    // Always surface the translator window: dying silently here (the old
+    // unwrap chain panicked on any failure) left users with no feedback at
+    // all when recognition failed (#1872). An empty input at least shows
+    // that OCR ran and found nothing.
+    let content = match recognize_cut_file(image_file_path) {
+        Ok(content) => {
+            debug_println!("ocr content: {:?}", content);
+            content
+        }
+        Err(e) => {
+            eprintln!("OCR failed: {}", e);
+            String::new()
+        }
+    };
+    crate::utils::send_text(content);
+    remember_active_window();
+    crate::windows::show_translator_window(false, true, true);
 }
 
 #[cfg(target_os = "macos")]
