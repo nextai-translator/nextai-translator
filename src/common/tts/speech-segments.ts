@@ -92,6 +92,42 @@ export function getSpeechWordStarts(text: string, lang: LangCode): number[] {
     })
 }
 
+export interface SpokenWordMatch {
+    index?: number
+    next: number
+}
+
+function normalizeSpokenText(value: string): string {
+    return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')
+}
+
+// Aligns a spoken-word boundary reported by a TTS service to the local word
+// segmentation: service tokenization can differ from ours (punctuation
+// handling, CJK phrases spanning several local words), so match within a
+// small window ahead and fall back to positional order so the cursor always
+// advances.
+export function matchSpokenWord(words: string[], cursor: number, spoken: string): SpokenWordMatch {
+    const target = normalizeSpokenText(spoken)
+    if (!target || cursor >= words.length) {
+        return { next: cursor }
+    }
+    const windowEnd = Math.min(words.length, cursor + 4)
+    for (let start = cursor; start < windowEnd; start++) {
+        let combined = ''
+        for (let end = start; end < words.length && combined.length < target.length; end++) {
+            combined += normalizeSpokenText(words[end])
+            if (combined === target) {
+                return { index: start, next: end + 1 }
+            }
+        }
+        const word = normalizeSpokenText(words[start])
+        if (word && (target.startsWith(word) || word.startsWith(target))) {
+            return { index: start, next: start + 1 }
+        }
+    }
+    return { index: cursor, next: cursor + 1 }
+}
+
 export function findSpeechWordIndex(text: string, lang: LangCode, charIndex: number): number | undefined {
     const parts = segmentSpeechText(text, lang)
     const containing = parts.find((part) => part.isWordLike && charIndex >= part.start && charIndex < part.end)

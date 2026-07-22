@@ -22,7 +22,7 @@ import { SpeakerIcon } from './SpeakerIcon'
 import { SpinnerIcon } from './SpinnerIcon'
 
 const ENGLISH_WORD_PATTERN = /[A-Za-z]+(?:[’'][A-Za-z]+)*(?:-[A-Za-z]+)*/g
-const CARD_WIDTH = 344
+const CARD_WIDTH = 320
 const VIEWPORT_PADDING = 12
 
 interface ActiveWord {
@@ -42,16 +42,18 @@ const WordHoverContext = createContext<WordHoverContextValue | null>(null)
 
 const useStyles = createUseStyles({
     'word': (props: IThemedStyleProps) => ({
-        'borderRadius': '4px',
+        'borderRadius': '3px',
         'cursor': 'pointer',
         'outline': 'none',
         'boxDecorationBreak': 'clone',
         'WebkitBoxDecorationBreak': 'clone',
-        'transition': 'color 140ms ease, background 140ms ease, box-shadow 140ms ease',
+        'textDecoration': 'underline dotted transparent',
+        'textDecorationThickness': '1px',
+        'textUnderlineOffset': '3px',
+        'transition': 'background 140ms ease, text-decoration-color 140ms ease',
         '&:hover, &:focus-visible': {
-            color: props.theme.colors.accent,
-            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.075)' : 'rgba(0,0,0,0.045)',
-            boxShadow: `0 0 0 2px ${props.themeType === 'dark' ? 'rgba(255,255,255,0.075)' : 'rgba(0,0,0,0.045)'}`,
+            background: props.themeType === 'dark' ? 'rgba(76, 132, 255, 0.16)' : 'rgba(39, 110, 241, 0.09)',
+            textDecorationColor: props.themeType === 'dark' ? 'rgba(160, 191, 248, 0.7)' : 'rgba(39, 110, 241, 0.55)',
         },
     }),
     'card': (props: IThemedStyleProps) => ({
@@ -60,17 +62,17 @@ const useStyles = createUseStyles({
         'boxSizing': 'border-box',
         'width': `${CARD_WIDTH}px`,
         'maxWidth': `calc(100vw - ${VIEWPORT_PADDING * 2}px)`,
-        'padding': '16px',
-        'borderRadius': '16px',
+        'padding': '14px',
+        'borderRadius': '12px',
         'color': props.theme.colors.contentPrimary,
         'background': props.themeType === 'dark' ? 'rgba(36, 36, 38, 0.96)' : 'rgba(255, 255, 255, 0.97)',
-        'border': `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.11)' : 'rgba(15,23,42,0.09)'}`,
+        'border': `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.09)' : 'rgba(15,23,42,0.08)'}`,
         'boxShadow':
             props.themeType === 'dark'
-                ? '0 20px 55px rgba(0,0,0,0.42), 0 2px 10px rgba(0,0,0,0.22)'
-                : '0 20px 55px rgba(15,23,42,0.16), 0 2px 10px rgba(15,23,42,0.07)',
-        'backdropFilter': 'blur(22px) saturate(1.15)',
-        'WebkitBackdropFilter': 'blur(22px) saturate(1.15)',
+                ? '0 8px 24px rgba(0,0,0,0.32), 0 1px 3px rgba(0,0,0,0.2)'
+                : '0 8px 24px rgba(15,23,42,0.12), 0 1px 3px rgba(15,23,42,0.06)',
+        'backdropFilter': 'blur(20px)',
+        'WebkitBackdropFilter': 'blur(20px)',
         'transformOrigin': '50% 0',
         'animation': '$cardIn 180ms cubic-bezier(0.22, 1, 0.36, 1)',
         'fontSize': '13px',
@@ -87,16 +89,15 @@ const useStyles = createUseStyles({
         alignItems: 'center',
         gap: '9px',
         minWidth: 0,
-        marginBottom: '13px',
+        marginBottom: '10px',
     },
     'wordTitle': {
         overflow: 'hidden',
         color: 'inherit',
-        fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif',
-        fontSize: '23px',
-        fontWeight: 650,
-        lineHeight: 1.1,
-        letterSpacing: '-0.02em',
+        fontSize: '17px',
+        fontWeight: 600,
+        lineHeight: 1.2,
+        letterSpacing: '-0.01em',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
     },
@@ -112,23 +113,19 @@ const useStyles = createUseStyles({
         'flex': '0 0 auto',
         'alignItems': 'center',
         'justifyContent': 'center',
-        'width': '30px',
-        'height': '30px',
+        'width': '28px',
+        'height': '28px',
         'marginLeft': 'auto',
         'padding': 0,
         'border': 'none',
-        'borderRadius': '10px',
+        'borderRadius': '8px',
         'color': props.theme.colors.contentSecondary,
-        'background': props.themeType === 'dark' ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.055)',
+        'background': 'none',
         'cursor': 'pointer',
-        'transition': 'transform 140ms ease, background 140ms ease, color 140ms ease',
+        'transition': 'background 140ms ease, color 140ms ease',
         '&:hover': {
             color: props.theme.colors.contentPrimary,
-            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.09)',
-            transform: 'translateY(-1px)',
-        },
-        '&:active': {
-            transform: 'scale(0.94)',
+            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)',
         },
     }),
     'meaning': (props: IThemedStyleProps) => ({
@@ -140,54 +137,36 @@ const useStyles = createUseStyles({
     }),
     'partOfSpeech': (props: IThemedStyleProps) => ({
         marginRight: '6px',
-        color: props.theme.colors.accent,
-        fontSize: '10px',
-        fontWeight: 700,
-        letterSpacing: '0.055em',
-        textTransform: 'uppercase',
+        color: props.themeType === 'dark' ? props.theme.colors.accent200 : props.theme.colors.accent,
+        fontSize: '11px',
+        fontStyle: 'italic',
+        fontWeight: 500,
     }),
     'definition': {
         color: 'inherit',
     },
     'example': (props: IThemedStyleProps) => ({
-        'position': 'relative',
-        'margin': '7px 0 0',
-        'paddingLeft': '12px',
-        'color': props.theme.colors.contentSecondary,
-        'fontFamily': 'ui-serif, Georgia, Cambria, "Times New Roman", serif',
-        'fontStyle': 'italic',
-        '&::before': {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            color: props.theme.colors.contentTertiary,
-            content: '"“"',
-        },
+        margin: '6px 0 0',
+        color: props.theme.colors.contentTertiary,
+        fontSize: '12px',
+        fontStyle: 'italic',
     }),
     'footerButton': (props: IThemedStyleProps) => ({
-        'display': 'flex',
+        'display': 'inline-flex',
         'alignItems': 'center',
-        'width': '100%',
-        'marginTop': '14px',
-        'padding': '10px 11px',
+        'gap': '4px',
+        'marginTop': '12px',
+        'padding': 0,
         'border': 'none',
-        'borderRadius': '11px',
-        'color': props.theme.colors.contentPrimary,
-        'background': props.themeType === 'dark' ? 'rgba(255,255,255,0.075)' : 'rgba(15,23,42,0.055)',
+        'background': 'none',
+        'color': props.themeType === 'dark' ? props.theme.colors.accent200 : props.theme.colors.accent,
         'cursor': 'pointer',
+        'fontFamily': 'inherit',
         'fontSize': '12px',
-        'fontWeight': 600,
-        'textAlign': 'left',
-        'transition': 'transform 140ms ease, background 140ms ease',
+        'fontWeight': 500,
+        'textUnderlineOffset': '3px',
         '&:hover': {
-            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.09)',
-            transform: 'translateY(-1px)',
-        },
-        '&:active': {
-            transform: 'scale(0.985)',
-        },
-        '& svg': {
-            marginLeft: 'auto',
+            textDecoration: 'underline',
         },
     }),
     'sourceLink': (props: IThemedStyleProps) => ({
@@ -395,7 +374,7 @@ export function WordHoverProvider({ children, enabled = true, onOpenDetails }: W
             )}
             <button type='button' className={styles.footerButton} onClick={() => openDetails(activeWord.word)}>
                 {t('Open full definition')}
-                <RxArrowRight size={14} />
+                <RxArrowRight size={13} />
             </button>
             {preview?.sourceUrl ? (
                 <a

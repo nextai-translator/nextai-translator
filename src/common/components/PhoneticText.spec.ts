@@ -36,6 +36,14 @@ describe('phonetic text parsing', () => {
         ])
     })
 
+    it('adds speech to a numbered example without punctuation after the number', () => {
+        expect(parsePhoneticSegments('1 How are you?（你好吗？）')).toEqual([
+            { kind: 'text', text: '1 ' },
+            { kind: 'example', text: 'How are you?', speechText: 'How are you?' },
+            { kind: 'text', text: '（你好吗？）' },
+        ])
+    })
+
     it('does not treat a numbered definition as an example', () => {
         expect(parsePhoneticSegments('1. an expression of greeting')).toEqual([
             { kind: 'text', text: '1. an expression of greeting' },

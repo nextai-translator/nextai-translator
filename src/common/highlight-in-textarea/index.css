@@ -62,7 +62,11 @@
     background-color: rgba(181, 73, 91, 0.5) !important;
 }
 
-.yetone-hit-content mark.yetone-hit-speaking,
+.yetone-hit-content mark.yetone-hit-speaking {
+    border-radius: 3px;
+    background-color: rgba(39, 110, 241, 0.14) !important;
+}
+
 .yetone-dark .yetone-hit-content mark.yetone-hit-speaking {
-    background-color: rgba(255, 193, 7, 0.28) !important;
+    background-color: rgba(76, 132, 255, 0.3) !important;
 }

@@ -169,6 +169,27 @@ async function synthesize(text: string, lang: LangCode, rate: number): Promise<s
     return invoke<string>('synthesize_local_tts', { text, lang, rate })
 }
 
+const SILENCE_THRESHOLD = 0.01
+
+// Synthesized chunks carry leading/trailing silence; distributing word
+// timings over the raw duration makes the highlight drift behind the voice,
+// so estimate over the audible window instead.
+function getAudibleWindow(buffer: AudioBuffer): { start: number; span: number } {
+    const data = buffer.getChannelData(0)
+    let startIndex = 0
+    while (startIndex < data.length && Math.abs(data[startIndex]) < SILENCE_THRESHOLD) {
+        startIndex++
+    }
+    let endIndex = data.length
+    while (endIndex > startIndex && Math.abs(data[endIndex - 1]) < SILENCE_THRESHOLD) {
+        endIndex--
+    }
+    return {
+        start: startIndex / buffer.sampleRate,
+        span: Math.max(0.05, (endIndex - startIndex) / buffer.sampleRate),
+    }
+}
+
 export async function speak({
     text,
     lang,
@@ -313,8 +334,12 @@ export async function speak({
             source.start(startAt)
             nextStart = startAt + buffer.duration
             if (onWordBoundary) {
+                const audible = getAudibleWindow(buffer)
                 for (const [wordIndex, fraction] of getSpeechWordStarts(chunks[index], lang).entries()) {
-                    const delay = Math.max(0, (startAt + buffer.duration * fraction - context.currentTime) * 1000)
+                    const delay = Math.max(
+                        0,
+                        (startAt + audible.start + audible.span * fraction - context.currentTime) * 1000
+                    )
                     boundaryTimers.push(
                         window.setTimeout(() => {
                             if (!stopped) {
