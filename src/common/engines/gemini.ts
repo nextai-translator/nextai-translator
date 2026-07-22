@@ -87,11 +87,11 @@ export class Gemini extends AbstractEngine {
         const isPro = /-pro($|[-:])/i.test(model)
         const thinkingConfig = settings.thinkingEnabled
             ? isGen3
-              ? { thinkingLevel: 'medium' }  // balanced thinking
-              : { thinkingBudget: -1 }       // dynamic thinking
+                ? { thinkingLevel: 'medium' } // balanced thinking
+                : { thinkingBudget: -1 } // dynamic thinking
             : isGen3
-              ? { thinkingLevel: isPro ? 'low' : 'minimal' }
-              : { thinkingBudget: isPro ? -1 : 0 }
+            ? { thinkingLevel: isPro ? 'low' : 'minimal' }
+            : { thinkingBudget: isPro ? -1 : 0 }
 
         const body = {
             contents: [
