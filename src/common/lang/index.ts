@@ -99,6 +99,31 @@ export function getLangName(langCode: string): string {
     return langName || langMap.get(langCode) || langCode
 }
 
+/**
+ * Target language when the UI follows "default target language" for translate mode.
+ * Avoids source === target (e.g. Japanese input with Japanese as default → Japanese output).
+ * Chinese variants still map to English. If source equals default target, uses
+ * {@link writingTargetLanguage} when it differs from source, otherwise English.
+ */
+export function pickTranslateAutoTargetLang(
+    sourceLang: LangCode,
+    defaultTargetLanguage: LangCode | string | undefined,
+    writingTargetLanguage: LangCode | string | undefined
+): LangCode {
+    if (sourceLang === 'zh-Hans' || sourceLang === 'zh-Hant') {
+        return 'en'
+    }
+    const defaultTarget = (defaultTargetLanguage as LangCode | undefined) ?? 'en'
+    if (sourceLang !== defaultTarget) {
+        return defaultTarget
+    }
+    const writing = (writingTargetLanguage as LangCode | undefined) ?? 'en'
+    if (writing !== sourceLang) {
+        return writing
+    }
+    return 'en'
+}
+
 export async function googleDetectLang(text: string): Promise<LangCode> {
     const langMap: Record<string, LangCode> = {
         'zh-CN': 'zh-Hans',
