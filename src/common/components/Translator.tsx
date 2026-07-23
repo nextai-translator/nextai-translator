@@ -155,46 +155,37 @@ const useStyles = createUseStyles({
         gap: '8px',
     },
     'updateButton': (props: IThemedStyleProps) => ({
-        'height': '27px',
-        'padding': '0 10px',
-        'border': `1px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
-        'borderRadius': '9px',
-        'background': props.themeType === 'dark' ? 'rgba(255,255,255,0.065)' : 'rgba(0,0,0,0.045)',
-        'boxShadow':
-            props.themeType === 'dark'
-                ? 'inset 0 1px 0 rgba(255,255,255,0.055), 0 1px 3px rgba(0,0,0,0.16)'
-                : 'inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 3px rgba(0,0,0,0.08)',
-        'color': props.theme.colors.contentPrimary,
+        'height': '24px',
+        'padding': '0 11px',
+        'border': 'none',
+        'borderRadius': '999px',
+        'background': props.themeType === 'dark' ? 'rgba(76, 132, 255, 0.16)' : 'rgba(39, 110, 241, 0.09)',
+        'color': props.themeType === 'dark' ? props.theme.colors.accent200 : props.theme.colors.accent,
         'cursor': 'pointer',
         'display': 'flex',
         'alignItems': 'center',
         'gap': '5px',
         'fontFamily': 'inherit',
         'fontSize': '11px',
-        'fontWeight': 600,
+        'fontWeight': 500,
         'lineHeight': 1,
         'whiteSpace': 'nowrap',
-        'transition': 'transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease',
+        'transition': 'background 160ms ease',
         '&:hover': {
-            transform: 'translateY(-1px)',
-            borderColor: props.themeType === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-            background: props.themeType === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.075)',
-            boxShadow:
-                props.themeType === 'dark'
-                    ? 'inset 0 1px 0 rgba(255,255,255,0.07), 0 3px 8px rgba(0,0,0,0.2)'
-                    : 'inset 0 1px 0 rgba(255,255,255,0.9), 0 3px 8px rgba(0,0,0,0.11)',
+            background: props.themeType === 'dark' ? 'rgba(76, 132, 255, 0.24)' : 'rgba(39, 110, 241, 0.14)',
         },
         '&:active': {
-            transform: 'translateY(0) scale(0.98)',
+            background: props.themeType === 'dark' ? 'rgba(76, 132, 255, 0.3)' : 'rgba(39, 110, 241, 0.18)',
         },
         '&:focus-visible': {
-            outline: `2px solid ${props.themeType === 'dark' ? 'rgba(255,255,255,0.46)' : 'rgba(0,0,0,0.42)'}`,
+            outline: `2px solid ${props.theme.colors.accent}`,
             outlineOffset: '2px',
         },
     }),
     'updateVersion': {
-        opacity: 0.68,
-        fontWeight: 500,
+        opacity: 0.65,
+        fontWeight: 400,
+        fontVariantNumeric: 'tabular-nums',
     },
     'poweredBy': (props: IThemedStyleProps) => ({
         fontSize: props.theme.sizing.scale300,
@@ -1590,8 +1581,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     return
                 }
 
-                const worker = createWorker()
-
                 const binaryFile = await readFile(filePath)
 
                 const file = new Blob([binaryFile.buffer], {
@@ -1612,20 +1601,25 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 })
                 setIsOCRProcessing(true)
 
-                await (await worker).loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
-                await (await worker).initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
+                // Create the worker only after validation and always
+                // terminate it: leaked Tesseract workers keep pumping
+                // messages and pile up listeners, dragging the whole UI.
+                const worker = await createWorker()
+                try {
+                    await worker.loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
+                    await worker.initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
 
-                const { data } = await (await worker).recognize(file)
+                    const { data } = await worker.recognize(file)
 
-                if (activateAction) {
-                    const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
+                    if (activateAction) {
+                        const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
 
-                    setTranslateDeps(newTranslateDeps)
+                        setTranslateDeps(newTranslateDeps)
+                    }
+                } finally {
+                    setIsOCRProcessing(false)
+                    await worker.terminate()
                 }
-
-                setIsOCRProcessing(false)
-
-                await (await worker).terminate()
             })
         })()
 
@@ -1635,16 +1629,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     }, [activateAction, getTranslateDeps])
 
     const onDrop = async (acceptedFiles: File[]) => {
-        const worker = createWorker()
-
-        setTranslateDeps((v) => {
-            return {
-                ...v,
-                text: '',
-            }
-        })
-        setIsOCRProcessing(true)
-
         if (acceptedFiles.length !== 1) {
             alert('Only one file can be uploaded at a time.')
             return
@@ -1662,19 +1646,32 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             return
         }
 
-        await (await worker).loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
-        await (await worker).initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
+        setTranslateDeps((v) => {
+            return {
+                ...v,
+                text: '',
+            }
+        })
+        setIsOCRProcessing(true)
 
-        const { data } = await (await worker).recognize(file)
+        // Create the worker only after validation and always terminate it:
+        // leaked Tesseract workers keep pumping messages and pile up
+        // listeners, dragging the whole UI.
+        const worker = await createWorker()
+        try {
+            await worker.loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
+            await worker.initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
 
-        if (activateAction) {
-            const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
-            setTranslateDeps(newTranslateDeps)
+            const { data } = await worker.recognize(file)
+
+            if (activateAction) {
+                const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
+                setTranslateDeps(newTranslateDeps)
+            }
+        } finally {
+            setIsOCRProcessing(false)
+            await worker.terminate()
         }
-
-        setIsOCRProcessing(false)
-
-        await (await worker).terminate()
     }
 
     const onCsvExport = async () => {
@@ -2034,7 +2031,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                 }}
                             >
                                 <Tooltip content='Exchange' placement='top'>
-                                    <div>
+                                    <div style={{ display: 'flex' }}>
                                         <TbArrowsExchange />
                                     </div>
                                 </Tooltip>
@@ -3026,7 +3023,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                             await commands.showUpdaterWindow()
                                         }}
                                     >
-                                        <MdBrowserUpdated size={13} />
+                                        <MdBrowserUpdated size={12} />
                                         <span>{t('Update')}</span>
                                         <span className={styles.updateVersion}>v{availableUpdate.version}</span>
                                     </button>

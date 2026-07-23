@@ -28,7 +28,7 @@ pub const HISTORY_WIN_NAME: &str = "history";
 pub const INLINE_LOOKUP_WIN_NAME: &str = "inline_lookup";
 pub const QUICK_TRANSLATOR_WIN_NAME: &str = "quick_translator";
 pub const WRITING_INDICATOR_WIN_NAME: &str = "writing_indicator";
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub const SCREENSHOT_WIN_NAME: &str = "screenshot";
 
 fn get_dummy_window() -> tauri::WebviewWindow {
@@ -865,13 +865,19 @@ pub async fn show_inline_lookup_window_command() {
     show_inline_lookup_window(false, true, true);
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub fn show_screenshot_window() {
+    // A leftover window from a failed run has already consumed its one-shot
+    // capture flow; reusing it silently does nothing (#1872), so always
+    // start from a fresh window.
+    let handle = APP_HANDLE.get().unwrap();
+    if let Some(window) = handle.get_webview_window(SCREENSHOT_WIN_NAME) {
+        let _ = window.destroy();
+    }
     let _ = get_screenshot_window();
-    // window.show().unwrap();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub fn get_screenshot_window() -> tauri::WebviewWindow {
     let handle = APP_HANDLE.get().unwrap();
     let current_monitor = get_current_monitor();
@@ -900,19 +906,29 @@ pub fn get_screenshot_window() -> tauri::WebviewWindow {
         }
     };
 
-    window.set_resizable(false).unwrap();
-    window.set_skip_taskbar(true).unwrap();
+    if let Err(e) = window.set_resizable(false) {
+        eprintln!("screenshot window set_resizable failed: {e:?}");
+    }
+    if let Err(e) = window.set_skip_taskbar(true) {
+        eprintln!("screenshot window set_skip_taskbar failed: {e:?}");
+    }
     #[cfg(target_os = "macos")]
     {
         let size = current_monitor.size();
-        window.set_decorations(false).unwrap();
-        window.set_size(*size).unwrap();
+        if let Err(e) = window.set_decorations(false) {
+            eprintln!("screenshot window set_decorations failed: {e:?}");
+        }
+        if let Err(e) = window.set_size(*size) {
+            eprintln!("screenshot window set_size failed: {e:?}");
+        }
     }
 
     #[cfg(not(target_os = "macos"))]
     window.set_fullscreen(true).unwrap();
 
-    window.set_always_on_top(true).unwrap();
+    if let Err(e) = window.set_always_on_top(true) {
+        eprintln!("screenshot window set_always_on_top failed: {e:?}");
+    }
 
     window
 }

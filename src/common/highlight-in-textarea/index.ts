@@ -155,13 +155,13 @@ export class HighlightInTextarea {
     }
 
     public handleInput() {
-        this.syncTypography()
         if (!this.hasActiveHighlight()) {
             if (this.highlights) {
                 this.highlights.innerHTML = ''
             }
             return
         }
+        this.syncTypography()
         const input = this.el?.value
         const ranges = this.getRanges(input, this.highlight?.highlight ?? null)
         const unstaggeredRanges = this.removeStaggeredRanges(ranges)

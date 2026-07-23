@@ -1,7 +1,7 @@
 import { langCode2TTSLang } from '.'
 import { SpeakOptions } from './types'
 import { EdgeTTS, listVoices } from 'edge-tts-universal'
-import { getSpeechWordStarts } from './speech-segments'
+import { getSpeechWordStarts, matchSpokenWord, segmentSpeechText } from './speech-segments'
 
 // https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/e6faf6b7fc1febb45993b940617719e8ed1358b2/src/sdk/SpeechSynthesizer.ts#L216
 const languageToDefaultVoice: { [key: string]: string } = {
@@ -162,8 +162,10 @@ export async function speak({
     // volume: 100 = +0%, 120 = +20%, 80 = -20%
     const volumeStr = volume >= 100 ? `+${Math.round(volume - 100)}%` : `-${Math.round(100 - volume)}%`
 
+    let contextForCleanup: AudioContext | null = null
     try {
         const audioContext = new AudioContext()
+        contextForCleanup = audioContext
         let audioBufferSource: AudioBufferSourceNode | null = null
         let stopped = false
         const boundaryTimers: number[] = []
@@ -232,7 +234,7 @@ export async function speak({
         onStartSpeaking?.()
         audioBufferSource.start()
         if (onWordBoundary) {
-            for (const [wordIndex, fraction] of getSpeechWordStarts(text, lang_ ?? 'en').entries()) {
+            const schedule = (wordIndex: number, delayMs: number) => {
                 boundaryTimers.push(
                     window.setTimeout(
                         () => {
@@ -240,9 +242,29 @@ export async function speak({
                                 onWordBoundary(wordIndex)
                             }
                         },
-                        buffer.duration * fraction * 1000
+                        Math.max(0, delayMs)
                     )
                 )
+            }
+            const boundaries = result.subtitle ?? []
+            if (boundaries.length > 0) {
+                // The service reports exact per-word timings (100 ns units);
+                // align its tokens to our segmentation instead of estimating.
+                const words = segmentSpeechText(text, lang_ ?? 'en')
+                    .filter((part) => part.isWordLike)
+                    .map((part) => part.text)
+                let cursor = 0
+                for (const boundary of boundaries) {
+                    const match = matchSpokenWord(words, cursor, boundary.text)
+                    cursor = match.next
+                    if (match.index !== undefined) {
+                        schedule(match.index, boundary.offset / 10000)
+                    }
+                }
+            } else {
+                for (const [wordIndex, fraction] of getSpeechWordStarts(text, lang_ ?? 'en').entries()) {
+                    schedule(wordIndex, buffer.duration * fraction * 1000)
+                }
             }
         }
 
@@ -255,6 +277,10 @@ export async function speak({
         })
     } catch (error) {
         console.error('Edge TTS error:', error)
+        // Close the context on failure: a leaked running AudioContext keeps
+        // the page marked as audible, which exempts all its timers from
+        // throttling and burns CPU forever.
+        contextForCleanup?.close().catch(() => undefined)
         onFinish?.()
         throw error
     }

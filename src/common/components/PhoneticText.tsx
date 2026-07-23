@@ -1,5 +1,7 @@
-import { Fragment, ReactNode, useState } from 'react'
+import { CSSProperties, Fragment, ReactNode, useState } from 'react'
 import { LangCode } from '../lang'
+import { BaseThemeType } from '../types'
+import { useTheme } from '../hooks/useTheme'
 import { TTSProvider } from '../tts/types'
 import { SpeakerIcon } from './SpeakerIcon'
 import { segmentSpeechText } from '../tts/speech-segments'
@@ -10,7 +12,7 @@ export type PhoneticSegment =
 
 const PHONETIC_PATTERN = /·\s*(\/\s*([^/\n]{1,120}?)\s*\/)/g
 const EXAMPLE_HEADER_PATTERN = /(?:例句|示例|examples?|example sentences?)\s*[：:]\s*/i
-const NUMBERED_EXAMPLE_PATTERN = /^\s*(?:[-*+]\s*)?\d+[.)、]\s*/
+const NUMBERED_EXAMPLE_PATTERN = /^\s*(?:[-*+]\s*)?\d+(?:[.)、]\s*|\s+)/
 const TRAILING_TRANSLATION_PATTERN = /\s*([（(][^()（）\n]{1,500}[)）])\s*$/
 
 function cleanSpeechCandidate(value: string): string {
@@ -132,14 +134,22 @@ interface PhoneticTextProps {
     renderText?: (text: string) => ReactNode
 }
 
-const activeWordStyle = {
-    backgroundColor: 'rgba(255, 193, 7, 0.28)',
-    borderRadius: 2,
+const readingWordBaseStyle: CSSProperties = {
+    backgroundColor: 'transparent',
+    borderRadius: 3,
     boxDecorationBreak: 'clone' as const,
     WebkitBoxDecorationBreak: 'clone' as const,
+    transition: 'background-color 160ms ease',
 }
 
-function renderHighlightedRange(text: string, offset: number, range?: [number, number]) {
+function readingWordStyle(themeType: BaseThemeType): CSSProperties {
+    return {
+        ...readingWordBaseStyle,
+        backgroundColor: themeType === 'dark' ? 'rgba(76, 132, 255, 0.3)' : 'rgba(39, 110, 241, 0.14)',
+    }
+}
+
+function renderHighlightedRange(text: string, offset: number, themeType: BaseThemeType, range?: [number, number]) {
     if (!range) {
         return text
     }
@@ -151,7 +161,7 @@ function renderHighlightedRange(text: string, offset: number, range?: [number, n
     return (
         <>
             {text.slice(0, start)}
-            <span style={activeWordStyle}>{text.slice(start, end)}</span>
+            <span style={readingWordStyle(themeType)}>{text.slice(start, end)}</span>
             {text.slice(end)}
         </>
     )
@@ -168,6 +178,7 @@ export function PhoneticText({
     volume,
     renderText,
 }: PhoneticTextProps) {
+    const { themeType } = useTheme()
     const segments = parsePhoneticSegments(text, fallbackText)
     const [activeWord, setActiveWord] = useState<{ segmentIndex: number; wordIndex: number }>()
     let segmentOffset = 0
@@ -180,7 +191,7 @@ export function PhoneticText({
                     return (
                         <Fragment key={index}>
                             {highlightRange
-                                ? renderHighlightedRange(segment.text, currentOffset, highlightRange)
+                                ? renderHighlightedRange(segment.text, currentOffset, themeType, highlightRange)
                                 : renderText
                                 ? renderText(segment.text)
                                 : segment.text}
@@ -200,7 +211,7 @@ export function PhoneticText({
                     >
                         <span>
                             {highlightRange
-                                ? renderHighlightedRange(segment.text, currentOffset, highlightRange)
+                                ? renderHighlightedRange(segment.text, currentOffset, themeType, highlightRange)
                                 : segment.kind === 'example'
                                 ? segmentSpeechText(segment.text, lang).map((part, partIndex) => (
                                       <span
@@ -208,11 +219,11 @@ export function PhoneticText({
                                           style={
                                               activeWord?.segmentIndex === index &&
                                               activeWord.wordIndex === part.wordIndex
-                                                  ? activeWordStyle
-                                                  : undefined
+                                                  ? readingWordStyle(themeType)
+                                                  : readingWordBaseStyle
                                           }
                                       >
-                                          {part.text}
+                                          {renderText ? renderText(part.text) : part.text}
                                       </span>
                                   ))
                                 : segment.text}
