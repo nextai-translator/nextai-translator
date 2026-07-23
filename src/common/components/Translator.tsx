@@ -1581,8 +1581,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     return
                 }
 
-                const worker = createWorker()
-
                 const binaryFile = await readFile(filePath)
 
                 const file = new Blob([binaryFile.buffer], {
@@ -1603,20 +1601,25 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 })
                 setIsOCRProcessing(true)
 
-                await (await worker).loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
-                await (await worker).initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
+                // Create the worker only after validation and always
+                // terminate it: leaked Tesseract workers keep pumping
+                // messages and pile up listeners, dragging the whole UI.
+                const worker = await createWorker()
+                try {
+                    await worker.loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
+                    await worker.initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
 
-                const { data } = await (await worker).recognize(file)
+                    const { data } = await worker.recognize(file)
 
-                if (activateAction) {
-                    const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
+                    if (activateAction) {
+                        const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
 
-                    setTranslateDeps(newTranslateDeps)
+                        setTranslateDeps(newTranslateDeps)
+                    }
+                } finally {
+                    setIsOCRProcessing(false)
+                    await worker.terminate()
                 }
-
-                setIsOCRProcessing(false)
-
-                await (await worker).terminate()
             })
         })()
 
@@ -1626,16 +1629,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     }, [activateAction, getTranslateDeps])
 
     const onDrop = async (acceptedFiles: File[]) => {
-        const worker = createWorker()
-
-        setTranslateDeps((v) => {
-            return {
-                ...v,
-                text: '',
-            }
-        })
-        setIsOCRProcessing(true)
-
         if (acceptedFiles.length !== 1) {
             alert('Only one file can be uploaded at a time.')
             return
@@ -1653,19 +1646,32 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             return
         }
 
-        await (await worker).loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
-        await (await worker).initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
+        setTranslateDeps((v) => {
+            return {
+                ...v,
+                text: '',
+            }
+        })
+        setIsOCRProcessing(true)
 
-        const { data } = await (await worker).recognize(file)
+        // Create the worker only after validation and always terminate it:
+        // leaked Tesseract workers keep pumping messages and pile up
+        // listeners, dragging the whole UI.
+        const worker = await createWorker()
+        try {
+            await worker.loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
+            await worker.initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
 
-        if (activateAction) {
-            const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
-            setTranslateDeps(newTranslateDeps)
+            const { data } = await worker.recognize(file)
+
+            if (activateAction) {
+                const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
+                setTranslateDeps(newTranslateDeps)
+            }
+        } finally {
+            setIsOCRProcessing(false)
+            await worker.terminate()
         }
-
-        setIsOCRProcessing(false)
-
-        await (await worker).terminate()
     }
 
     const onCsvExport = async () => {

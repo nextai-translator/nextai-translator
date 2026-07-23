@@ -162,8 +162,10 @@ export async function speak({
     // volume: 100 = +0%, 120 = +20%, 80 = -20%
     const volumeStr = volume >= 100 ? `+${Math.round(volume - 100)}%` : `-${Math.round(100 - volume)}%`
 
+    let contextForCleanup: AudioContext | null = null
     try {
         const audioContext = new AudioContext()
+        contextForCleanup = audioContext
         let audioBufferSource: AudioBufferSourceNode | null = null
         let stopped = false
         const boundaryTimers: number[] = []
@@ -275,6 +277,10 @@ export async function speak({
         })
     } catch (error) {
         console.error('Edge TTS error:', error)
+        // Close the context on failure: a leaked running AudioContext keeps
+        // the page marked as audible, which exempts all its timers from
+        // throttling and burns CPU forever.
+        contextForCleanup?.close().catch(() => undefined)
         onFinish?.()
         throw error
     }
