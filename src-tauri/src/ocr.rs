@@ -1,7 +1,7 @@
 #[cfg(any(target_os = "macos", target_os = "windows"))]
 use crate::insertion::remember_active_window;
 use debug_print::debug_println;
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 use std::path::Path;
 use tauri::path::BaseDirectory;
 use tauri::Manager;
@@ -250,55 +250,124 @@ pub fn do_ocr_with_cut_file_path(image_file_path: &Path) {
 
 #[cfg(target_os = "macos")]
 pub fn do_ocr() -> Result<(), Box<dyn std::error::Error>> {
-    use crate::{APP_HANDLE, CPU_VENDOR};
+    // The bundled macOCR helper binary this used to spawn no longer works on
+    // current macOS (its interactive screencapture child dies immediately),
+    // so macOS now uses the same in-app screenshot window flow as Windows,
+    // with recognition done natively via the Vision framework in
+    // do_ocr_with_cut_file_path.
+    use crate::windows::show_screenshot_window;
+    show_screenshot_window();
+    Ok(())
+}
 
-    let mut rel_path = "resources/bin/ocr_intel".to_string();
-    if *CPU_VENDOR.lock() == "Apple" {
-        rel_path = "resources/bin/ocr_apple".to_string();
+#[cfg(target_os = "macos")]
+unsafe fn nsstring_to_string(ns_string: cocoa::base::id) -> String {
+    use objc::{msg_send, sel, sel_impl};
+    let bytes: *const std::os::raw::c_char = msg_send![ns_string, UTF8String];
+    if bytes.is_null() {
+        return String::new();
+    }
+    std::ffi::CStr::from_ptr(bytes)
+        .to_string_lossy()
+        .into_owned()
+}
+
+#[cfg(target_os = "macos")]
+fn recognize_cut_file(image_file_path: &Path) -> Result<String, String> {
+    use cocoa::base::{id, nil, YES};
+    use cocoa::foundation::{NSArray, NSAutoreleasePool, NSString};
+    use objc::{class, msg_send, sel, sel_impl};
+
+    if !image_file_path.exists() {
+        return Err(format!("OCR image not found at {:?}", image_file_path));
     }
 
-    let app = APP_HANDLE.get().ok_or("APP_HANDLE not initialized")?;
+    unsafe {
+        let pool = NSAutoreleasePool::new(nil);
+        let result = (|| -> Result<String, String> {
+            let path_str = NSString::alloc(nil).init_str(&image_file_path.to_string_lossy());
+            let url: id = msg_send![class!(NSURL), fileURLWithPath: path_str];
+            if url == nil {
+                return Err("failed to create file URL for OCR image".to_string());
+            }
 
-    let bin_path = app
-        .path()
-        .resolve(&rel_path, BaseDirectory::Resource)
-        .map_err(|e| {
-            format!(
-                "Failed to resolve ocr binary resource '{}': {:?}",
-                rel_path, e
-            )
-        })?;
+            let options: id = msg_send![class!(NSDictionary), dictionary];
+            let handler: id = msg_send![class!(VNImageRequestHandler), alloc];
+            let handler: id = msg_send![handler, initWithURL: url options: options];
+            if handler == nil {
+                return Err("failed to create Vision image request handler".to_string());
+            }
 
-    if !bin_path.exists() {
-        return Err(format!(
-            "OCR binary not found at {:?}. Please ensure the binary is bundled correctly.",
-            bin_path
-        )
-        .into());
+            let request: id = msg_send![class!(VNRecognizeTextRequest), alloc];
+            let request: id = msg_send![request, init];
+            if request == nil {
+                return Err("failed to create Vision text recognition request".to_string());
+            }
+
+            // Match the languages the previous macOCR-based flow used (-l zh).
+            let languages = NSArray::arrayWithObjects(
+                nil,
+                &[
+                    NSString::alloc(nil).init_str("zh-Hans"),
+                    NSString::alloc(nil).init_str("zh-Hant"),
+                    NSString::alloc(nil).init_str("en-US"),
+                ],
+            );
+            let _: () = msg_send![request, setRecognitionLanguages: languages];
+            let _: () = msg_send![request, setUsesLanguageCorrection: YES];
+
+            let requests = NSArray::arrayWithObject(nil, request);
+            let mut error: id = nil;
+            let ok: bool = msg_send![handler, performRequests: requests error: &mut error];
+            if !ok {
+                let message = if error != nil {
+                    let description: id = msg_send![error, localizedDescription];
+                    nsstring_to_string(description)
+                } else {
+                    "unknown Vision error".to_string()
+                };
+                return Err(format!("Vision OCR failed: {}", message));
+            }
+
+            let results: id = msg_send![request, results];
+            let count: usize = msg_send![results, count];
+            let mut content = String::new();
+            for index in 0..count {
+                let observation: id = msg_send![results, objectAtIndex: index];
+                let candidates: id = msg_send![observation, topCandidates: 1usize];
+                let candidate_count: usize = msg_send![candidates, count];
+                if candidate_count == 0 {
+                    continue;
+                }
+                let candidate: id = msg_send![candidates, objectAtIndex: 0usize];
+                let text: id = msg_send![candidate, string];
+                content.push_str(nsstring_to_string(text).trim());
+                content.push('\n');
+            }
+            Ok(content)
+        })();
+        pool.drain();
+        result
     }
+}
 
-    let output = std::process::Command::new(&bin_path)
-        .args(["-l", "zh"])
-        .output()
-        .map_err(|e| format!("Failed to execute ocr binary at {:?}: {:?}", bin_path, e))?;
-
-    // check exit code
-    if output.status.success() {
-        // get output content
-        let content = String::from_utf8_lossy(&output.stdout);
-        crate::utils::send_text(content.to_string());
-        remember_active_window();
-        crate::windows::show_translator_window(false, true, true);
-        Ok(())
-    } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        Err(format!(
-            "OCR binary failed with exit code {:?}: {}",
-            output.status.code(),
-            stderr
-        )
-        .into())
-    }
+#[cfg(target_os = "macos")]
+pub fn do_ocr_with_cut_file_path(image_file_path: &Path) {
+    // Always surface the translator window, mirroring the Windows flow:
+    // silent failures left users with no feedback at all (#1872).
+    let content = match recognize_cut_file(image_file_path) {
+        Ok(content) => {
+            debug_println!("ocr content: {:?}", content);
+            content
+        }
+        Err(e) => {
+            eprintln!("OCR failed: {}", e);
+            String::new()
+        }
+    };
+    crate::utils::send_text(content);
+    remember_active_window();
+    crate::windows::show_translator_window(false, true, true);
 }
 
 #[tauri::command(async)]
@@ -319,7 +388,7 @@ pub fn finish_ocr() {
     do_finish_ocr();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 fn do_finish_ocr() {
     let app_handle = match crate::APP_HANDLE.get() {
         Some(handle) => handle,
@@ -345,5 +414,22 @@ fn do_finish_ocr() {
 #[cfg(target_os = "linux")]
 fn do_finish_ocr() {}
 
-#[cfg(target_os = "macos")]
-fn do_finish_ocr() {}
+#[cfg(all(test, target_os = "macos"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn recognizes_text_in_fixture_image() {
+        let path =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/ocr-fixture.png");
+        let content = recognize_cut_file(&path).expect("recognition should succeed");
+        assert!(content.contains("Hello"), "unexpected content: {content:?}");
+        assert!(content.contains("你好"), "unexpected content: {content:?}");
+    }
+
+    #[test]
+    fn reports_missing_image_as_error() {
+        let result = recognize_cut_file(std::path::Path::new("/nonexistent/ocr.png"));
+        assert!(result.is_err());
+    }
+}

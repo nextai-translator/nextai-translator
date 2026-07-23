@@ -34,6 +34,7 @@ export function ScreenshotWindow() {
     useEffect(() => {
         currentMonitor().then((monitor) => {
             if (!monitor) {
+                console.error('screenshot window: no current monitor')
                 return
             }
 
@@ -68,6 +69,9 @@ export function ScreenshotWindow() {
                         void appWindow.setFocus()
                         void appWindow.setResizable(false)
                     }
+                }}
+                onError={() => {
+                    console.error('screenshot window: failed to load the captured image')
                 }}
             />
             <div
@@ -109,10 +113,10 @@ export function ScreenshotWindow() {
                     }
                 }}
                 onMouseUp={async (e) => {
-                    appWindow.hide()
                     setIsDown(false)
                     setIsMoved(false)
                     if (!imgRef.current) {
+                        await appWindow.close()
                         return
                     }
                     const imgWidth = imgRef.current.naturalWidth
@@ -126,6 +130,10 @@ export function ScreenshotWindow() {
                     if (width <= 0 || height <= 0) {
                         await appWindow.close()
                     } else {
+                        // Do NOT hide the window before the commands finish:
+                        // hiding suspends this webview's JS on macOS, freezing
+                        // the continuation so finishOcr is never sent and OCR
+                        // silently does nothing (#1872).
                         try {
                             await commands.cutImage(left, top, width, height)
                             await commands.finishOcr()
