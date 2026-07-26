@@ -1029,6 +1029,11 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         engineModel: undefined,
     })
 
+    const translateDepsRef = useRef(translateDeps)
+    useEffect(() => {
+        translateDepsRef.current = translateDeps
+    }, [translateDeps])
+
     const getTranslateDeps = useCallback(
         async function (text: string, action: Action): Promise<typeof translateDeps> {
             const newSourceLang = await detectLang(text)
@@ -1466,7 +1471,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             }
             historyEntryIdRef.current = item.id ?? null
             lastHistoryKeyRef.current = null
-            skipNextTranslateRef.current = true
             setSourceLang(item.sourceLang)
             setTargetLang(item.targetLang)
             setEditableText(item.text)
@@ -1476,19 +1480,24 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             setShowWordbookButtons(false)
             setSelectedWord('')
             setHighlightWords([])
-            setTranslateDeps((prev) => {
-                const nextAction = matchedAction ?? prev.action
-                const providerFromHistory = isProviderValue(item.provider) ? item.provider : undefined
-                return {
-                    ...prev,
-                    text: item.text,
-                    sourceLang: item.sourceLang,
-                    targetLang: item.targetLang,
-                    action: nextAction,
-                    provider: providerFromHistory ?? prev.provider ?? settings.provider,
-                    engineModel: item.engineModel ?? prev.engineModel,
-                }
-            })
+            const prev = translateDepsRef.current
+            const nextAction = matchedAction ?? prev.action
+            const providerFromHistory = isProviderValue(item.provider) ? item.provider : undefined
+            const next = {
+                ...prev,
+                text: item.text,
+                sourceLang: item.sourceLang,
+                targetLang: item.targetLang,
+                action: nextAction,
+                provider: providerFromHistory ?? prev.provider ?? settings.provider,
+                engineModel: item.engineModel ?? prev.engineModel,
+            }
+            // Only arm the skip flag when the deps actually changed: if they
+            // are deep-equal, the translate effect never re-runs, the flag is
+            // never consumed, and it would silently swallow the user's next
+            // submit instead.
+            skipNextTranslateRef.current = JSON.stringify(prev) !== JSON.stringify(next)
+            setTranslateDeps(next)
         },
         [actions, settings.provider, setActivateAction]
     )
@@ -1843,6 +1852,10 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         (e: React.SyntheticEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
             e.preventDefault()
             e.stopPropagation()
+            // An explicit submit must never be swallowed: a leftover skip
+            // flag from a history restore whose deps never re-ran the
+            // translate effect would silently eat this submit.
+            skipNextTranslateRef.current = false
             let action = activateAction
             if (!action) {
                 action = actions?.find((action) => action.mode === 'translate')
@@ -1851,7 +1864,15 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             const text = editorRef.current?.value ?? ''
             if (action) {
                 getTranslateDeps(text, action).then((v) => {
+                    // translateText compares deps deeply, so resubmitting
+                    // unchanged content would not retrigger it; bump the
+                    // translation flag (same mechanism as the Retry button)
+                    // so an explicit submit always runs.
+                    const unchanged = JSON.stringify(translateDepsRef.current) === JSON.stringify(v)
                     setTranslateDeps(v)
+                    if (unchanged) {
+                        forceTranslate()
+                    }
                 })
             }
         },
