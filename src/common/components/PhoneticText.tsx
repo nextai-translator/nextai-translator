@@ -201,13 +201,19 @@ export function PhoneticText({
                 return (
                     <span
                         key={index}
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 3,
-                            marginRight: segment.kind === 'example' ? 4 : undefined,
-                            whiteSpace: 'nowrap',
-                        }}
+                        style={
+                            segment.kind === 'example'
+                                ? // Example segments are whole sentences: they must wrap
+                                  // like normal text, otherwise a long example forces the
+                                  // entire result area to scroll horizontally.
+                                  { marginRight: 4 }
+                                : {
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: 3,
+                                      whiteSpace: 'nowrap',
+                                  }
+                        }
                     >
                         <span>
                             {highlightRange
@@ -238,6 +244,7 @@ export function PhoneticText({
                                 cursor: 'pointer',
                                 position: 'relative',
                                 top: segment.kind === 'phonetic' ? 2 : 1,
+                                marginLeft: segment.kind === 'example' ? 3 : undefined,
                             }}
                         >
                             <SpeakerIcon

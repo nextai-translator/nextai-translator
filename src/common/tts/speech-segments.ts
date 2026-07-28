@@ -77,19 +77,46 @@ export function segmentSpeechText(text: string, lang: LangCode): SpeechTextPart[
     })
 }
 
+// Spoken duration tracks syllable count far better than character count:
+// weight latin words by their vowel groups (plus a small per-word overhead
+// for articulation gaps) and Han text by characters (one syllable each).
+function estimateWordWeight(text: string): number {
+    if (/\p{Script=Han}/u.test(text)) {
+        return Array.from(text).length
+    }
+    const syllables = (text.match(/[aeiouyàáâäèéêëìíîïòóôöùúûüæø]+/gi) ?? []).length
+    return Math.max(1, syllables) + 0.3
+}
+
+// TTS engines insert real pauses at punctuation; ignoring them makes every
+// estimated word start drift away from the voice inside long sentences.
+function estimatePauseWeight(text: string): number {
+    let weight = 0
+    for (const char of text) {
+        if ('，,、；;：:'.includes(char)) {
+            weight += 0.6
+        } else if ('。．.！!？?…'.includes(char)) {
+            weight += 1
+        }
+    }
+    return weight
+}
+
 export function getSpeechWordStarts(text: string, lang: LangCode): number[] {
-    const words = segmentSpeechText(text, lang).filter((part) => part.isWordLike)
-    const weights = words.map((word) => {
-        const length = Array.from(word.text).length
-        return /\p{Script=Han}/u.test(word.text) ? length : Math.max(1, Math.sqrt(length))
-    })
+    const parts = segmentSpeechText(text, lang)
+    const weights = parts.map((part) =>
+        part.isWordLike ? estimateWordWeight(part.text) : estimatePauseWeight(part.text)
+    )
     const total = weights.reduce((sum, weight) => sum + weight, 0)
+    const starts: number[] = []
     let elapsed = 0
-    return weights.map((weight) => {
-        const start = total > 0 ? elapsed / total : 0
-        elapsed += weight
-        return start
+    parts.forEach((part, index) => {
+        if (part.isWordLike) {
+            starts.push(total > 0 ? elapsed / total : 0)
+        }
+        elapsed += weights[index]
     })
+    return starts
 }
 
 export interface SpokenWordMatch {

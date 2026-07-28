@@ -170,6 +170,9 @@ async function synthesize(text: string, lang: LangCode, rate: number): Promise<s
 }
 
 const SILENCE_THRESHOLD = 0.01
+// Fire estimated word boundaries slightly early: a highlight that leads the
+// voice by a beat reads naturally, one that trails it feels broken.
+const HIGHLIGHT_LEAD_MS = 100
 
 // Synthesized chunks carry leading/trailing silence; distributing word
 // timings over the raw duration makes the highlight drift behind the voice,
@@ -338,7 +341,8 @@ export async function speak({
                 for (const [wordIndex, fraction] of getSpeechWordStarts(chunks[index], lang).entries()) {
                     const delay = Math.max(
                         0,
-                        (startAt + audible.start + audible.span * fraction - context.currentTime) * 1000
+                        (startAt + audible.start + audible.span * fraction - context.currentTime) * 1000 -
+                            HIGHLIGHT_LEAD_MS
                     )
                     boundaryTimers.push(
                         window.setTimeout(() => {
