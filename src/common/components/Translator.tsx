@@ -13,7 +13,14 @@ import { TbArrowsExchange, TbCsv } from 'react-icons/tb'
 import { MdOutlineGrade, MdGrade, MdHistory, MdBrowserUpdated } from 'react-icons/md'
 import * as mdIcons from 'react-icons/md'
 import { StatefulTooltip } from 'baseui-sd/tooltip'
-import { detectLang, getLangConfig, sourceLanguages, targetLanguages, LangCode } from '../lang'
+import {
+    detectLang,
+    getLangConfig,
+    pickTranslateAutoTargetLang,
+    sourceLanguages,
+    targetLanguages,
+    LangCode,
+} from '../lang'
 import { translate, TranslateMode } from '../translate'
 import { Select, Value, Option } from 'baseui-sd/select'
 import { RxEraser, RxEnter, RxReload, RxStop } from 'react-icons/rx'
@@ -1059,10 +1066,10 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             isTranslate &&
                             (!stopAutomaticallyChangeTargetLang.current || newSourceLang === targetLang_)
                         ) {
-                            return (
-                                (newSourceLang === 'zh-Hans' || newSourceLang === 'zh-Hant'
-                                    ? 'en'
-                                    : (settings?.defaultTargetLanguage as LangCode | undefined)) ?? 'en'
+                            return pickTranslateAutoTargetLang(
+                                newSourceLang,
+                                settings?.defaultTargetLanguage,
+                                settings?.writingTargetLanguage
                             )
                         }
                         if (!targetLang_) {
@@ -1087,7 +1094,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 })
             })
         },
-        [settings.defaultTargetLanguage]
+        [settings.defaultTargetLanguage, settings.writingTargetLanguage]
     )
 
     const { externalOriginalText } = useTranslatorStore()

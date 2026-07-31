@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { detectLang, LangCode } from '@/common/lang'
+import { detectLang, pickTranslateAutoTargetLang } from '@/common/lang'
 import { translate } from '@/common/translate'
 import { useSettings } from '@/common/hooks/useSettings'
 import { actionService } from '@/common/services/action'
@@ -28,10 +28,11 @@ export function InlineLookupContainer({ text, onClose }: InlineLookupContainerPr
 
             try {
                 const sourceLang = await detectLang(text)
-                const targetLang: LangCode =
-                    sourceLang === 'zh-Hans' || sourceLang === 'zh-Hant'
-                        ? 'en'
-                        : (settings.defaultTargetLanguage as LangCode | undefined) ?? 'en'
+                const targetLang = pickTranslateAutoTargetLang(
+                    sourceLang,
+                    settings.defaultTargetLanguage,
+                    settings.writingTargetLanguage
+                )
 
                 let action: Action | undefined
                 try {
@@ -80,7 +81,7 @@ export function InlineLookupContainer({ text, onClose }: InlineLookupContainerPr
                 setIsLoading(false)
             }
         },
-        [settings.defaultTargetLanguage]
+        [settings.defaultTargetLanguage, settings.writingTargetLanguage]
     )
 
     useEffect(() => {
