@@ -29,6 +29,8 @@ import { CerebrasIcon } from '@/common/components/icons/CerebrasIcon'
 import { Cerebras } from './cerebras'
 import { TeamoRouterIcon } from '@/common/components/icons/TeamoRouterIcon'
 import { TeamoRouter } from './teamorouter'
+import { OpenRouterIcon } from '@/common/components/icons/OpenRouterIcon'
+import { OpenRouter } from './openrouter'
 
 export type Provider =
     | 'OpenAI'
@@ -46,6 +48,7 @@ export type Provider =
     | 'DeepSeek'
     | 'Cerebras'
     | 'TeamoRouter'
+    | 'OpenRouter'
 
 export const engineIcons: Record<Provider, IconType> = {
     OpenAI: RiOpenaiFill,
@@ -63,6 +66,7 @@ export const engineIcons: Record<Provider, IconType> = {
     DeepSeek: DeepSeekIcon,
     Cerebras: CerebrasIcon,
     TeamoRouter: TeamoRouterIcon,
+    OpenRouter: OpenRouterIcon,
 }
 
 export const providerToEngine: Record<Provider, { new (): IEngine }> = {
@@ -81,6 +85,7 @@ export const providerToEngine: Record<Provider, { new (): IEngine }> = {
     DeepSeek: DeepSeek,
     Cerebras: Cerebras,
     TeamoRouter: TeamoRouter,
+    OpenRouter: OpenRouter,
 }
 
 export function getEngine(provider: Provider): IEngine {

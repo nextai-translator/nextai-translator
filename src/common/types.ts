@@ -144,6 +144,8 @@ export interface ISettings {
     cerebrasAPIModel: string
     teamoRouterAPIKey: string
     teamoRouterAPIModel: string
+    openRouterAPIKey: string
+    openRouterAPIModel: string
     fontSize: number
     uiFontSize: number
     iconSize: number
