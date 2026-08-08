@@ -1047,45 +1047,45 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         }
     }, [])
 
+    const targetLangRef = useRef<LangCode | undefined>(undefined)
+
     const getTranslateDeps = useCallback(
         async function (text: string, action: Action): Promise<typeof translateDeps> {
             const newSourceLang = await detectLang(text)
             setSourceLang(newSourceLang)
-            return await new Promise((resolve) => {
-                const isTranslate = action.mode === 'translate'
-                setTargetLang((targetLang_) => {
-                    const newTargetLang = (() => {
-                        if (
-                            isTranslate &&
-                            (!stopAutomaticallyChangeTargetLang.current || newSourceLang === targetLang_)
-                        ) {
-                            return (
-                                (newSourceLang === 'zh-Hans' || newSourceLang === 'zh-Hant'
-                                    ? 'en'
-                                    : (settings?.defaultTargetLanguage as LangCode | undefined)) ?? 'en'
-                            )
-                        }
-                        if (!targetLang_) {
-                            if (settings?.defaultTargetLanguage) {
-                                return settings.defaultTargetLanguage as LangCode
-                            }
-                            return newSourceLang
-                        }
-                        return targetLang_
-                    })()
-                    setTranslateDeps((oldV) => {
-                        const newV: typeof translateDeps = {
-                            ...oldV,
-                            sourceLang: newSourceLang,
-                            targetLang: newTargetLang,
-                            text,
-                        }
-                        resolve(newV)
-                        return oldV
-                    })
-                    return newTargetLang
-                })
-            })
+            // Compute the new deps directly from refs instead of resolving a
+            // promise inside setState updaters: updaters only run when React
+            // renders, and a throttled background page defers renders long
+            // enough that such a promise never settles - which silently
+            // swallowed submits.
+            const isTranslate = action.mode === 'translate'
+            const currentTargetLang = targetLangRef.current
+            const newTargetLang = (() => {
+                if (
+                    isTranslate &&
+                    (!stopAutomaticallyChangeTargetLang.current || newSourceLang === currentTargetLang)
+                ) {
+                    return (
+                        (newSourceLang === 'zh-Hans' || newSourceLang === 'zh-Hant'
+                            ? 'en'
+                            : (settings?.defaultTargetLanguage as LangCode | undefined)) ?? 'en'
+                    )
+                }
+                if (!currentTargetLang) {
+                    if (settings?.defaultTargetLanguage) {
+                        return settings.defaultTargetLanguage as LangCode
+                    }
+                    return newSourceLang
+                }
+                return currentTargetLang
+            })()
+            setTargetLang(newTargetLang)
+            return {
+                ...translateDepsRef.current,
+                sourceLang: newSourceLang,
+                targetLang: newTargetLang,
+                text,
+            }
         },
         [settings.defaultTargetLanguage]
     )
@@ -1164,6 +1164,9 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     }, [])
     const [sourceLang, setSourceLang] = useState<LangCode>('en')
     const [targetLang, setTargetLang] = useState<LangCode>()
+    useEffect(() => {
+        targetLangRef.current = targetLang
+    }, [targetLang])
     const stopAutomaticallyChangeTargetLang = useRef(false)
 
     useEffect(() => {
@@ -1890,17 +1893,24 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             }
             const text = editorRef.current?.value ?? ''
             if (action) {
-                getTranslateDeps(text, action).then((v) => {
-                    // translateText compares deps deeply, so resubmitting
-                    // unchanged content would not retrigger it; bump the
-                    // translation flag (same mechanism as the Retry button)
-                    // so an explicit submit always runs.
-                    const unchanged = JSON.stringify(translateDepsRef.current) === JSON.stringify(v)
-                    setTranslateDeps(v)
-                    if (unchanged) {
-                        forceTranslate()
-                    }
-                })
+                getTranslateDeps(text, action)
+                    .then((v) => {
+                        // translateText compares deps deeply, so resubmitting
+                        // unchanged content would not retrigger it; bump the
+                        // translation flag (same mechanism as the Retry button)
+                        // so an explicit submit always runs.
+                        const unchanged = JSON.stringify(translateDepsRef.current) === JSON.stringify(v)
+                        setTranslateDeps(v)
+                        if (unchanged) {
+                            forceTranslate()
+                        }
+                    })
+                    .catch((error) => {
+                        // A rejected language detection used to kill the submit
+                        // silently; surface it instead.
+                        console.error('submit failed:', error)
+                        toast(String(error), { duration: 5000, icon: '❌' })
+                    })
             }
         },
         [actions, activateAction, getTranslateDeps]

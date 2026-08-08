@@ -116,6 +116,17 @@ export const commands = {
             else return { status: 'error', error: e as any }
         }
     },
+    /**
+     * Self-healing hook for the page-side visibility watchdog: when a page
+     * believes it is hidden but its window is actually (at least partially)
+     * visible on screen, force WebKit to re-evaluate. WebKit's own recovery
+     * notification is unreliable after occlusion/raise cycles, which left
+     * pages permanently throttled (frozen rendering, crawling async work)
+     * while sitting right in front of the user.
+     */
+    async recoverWebviewVisibility(): Promise<void> {
+        await TAURI_INVOKE('recover_webview_visibility')
+    },
 }
 
 /** user-defined events **/

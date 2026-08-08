@@ -219,6 +219,7 @@ pub fn close_thumb() {
 pub fn show_thumb(x: i32, y: i32) {
     let window = get_thumb_window(x, y);
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 }
 
 pub fn get_thumb_window(x: i32, y: i32) -> tauri::WebviewWindow {
@@ -383,6 +384,58 @@ pub async fn show_translator_window_command() {
     show_translator_window(false, false, true);
 }
 
+/// WKWebView tracks page visibility from view/window state; after a
+/// hide() -> show() cycle this can desync, leaving the page believing it
+/// is hidden (rendering paused, timers throttled, process eventually
+/// suspended) while the window is visibly on screen - the UI then looks
+/// frozen. Toggling the view's hidden flag forces WebKit to re-evaluate.
+#[cfg(target_os = "macos")]
+pub fn nudge_webview_visibility(window: &tauri::WebviewWindow) {
+    let _ = window.with_webview(|webview| unsafe {
+        use cocoa::base::{id, NO, YES};
+        use objc::{msg_send, sel, sel_impl};
+        let wv = webview.inner() as id;
+        let _: () = msg_send![wv, setHidden: YES];
+        let _: () = msg_send![wv, setHidden: NO];
+    });
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn nudge_webview_visibility(_window: &tauri::WebviewWindow) {}
+
+/// Self-healing hook for the page-side visibility watchdog: when a page
+/// believes it is hidden but its window is actually (at least partially)
+/// visible on screen, force WebKit to re-evaluate. WebKit's own recovery
+/// notification is unreliable after occlusion/raise cycles, which left
+/// pages permanently throttled (frozen rendering, crawling async work)
+/// while sitting right in front of the user.
+#[tauri::command]
+#[specta::specta]
+pub fn recover_webview_visibility(window: tauri::WebviewWindow) {
+    #[cfg(target_os = "macos")]
+    {
+        let w = window.clone();
+        let _ = window.run_on_main_thread(move || {
+            use cocoa::base::id;
+            use objc::{msg_send, sel, sel_impl};
+            const NS_WINDOW_OCCLUSION_STATE_VISIBLE: u64 = 1 << 1;
+            if let Ok(ns_win) = w.ns_window() {
+                let occlusion: u64 = unsafe { msg_send![ns_win as id, occlusionState] };
+                if occlusion & NS_WINDOW_OCCLUSION_STATE_VISIBLE == 0 {
+                    // The window really is fully occluded or hidden; the
+                    // page's hidden state is correct.
+                    return;
+                }
+            }
+            nudge_webview_visibility(&w);
+        });
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = window;
+    }
+}
+
 pub fn show_translator_window(
     center: bool,
     to_mouse_position: bool,
@@ -390,6 +443,46 @@ pub fn show_translator_window(
 ) -> tauri::WebviewWindow {
     let window = get_translator_window(center, to_mouse_position, set_focus);
     window.show().unwrap();
+    nudge_webview_visibility(&window);
+    if set_focus {
+        // An accessory app cannot reliably raise its windows above other
+        // apps' windows on macOS 14+ (cooperative activation may be
+        // refused), so a summoned window could stay buried under the window
+        // stack - looking frozen. Temporarily float it to guarantee it
+        // surfaces, then restore the user's pin preference.
+        let _ = window.set_always_on_top(true);
+        if !ALWAYS_ON_TOP.load(Ordering::Acquire) {
+            let w = window.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(Duration::from_millis(1500));
+                if !ALWAYS_ON_TOP.load(Ordering::Acquire) {
+                    let _ = w.set_always_on_top(false);
+                }
+            });
+        }
+    }
+    // On macOS 14+, cooperative activation can silently refuse to activate
+    // an accessory app: the window is on screen but never becomes key, so
+    // every click and keystroke goes nowhere and the UI appears frozen.
+    // Explicitly activate the app and make the window key.
+    #[cfg(target_os = "macos")]
+    if set_focus {
+        let w = window.clone();
+        let _ = window.run_on_main_thread(move || unsafe {
+            use cocoa::appkit::NSApp;
+            use cocoa::base::{id, nil, YES};
+            use objc::{msg_send, sel, sel_impl};
+
+            let app: id = NSApp();
+            // The modern cooperative request first, then the legacy forced
+            // variant as a fallback for systems where cooperation is refused.
+            let _: () = msg_send![app, activate];
+            let _: () = msg_send![app, activateIgnoringOtherApps: YES];
+            if let Ok(ns_win) = w.ns_window() {
+                let _: () = msg_send![ns_win as id, makeKeyAndOrderFront: nil];
+            }
+        });
+    }
     window
 }
 
@@ -569,6 +662,7 @@ pub async fn show_action_manager_window() {
     let window = get_action_manager_window();
     window.center().unwrap();
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 }
 
 pub fn get_action_manager_window() -> tauri::WebviewWindow {
@@ -606,6 +700,7 @@ pub async fn show_history_window() {
     let window = get_history_window();
     window.center().unwrap();
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 }
 
 pub fn get_history_window() -> tauri::WebviewWindow {
@@ -641,6 +736,7 @@ pub fn show_settings_window() {
     let window = get_settings_window();
     window.center().unwrap();
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 }
 
 pub fn get_settings_window() -> tauri::WebviewWindow {
@@ -684,6 +780,7 @@ pub fn show_updater_window() {
     let window = get_updater_window();
     window.center().unwrap();
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 
     let handle = APP_HANDLE.get().unwrap();
     CheckUpdateEvent::listen(handle, move |event| {
@@ -841,6 +938,7 @@ pub fn show_inline_lookup_window(
         let _ = window.set_position(window_physical_position);
     }
     window.show().unwrap();
+    nudge_webview_visibility(&window);
     window
 }
 
@@ -1045,6 +1143,7 @@ pub fn show_quick_translator_window() -> tauri::WebviewWindow {
     position_quick_translator_window(&window);
     set_webview_visibility(&window, true);
     let _ = window.show();
+    nudge_webview_visibility(&window);
     let _ = window.set_always_on_top(true);
     if let Err(e) = APP_HANDLE
         .get()
@@ -1267,6 +1366,7 @@ pub async fn show_writing_indicator(target_language: String) {
 
     set_webview_visibility(&window, true);
     let _ = window.show();
+    nudge_webview_visibility(&window);
     let _ = window.set_always_on_top(true);
     if let Some(handle) = APP_HANDLE.get() {
         // Broadcast (not emit_to). Targeted delivery to a webview that may
