@@ -36,7 +36,9 @@ impl PinnedFromWindowEvent {
 pub static TRAY_EVENT_REGISTERED: AtomicBool = AtomicBool::new(false);
 
 pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
-    let config = get_config().unwrap();
+    // Tray creation is the first config consumer at startup; a config problem
+    // must degrade to missing hotkey labels, not a crash before any UI exists.
+    let config = get_config().unwrap_or_default();
     let check_for_updates_i = MenuItem::with_id(
         app,
         "check_for_updates",

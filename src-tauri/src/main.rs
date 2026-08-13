@@ -569,7 +569,7 @@ fn main() {
 
     #[cfg(target_os = "macos")]
     {
-        let config = config::get_config_by_app(app.handle()).unwrap();
+        let config = config::get_config_by_app(app.handle()).unwrap_or_default();
         if config.hide_the_icon_in_the_dock.unwrap_or(true) {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
         } else {

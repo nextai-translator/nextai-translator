@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { writeTextFile, BaseDirectory } from '@tauri-apps/plugin-fs'
+import { writeTextFile, rename, BaseDirectory } from '@tauri-apps/plugin-fs'
 import { Proxy, ProxyConfig, fetch } from '@tauri-apps/plugin-http'
 import * as utils from '../utils'
 import { IBrowser, ISettings } from '../types'
@@ -31,8 +31,16 @@ class BrowserStorageSync {
         }, {})
         const settings = await getSettings()
         const newSettings = { ...settings, ...newItems }
-        await writeTextFile('config.json', JSON.stringify(newSettings), {
+        // Write-then-rename so config.json is replaced atomically: overwriting
+        // it in place leaves a truncated, unparseable file if the app dies
+        // mid-write, and since the file survives uninstall/reinstall that used
+        // to brick the app at every subsequent launch.
+        await writeTextFile('config.json.tmp', JSON.stringify(newSettings), {
             baseDir: BaseDirectory.AppConfig,
+        })
+        await rename('config.json.tmp', 'config.json', {
+            oldPathBaseDir: BaseDirectory.AppConfig,
+            newPathBaseDir: BaseDirectory.AppConfig,
         })
     }
 }
