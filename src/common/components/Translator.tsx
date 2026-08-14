@@ -2014,6 +2014,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 minHeight: vocabularyType !== 'hide' ? '600px' : undefined,
                 background: isDesktopApp() ? 'transparent' : theme.colors.backgroundPrimary,
                 paddingBottom: showSettings || settings.enableBackgroundBlur ? '0px' : '42px',
+                fontSize: settings.uiFontSize,
             }}
         >
             {showSettings && (
