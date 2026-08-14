@@ -172,10 +172,10 @@ const API_URL_PATH = `/openai/deployments/${deployName}/chat/completions?api-ver
 # Star History
 
 <p align="center">
-  <a target="_blank" href="https://star-history.com/#nextai-translator/nextai-translator&Date">
+  <a target="_blank" href="https://star-history.dera.page/#nextai-translator/nextai-translator&Date">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=nextai-translator/nextai-translator&type=Date&theme=dark">
-      <img alt="NebulaGraph Data Intelligence Suite(ngdi)" src="https://api.star-history.com/svg?repos=nextai-translator/nextai-translator&type=Date">
+      <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=nextai-translator/nextai-translator&type=Date&theme=dark">
+      <img alt="NebulaGraph Data Intelligence Suite(ngdi)" src="https://star-history.dera.page/svg?repos=nextai-translator/nextai-translator&type=Date">
     </picture>
   </a>
 </p>
