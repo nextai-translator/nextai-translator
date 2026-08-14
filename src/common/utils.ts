@@ -254,7 +254,7 @@ export async function getSettings(): Promise<ISettings> {
         settings.fontSize = 15
     }
     if (settings.uiFontSize === undefined || settings.uiFontSize === null) {
-        settings.uiFontSize = 12
+        settings.uiFontSize = 14
     }
     if (settings.iconSize === undefined || settings.iconSize === null) {
         settings.iconSize = 15
