@@ -3450,8 +3450,21 @@ export function InnerSettings({
                         >
                             <MyCheckbox onBlur={onBlur} />
                         </FormItem>
-                        <FormItem name='fontSize' label={t('Font size')}>
-                            <NumberInput />
+                        <FormItem
+                            name='fontSize'
+                            label={t('Font size')}
+                            caption={t(
+                                'Controls the font size of the input box and the translation text.'
+                            )}
+                        >
+                            <NumberInput min={8} max={40} step={1} />
+                        </FormItem>
+                        <FormItem
+                            name='uiFontSize'
+                            label={t('UI font size')}
+                            caption={t('Controls the font size of the app interface (toolbar, menus, labels).')}
+                        >
+                            <NumberInput min={8} max={24} step={1} />
                         </FormItem>
                         <FormItem
                             name='alwaysShowIcons'
