@@ -347,6 +347,15 @@ fn bind_mouse_hook() {
 }
 
 fn main() {
+    // Without a working WebView2 Runtime not a single window can be created,
+    // so the app would only ever flash a frame and abort (discussion #1907).
+    // Fail up front with an actionable dialog instead.
+    #[cfg(target_os = "windows")]
+    if let Err(err) = tauri::webview_version() {
+        crate::windows::show_webview2_broken_dialog(&err.to_string());
+        std::process::exit(1);
+    }
+
     let _ = init_tokio_runtime();
     let silently = env::args().any(|arg| arg == "--silently");
 

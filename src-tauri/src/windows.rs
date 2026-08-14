@@ -40,15 +40,15 @@ fn get_dummy_window() -> tauri::WebviewWindow {
         }
         None => {
             debug_println!("Create dummy window!");
-            tauri::WebviewWindowBuilder::new(
-                app_handle,
-                "dummy",
-                tauri::WebviewUrl::App("src/tauri/dummy.html".into()),
+            checked_build(
+                tauri::WebviewWindowBuilder::new(
+                    app_handle,
+                    "dummy",
+                    tauri::WebviewUrl::App("src/tauri/dummy.html".into()),
+                )
+                .title("Dummy")
+                .visible(false),
             )
-            .title("Dummy")
-            .visible(false)
-            .build()
-            .unwrap()
         }
     }
 }
@@ -258,7 +258,7 @@ pub fn get_thumb_window(x: i32, y: i32) -> tauri::WebviewWindow {
                 builder = builder.shadow(false);
             }
 
-            let window = builder.build().unwrap();
+            let window = checked_build(builder);
             #[cfg(target_os = "windows")]
             {
                 // use SetWindowLongPtrW in tao page to disable minimize, maximize and close buttons
@@ -350,17 +350,76 @@ pub fn set_webview_visibility(window: &tauri::WebviewWindow, visible: bool) {
 #[cfg(not(target_os = "windows"))]
 pub fn set_webview_visibility(_window: &tauri::WebviewWindow, _visible: bool) {}
 
+// A broken WebView2 Runtime (Windows' registry says it is installed but its
+// files are gone, so its own installer refuses to repair it - see discussion
+// #1907) used to surface as an unwrap panic on the first webview build: the
+// window frame flashed and the process aborted with 0xc0000409 before any UI
+// existed, at every launch, across reinstalls. Explain and point at the
+// repair download instead.
+#[cfg(target_os = "windows")]
+pub fn show_webview2_broken_dialog(detail: &str) {
+    use windows::core::PCWSTR;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        MessageBoxW, IDOK, MB_ICONERROR, MB_OKCANCEL, MB_SETFOREGROUND,
+    };
+
+    let encode = |s: &str| {
+        s.encode_utf16()
+            .chain(std::iter::once(0))
+            .collect::<Vec<u16>>()
+    };
+    let text = encode(&format!(
+        "NextAI Translator cannot start because the Microsoft Edge WebView2 Runtime on this computer is missing or broken.\n\nClick OK to open the WebView2 download page, run the installer as administrator, then start NextAI Translator again.\n\nTechnical detail: {detail}"
+    ));
+    let caption = encode("NextAI Translator");
+    let pressed = unsafe {
+        MessageBoxW(
+            None,
+            PCWSTR(text.as_ptr()),
+            PCWSTR(caption.as_ptr()),
+            MB_OKCANCEL | MB_ICONERROR | MB_SETFOREGROUND,
+        )
+    };
+    if pressed == IDOK {
+        let _ = std::process::Command::new("rundll32")
+            .args([
+                "url.dll,FileProtocolHandler",
+                "https://developer.microsoft.com/microsoft-edge/webview2/",
+            ])
+            .spawn();
+    }
+}
+
+fn handle_webview_build_failure(e: &tauri::Error) -> ! {
+    #[cfg(target_os = "windows")]
+    {
+        show_webview2_broken_dialog(&e.to_string());
+        std::process::exit(1);
+    }
+    #[cfg(not(target_os = "windows"))]
+    panic!("failed to create webview window: {e}");
+}
+
+pub fn checked_build<R: tauri::Runtime, M: tauri::Manager<R>>(
+    builder: tauri::WebviewWindowBuilder<'_, R, M>,
+) -> tauri::WebviewWindow<R> {
+    match builder.build() {
+        Ok(window) => window,
+        Err(e) => handle_webview_build_failure(&e),
+    }
+}
+
 pub fn build_window<'a, R: tauri::Runtime, M: tauri::Manager<R>>(
     builder: tauri::WebviewWindowBuilder<'a, R, M>,
 ) -> tauri::WebviewWindow<R> {
     #[cfg(target_os = "macos")]
     {
-        let window = builder
-            .title_bar_style(tauri::TitleBarStyle::Overlay)
-            .hidden_title(true)
-            .transparent(true)
-            .build()
-            .unwrap();
+        let window = checked_build(
+            builder
+                .title_bar_style(tauri::TitleBarStyle::Overlay)
+                .hidden_title(true)
+                .transparent(true),
+        );
 
         post_process_window(&window);
 
@@ -369,7 +428,7 @@ pub fn build_window<'a, R: tauri::Runtime, M: tauri::Manager<R>>(
 
     #[cfg(not(target_os = "macos"))]
     {
-        let window = builder.transparent(true).decorations(true).build().unwrap();
+        let window = checked_build(builder.transparent(true).decorations(true));
 
         post_process_window(&window);
 
@@ -873,7 +932,7 @@ pub fn get_inline_lookup_window() -> tauri::WebviewWindow {
             .decorations(false)
             .shadow(true);
 
-            let window = builder.build().unwrap();
+            let window = checked_build(builder);
             post_process_window(&window);
 
             window
@@ -1091,7 +1150,7 @@ pub fn get_quick_translator_window() -> tauri::WebviewWindow {
     .transparent(true)
     .shadow(true);
 
-    let window = builder.build().unwrap();
+    let window = checked_build(builder);
     post_process_window(&window);
     apply_quick_translator_panel_traits(&window);
     // Created hidden — suspend the WebView2 renderer until first show.
@@ -1250,7 +1309,7 @@ pub fn get_writing_indicator_window() -> tauri::WebviewWindow {
     .transparent(true)
     .shadow(false);
 
-    let window = builder.build().unwrap();
+    let window = checked_build(builder);
     post_process_window(&window);
     apply_writing_indicator_panel_traits(&window);
     // Created hidden — suspend the WebView2 renderer until first show.
