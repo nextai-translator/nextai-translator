@@ -63,16 +63,25 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 { name: 'gpt-3.5-turbo-16k-0613', id: 'gpt-3.5-turbo-16k-0613' },
                 { name: 'gpt-4', id: 'gpt-4' },
                 { name: 'gpt-4o (recommended)', id: 'gpt-4o' },
+                { name: 'gpt-4o-mini', id: 'gpt-4o-mini' },
+                { name: 'gpt-4.1', id: 'gpt-4.1' },
+                { name: 'gpt-4.1-mini', id: 'gpt-4.1-mini' },
                 { name: 'gpt-4-turbo', id: 'gpt-4-turbo' },
                 { name: 'gpt-4-turbo-2024-04-09', id: 'gpt-4-turbo-2024-04-09' },
                 { name: 'gpt-4-turbo-preview', id: 'gpt-4-turbo-preview' },
-                { name: 'gpt-4-0125-preview ', id: 'gpt-4-0125-preview' },
+                { name: 'gpt-4-0125-preview', id: 'gpt-4-0125-preview' },
                 { name: 'gpt-4-1106-preview', id: 'gpt-4-1106-preview' },
                 { name: 'gpt-4-0314', id: 'gpt-4-0314' },
                 { name: 'gpt-4-0613', id: 'gpt-4-0613' },
                 { name: 'gpt-4-32k', id: 'gpt-4-32k' },
                 { name: 'gpt-4-32k-0314', id: 'gpt-4-32k-0314' },
                 { name: 'gpt-4-32k-0613', id: 'gpt-4-32k-0613' },
+                { name: 'gpt-5', id: 'gpt-5' },
+                { name: 'gpt-5-mini', id: 'gpt-5-mini' },
+                { name: 'gpt-5-nano', id: 'gpt-5-nano' },
+                { name: 'o1-mini', id: 'o1-mini' },
+                { name: 'o3-mini', id: 'o3-mini' },
+                { name: 'o4-mini', id: 'o4-mini' },
             ]
         }
         const apiKey_ = apiKey.split(',')[0]
@@ -93,7 +102,9 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .filter((model: any) => {
                     if (apiUrl === 'https://api.openai.com') {
-                        return model.id.includes('gpt')
+                        // Keep GPT models and the o-series reasoning models (o1/o3/o4),
+                        // which are fully supported chat models but whose ids don't contain "gpt".
+                        return model.id.includes('gpt') || /^o[1-9]/.test(model.id)
                     }
                     return ['text-', 'dall-', 'tts-', 'winsper-', 'davinci', 'babbage'].every(
                         (it) => !(model.id as string).startsWith(it)
