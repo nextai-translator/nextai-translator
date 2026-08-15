@@ -32,7 +32,7 @@ class BrowserStorageSync {
         const settings = await getSettings()
         const newSettings = { ...settings, ...newItems }
         // Write-then-rename so config.json is replaced atomically: overwriting
-        // it in place leaves a truncated, unparseable file if the app dies
+        // it in place leaves a truncated, unparsable file if the app dies
         // mid-write, and since the file survives uninstall/reinstall that used
         // to brick the app at every subsequent launch.
         await writeTextFile('config.json.tmp', JSON.stringify(newSettings), {
