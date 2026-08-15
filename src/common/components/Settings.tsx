@@ -3453,9 +3453,7 @@ export function InnerSettings({
                         <FormItem
                             name='fontSize'
                             label={t('Font size')}
-                            caption={t(
-                                'Controls the font size of the input box and the translation text.'
-                            )}
+                            caption={t('Controls the font size of the input box and the translation text.')}
                         >
                             <NumberInput min={8} max={40} step={1} />
                         </FormItem>
