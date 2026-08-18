@@ -1,0 +1,31 @@
+# Normalize line endings across platforms.
+# Repo stores text as LF; Git converts on checkout per rules below.
+
+# Default: treat as text, store LF in the repo, check out LF.
+* text=auto eol=lf
+
+# Windows-only scripts must stay CRLF.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary files: never touch line endings.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.icns   binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.otf    binary
+*.eot    binary
+*.pdf    binary
+*.zip    binary
+*.gz     binary
+*.dll    binary
+*.exe    binary
+*.so     binary
+*.dylib  binary
+*.node   binary
