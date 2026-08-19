@@ -209,11 +209,10 @@
     "to get the solutions.": "获取解决方案。",
     "ChatGLM": "智谱清言",
     "Font size": "字体大小",
-    "UI font size": "界面字号",
+    "UI font size": "UI 字体大小",
     "Controls the font size of the input box and the translation text.": "控制输入框与译文的字号。",
     "Controls the font size of the app interface (toolbar, menus, labels).": "控制应用界面（工具栏、菜单、标签）的字号。",
     "Font family": "字体",
-    "UI font size": "UI 字体大小",
     "UI font family": "UI 字体",
     "Icon size": "图标大小",
     "Window background blur": "窗口背景模糊",
@@ -234,7 +233,6 @@
     "Using global settings": "使用全局设置",
     "Action Model": "操作模型",
     "Action Provider": "操作服务商",
-    "Custom Model Name": "自定义模型名称",
     "Enable Extended Thinking": "启用扩展思考",
     "Thinking Level": "思考级别",
     "Low": "低",
@@ -248,5 +246,7 @@
     "Download progress for {{voice}}": "{{voice}}下载进度",
     "Verifying and extracting…": "校验并解压中…",
     "{{voice}} is ready": "{{voice}}已就绪",
-    "Failed to download {{voice}}": "{{voice}}下载失败"
+    "Failed to download {{voice}}": "{{voice}}下载失败",
+    "Back": "后退",
+    "Forward": "前进"
 }

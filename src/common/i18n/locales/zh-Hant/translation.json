@@ -231,7 +231,6 @@
     "Using global settings": "使用全域設定",
     "Action Model": "動作模型",
     "Action Provider": "動作服務商",
-    "Custom Model Name": "自訂模型名稱",
     "Enable Extended Thinking": "啟用擴展思考",
     "Thinking Level": "思考級別",
     "Low": "低",
@@ -245,5 +244,7 @@
     "Download progress for {{voice}}": "{{voice}}下載進度",
     "Verifying and extracting…": "驗證並解壓縮中…",
     "{{voice}} is ready": "{{voice}}已就緒",
-    "Failed to download {{voice}}": "{{voice}}下載失敗"
+    "Failed to download {{voice}}": "{{voice}}下載失敗",
+    "Back": "後退",
+    "Forward": "前進"
 }
