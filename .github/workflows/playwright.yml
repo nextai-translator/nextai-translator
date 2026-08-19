@@ -37,8 +37,11 @@ jobs:
 
     # Browser binary download from Playwright CDN — separate step, own timeout.
     - name: Install Playwright browser (chromium)
-      timeout-minutes: 5
-      run: pnpm exec playwright install chromium
+      uses: nick-fields/retry@v3
+      with:
+        timeout_minutes: 15
+        max_attempts: 3
+        command: pnpm exec playwright install chromium
 
     - name: Build Chromium extension
       run: pnpm vite build -c vite.config.chromium.ts
