@@ -117,6 +117,9 @@ const settingKeys: Record<keyof ISettings, number> = {
     teamoRouterAPIModel: 1,
     openRouterAPIKey: 1,
     openRouterAPIModel: 1,
+    liteLLMAPIURL: 1,
+    liteLLMAPIKey: 1,
+    liteLLMAPIModel: 1,
     fontSize: 1,
     uiFontSize: 1,
     iconSize: 1,
@@ -240,6 +243,9 @@ export async function getSettings(): Promise<ISettings> {
     }
     if (!settings.groqAPIURLPath) {
         settings.groqAPIURLPath = '/openai/v1/chat/completions'
+    }
+    if (!settings.liteLLMAPIURL) {
+        settings.liteLLMAPIURL = 'http://localhost:4000'
     }
     if (!settings.claudeAPIURL) {
         settings.claudeAPIURL = 'https://api.anthropic.com'
@@ -609,6 +615,8 @@ export function getAPIKeyForProvider(provider: string, settings: ISettings): str
             return settings.teamoRouterAPIKey
         case 'OpenRouter':
             return settings.openRouterAPIKey
+        case 'LiteLLM':
+            return settings.liteLLMAPIKey
         case 'Moonshot':
             return settings.moonshotAPIKey
         case 'MiniMax':

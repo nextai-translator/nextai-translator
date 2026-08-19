@@ -1478,6 +1478,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'OpenAI', id: 'OpenAI' },
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
+              { label: 'LiteLLM', id: 'LiteLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -1499,6 +1500,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'OpenAI', id: 'OpenAI' },
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
+              { label: 'LiteLLM', id: 'LiteLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -3412,6 +3414,40 @@ export function InnerSettings({
                                     provider='OpenRouter'
                                     currentProvider={values.provider}
                                     apiKey={values.openRouterAPIKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'LiteLLM' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'LiteLLM'}
+                                name='liteLLMAPIURL'
+                                label={t('API URL')}
+                                caption='The base URL of your LiteLLM proxy server, e.g. http://localhost:4000'
+                            >
+                                <Input autoFocus size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                required={values.provider === 'LiteLLM'}
+                                name='liteLLMAPIKey'
+                                label='LiteLLM API Key'
+                                caption='Your LiteLLM proxy virtual key or master key. Leave blank if your proxy has no authentication.'
+                            >
+                                <Input type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='liteLLMAPIModel'
+                                label={t('API Model')}
+                                required={values.provider === 'LiteLLM'}
+                            >
+                                <APIModelSelector
+                                    provider='LiteLLM'
+                                    currentProvider={values.provider}
+                                    apiKey={values.liteLLMAPIKey}
                                     onBlur={onBlur}
                                 />
                             </FormItem>
