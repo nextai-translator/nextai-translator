@@ -27,8 +27,18 @@ jobs:
     - name: Install dependencies
       run: pnpm install --no-frozen-lockfile
 
-    - name: Install Playwright Browsers
-      run: pnpm exec playwright install chromium --with-deps
+    # Split out the apt step (the flaky part) and retry it on a bad Ubuntu mirror.
+    - name: Install Playwright system deps
+      uses: nick-fields/retry@v3
+      with:
+        timeout_minutes: 15
+        max_attempts: 3
+        command: pnpm exec playwright install-deps chromium
+
+    # Browser binary download from Playwright CDN — separate step, own timeout.
+    - name: Install Playwright browser (chromium)
+      timeout-minutes: 5
+      run: pnpm exec playwright install chromium
 
     - name: Build Chromium extension
       run: pnpm vite build -c vite.config.chromium.ts
