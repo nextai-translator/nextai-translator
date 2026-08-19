@@ -4,11 +4,9 @@ on:
   push:
     branches: 
       - main
-      - fix/playwright-git-action-test
   pull_request:
     branches: 
       - main
-  workflow_dispatch:
 
 jobs:
   e2e-test:
