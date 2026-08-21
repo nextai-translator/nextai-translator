@@ -1306,6 +1306,11 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         async (selectedWord: string, signal: AbortSignal) => {
             if (skipNextTranslateRef.current) {
                 skipNextTranslateRef.current = false
+                // The effect cleanup aborts the previous run, and the aborted
+                // run returns before its finally clears the loading state - it
+                // relies on this run taking the state over. A bail out here
+                // must therefore clear it, or the spinner never stops.
+                stopLoading()
                 return
             }
             translationIDRef.current += 1
@@ -1315,6 +1320,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             const translationID = translationIDRef.current
             const { text, sourceLang, targetLang, action } = translateDeps
             if (!text || !sourceLang || !targetLang || !action) {
+                stopLoading()
                 return
             }
             setShowWordbookButtons(false)
@@ -2095,32 +2101,44 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             skipNextTranslateRef.current = false
             let action = activateAction
             if (!action) {
-                action = actions?.find((action) => action.mode === 'translate')
-                setActivateAction(action)
+                // The built-in translate action can be renamed or deleted, and
+                // on a cold start the action list may not have loaded yet.
+                action = actions?.find((a) => a.mode === 'translate') ?? actions?.[0]
+                if (action) {
+                    setActivateAction(action)
+                }
             }
-            const text = editorRef.current?.value ?? ''
-            if (action) {
-                getTranslateDeps(text, action)
-                    .then((v) => {
-                        // translateText compares deps deeply, so resubmitting
-                        // unchanged content would not retrigger it; bump the
-                        // translation flag (same mechanism as the Retry button)
-                        // so an explicit submit always runs.
-                        const unchanged = JSON.stringify(translateDepsRef.current) === JSON.stringify(v)
-                        setTranslateDeps(v)
-                        if (unchanged) {
-                            forceTranslate()
-                        }
-                    })
-                    .catch((error) => {
-                        // A rejected language detection used to kill the submit
-                        // silently; surface it instead.
-                        console.error('submit failed:', error)
-                        toast(String(error), { duration: 5000, icon: '❌' })
-                    })
+            const text = editorRef.current?.value ?? editableText
+            if (!action) {
+                // Bailing out here used to be completely silent.
+                toast(t('No available action'), { duration: 5000, icon: '❌' })
+                return
             }
+            const submittedAction = action
+            getTranslateDeps(text, submittedAction)
+                .then((v) => {
+                    // getTranslateDeps carries the previous action over, which
+                    // is empty on the very first submit; without this the
+                    // translate effect bails on its missing-deps guard.
+                    const deps = { ...v, action: submittedAction }
+                    // translateText compares deps deeply, so resubmitting
+                    // unchanged content would not retrigger it; bump the
+                    // translation flag (same mechanism as the Retry button)
+                    // so an explicit submit always runs.
+                    const unchanged = JSON.stringify(translateDepsRef.current) === JSON.stringify(deps)
+                    setTranslateDeps(deps)
+                    if (unchanged) {
+                        forceTranslate()
+                    }
+                })
+                .catch((error) => {
+                    // A rejected language detection used to kill the submit
+                    // silently; surface it instead.
+                    console.error('submit failed:', error)
+                    toast(String(error), { duration: 5000, icon: '❌' })
+                })
         },
-        [actions, activateAction, getTranslateDeps]
+        [actions, activateAction, editableText, getTranslateDeps, t]
     )
 
     const { data: promotions, mutate: refetchPromotions } = useSWR<IPromotionResponse>(
@@ -2583,6 +2601,20 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                             onChange={(e) => setEditableText(e.target.value)}
                                             onKeyDown={(e) => {
                                                 e.stopPropagation()
+                                                if (e.key !== 'Enter' || e.shiftKey) {
+                                                    return
+                                                }
+                                                // Chrome does not fire keypress
+                                                // while an IME is composing, so
+                                                // submitting from keypress made
+                                                // the Enter that commits a
+                                                // candidate disappear; submit
+                                                // from keydown and skip the
+                                                // composing Enter instead.
+                                                if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) {
+                                                    return
+                                                }
+                                                handleSubmit(e)
                                             }}
                                             onKeyUp={(e) => {
                                                 e.stopPropagation()
@@ -2590,7 +2622,10 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                             onKeyPress={(e) => {
                                                 e.stopPropagation()
                                                 if (e.key === 'Enter' && !e.shiftKey) {
-                                                    handleSubmit(e)
+                                                    // Submitting already
+                                                    // happened on keydown; keep
+                                                    // the newline out.
+                                                    e.preventDefault()
                                                 }
                                             }}
                                         />
