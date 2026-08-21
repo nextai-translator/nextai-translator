@@ -69,6 +69,9 @@ async function fetchWithStream(
     const reader = response?.body?.getReader()
     if (!reader) {
         port.postMessage(responseSend)
+        // A body-less response is still a completed request: leaving the port
+        // open would keep the content script's stream and promise alive.
+        port.disconnect()
         return
     }
 
