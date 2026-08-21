@@ -69,6 +69,7 @@ import { usePromotionNeverDisplay } from '../hooks/usePromotionNeverDisplay'
 import { Textarea } from 'baseui-sd/textarea'
 import { ProxyTester } from './ProxyTester'
 import { CUSTOM_MODEL_ID } from '../constants'
+import { filterModelOptions } from './model-option-filter'
 import { isMacOS } from '../utils'
 import NumberInput from './NumberInput'
 import { DurationPicker } from './DurationPicker'
@@ -879,6 +880,17 @@ export function APIModelSelector({
         userEditedRef.current = false
     }, [currentProvider, provider])
 
+    // Filtering has to be driven by what the user typed, never by the committed
+    // value. Deriving it from the value makes the option list change as a
+    // *result* of picking an option, while baseui still holds the index into
+    // the list that was on screen when the click happened - it then resolves
+    // that stale index against the new list and both shows and commits a
+    // different model than the one clicked.
+    const [query, setQuery] = useState('')
+    useEffect(() => {
+        setQuery('')
+    }, [currentProvider, provider])
+
     useEffect(() => {
         if (provider !== currentProvider || options.length === 0) {
             return
@@ -913,26 +925,18 @@ export function APIModelSelector({
                     <Combobox
                         size='compact'
                         value={value ?? ''}
-                        onChange={(nextValue) => {
+                        onChange={(nextValue, option) => {
                             userEditedRef.current = true
+                            // baseui passes the option only when one was picked
+                            // from the listbox; a null option means the user
+                            // typed, which is the only thing that may refilter.
+                            if (!option) {
+                                setQuery(String(nextValue ?? ''))
+                            }
                             onChange?.(nextValue as APIModel)
                         }}
                         onBlur={onBlur}
-                        options={(() => {
-                            const query = (value ?? '').toLowerCase()
-                            if (!query) {
-                                return options
-                            }
-                            const matched = options.filter(
-                                (option) =>
-                                    option.id.toLowerCase().includes(query) || option.name.toLowerCase().includes(query)
-                            )
-                            const exactMatch = options.some((option) => option.id.toLowerCase() === query)
-                            // A picked model or a free-typed name that matches
-                            // nothing should still let the user browse the
-                            // full list when reopening the dropdown.
-                            return matched.length > 0 && !exactMatch ? matched : options
-                        })()}
+                        options={filterModelOptions(options, query)}
                         mapOptionToString={(option: APIModelOption) => option.id}
                         mapOptionToNode={({ option }: { isSelected: boolean; option: APIModelOption }) => (
                             <div
