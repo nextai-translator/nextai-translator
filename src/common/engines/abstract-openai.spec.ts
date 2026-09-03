@@ -132,6 +132,31 @@ describe('AbstractOpenAI', () => {
         expect(onFinished).toHaveBeenCalledWith('stop')
     })
 
+    it('emits the final text segment when content and finish_reason arrive together in one chunk', async () => {
+        const engine = new TestOpenAIEngine('gpt-4')
+        const { req, onMessage, onFinished } = createMessageRequest()
+
+        vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+            expect(input).toBe('https://api.openai.com/v1/chat/completions')
+
+            // OpenRouter forwarding Gemini emits the last text segment together
+            // with finish_reason in the same SSE chunk instead of sending an
+            // empty delta on a trailing chunk like the OpenAI API does. The
+            // content must still be emitted and must not be dropped.
+            await options.onMessage(
+                JSON.stringify({
+                    // eslint-disable-next-line camelcase
+                    choices: [{ delta: { content: '最后一段', role: 'assistant' }, finish_reason: 'stop' }],
+                })
+            )
+        })
+
+        await engine.sendMessage(req)
+
+        expect(onMessage).toHaveBeenCalledWith({ content: '最后一段', role: 'assistant' })
+        expect(onFinished).toHaveBeenCalledWith('stop')
+    })
+
     it('does not send reasoning_effort for GPT-5 code models', async () => {
         const engine = new TestOpenAIEngine('gpt-5-code')
         const { req } = createMessageRequest()
