@@ -35,6 +35,7 @@ const useStyles = createUseStyles({
         minHeight: `${popupCardMinHeight}px`,
         width: 'max-content',
         overflow: 'hidden',
+        resize: 'both',
     },
 })
 
@@ -73,6 +74,14 @@ export default function InnerContainer({ children, reference, compact }: Props) 
         })
     }, [reference])
 
+    function handleResizeStart(event: MouseEvent) {
+        if (!draggableRef.current || event.target !== draggableRef.current) {
+            return
+        }
+        draggedRef.current = true
+        draggableRef.current.style.maxWidth = `calc(100vw - ${documentPadding * 2}px)`
+    }
+
     function handleOnDrag(event: DraggableEvent, data: DraggableData) {
         draggedRef.current = true
         setPosition({ x: data.x, y: data.y })
@@ -101,7 +110,7 @@ export default function InnerContainer({ children, reference, compact }: Props) 
                 ref={draggableRef}
                 className={styles.container}
                 id={popupCardInnerContainerId}
-                style={{ minWidth: 'auto', minHeight: 'auto', width: 'max-content' }}
+                style={{ minWidth: 'auto', minHeight: 'auto', width: 'max-content', resize: 'none' }}
             >
                 {children}
             </div>
@@ -115,6 +124,7 @@ export default function InnerContainer({ children, reference, compact }: Props) 
             bounds='html'
             position={position}
             onDrag={handleOnDrag}
+            onMouseDown={handleResizeStart}
         >
             <div ref={draggableRef} className={styles.container} id={popupCardInnerContainerId}>
                 {children}
