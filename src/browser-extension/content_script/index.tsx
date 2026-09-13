@@ -9,7 +9,9 @@ import { getContainer, queryPopupCardElement, queryPopupThumbElement } from './u
 import { create } from 'jss'
 import preset from 'jss-preset-default'
 import { JssProvider, createGenerateId } from 'react-jss'
+import { LayersManager } from 'baseui-sd/layer'
 import { Client as Styletron } from 'styletron-engine-atomic'
+import { Provider as StyletronProvider } from 'styletron-react'
 import { createRoot, Root } from 'react-dom/client'
 import hotkeys from 'hotkeys-js'
 import '@/common/i18n.js'
@@ -117,22 +119,26 @@ async function showPopupCard(reference: ReferenceElement, text: string, autoFocu
         <React.StrictMode>
             <GlobalSuspense>
                 <JSS jss={jss} generateId={generateId} classNamePrefix='__yetone-nextai-translator-jss-'>
-                    <InnerContainer reference={reference} compact={isCompact}>
-                        {isCompact ? (
-                            <InlineLookupContainer text={text} onClose={hidePopupCard} />
-                        ) : (
-                            <>
-                                <TitleBar pinned={settings.pinned} onClose={hidePopupCard} engine={engine} />
-                                <Translator
-                                    engine={engine}
-                                    autoFocus={autoFocus}
-                                    showSettingsIcon
-                                    defaultShowSettings={isUserscript}
-                                    showLogo={false}
-                                />
-                            </>
-                        )}
-                    </InnerContainer>
+                    <StyletronProvider value={engine}>
+                        <LayersManager>
+                            <InnerContainer reference={reference} compact={isCompact}>
+                                {isCompact ? (
+                                    <InlineLookupContainer text={text} onClose={hidePopupCard} />
+                                ) : (
+                                    <>
+                                        <TitleBar pinned={settings.pinned} onClose={hidePopupCard} engine={engine} />
+                                        <Translator
+                                            engine={engine}
+                                            autoFocus={autoFocus}
+                                            showSettingsIcon
+                                            defaultShowSettings={isUserscript}
+                                            showLogo={false}
+                                        />
+                                    </>
+                                )}
+                            </InnerContainer>
+                        </LayersManager>
+                    </StyletronProvider>
                 </JSS>
             </GlobalSuspense>
         </React.StrictMode>

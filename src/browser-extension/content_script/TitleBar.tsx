@@ -10,6 +10,7 @@ import { RxCross2, RxDrawingPin, RxDrawingPinFilled } from 'react-icons/rx'
 import LogoWithText from '../../common/components/LogoWithText'
 import { setSettings } from '../../common/utils'
 import { Tooltip } from '../../common/components/Tooltip'
+import { zIndex } from './consts'
 
 const useStyles = createUseStyles({
     container: ({ theme }: IThemedStyleProps) => ({
@@ -69,7 +70,7 @@ export default function TitleBar({ pinned = false, onClose, engine }: TitleBarPr
 
     return (
         <StyletronProvider value={engine}>
-            <BaseProvider theme={theme}>
+            <BaseProvider theme={theme} zIndex={Number(zIndex)}>
                 <div data-tauri-drag-region className={styles.container}>
                     <LogoWithText />
                     <div className={styles.actionsContainer}>
