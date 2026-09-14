@@ -1482,7 +1482,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'OpenAI', id: 'OpenAI' },
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
-              { label: 'API Route', id: 'APIRoute' },
+              { label: 'API-Route', id: 'APIRoute' },
               { label: 'LiteLLM', id: 'LiteLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
@@ -1505,7 +1505,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'OpenAI', id: 'OpenAI' },
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
-              { label: 'API Route', id: 'APIRoute' },
+              { label: 'API-Route', id: 'APIRoute' },
               { label: 'LiteLLM', id: 'LiteLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
@@ -3432,7 +3432,7 @@ export function InnerSettings({
                             <FormItem
                                 required={values.provider === 'APIRoute'}
                                 name='apiRouteAPIKey'
-                                label='API Route API Key'
+                                label='API-Route API Key'
                                 caption={
                                     <div>
                                         {t('Go to the')}{' '}
@@ -3442,7 +3442,7 @@ export function InnerSettings({
                                             rel='noreferrer'
                                             style={linkStyle}
                                         >
-                                            API Route Page
+                                            API-Route Page
                                         </a>{' '}
                                         {t('to get your API Key.')}
                                     </div>

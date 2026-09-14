@@ -19,7 +19,7 @@ describe('APIRoute', () => {
         } as any)
     })
 
-    it('uses the API Route OpenAI-compatible endpoint', async () => {
+    it('uses the API-Route OpenAI-compatible endpoint', async () => {
         const engine = new APIRoute()
         expect(await engine.getAPIURL()).toBe('https://global.api-route.com')
         expect(await engine.getAPIURLPath()).toBe('/v1/chat/completions')
