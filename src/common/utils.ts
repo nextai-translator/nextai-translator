@@ -117,6 +117,8 @@ const settingKeys: Record<keyof ISettings, number> = {
     teamoRouterAPIModel: 1,
     openRouterAPIKey: 1,
     openRouterAPIModel: 1,
+    apiRouteAPIKey: 1,
+    apiRouteAPIModel: 1,
     liteLLMAPIURL: 1,
     liteLLMAPIKey: 1,
     liteLLMAPIModel: 1,
@@ -615,6 +617,8 @@ export function getAPIKeyForProvider(provider: string, settings: ISettings): str
             return settings.teamoRouterAPIKey
         case 'OpenRouter':
             return settings.openRouterAPIKey
+        case 'APIRoute':
+            return settings.apiRouteAPIKey
         case 'LiteLLM':
             return settings.liteLLMAPIKey
         case 'Moonshot':
