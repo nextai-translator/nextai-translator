@@ -120,6 +120,8 @@ const settingKeys: Record<keyof ISettings, number> = {
     liteLLMAPIURL: 1,
     liteLLMAPIKey: 1,
     liteLLMAPIModel: 1,
+    atlasCloudAPIKey: 1,
+    atlasCloudAPIModel: 1,
     fontSize: 1,
     uiFontSize: 1,
     iconSize: 1,
@@ -617,6 +619,8 @@ export function getAPIKeyForProvider(provider: string, settings: ISettings): str
             return settings.openRouterAPIKey
         case 'LiteLLM':
             return settings.liteLLMAPIKey
+        case 'AtlasCloud':
+            return settings.atlasCloudAPIKey
         case 'Moonshot':
             return settings.moonshotAPIKey
         case 'MiniMax':
