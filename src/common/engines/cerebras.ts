@@ -96,20 +96,24 @@ export class Cerebras extends AbstractEngine {
                 if (!choices || choices.length === 0) {
                     return
                 }
-                const { finish_reason: finishReason } = choices[0]
+                const { finish_reason: finishReason, delta } = choices[0]
+
+                // Some OpenAI-compatible providers (e.g. Cerebras behind
+                // OpenRouter) emit the final text segment together with
+                // finish_reason in the same SSE chunk instead of sending an
+                // empty delta on a trailing chunk like the OpenAI API does.
+                // Emit the content before handling finish_reason so the last
+                // segment is not dropped.
+                const { content = '', role } = delta ?? {}
+                if (content) {
+                    await req.onMessage({ content, role })
+                }
+
                 if (finishReason) {
                     req.onFinished(finishReason)
                     finished = true
                     return
                 }
-
-                let targetTxt = ''
-
-                const { content = '', role } = choices[0].delta
-
-                targetTxt = content
-
-                await req.onMessage({ content: targetTxt, role })
             },
             onError: (err) => {
                 if (err instanceof Error) {
