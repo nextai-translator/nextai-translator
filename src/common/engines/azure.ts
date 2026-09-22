@@ -1,9 +1,14 @@
 /* eslint-disable camelcase */
+import { CUSTOM_MODEL_ID } from '../constants'
 import { getSettings } from '../utils'
 import { AbstractOpenAI } from './abstract-openai'
 import { IModel } from './interfaces'
 
 export class Azure extends AbstractOpenAI {
+    supportCustomModel(): boolean {
+        return true
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listModels(apiKey_: string | undefined): Promise<IModel[]> {
         return [
@@ -15,6 +20,7 @@ export class Azure extends AbstractOpenAI {
             { name: 'gpt-3.5-turbo-16k-0613', id: 'gpt-3.5-turbo-16k-0613' },
             { name: 'gpt-4', id: 'gpt-4' },
             { name: 'gpt-4o (recommended)', id: 'gpt-4o' },
+            { name: 'gpt-4o-mini', id: 'gpt-4o-mini' },
             { name: 'gpt-4-turbo', id: 'gpt-4-turbo' },
             { name: 'gpt-4-turbo-2024-04-09', id: 'gpt-4-turbo-2024-04-09' },
             { name: 'gpt-4-turbo-preview', id: 'gpt-4-turbo-preview' },
@@ -35,6 +41,9 @@ export class Azure extends AbstractOpenAI {
 
     async getAPIModel(): Promise<string> {
         const settings = await getSettings()
+        if (settings.azureAPIModel === CUSTOM_MODEL_ID) {
+            return settings.azureCustomModelName ?? ''
+        }
         return settings.azureAPIModel
     }
 
