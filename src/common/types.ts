@@ -149,6 +149,8 @@ export interface ISettings {
     teamoRouterAPIModel: string
     openRouterAPIKey: string
     openRouterAPIModel: string
+    requestyAPIKey: string
+    requestyAPIModel: string
     liteLLMAPIURL: string
     liteLLMAPIKey: string
     liteLLMAPIModel: string
