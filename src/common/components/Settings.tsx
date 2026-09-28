@@ -1482,6 +1482,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'OpenAI', id: 'OpenAI' },
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
+              { label: 'Requesty', id: 'Requesty' },
               { label: 'LiteLLM', id: 'LiteLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
@@ -1504,6 +1505,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'OpenAI', id: 'OpenAI' },
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
+              { label: 'Requesty', id: 'Requesty' },
               { label: 'LiteLLM', id: 'LiteLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
@@ -3418,6 +3420,45 @@ export function InnerSettings({
                                     provider='OpenRouter'
                                     currentProvider={values.provider}
                                     apiKey={values.openRouterAPIKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'Requesty' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'Requesty'}
+                                name='requestyAPIKey'
+                                label='Requesty API Key'
+                                caption={
+                                    <div>
+                                        {t('Go to the')}{' '}
+                                        <a
+                                            target='_blank'
+                                            href='https://app.requesty.ai/api-keys'
+                                            rel='noreferrer'
+                                            style={linkStyle}
+                                        >
+                                            Requesty Page
+                                        </a>{' '}
+                                        {t('to get your API Key.')}
+                                    </div>
+                                }
+                            >
+                                <Input autoFocus type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='requestyAPIModel'
+                                label={t('API Model')}
+                                required={values.provider === 'Requesty'}
+                            >
+                                <APIModelSelector
+                                    provider='Requesty'
+                                    currentProvider={values.provider}
+                                    apiKey={values.requestyAPIKey}
                                     onBlur={onBlur}
                                 />
                             </FormItem>
