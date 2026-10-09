@@ -3,6 +3,23 @@ import { getSettings } from '../utils'
 import { AbstractOpenAI } from './abstract-openai'
 import { IModel } from './interfaces'
 
+export function usesMaxCompletionTokens(model: string, apiURL: string): boolean {
+    const normalizedModel = model.trim().toLowerCase()
+    let hostname = ''
+
+    try {
+        hostname = new URL(apiURL).hostname
+    } catch {
+        // Keep the model-based fallback for older or partially configured URLs.
+    }
+
+    if (hostname.endsWith('.services.ai.azure.com')) {
+        return true
+    }
+
+    return /^(?:gpt-4o(?:[-.]|$)|gpt-4\.1(?:[-.]|$)|gpt-5(?:[-.]|$)|o\d(?:[-.]|$))/.test(normalizedModel)
+}
+
 export class Azure extends AbstractOpenAI {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listModels(apiKey_: string | undefined): Promise<IModel[]> {
@@ -56,7 +73,15 @@ export class Azure extends AbstractOpenAI {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async getBaseRequestBody(): Promise<Record<string, any>> {
         const settings = await getSettings()
-        const body = await super.getBaseRequestBody()
+        const body = await super.getBaseRequestBody(settings.azureAPIModel)
+
+        if (usesMaxCompletionTokens(settings.azureAPIModel, settings.azureAPIURL)) {
+            return {
+                ...body,
+                max_completion_tokens: settings.azMaxWords,
+            }
+        }
+
         return {
             ...body,
             max_tokens: settings.azMaxWords,
