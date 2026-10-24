@@ -7,6 +7,7 @@ import { listen, Event, emit } from '@tauri-apps/api/event'
 import { parse as bestEffortJSONParse } from 'best-effort-json-parser'
 import { commands } from '@/tauri/bindings'
 import { OPENAI_CHAT_COMPLETIONS_API_PATH, OPENAI_PREFERRED_DEFAULT_MODEL } from './openai-api-path'
+import { FetchStreamTimings, markPerf, recordPerfServerTimings } from './perf'
 
 export const defaultAPIURL = 'https://api.openai.com'
 export const defaultAPIURLPath = OPENAI_CHAT_COMPLETIONS_API_PATH
@@ -462,8 +463,11 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
         }
     })
 
+    markPerf('dispatch')
+
     if (isTauri()) {
         const id = uuidv4()
+        let isFirstChunk = true
         const unlistens: Array<() => void> = []
         let cleanedUp = false
         const unlisten = () => {
@@ -491,19 +495,39 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
                 reject()
                 emit('abort-fetch-stream', { id })
             })
-            listen('fetch-stream-status-code', (event: Event<{ id: string; status: number }>) => {
-                if (isAborted) {
-                    return
+            const statusListener = listen(
+                'fetch-stream-status-code',
+                (event: Event<{ id: string; status: number; timings?: FetchStreamTimings }>) => {
+                    if (isAborted) {
+                        return
+                    }
+                    const payload = event.payload
+                    if (payload.id === id) {
+                        // The Rust side measures what the JS side cannot see:
+                        // client setup (DNS/TCP/TLS) and time to response headers.
+                        if (payload.timings) {
+                            recordPerfServerTimings({
+                                clientMs: payload.timings.clientMs,
+                                headersMs: payload.timings.headersMs,
+                                firstChunkMs: payload.timings.firstChunkMs,
+                            })
+                        }
+                        markPerf('headers')
+                        onStatusCode?.(payload.status)
+                    }
                 }
-                if (event.payload.id === id) {
-                    onStatusCode?.(event.payload.status)
-                }
-            })
-                .then(track)
-                .catch((e) => reject(e))
-            listen(
+            )
+            const chunkListener = listen(
                 'fetch-stream-chunk',
-                (event: Event<{ id: string; data: string; done: boolean; status: number }>) => {
+                (
+                    event: Event<{
+                        id: string
+                        data: string
+                        done: boolean
+                        status: number
+                        timings?: FetchStreamTimings
+                    }>
+                ) => {
                     if (isAborted) {
                         return
                     }
@@ -513,6 +537,17 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
                     }
                     if (payload.done) {
                         return
+                    }
+                    if (isFirstChunk) {
+                        isFirstChunk = false
+                        markPerf('first-byte')
+                    }
+                    if (payload.timings) {
+                        recordPerfServerTimings({
+                            clientMs: payload.timings.clientMs,
+                            headersMs: payload.timings.headersMs,
+                            firstChunkMs: payload.timings.firstChunkMs,
+                        })
                     }
                     if (payload.status !== 200) {
                         try {
@@ -534,27 +569,39 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
                     }
                 }
             )
-                .then(track)
-                .catch((e) => {
-                    reject(e)
-                })
 
-            commands
-                .fetchStream(id, input, JSON.stringify(fetchOptions))
+            // Dispatch only once both listeners are registered. Registration is
+            // an IPC round trip, and a fast provider (a local Ollama, a cached
+            // completion) can answer faster than that - its first chunks were
+            // dropped on the floor, so translations started mid-sentence.
+            Promise.all([statusListener, chunkListener])
+                .then(([unlistenStatus, unlistenChunk]) => {
+                    track(unlistenStatus)
+                    track(unlistenChunk)
+                    if (isAborted || cleanedUp) {
+                        return
+                    }
+                    return commands
+                        .fetchStream(id, input, JSON.stringify(fetchOptions))
+                        .catch((e) => {
+                            reject(e)
+                        })
+                        .finally(() => {
+                            // Aborted requests must clean up their listeners too.
+                            unlisten()
+                            if (!isAborted) {
+                                resolve()
+                            }
+                        })
+                })
                 .catch((e) => {
                     reject(e)
-                })
-                .finally(() => {
-                    // Aborted requests must clean up their listeners too.
-                    unlisten()
-                    if (!isAborted) {
-                        resolve()
-                    }
                 })
         })
     }
 
     const resp = await fetcher(input, fetchOptions)
+    markPerf('headers')
     onStatusCode?.(resp.status)
     if (resp.status !== 200) {
         onError(await resp.json())
@@ -562,14 +609,24 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const reader = resp.body!.getReader()
+    // One decoder for the whole response, and `{ stream: true }` on every
+    // chunk: a network chunk can end in the middle of a multi-byte character
+    // (any CJK text hits this constantly), and decoding each chunk in
+    // isolation turned those halves into replacement characters.
+    const decoder = new TextDecoder()
     try {
+        let isFirstChunk = true
         // eslint-disable-next-line no-constant-condition
         while (true) {
             const { done, value } = await reader.read()
             if (done) {
                 break
             }
-            const str = new TextDecoder().decode(value)
+            if (isFirstChunk) {
+                isFirstChunk = false
+                markPerf('first-byte')
+            }
+            const str = decoder.decode(value, { stream: true })
             if (isJSONStream) {
                 partialJSONParser({ value: str, done })
             } else {

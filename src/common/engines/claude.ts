@@ -4,6 +4,7 @@ import { CUSTOM_MODEL_ID } from '../constants'
 import { fetchSSE, getSettings } from '../utils'
 import { AbstractEngine } from './abstract-engine'
 import { IModel, IMessageRequest } from './interfaces'
+import { markPerf } from '../perf'
 
 export class Claude extends AbstractEngine {
     supportCustomModel(): boolean {
@@ -69,6 +70,8 @@ export class Claude extends AbstractEngine {
 
         let hasError = false
         let finished = false
+        markPerf('request')
+        let hasFirstToken = false
         await fetchSSE(url, {
             method: 'POST',
             headers,
@@ -92,6 +95,10 @@ export class Claude extends AbstractEngine {
                         return
                     }
                     const { text } = delta
+                    if (!hasFirstToken) {
+                        hasFirstToken = true
+                        markPerf('first-token')
+                    }
                     await req.onMessage({ content: text, role: '' })
                     return
                 }

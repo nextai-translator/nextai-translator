@@ -38,6 +38,14 @@ export const commands = {
             else return { status: 'error', error: e as any }
         }
     },
+    /**
+     * Receives the renderer's finished latency traces and prints them to the
+     * app's stdout, which is the only observability channel a packaged build
+     * reliably has.
+     */
+    async logPerfLine(line: string): Promise<void> {
+        await TAURI_INVOKE('log_perf_line', { line })
+    },
     async writingCommand(): Promise<void> {
         await TAURI_INVOKE('writing_command')
     },

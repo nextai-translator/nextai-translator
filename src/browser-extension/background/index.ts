@@ -75,6 +75,11 @@ async function fetchWithStream(
         return
     }
 
+    // One decoder for the whole body, with `{ stream: true }` on every chunk:
+    // a chunk can end in the middle of a multi-byte character, and decoding
+    // each chunk in isolation turned those halves into replacement characters
+    // (every CJK translation hits this).
+    const decoder = new TextDecoder()
     try {
         // eslint-disable-next-line no-constant-condition
         while (true) {
@@ -82,10 +87,17 @@ async function fetchWithStream(
             if (done) {
                 break
             }
-            const str = new TextDecoder().decode(value)
+            const str = decoder.decode(value, { stream: true })
             port.postMessage({
                 ...responseSend,
                 data: str,
+            })
+        }
+        const rest = decoder.decode()
+        if (rest) {
+            port.postMessage({
+                ...responseSend,
+                data: rest,
             })
         }
     } catch (error) {

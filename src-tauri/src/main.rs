@@ -36,7 +36,7 @@ use windows::{get_translator_window, CheckUpdateEvent, CheckUpdateResultEvent};
 
 use crate::ax_context::{read_ax_context_narrow, read_ax_context_wide};
 use crate::config::{clear_config_cache, get_config_content, ConfigUpdatedEvent};
-use crate::fetch::fetch_stream;
+use crate::fetch::{fetch_stream, log_perf_line};
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
 use crate::tts::synthesize_local_tts;
@@ -378,6 +378,7 @@ fn main() {
             show_updater_window,
             get_translator_window_always_on_top,
             fetch_stream,
+            log_perf_line,
             writing_command,
             write_to_input,
             finish_writing,
