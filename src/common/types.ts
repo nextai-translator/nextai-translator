@@ -149,6 +149,8 @@ export interface ISettings {
     liteLLMAPIURL: string
     liteLLMAPIKey: string
     liteLLMAPIModel: string
+    atlasCloudAPIKey: string
+    atlasCloudAPIModel: string
     fontSize: number
     uiFontSize: number
     iconSize: number
