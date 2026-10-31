@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getSettings } from '../utils'
+import { fetchSSE, getSettings } from '../utils'
 import { Azure, usesMaxCompletionTokens } from './azure'
 
 vi.mock('../utils', () => ({
+    defaultAPIURL: 'https://api.openai.com',
+    defaultAPIURLPath: '/v1/chat/completions',
+    fetchSSE: vi.fn(),
     getSettings: vi.fn(),
 }))
 
@@ -49,5 +52,33 @@ describe('Azure token limit parameter', () => {
             expect(body.max_tokens).toBe(1024)
             expect(body.max_completion_tokens).toBeUndefined()
         })
+    })
+
+    it('sends max_output_tokens, not max_completion_tokens, to the Responses API', async () => {
+        vi.mocked(getSettings).mockResolvedValue({
+            azureAPIModel: 'gpt-5-mini',
+            azureAPIURL: 'https://example.openai.azure.com',
+            azureAPIURLPath: '/openai/v1/responses',
+            azureAPIKeys: 'test-key',
+            azMaxWords: 1024,
+        } as never)
+        let body = ''
+        vi.mocked(fetchSSE).mockImplementationOnce(async (_input, options) => {
+            body = (options as { body: string }).body
+        })
+
+        await new Azure().sendMessage({
+            rolePrompt: 'You are a translator',
+            commandPrompt: 'Translate hello to Chinese',
+            onMessage: vi.fn(),
+            onError: vi.fn(),
+            onFinished: vi.fn(),
+            signal: new AbortController().signal,
+        })
+
+        const sent = JSON.parse(body)
+        expect(sent.max_output_tokens).toBe(1024)
+        expect(sent.max_completion_tokens).toBeUndefined()
+        expect(sent.max_tokens).toBeUndefined()
     })
 })
