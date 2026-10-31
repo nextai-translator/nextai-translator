@@ -212,7 +212,6 @@
     "Using global settings": "グローバル設定を使用中",
     "Action Model": "アクションモデル",
     "Action Provider": "アクションプロバイダー",
-    "Custom Model Name": "カスタムモデル名",
     "Enable Extended Thinking": "拡張思考を有効化",
     "Thinking Level": "思考レベル",
     "Low": "低",
@@ -226,5 +225,7 @@
     "Download progress for {{voice}}": "{{voice}}のダウンロード進捗",
     "Verifying and extracting…": "検証・展開中…",
     "{{voice}} is ready": "{{voice}}の準備ができました",
-    "Failed to download {{voice}}": "{{voice}}のダウンロードに失敗しました"
+    "Failed to download {{voice}}": "{{voice}}のダウンロードに失敗しました",
+    "Back": "戻る",
+    "Forward": "進む"
 }

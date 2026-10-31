@@ -1,7 +1,16 @@
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { CodeBlock } from './CodeBlock'
 import { useTheme } from '../hooks/useTheme'
-import { Children, createElement, HTMLAttributeAnchorTarget, HTMLAttributes, ReactNode, useMemo } from 'react'
+import {
+    Children,
+    createElement,
+    CSSProperties,
+    HTMLAttributeAnchorTarget,
+    HTMLAttributes,
+    ReactNode,
+    useMemo,
+} from 'react'
 import { LangCode } from '../lang'
 import { TTSProvider } from '../tts/types'
 import { PhoneticText } from './PhoneticText'
@@ -33,7 +42,7 @@ export function Markdown({
     ttsRate,
     ttsVolume,
 }: IMarkdownProps) {
-    const { theme } = useTheme()
+    const { theme, themeType } = useTheme()
     const renderedTextComponents = useMemo(() => {
         if (!renderText) return {}
         const renderChildren = (value: ReactNode) =>
@@ -60,10 +69,20 @@ export function Markdown({
             strong: withRenderedText('strong'),
             em: withRenderedText('em'),
             del: withRenderedText('del'),
-            td: withRenderedText('td'),
-            th: withRenderedText('th'),
         }
     }, [renderText])
+
+    const isDarkTheme = themeType === 'dark'
+    const tableCellStyle: CSSProperties = {
+        border: `1px solid ${isDarkTheme ? 'rgba(255, 255, 255, 0.28)' : 'rgba(0, 0, 0, 0.25)'}`,
+        padding: '0.4rem 0.75rem',
+        textAlign: 'center',
+        verticalAlign: 'middle',
+        wordBreak: 'break-word',
+        overflowWrap: 'break-word',
+    }
+    const renderCellText = (content: ReactNode) =>
+        renderText ? Children.map(content, (child) => (typeof child === 'string' ? renderText(child) : child)) : content
 
     const renderPhonetics = (content: ReactNode) => {
         const renderChild = (child: string): ReactNode => {
@@ -88,6 +107,7 @@ export function Markdown({
 
     return (
         <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
                 ...renderedTextComponents,
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -131,6 +151,45 @@ export function Markdown({
                     }
                     const code = (children as string[])[0]
                     return <CodeBlock code={code} language={language} />
+                },
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                table({ node, children, ...props }) {
+                    return (
+                        <table
+                            {...props}
+                            style={{
+                                borderCollapse: 'collapse',
+                                margin: '0.6rem auto',
+                                maxWidth: '100%',
+                            }}
+                        >
+                            {children}
+                        </table>
+                    )
+                },
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                th({ node, isHeader, children, ...props }) {
+                    return (
+                        <th
+                            {...props}
+                            style={{
+                                ...tableCellStyle,
+                                fontWeight: 600,
+                                backgroundColor: isDarkTheme ? 'rgba(0, 0, 0, 0.45)' : '#374151',
+                                color: isDarkTheme ? theme.colors.contentPrimary : '#ffffff',
+                            }}
+                        >
+                            {renderCellText(children)}
+                        </th>
+                    )
+                },
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                td({ node, isHeader, children, ...props }) {
+                    return (
+                        <td {...props} style={tableCellStyle}>
+                            {renderCellText(children)}
+                        </td>
+                    )
                 },
             }}
         >

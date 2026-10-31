@@ -5,6 +5,7 @@ import { Action } from './internal-services/db'
 import { codeBlock, oneLine, oneLineTrim } from 'common-tags'
 import { getEngine } from './engines'
 import { getSettings } from './utils'
+import { ensurePerfTrace, markPerf, setPerfMeta } from './perf'
 
 export type TranslateMode = 'translate' | 'polishing' | 'summarize' | 'analyze' | 'explain-code' | 'big-bang'
 export type APIModel =
@@ -206,6 +207,15 @@ export class QuoteProcessor {
 const chineseLangCodes = ['zh-Hans', 'zh-Hant', 'lzh', 'yue', 'jdbhw', 'xdbhw']
 
 export async function translate(query: TranslateQuery) {
+    // The UI usually opens the trace before calling us; when a caller does not
+    // (extension popup, writing window, userscript) we start it here so every
+    // translation produces a latency breakdown.
+    ensurePerfTrace('translate', {
+        mode: query.mode,
+        from: query.mode === 'big-bang' ? undefined : query.detectFrom,
+        to: query.mode === 'big-bang' ? undefined : query.detectTo,
+        chars: query.text.length,
+    })
     let rolePrompt = ''
     let commandPrompt = ''
     let contentPrompt = query.text
@@ -406,8 +416,10 @@ If you understand, say "yes", and then we will begin.`
     if (contentPrompt) {
         commandPrompt = `Only reply the result and nothing else. ${commandPrompt}:\n\n${contentPrompt.trimEnd()}`
     }
+    markPerf('prompt')
 
     const settings = await getSettings()
+    markPerf('settings')
 
     // Use per-action provider/model if configured, otherwise fall back to global settings
     const effectiveProvider = (query.mode !== 'big-bang' && query.action?.provider) || settings.provider
@@ -426,6 +438,8 @@ If you understand, say "yes", and then we will begin.`
     }
 
     const engine = getEngine(effectiveProvider)
+    setPerfMeta('provider', effectiveProvider)
+    markPerf('engine')
     await engine.sendMessage({
         signal: query.signal,
         rolePrompt,

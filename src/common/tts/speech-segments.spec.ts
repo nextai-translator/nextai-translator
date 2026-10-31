@@ -28,6 +28,19 @@ describe('speech word segmentation', () => {
         expect(starts.at(-1)).toBeLessThan(1)
         expect(findSpeechWordIndex('Hello, nice to meet you.', 'en', 7)).toBe(1)
     })
+
+    it('accounts for punctuation pauses in timing estimates', () => {
+        const withComma = getSpeechWordStarts('Hello, world', 'en')
+        const withoutComma = getSpeechWordStarts('Hello world', 'en')
+        expect(withComma[1]).toBeGreaterThan(withoutComma[1])
+    })
+
+    it('weights long words by syllables rather than raw length', () => {
+        const starts = getSpeechWordStarts('a mysterious egg', 'en')
+        // "mysterious" (4 syllables) should occupy clearly more of the
+        // timeline than the single-syllable "a" before it
+        expect(starts[2] - starts[1]).toBeGreaterThan((starts[1] - starts[0]) * 2)
+    })
 })
 
 describe('spoken word alignment', () => {

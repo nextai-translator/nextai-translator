@@ -36,15 +36,15 @@ use windows::{get_translator_window, CheckUpdateEvent, CheckUpdateResultEvent};
 
 use crate::ax_context::{read_ax_context_narrow, read_ax_context_wide};
 use crate::config::{clear_config_cache, get_config_content, ConfigUpdatedEvent};
-use crate::fetch::fetch_stream;
+use crate::fetch::{fetch_stream, log_perf_line};
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
 use crate::tts::synthesize_local_tts;
 use crate::windows::{
     get_translator_window_always_on_top, get_writing_indicator_pending_lang,
     hide_inline_lookup_window, hide_quick_translator_window, hide_translator_window,
-    hide_writing_indicator, show_action_manager_window, show_history_window,
-    show_inline_lookup_window_command, show_quick_translator_window_command,
+    hide_writing_indicator, recover_webview_visibility, show_action_manager_window,
+    show_history_window, show_inline_lookup_window_command, show_quick_translator_window_command,
     show_translator_window_command, show_translator_window_with_selected_text_command,
     show_updater_window, show_writing_indicator, TRANSLATOR_WIN_NAME,
 };
@@ -347,6 +347,15 @@ fn bind_mouse_hook() {
 }
 
 fn main() {
+    // Without a working WebView2 Runtime not a single window can be created,
+    // so the app would only ever flash a frame and abort (discussion #1907).
+    // Fail up front with an actionable dialog instead.
+    #[cfg(target_os = "windows")]
+    if let Err(err) = tauri::webview_version() {
+        crate::windows::show_webview2_broken_dialog(&err.to_string());
+        std::process::exit(1);
+    }
+
     let _ = init_tokio_runtime();
     let silently = env::args().any(|arg| arg == "--silently");
 
@@ -369,6 +378,7 @@ fn main() {
             show_updater_window,
             get_translator_window_always_on_top,
             fetch_stream,
+            log_perf_line,
             writing_command,
             write_to_input,
             finish_writing,
@@ -390,6 +400,7 @@ fn main() {
             finish_ocr,
             cut_image,
             synthesize_local_tts,
+            recover_webview_visibility,
         ])
         .events(tauri_specta::collect_events![
             CheckUpdateEvent,
@@ -516,7 +527,12 @@ fn main() {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 loop {
-                    std::thread::sleep(std::time::Duration::from_secs(60 * 10));
+                    // MUST be the async sleep: std::thread::sleep here parks a
+                    // tokio runtime worker for 10 minutes, and with enough
+                    // concurrently blocked workers every tauri command (all
+                    // webview IPC) hangs - the app looks frozen while the UI
+                    // process is perfectly healthy.
+                    tokio::time::sleep(std::time::Duration::from_secs(60 * 10)).await;
                     let builder = handle.updater_builder();
                     let updater = builder.build().unwrap();
 
@@ -563,7 +579,7 @@ fn main() {
 
     #[cfg(target_os = "macos")]
     {
-        let config = config::get_config_by_app(app.handle()).unwrap();
+        let config = config::get_config_by_app(app.handle()).unwrap_or_default();
         if config.hide_the_icon_in_the_dock.unwrap_or(true) {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
         } else {
@@ -601,7 +617,7 @@ fn main() {
                                 .automatic_check_for_updates
                                 .is_some_and(|x| x == true)
                         {
-                            std::thread::sleep(std::time::Duration::from_secs(3));
+                            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                             show_updater_window();
                         }
                     }

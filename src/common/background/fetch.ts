@@ -16,6 +16,9 @@ export interface BackgroundFetchResponseMessage
 
 async function readText(stream: ReadableStream) {
     const reader = stream.getReader()
+    // `{ stream: true }` because the chunks this bridge re-encodes are byte
+    // slices of the original body and can split a multi-byte character.
+    const decoder = new TextDecoder()
     let text = ''
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -23,10 +26,9 @@ async function readText(stream: ReadableStream) {
         if (done) {
             break
         }
-        const str = new TextDecoder().decode(value)
-        text += str
+        text += decoder.decode(value, { stream: true })
     }
-    return text
+    return text + decoder.decode()
 }
 
 export async function backgroundFetch(input: string, options: RequestInit) {
@@ -42,7 +44,10 @@ export async function backgroundFetch(input: string, options: RequestInit) {
                 ? (ReadableStreamPolyfill as typeof window.ReadableStream)
                 : window.ReadableStream
             const textEncoder = new TextEncoder()
-            let resolved = false
+            // Guards the promise, not just the resolve path: every exit of this
+            // bridge (data, error, disconnect) has to settle it exactly once,
+            // otherwise the caller awaits forever.
+            let settled = false
             const browser = (await import('webextension-polyfill')).default
             const port = browser.runtime.connect({ name: BackgroundEventNames.fetch })
             const message: BackgroundFetchRequestMessage = {
@@ -58,11 +63,18 @@ export async function backgroundFetch(input: string, options: RequestInit) {
                             const e = new Error()
                             e.message = error.message
                             e.name = error.name
+                            // Erroring the stream only reaches a caller that
+                            // already has the Response; before that the
+                            // rejection is the only signal it can observe.
+                            if (!settled) {
+                                settled = true
+                                reject(e)
+                            }
                             controller.error(e)
                             return
                         }
                         controller.enqueue(textEncoder.encode(data))
-                        if (!resolved) {
+                        if (!settled) {
                             resolve({
                                 ...restResp,
                                 body: readableStream,
@@ -72,12 +84,23 @@ export async function backgroundFetch(input: string, options: RequestInit) {
                                     return JSON.parse(text)
                                 },
                             } as unknown as Response)
-                            resolved = true
+                            settled = true
                         }
                     })
 
                     port.onDisconnect.addListener(() => {
                         signal?.removeEventListener('abort', handleAbort)
+                        // The background disconnects on every terminal path,
+                        // including ones that never posted a message (an abort,
+                        // or the service worker being torn down mid-request).
+                        if (!settled) {
+                            settled = true
+                            reject(
+                                signal?.aborted
+                                    ? new DOMException('Aborted', 'AbortError')
+                                    : new Error('The connection to the background was closed before any response')
+                            )
+                        }
                         try {
                             controller.close()
                         } catch (e) {

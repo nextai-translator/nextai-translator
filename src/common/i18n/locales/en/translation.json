@@ -104,6 +104,7 @@
     "Update": "Update",
     "Action": "Action",
     "All Actions": "All actions",
+    "No available action": "No available action",
     "Action Manager": "Action Manager",
     "Clear All History?": "Clear all history?",
     "Clear History": "Clear history",
@@ -209,8 +210,10 @@
     "to get the solutions.": "to get the solutions.",
     "ChatGLM": "ChatGLM",
     "Font size": "Font size",
-    "Font family": "Font family",
     "UI font size": "UI font size",
+    "Controls the font size of the input box and the translation text.": "Controls the font size of the input box and the translation text.",
+    "Controls the font size of the app interface (toolbar, menus, labels).": "Controls the font size of the app interface (toolbar, menus, labels).",
+    "Font family": "Font family",
     "UI font family": "UI font family",
     "Icon size": "Icon size",
     "Window background blur": "Window background blur",
@@ -231,7 +234,6 @@
     "Using global settings": "Using global settings",
     "Action Model": "Action Model",
     "Action Provider": "Action Provider",
-    "Custom Model Name": "Custom Model Name",
     "Enable Extended Thinking": "Enable Extended Thinking",
     "Thinking Level": "Thinking Level",
     "Low": "Low",
@@ -245,5 +247,7 @@
     "Download progress for {{voice}}": "Download progress for {{voice}}",
     "Verifying and extracting…": "Verifying and extracting…",
     "{{voice}} is ready": "{{voice}} is ready",
-    "Failed to download {{voice}}": "Failed to download {{voice}}"
+    "Failed to download {{voice}}": "Failed to download {{voice}}",
+    "Back": "Back",
+    "Forward": "Forward"
 }

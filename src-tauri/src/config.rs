@@ -32,7 +32,7 @@ pub struct ProxyConfig {
     pub no_proxy: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
     pub hotkey: Option<String>,
@@ -72,7 +72,16 @@ pub fn _get_config_by_app(app: &AppHandle) -> Result<Config, Box<dyn std::error:
         return Ok(config_cache.clone());
     }
     let config_content = get_config_content_by_app(app)?;
-    let config: Config = serde_json::from_str(&config_content)?;
+    // A config that fails typed deserialization (e.g. a field written with a
+    // wrong type by some older version) must never prevent startup: the very
+    // first get_config() happens while building the tray, before any window
+    // exists, so an error here used to kill the app before anything appeared
+    // on screen. Fall back to defaults and leave the file alone - the webview
+    // reads it as untyped JSON and may still be perfectly happy with it.
+    let config: Config = serde_json::from_str(&config_content).unwrap_or_else(|e| {
+        println!("config.json does not match the expected schema ({e}), using defaults");
+        Config::default()
+    });
     CONFIG_CACHE.lock().replace(config.clone());
     Ok(config)
 }
@@ -87,7 +96,7 @@ pub fn clear_config_cache() {
 #[specta::specta]
 pub fn get_config_content() -> String {
     if let Some(app) = APP_HANDLE.get() {
-        return get_config_content_by_app(app).unwrap();
+        return get_config_content_by_app(app).unwrap_or_else(|_| "{}".to_string());
     } else {
         return "{}".to_string();
     }
@@ -123,8 +132,23 @@ pub fn get_config_content_by_app(app: &AppHandle) -> Result<String, String> {
     }
     let config_path = app_config_dir.join("config.json");
     if config_path.exists() {
-        match std::fs::read_to_string(config_path) {
-            Ok(content) => Ok(content),
+        match std::fs::read_to_string(&config_path) {
+            Ok(content) => {
+                if serde_json::from_str::<serde_json::Value>(&content).is_ok() {
+                    Ok(content)
+                } else {
+                    // The file is not valid JSON - typically truncated by a
+                    // crash or power loss in the middle of a settings save.
+                    // It survives uninstall/reinstall, so without recovery
+                    // here every version of the app crashes at launch
+                    // forever. Keep the bytes for manual recovery and start
+                    // over with defaults.
+                    let _ =
+                        std::fs::rename(&config_path, app_config_dir.join("config.json.corrupted"));
+                    let _ = std::fs::write(&config_path, "{}");
+                    Ok("{}".to_string())
+                }
+            }
             Err(_) => Err("Failed to read config file".to_string()),
         }
     } else {

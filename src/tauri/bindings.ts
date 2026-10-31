@@ -38,6 +38,14 @@ export const commands = {
             else return { status: 'error', error: e as any }
         }
     },
+    /**
+     * Receives the renderer's finished latency traces and prints them to the
+     * app's stdout, which is the only observability channel a packaged build
+     * reliably has.
+     */
+    async logPerfLine(line: string): Promise<void> {
+        await TAURI_INVOKE('log_perf_line', { line })
+    },
     async writingCommand(): Promise<void> {
         await TAURI_INVOKE('writing_command')
     },
@@ -115,6 +123,17 @@ export const commands = {
             if (e instanceof Error) throw e
             else return { status: 'error', error: e as any }
         }
+    },
+    /**
+     * Self-healing hook for the page-side visibility watchdog: when a page
+     * believes it is hidden but its window is actually (at least partially)
+     * visible on screen, force WebKit to re-evaluate. WebKit's own recovery
+     * notification is unreliable after occlusion/raise cycles, which left
+     * pages permanently throttled (frozen rendering, crawling async work)
+     * while sitting right in front of the user.
+     */
+    async recoverWebviewVisibility(): Promise<void> {
+        await TAURI_INVOKE('recover_webview_visibility')
     },
 }
 

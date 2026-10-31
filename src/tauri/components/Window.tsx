@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
+import { invoke } from '@tauri-apps/api/core'
 import { Effect } from '@tauri-apps/api/window'
 import { useTheme } from '../../common/hooks/useTheme'
 import { Provider as StyletronProvider } from 'styletron-react'
@@ -172,6 +173,41 @@ export function InnerWindow(props: IWindowProps) {
         }
         void applyEffects()
     }, [settings.enableBackgroundBlur, settings.themeType])
+
+    // Self-healing visibility recovery, gated on user interaction: WebKit
+    // sometimes fails to notify a page that its window became visible again
+    // after occlusion/raise cycles, leaving it throttled as 'hidden' while
+    // the user is looking at it. A user interacting with the page proves the
+    // window is visible, so that is the only moment we force WebKit to
+    // re-evaluate. (A periodic watchdog is NOT safe here: while a window is
+    // genuinely mostly-occluded, forcing visibility loops against WebKit's
+    // own occlusion tracking and the visibilitychange churn re-renders the
+    // app forever.)
+    useEffect(() => {
+        if (!isTauri()) {
+            return undefined
+        }
+        let lastRecover = 0
+        const onInteraction = () => {
+            if (document.visibilityState !== 'hidden') {
+                return
+            }
+            const now = Date.now()
+            if (now - lastRecover < 5000) {
+                return
+            }
+            lastRecover = now
+            void invoke('recover_webview_visibility').catch(() => undefined)
+        }
+        document.addEventListener('pointerdown', onInteraction, true)
+        document.addEventListener('keydown', onInteraction, true)
+        document.addEventListener('wheel', onInteraction, { capture: true, passive: true })
+        return () => {
+            document.removeEventListener('pointerdown', onInteraction, true)
+            document.removeEventListener('keydown', onInteraction, true)
+            document.removeEventListener('wheel', onInteraction, { capture: true } as EventListenerOptions)
+        }
+    }, [])
 
     useEffect(() => {
         if (!props.isTranslatorWindow) {
