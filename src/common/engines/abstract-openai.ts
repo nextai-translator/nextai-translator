@@ -5,6 +5,7 @@ import { getUniversalFetch } from '../universal-fetch'
 import { defaultAPIURL, defaultAPIURLPath, fetchSSE, getSettings } from '../utils'
 import { AbstractEngine } from './abstract-engine'
 import { IMessageRequest, IModel } from './interfaces'
+import { markPerf, setPerfMeta } from '../perf'
 
 export abstract class AbstractOpenAI extends AbstractEngine {
     private isResponsesAPIPath(apiURLPath: string): boolean {
@@ -221,9 +222,14 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 }
                 delete body.reasoning_effort
             }
-            if (body.max_tokens !== undefined && body.max_output_tokens === undefined) {
-                body.max_output_tokens = body.max_tokens
-                delete body.max_tokens
+            // The Responses API knows neither Chat Completions token limit, only max_output_tokens.
+            for (const key of ['max_completion_tokens', 'max_tokens']) {
+                if (body[key] !== undefined) {
+                    if (body.max_output_tokens === undefined) {
+                        body.max_output_tokens = body[key]
+                    }
+                    delete body[key]
+                }
             }
             delete body.temperature
             delete body.top_p
@@ -259,6 +265,18 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         }
         let finished = false // finished can be called twice because event.data is 1. "finish_reason":"stop"; 2. [DONE]
         let responsesHasStreamedText = false
+        // Every awaited call above is a phase of its own on the desktop build,
+        // where each one used to be an IPC round trip plus a config file read.
+        markPerf('request')
+        setPerfMeta('model', model)
+        let hasFirstToken = false
+        const markFirstToken = () => {
+            if (hasFirstToken) {
+                return
+            }
+            hasFirstToken = true
+            markPerf('first-token')
+        }
         await fetchSSE(url, {
             method: 'POST',
             headers,
@@ -287,6 +305,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                         const { delta = '' } = resp
                         responsesHasStreamedText = true
                         if (delta) {
+                            markFirstToken()
                             await req.onMessage({ content: delta, role: 'assistant' })
                         }
                         return
@@ -294,6 +313,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                     if (type === 'response.output_text.done') {
                         const { text = '' } = resp
                         if (!responsesHasStreamedText && text) {
+                            markFirstToken()
                             await req.onMessage({ content: text, role: 'assistant' })
                         }
                         return
@@ -302,6 +322,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                         if (!responsesHasStreamedText) {
                             const outputText = this.extractResponseOutputText(resp)
                             if (outputText) {
+                                markFirstToken()
                                 await req.onMessage({ content: outputText, role: 'assistant' })
                             }
                         }
@@ -348,11 +369,15 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                     // It's used for Azure OpenAI Service's legacy parameters.
                     targetTxt = choices[0].text
 
+                    markFirstToken()
                     await req.onMessage({ content: targetTxt, role: '' })
                 } else {
                     const { content = '', role } = choices[0].delta
 
                     targetTxt = content
+                    if (targetTxt) {
+                        markFirstToken()
+                    }
 
                     await req.onMessage({ content: targetTxt, role })
                 }
