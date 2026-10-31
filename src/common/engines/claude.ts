@@ -3,6 +3,7 @@ import { urlJoin } from 'url-join-ts'
 import { CUSTOM_MODEL_ID } from '../constants'
 import { fetchSSE, getSettings } from '../utils'
 import { AbstractEngine } from './abstract-engine'
+import { effortForThinkingBudget, isAdaptiveThinkingOnly } from './claude-request'
 import { IModel, IMessageRequest } from './interfaces'
 import { markPerf } from '../perf'
 
@@ -22,6 +23,9 @@ export class Claude extends AbstractEngine {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listModels(apiKey_: string | undefined): Promise<IModel[]> {
         return Promise.resolve([
+            { id: 'claude-opus-5-5', name: 'Claude Opus 5.5' },
+            { id: 'claude-sonnet-5-5', name: 'Claude Sonnet 5.5' },
+            { id: 'claude-haiku-5-5', name: 'Claude Haiku 5.5' },
             { id: 'claude-opus-4-6', name: 'Claude Opus 4.6' },
             { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6' },
             { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5' },
@@ -57,7 +61,20 @@ export class Claude extends AbstractEngine {
                 },
             ],
         }
-        if (req.thinkingBudget) {
+        if (isAdaptiveThinkingOnly(model)) {
+            // These models answer a temperature, a thinking budget or both with a 400, so neither is sent.
+            if (req.thinkingBudget) {
+                body.thinking = { type: 'adaptive' }
+                body.output_config = { effort: effortForThinkingBudget(req.thinkingBudget) }
+                body.max_tokens = 32000
+            } else {
+                // Most of these models think by default and some refuse `thinking: { type: 'disabled' }`,
+                // so thinking off is sent as a low effort, which keeps the thinking short. It still
+                // counts toward max_tokens.
+                body.output_config = { effort: 'low' }
+                body.max_tokens = 16000
+            }
+        } else if (req.thinkingBudget) {
             body.thinking = {
                 type: 'enabled',
                 budget_tokens: req.thinkingBudget,
@@ -95,6 +112,10 @@ export class Claude extends AbstractEngine {
                         return
                     }
                     const { text } = delta
+                    // A thinking block ends with a signature_delta, which carries no text.
+                    if (typeof text !== 'string') {
+                        return
+                    }
                     if (!hasFirstToken) {
                         hasFirstToken = true
                         markPerf('first-token')
