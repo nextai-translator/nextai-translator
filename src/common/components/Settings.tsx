@@ -774,6 +774,7 @@ function Ii18nSelector({ value, onChange, onBlur }: Ii18nSelectorProps) {
         { label: '한국어', id: 'ko' },
         { label: 'ไทย', id: 'th' },
         { label: 'Türkçe', id: 'tr' },
+        { label: 'Português (Brasil)', id: 'pt-BR' },
     ]
 
     return (
