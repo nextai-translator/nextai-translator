@@ -1024,15 +1024,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         setStoreIsTranslating(isLoading)
     }, [isLoading])
 
-    // Emit streaming translation to inline lookup window (desktop only)
-    useEffect(() => {
-        if (!isDesktopApp()) return
-        const done = !isLoading && translatedText !== ''
-        import('@tauri-apps/api/event').then(({ emitTo }) => {
-            emitTo('inline_lookup', 'translated-text-chunk', { text: translatedText, done })
-        })
-    }, [translatedText, isLoading])
-
     const [translateDeps, setTranslateDeps] = useState<{
         sourceLang?: LangCode
         targetLang?: LangCode
@@ -1180,6 +1171,24 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         isWordModeRef.current = isWordMode
     }, [isWordMode])
     const [errorMessage, setErrorMessage] = useState('')
+    // Emit streaming translation to inline lookup window (desktop only). A request is over once it
+    // has stopped loading, with or without text: one that fails or answers nothing must stop the
+    // popup's spinner too, and the popup shows the error, since the main window is hidden (#1938).
+    const inlineLookupLoadedRef = useRef(false)
+    useEffect(() => {
+        if (!isDesktopApp()) return
+        if (isLoading) {
+            inlineLookupLoadedRef.current = true
+        }
+        const done = !isLoading && (inlineLookupLoadedRef.current || translatedText !== '' || errorMessage !== '')
+        if (done) {
+            // The next request starts fresh: a render between two requests is not an end.
+            inlineLookupLoadedRef.current = false
+        }
+        import('@tauri-apps/api/event').then(({ emitTo }) => {
+            emitTo('inline_lookup', 'translated-text-chunk', { text: translatedText, done, error: errorMessage })
+        })
+    }, [translatedText, isLoading, errorMessage])
     const startLoading = useCallback(() => {
         setIsLoading(true)
     }, [])
