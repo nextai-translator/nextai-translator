@@ -7,6 +7,7 @@ import { listen, Event, emit } from '@tauri-apps/api/event'
 import { parse as bestEffortJSONParse } from 'best-effort-json-parser'
 import { commands } from '@/tauri/bindings'
 import { OPENAI_CHAT_COMPLETIONS_API_PATH, OPENAI_PREFERRED_DEFAULT_MODEL } from './openai-api-path'
+import { FetchStreamTimings, markPerf, recordPerfServerTimings } from './perf'
 
 export const defaultAPIURL = 'https://api.openai.com'
 export const defaultAPIURLPath = OPENAI_CHAT_COMPLETIONS_API_PATH
@@ -113,6 +114,13 @@ const settingKeys: Record<keyof ISettings, number> = {
     deepSeekAPIModel: 1,
     cerebrasAPIKey: 1,
     cerebrasAPIModel: 1,
+    teamoRouterAPIKey: 1,
+    teamoRouterAPIModel: 1,
+    openRouterAPIKey: 1,
+    openRouterAPIModel: 1,
+    liteLLMAPIURL: 1,
+    liteLLMAPIKey: 1,
+    liteLLMAPIModel: 1,
     fontSize: 1,
     uiFontSize: 1,
     iconSize: 1,
@@ -175,6 +183,11 @@ export async function getSettings(): Promise<ISettings> {
     if (!settings.themeType) {
         settings.themeType = 'followTheSystem'
     }
+    if (settings.tts?.provider === 'EdgeTTS') {
+        // The Edge TTS public endpoint no longer works, so route users who
+        // had selected it onto the local engine.
+        settings.tts = { ...settings.tts, provider: 'LocalTTS' }
+    }
     if (settings.provider === 'Azure') {
         if (!settings.azureAPIKeys) {
             settings.azureAPIKeys = settings.apiKeys
@@ -232,6 +245,9 @@ export async function getSettings(): Promise<ISettings> {
     if (!settings.groqAPIURLPath) {
         settings.groqAPIURLPath = '/openai/v1/chat/completions'
     }
+    if (!settings.liteLLMAPIURL) {
+        settings.liteLLMAPIURL = 'http://localhost:4000'
+    }
     if (!settings.claudeAPIURL) {
         settings.claudeAPIURL = 'https://api.anthropic.com'
     }
@@ -245,7 +261,7 @@ export async function getSettings(): Promise<ISettings> {
         settings.fontSize = 15
     }
     if (settings.uiFontSize === undefined || settings.uiFontSize === null) {
-        settings.uiFontSize = 12
+        settings.uiFontSize = 14
     }
     if (settings.iconSize === undefined || settings.iconSize === null) {
         settings.iconSize = 15
@@ -447,11 +463,29 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
         }
     })
 
+    markPerf('dispatch')
+
     if (isTauri()) {
         const id = uuidv4()
+        let isFirstChunk = true
         const unlistens: Array<() => void> = []
+        let cleanedUp = false
         const unlisten = () => {
+            cleanedUp = true
             unlistens.forEach((cb) => cb())
+            unlistens.length = 0
+        }
+        // listen() registrations resolve asynchronously and can land AFTER
+        // cleanup already ran (fast failures, aborts) - such listeners used
+        // to leak forever, and every leaked listener is iterated on every
+        // stream chunk of every later request, grinding the whole app down
+        // the longer the session runs.
+        const track = (cb: () => void) => {
+            if (cleanedUp) {
+                cb()
+                return
+            }
+            unlistens.push(cb)
         }
         return await new Promise<void>((resolve, reject) => {
             let isAborted = false
@@ -461,19 +495,39 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
                 reject()
                 emit('abort-fetch-stream', { id })
             })
-            listen('fetch-stream-status-code', (event: Event<{ id: string; status: number }>) => {
-                if (isAborted) {
-                    return
+            const statusListener = listen(
+                'fetch-stream-status-code',
+                (event: Event<{ id: string; status: number; timings?: FetchStreamTimings }>) => {
+                    if (isAborted) {
+                        return
+                    }
+                    const payload = event.payload
+                    if (payload.id === id) {
+                        // The Rust side measures what the JS side cannot see:
+                        // client setup (DNS/TCP/TLS) and time to response headers.
+                        if (payload.timings) {
+                            recordPerfServerTimings({
+                                clientMs: payload.timings.clientMs,
+                                headersMs: payload.timings.headersMs,
+                                firstChunkMs: payload.timings.firstChunkMs,
+                            })
+                        }
+                        markPerf('headers')
+                        onStatusCode?.(payload.status)
+                    }
                 }
-                if (event.payload.id === id) {
-                    onStatusCode?.(event.payload.status)
-                }
-            })
-                .then((cb) => unlistens.push(cb))
-                .catch((e) => reject(e))
-            listen(
+            )
+            const chunkListener = listen(
                 'fetch-stream-chunk',
-                (event: Event<{ id: string; data: string; done: boolean; status: number }>) => {
+                (
+                    event: Event<{
+                        id: string
+                        data: string
+                        done: boolean
+                        status: number
+                        timings?: FetchStreamTimings
+                    }>
+                ) => {
                     if (isAborted) {
                         return
                     }
@@ -483,6 +537,17 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
                     }
                     if (payload.done) {
                         return
+                    }
+                    if (isFirstChunk) {
+                        isFirstChunk = false
+                        markPerf('first-byte')
+                    }
+                    if (payload.timings) {
+                        recordPerfServerTimings({
+                            clientMs: payload.timings.clientMs,
+                            headersMs: payload.timings.headersMs,
+                            firstChunkMs: payload.timings.firstChunkMs,
+                        })
                     }
                     if (payload.status !== 200) {
                         try {
@@ -504,29 +569,39 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
                     }
                 }
             )
-                .then((cb) => {
-                    unlistens.push(cb)
-                })
-                .catch((e) => {
-                    reject(e)
-                })
 
-            commands
-                .fetchStream(id, input, JSON.stringify(fetchOptions))
-                .catch((e) => {
-                    reject(e)
-                })
-                .finally(() => {
-                    if (isAborted) {
+            // Dispatch only once both listeners are registered. Registration is
+            // an IPC round trip, and a fast provider (a local Ollama, a cached
+            // completion) can answer faster than that - its first chunks were
+            // dropped on the floor, so translations started mid-sentence.
+            Promise.all([statusListener, chunkListener])
+                .then(([unlistenStatus, unlistenChunk]) => {
+                    track(unlistenStatus)
+                    track(unlistenChunk)
+                    if (isAborted || cleanedUp) {
                         return
                     }
-                    unlisten?.()
-                    resolve()
+                    return commands
+                        .fetchStream(id, input, JSON.stringify(fetchOptions))
+                        .catch((e) => {
+                            reject(e)
+                        })
+                        .finally(() => {
+                            // Aborted requests must clean up their listeners too.
+                            unlisten()
+                            if (!isAborted) {
+                                resolve()
+                            }
+                        })
+                })
+                .catch((e) => {
+                    reject(e)
                 })
         })
     }
 
     const resp = await fetcher(input, fetchOptions)
+    markPerf('headers')
     onStatusCode?.(resp.status)
     if (resp.status !== 200) {
         onError(await resp.json())
@@ -534,14 +609,24 @@ export async function fetchSSE(input: string, options: FetchSSEOptions) {
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const reader = resp.body!.getReader()
+    // One decoder for the whole response, and `{ stream: true }` on every
+    // chunk: a network chunk can end in the middle of a multi-byte character
+    // (any CJK text hits this constantly), and decoding each chunk in
+    // isolation turned those halves into replacement characters.
+    const decoder = new TextDecoder()
     try {
+        let isFirstChunk = true
         // eslint-disable-next-line no-constant-condition
         while (true) {
             const { done, value } = await reader.read()
             if (done) {
                 break
             }
-            const str = new TextDecoder().decode(value)
+            if (isFirstChunk) {
+                isFirstChunk = false
+                markPerf('first-byte')
+            }
+            const str = decoder.decode(value, { stream: true })
             if (isJSONStream) {
                 partialJSONParser({ value: str, done })
             } else {
@@ -583,6 +668,12 @@ export function getAPIKeyForProvider(provider: string, settings: ISettings): str
             return settings.deepSeekAPIKey
         case 'Cerebras':
             return settings.cerebrasAPIKey
+        case 'TeamoRouter':
+            return settings.teamoRouterAPIKey
+        case 'OpenRouter':
+            return settings.openRouterAPIKey
+        case 'LiteLLM':
+            return settings.liteLLMAPIKey
         case 'Moonshot':
             return settings.moonshotAPIKey
         case 'MiniMax':

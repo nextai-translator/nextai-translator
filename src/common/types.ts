@@ -142,6 +142,13 @@ export interface ISettings {
     cohereAPIModel: string
     cerebrasAPIKey: string
     cerebrasAPIModel: string
+    teamoRouterAPIKey: string
+    teamoRouterAPIModel: string
+    openRouterAPIKey: string
+    openRouterAPIModel: string
+    liteLLMAPIURL: string
+    liteLLMAPIKey: string
+    liteLLMAPIModel: string
     fontSize: number
     uiFontSize: number
     iconSize: number

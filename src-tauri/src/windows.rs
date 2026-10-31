@@ -28,7 +28,7 @@ pub const HISTORY_WIN_NAME: &str = "history";
 pub const INLINE_LOOKUP_WIN_NAME: &str = "inline_lookup";
 pub const QUICK_TRANSLATOR_WIN_NAME: &str = "quick_translator";
 pub const WRITING_INDICATOR_WIN_NAME: &str = "writing_indicator";
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub const SCREENSHOT_WIN_NAME: &str = "screenshot";
 
 fn get_dummy_window() -> tauri::WebviewWindow {
@@ -40,15 +40,15 @@ fn get_dummy_window() -> tauri::WebviewWindow {
         }
         None => {
             debug_println!("Create dummy window!");
-            tauri::WebviewWindowBuilder::new(
-                app_handle,
-                "dummy",
-                tauri::WebviewUrl::App("src/tauri/dummy.html".into()),
+            checked_build(
+                tauri::WebviewWindowBuilder::new(
+                    app_handle,
+                    "dummy",
+                    tauri::WebviewUrl::App("src/tauri/dummy.html".into()),
+                )
+                .title("Dummy")
+                .visible(false),
             )
-            .title("Dummy")
-            .visible(false)
-            .build()
-            .unwrap()
         }
     }
 }
@@ -219,6 +219,7 @@ pub fn close_thumb() {
 pub fn show_thumb(x: i32, y: i32) {
     let window = get_thumb_window(x, y);
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 }
 
 pub fn get_thumb_window(x: i32, y: i32) -> tauri::WebviewWindow {
@@ -257,7 +258,7 @@ pub fn get_thumb_window(x: i32, y: i32) -> tauri::WebviewWindow {
                 builder = builder.shadow(false);
             }
 
-            let window = builder.build().unwrap();
+            let window = checked_build(builder);
             #[cfg(target_os = "windows")]
             {
                 // use SetWindowLongPtrW in tao page to disable minimize, maximize and close buttons
@@ -331,17 +332,94 @@ pub fn post_process_window<R: tauri::Runtime>(window: &tauri::WebviewWindow<R>) 
     }
 }
 
+/// Tauri/wry never propagate native window visibility to the WebView2
+/// controller on Windows: a window created with `.visible(false)` — or hidden
+/// later via `window.hide()` — keeps `ICoreWebView2Controller.IsVisible ==
+/// TRUE`, so its renderer keeps compositing frames. For the transparent,
+/// always-alive panel windows (Quick Translator, writing indicator) that
+/// meant constant WebView2 CPU usage while the app sat idle in the tray
+/// (#1883, #1886). Explicitly sync the controller whenever those panels are
+/// created hidden, shown, or hidden again.
+#[cfg(target_os = "windows")]
+pub fn set_webview_visibility(window: &tauri::WebviewWindow, visible: bool) {
+    let _ = window.with_webview(move |webview| unsafe {
+        let _ = webview.controller().SetIsVisible(visible);
+    });
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn set_webview_visibility(_window: &tauri::WebviewWindow, _visible: bool) {}
+
+// A broken WebView2 Runtime (Windows' registry says it is installed but its
+// files are gone, so its own installer refuses to repair it - see discussion
+// #1907) used to surface as an unwrap panic on the first webview build: the
+// window frame flashed and the process aborted with 0xc0000409 before any UI
+// existed, at every launch, across reinstalls. Explain and point at the
+// repair download instead.
+#[cfg(target_os = "windows")]
+pub fn show_webview2_broken_dialog(detail: &str) {
+    use windows::core::PCWSTR;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        MessageBoxW, IDOK, MB_ICONERROR, MB_OKCANCEL, MB_SETFOREGROUND,
+    };
+
+    let encode = |s: &str| {
+        s.encode_utf16()
+            .chain(std::iter::once(0))
+            .collect::<Vec<u16>>()
+    };
+    let text = encode(&format!(
+        "NextAI Translator cannot start because the Microsoft Edge WebView2 Runtime on this computer is missing or broken.\n\nClick OK to open the WebView2 download page, run the installer as administrator, then start NextAI Translator again.\n\nTechnical detail: {detail}"
+    ));
+    let caption = encode("NextAI Translator");
+    let pressed = unsafe {
+        MessageBoxW(
+            None,
+            PCWSTR(text.as_ptr()),
+            PCWSTR(caption.as_ptr()),
+            MB_OKCANCEL | MB_ICONERROR | MB_SETFOREGROUND,
+        )
+    };
+    if pressed == IDOK {
+        let _ = std::process::Command::new("rundll32")
+            .args([
+                "url.dll,FileProtocolHandler",
+                "https://developer.microsoft.com/microsoft-edge/webview2/",
+            ])
+            .spawn();
+    }
+}
+
+fn handle_webview_build_failure(e: &tauri::Error) -> ! {
+    #[cfg(target_os = "windows")]
+    {
+        show_webview2_broken_dialog(&e.to_string());
+        std::process::exit(1);
+    }
+    #[cfg(not(target_os = "windows"))]
+    panic!("failed to create webview window: {e}");
+}
+
+pub fn checked_build<R: tauri::Runtime, M: tauri::Manager<R>>(
+    builder: tauri::WebviewWindowBuilder<'_, R, M>,
+) -> tauri::WebviewWindow<R> {
+    match builder.build() {
+        Ok(window) => window,
+        Err(e) => handle_webview_build_failure(&e),
+    }
+}
+
 pub fn build_window<'a, R: tauri::Runtime, M: tauri::Manager<R>>(
     builder: tauri::WebviewWindowBuilder<'a, R, M>,
 ) -> tauri::WebviewWindow<R> {
     #[cfg(target_os = "macos")]
     {
-        let window = builder
-            .title_bar_style(tauri::TitleBarStyle::Overlay)
-            .hidden_title(true)
-            .transparent(true)
-            .build()
-            .unwrap();
+        let window = checked_build(
+            builder
+                .title_bar_style(tauri::TitleBarStyle::Overlay)
+                .hidden_title(true)
+                .transparent(true),
+        );
 
         post_process_window(&window);
 
@@ -350,7 +428,7 @@ pub fn build_window<'a, R: tauri::Runtime, M: tauri::Manager<R>>(
 
     #[cfg(not(target_os = "macos"))]
     {
-        let window = builder.transparent(true).decorations(true).build().unwrap();
+        let window = checked_build(builder.transparent(true).decorations(true));
 
         post_process_window(&window);
 
@@ -365,6 +443,71 @@ pub async fn show_translator_window_command() {
     show_translator_window(false, false, true);
 }
 
+/// WKWebView tracks page visibility from view/window state; after a
+/// hide() -> show() cycle this can desync, leaving the page believing it
+/// is hidden (rendering paused, timers throttled, process eventually
+/// suspended) while the window is visibly on screen - the UI then looks
+/// frozen. Toggling the view's hidden flag forces WebKit to re-evaluate.
+///
+/// Hiding the first responder hands first-responder status to its next
+/// valid key view, and the webview has none, so the window itself is left
+/// as first responder and unhiding does not give it back. Keystrokes then
+/// stop reaching the page: the input looks focused but typing does nothing
+/// until the user clicks it (#1915). Hand first responder back afterwards.
+#[cfg(target_os = "macos")]
+pub fn nudge_webview_visibility(window: &tauri::WebviewWindow) {
+    let _ = window.with_webview(|webview| unsafe {
+        use cocoa::base::{id, nil, BOOL, NO, YES};
+        use objc::{msg_send, sel, sel_impl};
+        let wv = webview.inner() as id;
+        let _: () = msg_send![wv, setHidden: YES];
+        let _: () = msg_send![wv, setHidden: NO];
+        let ns_window: id = msg_send![wv, window];
+        if ns_window != nil {
+            let first_responder: id = msg_send![ns_window, firstResponder];
+            if first_responder == nil || first_responder == ns_window {
+                let _: BOOL = msg_send![ns_window, makeFirstResponder: wv];
+            }
+        }
+    });
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn nudge_webview_visibility(_window: &tauri::WebviewWindow) {}
+
+/// Self-healing hook for the page-side visibility watchdog: when a page
+/// believes it is hidden but its window is actually (at least partially)
+/// visible on screen, force WebKit to re-evaluate. WebKit's own recovery
+/// notification is unreliable after occlusion/raise cycles, which left
+/// pages permanently throttled (frozen rendering, crawling async work)
+/// while sitting right in front of the user.
+#[tauri::command]
+#[specta::specta]
+pub fn recover_webview_visibility(window: tauri::WebviewWindow) {
+    #[cfg(target_os = "macos")]
+    {
+        let w = window.clone();
+        let _ = window.run_on_main_thread(move || {
+            use cocoa::base::id;
+            use objc::{msg_send, sel, sel_impl};
+            const NS_WINDOW_OCCLUSION_STATE_VISIBLE: u64 = 1 << 1;
+            if let Ok(ns_win) = w.ns_window() {
+                let occlusion: u64 = unsafe { msg_send![ns_win as id, occlusionState] };
+                if occlusion & NS_WINDOW_OCCLUSION_STATE_VISIBLE == 0 {
+                    // The window really is fully occluded or hidden; the
+                    // page's hidden state is correct.
+                    return;
+                }
+            }
+            nudge_webview_visibility(&w);
+        });
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = window;
+    }
+}
+
 pub fn show_translator_window(
     center: bool,
     to_mouse_position: bool,
@@ -372,6 +515,46 @@ pub fn show_translator_window(
 ) -> tauri::WebviewWindow {
     let window = get_translator_window(center, to_mouse_position, set_focus);
     window.show().unwrap();
+    nudge_webview_visibility(&window);
+    if set_focus {
+        // An accessory app cannot reliably raise its windows above other
+        // apps' windows on macOS 14+ (cooperative activation may be
+        // refused), so a summoned window could stay buried under the window
+        // stack - looking frozen. Temporarily float it to guarantee it
+        // surfaces, then restore the user's pin preference.
+        let _ = window.set_always_on_top(true);
+        if !ALWAYS_ON_TOP.load(Ordering::Acquire) {
+            let w = window.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(Duration::from_millis(1500));
+                if !ALWAYS_ON_TOP.load(Ordering::Acquire) {
+                    let _ = w.set_always_on_top(false);
+                }
+            });
+        }
+    }
+    // On macOS 14+, cooperative activation can silently refuse to activate
+    // an accessory app: the window is on screen but never becomes key, so
+    // every click and keystroke goes nowhere and the UI appears frozen.
+    // Explicitly activate the app and make the window key.
+    #[cfg(target_os = "macos")]
+    if set_focus {
+        let w = window.clone();
+        let _ = window.run_on_main_thread(move || unsafe {
+            use cocoa::appkit::NSApp;
+            use cocoa::base::{id, nil, YES};
+            use objc::{msg_send, sel, sel_impl};
+
+            let app: id = NSApp();
+            // The modern cooperative request first, then the legacy forced
+            // variant as a fallback for systems where cooperation is refused.
+            let _: () = msg_send![app, activate];
+            let _: () = msg_send![app, activateIgnoringOtherApps: YES];
+            if let Ok(ns_win) = w.ns_window() {
+                let _: () = msg_send![ns_win as id, makeKeyAndOrderFront: nil];
+            }
+        });
+    }
     window
 }
 
@@ -551,6 +734,7 @@ pub async fn show_action_manager_window() {
     let window = get_action_manager_window();
     window.center().unwrap();
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 }
 
 pub fn get_action_manager_window() -> tauri::WebviewWindow {
@@ -588,6 +772,7 @@ pub async fn show_history_window() {
     let window = get_history_window();
     window.center().unwrap();
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 }
 
 pub fn get_history_window() -> tauri::WebviewWindow {
@@ -623,6 +808,7 @@ pub fn show_settings_window() {
     let window = get_settings_window();
     window.center().unwrap();
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 }
 
 pub fn get_settings_window() -> tauri::WebviewWindow {
@@ -660,10 +846,13 @@ pub struct CheckUpdateResultEvent(UpdateResult);
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, specta::Type, tauri_specta::Event)]
 pub struct CheckUpdateEvent;
 
+#[tauri::command]
+#[specta::specta]
 pub fn show_updater_window() {
     let window = get_updater_window();
     window.center().unwrap();
     window.show().unwrap();
+    nudge_webview_visibility(&window);
 
     let handle = APP_HANDLE.get().unwrap();
     CheckUpdateEvent::listen(handle, move |event| {
@@ -756,7 +945,7 @@ pub fn get_inline_lookup_window() -> tauri::WebviewWindow {
             .decorations(false)
             .shadow(true);
 
-            let window = builder.build().unwrap();
+            let window = checked_build(builder);
             post_process_window(&window);
 
             window
@@ -821,6 +1010,7 @@ pub fn show_inline_lookup_window(
         let _ = window.set_position(window_physical_position);
     }
     window.show().unwrap();
+    nudge_webview_visibility(&window);
     window
 }
 
@@ -845,13 +1035,19 @@ pub async fn show_inline_lookup_window_command() {
     show_inline_lookup_window(false, true, true);
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub fn show_screenshot_window() {
+    // A leftover window from a failed run has already consumed its one-shot
+    // capture flow; reusing it silently does nothing (#1872), so always
+    // start from a fresh window.
+    let handle = APP_HANDLE.get().unwrap();
+    if let Some(window) = handle.get_webview_window(SCREENSHOT_WIN_NAME) {
+        let _ = window.destroy();
+    }
     let _ = get_screenshot_window();
-    // window.show().unwrap();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub fn get_screenshot_window() -> tauri::WebviewWindow {
     let handle = APP_HANDLE.get().unwrap();
     let current_monitor = get_current_monitor();
@@ -880,19 +1076,29 @@ pub fn get_screenshot_window() -> tauri::WebviewWindow {
         }
     };
 
-    window.set_resizable(false).unwrap();
-    window.set_skip_taskbar(true).unwrap();
+    if let Err(e) = window.set_resizable(false) {
+        eprintln!("screenshot window set_resizable failed: {e:?}");
+    }
+    if let Err(e) = window.set_skip_taskbar(true) {
+        eprintln!("screenshot window set_skip_taskbar failed: {e:?}");
+    }
     #[cfg(target_os = "macos")]
     {
         let size = current_monitor.size();
-        window.set_decorations(false).unwrap();
-        window.set_size(*size).unwrap();
+        if let Err(e) = window.set_decorations(false) {
+            eprintln!("screenshot window set_decorations failed: {e:?}");
+        }
+        if let Err(e) = window.set_size(*size) {
+            eprintln!("screenshot window set_size failed: {e:?}");
+        }
     }
 
     #[cfg(not(target_os = "macos"))]
     window.set_fullscreen(true).unwrap();
 
-    window.set_always_on_top(true).unwrap();
+    if let Err(e) = window.set_always_on_top(true) {
+        eprintln!("screenshot window set_always_on_top failed: {e:?}");
+    }
 
     window
 }
@@ -957,9 +1163,11 @@ pub fn get_quick_translator_window() -> tauri::WebviewWindow {
     .transparent(true)
     .shadow(true);
 
-    let window = builder.build().unwrap();
+    let window = checked_build(builder);
     post_process_window(&window);
     apply_quick_translator_panel_traits(&window);
+    // Created hidden — suspend the WebView2 renderer until first show.
+    set_webview_visibility(&window, false);
 
     #[cfg(target_os = "macos")]
     {
@@ -1005,7 +1213,9 @@ fn position_quick_translator_window(window: &tauri::WebviewWindow) {
 pub fn show_quick_translator_window() -> tauri::WebviewWindow {
     let window = get_quick_translator_window();
     position_quick_translator_window(&window);
+    set_webview_visibility(&window, true);
     let _ = window.show();
+    nudge_webview_visibility(&window);
     let _ = window.set_always_on_top(true);
     if let Err(e) = APP_HANDLE
         .get()
@@ -1031,6 +1241,7 @@ pub async fn hide_quick_translator_window() {
         if let Some(window) = handle.get_webview_window(QUICK_TRANSLATOR_WIN_NAME) {
             let _ = window.set_always_on_top(false);
             let _ = window.hide();
+            set_webview_visibility(&window, false);
         }
     }
 }
@@ -1111,9 +1322,11 @@ pub fn get_writing_indicator_window() -> tauri::WebviewWindow {
     .transparent(true)
     .shadow(false);
 
-    let window = builder.build().unwrap();
+    let window = checked_build(builder);
     post_process_window(&window);
     apply_writing_indicator_panel_traits(&window);
+    // Created hidden — suspend the WebView2 renderer until first show.
+    set_webview_visibility(&window, false);
 
     // Native macOS HUD vibrancy material. With the NSWindow background set to
     // clearColor (above) the effect material is what the user actually sees
@@ -1223,7 +1436,9 @@ pub async fn show_writing_indicator(target_language: String) {
     // Mirror state for the React mount-time poll.
     *WRITING_INDICATOR_PENDING_LANG.lock() = Some(target_language.clone());
 
+    set_webview_visibility(&window, true);
     let _ = window.show();
+    nudge_webview_visibility(&window);
     let _ = window.set_always_on_top(true);
     if let Some(handle) = APP_HANDLE.get() {
         // Broadcast (not emit_to). Targeted delivery to a webview that may
@@ -1269,6 +1484,7 @@ pub async fn hide_writing_indicator() {
                     debug_println!("[indicator] window.hide() failed: {:?}", e);
                 }
             }
+            set_webview_visibility(&window, false);
         }
     }
 }

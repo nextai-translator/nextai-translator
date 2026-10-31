@@ -24,6 +24,9 @@ export const commands = {
     async showHistoryWindow(): Promise<void> {
         await TAURI_INVOKE('show_history_window')
     },
+    async showUpdaterWindow(): Promise<void> {
+        await TAURI_INVOKE('show_updater_window')
+    },
     async getTranslatorWindowAlwaysOnTop(): Promise<boolean> {
         return await TAURI_INVOKE('get_translator_window_always_on_top')
     },
@@ -34,6 +37,14 @@ export const commands = {
             if (e instanceof Error) throw e
             else return { status: 'error', error: e as any }
         }
+    },
+    /**
+     * Receives the renderer's finished latency traces and prints them to the
+     * app's stdout, which is the only observability channel a packaged build
+     * reliably has.
+     */
+    async logPerfLine(line: string): Promise<void> {
+        await TAURI_INVOKE('log_perf_line', { line })
     },
     async writingCommand(): Promise<void> {
         await TAURI_INVOKE('writing_command')
@@ -104,6 +115,25 @@ export const commands = {
     },
     async cutImage(left: number, top: number, width: number, height: number): Promise<void> {
         await TAURI_INVOKE('cut_image', { left, top, width, height })
+    },
+    async synthesizeLocalTts(text: string, lang: string, rate: number): Promise<Result<string, string>> {
+        try {
+            return { status: 'ok', data: await TAURI_INVOKE('synthesize_local_tts', { text, lang, rate }) }
+        } catch (e) {
+            if (e instanceof Error) throw e
+            else return { status: 'error', error: e as any }
+        }
+    },
+    /**
+     * Self-healing hook for the page-side visibility watchdog: when a page
+     * believes it is hidden but its window is actually (at least partially)
+     * visible on screen, force WebKit to re-evaluate. WebKit's own recovery
+     * notification is unreliable after occlusion/raise cycles, which left
+     * pages permanently throttled (frozen rendering, crawling async work)
+     * while sitting right in front of the user.
+     */
+    async recoverWebviewVisibility(): Promise<void> {
+        await TAURI_INVOKE('recover_webview_visibility')
     },
 }
 

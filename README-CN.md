@@ -69,10 +69,11 @@
 7. 有桌面端应用，全平台（Windows + macOS + Linux）支持！
 8. 支持截图翻译
 9. 支持生词本，同时支持基于生词本里的单词生成帮助记忆的内容
-10. 支持 [OpenAI](https://openai.com/)、[Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service)、[MiniMax](https://www.minimaxi.com/) 等多种 LLM 服务商
+10. 支持 [OpenAI](https://openai.com/)、[TeamoRouter](https://teamorouter.com/?utm_source=nextai_translator&utm_medium=referral&utm_campaign=ai_directory)、[Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service)、[MiniMax](https://www.minimaxi.com/) 等多种 LLM 服务商
 
 # 使用准备
 
+-   （推荐）使用 [**TeamoRouter**](https://teamorouter.com/?utm_source=nextai_translator&utm_medium=referral&utm_campaign=ai_directory) —— 一个兼容 OpenAI 协议的 LLM 网关，一个 API Key 即可调用 OpenAI、Claude、Gemini 等模型，最高可省 90%。已内置：在设置里将服务商选择为 **TeamoRouter**，填入 API Key 即可使用。
 -   （必须）申请 [OpenAI API Key](https://platform.openai.com/account/api-keys) 或 [Azure OpenAI Service API Key](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/chatgpt-quickstart?tabs=command-line&pivots=rest-api#retrieve-key-and-endpoint)
 -   （可选）如果无法访问 OpenAI，可以使用 OpenAI API Proxy
 

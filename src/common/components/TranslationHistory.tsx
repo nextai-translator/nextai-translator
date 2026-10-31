@@ -522,6 +522,19 @@ export function TranslationHistory(props: TranslationHistoryProps) {
                 className={styles.historyActions}
                 style={{
                     justifyContent: isModal ? 'flex-start' : 'flex-end',
+                    ...(isModal
+                        ? {}
+                        : {
+                              position: 'sticky',
+                              bottom: 0,
+                              padding: '12px 0',
+                              background: color(theme.colors.backgroundPrimary)
+                                  .alpha(themeType === 'dark' ? 0.92 : 0.94)
+                                  .string(),
+                              backdropFilter: 'blur(10px)',
+                              WebkitBackdropFilter: 'blur(10px)',
+                              borderTop: `1px solid ${theme.colors.borderTransparent}`,
+                          }),
                 }}
             >
                 <Button size='compact' kind='tertiary' onClick={onClose}>

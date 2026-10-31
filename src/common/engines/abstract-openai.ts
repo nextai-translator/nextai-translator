@@ -5,6 +5,7 @@ import { getUniversalFetch } from '../universal-fetch'
 import { defaultAPIURL, defaultAPIURLPath, fetchSSE, getSettings } from '../utils'
 import { AbstractEngine } from './abstract-engine'
 import { IMessageRequest, IModel } from './interfaces'
+import { markPerf, setPerfMeta } from '../perf'
 
 export abstract class AbstractOpenAI extends AbstractEngine {
     private isResponsesAPIPath(apiURLPath: string): boolean {
@@ -55,6 +56,14 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         const settings = await getSettings()
         if (settings.noModelsAPISupport) {
             return [
+                { name: 'gpt-5.6', id: 'gpt-5.6' },
+                { name: 'gpt-5.1', id: 'gpt-5.1' },
+                { name: 'gpt-5', id: 'gpt-5' },
+                { name: 'gpt-5-mini (recommended)', id: 'gpt-5-mini' },
+                { name: 'gpt-5-nano', id: 'gpt-5-nano' },
+                { name: 'gpt-4.1', id: 'gpt-4.1' },
+                { name: 'gpt-4.1-mini', id: 'gpt-4.1-mini' },
+                { name: 'gpt-4o-mini', id: 'gpt-4o-mini' },
                 { name: 'gpt-3.5-turbo-1106', id: 'gpt-3.5-turbo-1106' },
                 { name: 'gpt-3.5-turbo', id: 'gpt-3.5-turbo' },
                 { name: 'gpt-3.5-turbo-0613', id: 'gpt-3.5-turbo-0613' },
@@ -62,7 +71,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 { name: 'gpt-3.5-turbo-16k', id: 'gpt-3.5-turbo-16k' },
                 { name: 'gpt-3.5-turbo-16k-0613', id: 'gpt-3.5-turbo-16k-0613' },
                 { name: 'gpt-4', id: 'gpt-4' },
-                { name: 'gpt-4o (recommended)', id: 'gpt-4o' },
+                { name: 'gpt-4o', id: 'gpt-4o' },
                 { name: 'gpt-4-turbo', id: 'gpt-4-turbo' },
                 { name: 'gpt-4-turbo-2024-04-09', id: 'gpt-4-turbo-2024-04-09' },
                 { name: 'gpt-4-turbo-preview', id: 'gpt-4-turbo-preview' },
@@ -169,8 +178,11 @@ export abstract class AbstractOpenAI extends AbstractEngine {
             return { model, stream: true }
         }
 
-        // GPT-5 base/mini/nano models — use 'minimal' reasoning effort
-        if (/^gpt-5(\.0)?(-mini|-nano)?(\b|-)/.test(modelLower)) {
+        // Only the undotted gpt-5 series (gpt-5 / gpt-5-mini / gpt-5-nano,
+        // including dated suffixes) supports reasoning_effort 'minimal';
+        // dotted successors dropped it, so any gpt-5.x that slipped past the
+        // guards above must not receive it (#1853).
+        if (/^gpt-5(-mini|-nano)?(\b|-)/.test(modelLower) && !/^gpt-5\./.test(modelLower)) {
             return { model, stream: true, reasoning_effort: 'minimal' }
         }
 
@@ -210,9 +222,14 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 }
                 delete body.reasoning_effort
             }
-            if (body.max_tokens !== undefined && body.max_output_tokens === undefined) {
-                body.max_output_tokens = body.max_tokens
-                delete body.max_tokens
+            // The Responses API knows neither Chat Completions token limit, only max_output_tokens.
+            for (const key of ['max_completion_tokens', 'max_tokens']) {
+                if (body[key] !== undefined) {
+                    if (body.max_output_tokens === undefined) {
+                        body.max_output_tokens = body[key]
+                    }
+                    delete body[key]
+                }
             }
             delete body.temperature
             delete body.top_p
@@ -248,6 +265,18 @@ export abstract class AbstractOpenAI extends AbstractEngine {
         }
         let finished = false // finished can be called twice because event.data is 1. "finish_reason":"stop"; 2. [DONE]
         let responsesHasStreamedText = false
+        // Every awaited call above is a phase of its own on the desktop build,
+        // where each one used to be an IPC round trip plus a config file read.
+        markPerf('request')
+        setPerfMeta('model', model)
+        let hasFirstToken = false
+        const markFirstToken = () => {
+            if (hasFirstToken) {
+                return
+            }
+            hasFirstToken = true
+            markPerf('first-token')
+        }
         await fetchSSE(url, {
             method: 'POST',
             headers,
@@ -276,6 +305,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                         const { delta = '' } = resp
                         responsesHasStreamedText = true
                         if (delta) {
+                            markFirstToken()
                             await req.onMessage({ content: delta, role: 'assistant' })
                         }
                         return
@@ -283,6 +313,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                     if (type === 'response.output_text.done') {
                         const { text = '' } = resp
                         if (!responsesHasStreamedText && text) {
+                            markFirstToken()
                             await req.onMessage({ content: text, role: 'assistant' })
                         }
                         return
@@ -291,6 +322,7 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                         if (!responsesHasStreamedText) {
                             const outputText = this.extractResponseOutputText(resp)
                             if (outputText) {
+                                markFirstToken()
                                 await req.onMessage({ content: outputText, role: 'assistant' })
                             }
                         }
@@ -325,25 +357,30 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 if (!choices || choices.length === 0) {
                     return
                 }
-                const { finish_reason: finishReason } = choices[0]
+                const { finish_reason: finishReason, delta } = choices[0]
+
+                // OpenAI ends a stream with an empty delta plus finish_reason,
+                // but some proxies (e.g. OpenRouter -> Gemini) send the final
+                // text segment together with finish_reason in the same chunk.
+                // Emit the content first so the last segment is never dropped.
+                if (isChatAPI) {
+                    const { content = '', role } = delta ?? {}
+                    if (content) {
+                        markFirstToken()
+                        await req.onMessage({ content, role })
+                    }
+                } else {
+                    const text = choices[0].text
+                    if (text) {
+                        markFirstToken()
+                        await req.onMessage({ content: text, role: '' })
+                    }
+                }
+
                 if (finishReason) {
                     req.onFinished(finishReason)
                     finished = true
                     return
-                }
-
-                let targetTxt = ''
-                if (!isChatAPI) {
-                    // It's used for Azure OpenAI Service's legacy parameters.
-                    targetTxt = choices[0].text
-
-                    await req.onMessage({ content: targetTxt, role: '' })
-                } else {
-                    const { content = '', role } = choices[0].delta
-
-                    targetTxt = content
-
-                    await req.onMessage({ content: targetTxt, role })
                 }
             },
             onError: (err) => {
