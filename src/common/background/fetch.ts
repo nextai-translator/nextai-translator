@@ -16,6 +16,9 @@ export interface BackgroundFetchResponseMessage
 
 async function readText(stream: ReadableStream) {
     const reader = stream.getReader()
+    // `{ stream: true }` because the chunks this bridge re-encodes are byte
+    // slices of the original body and can split a multi-byte character.
+    const decoder = new TextDecoder()
     let text = ''
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -23,10 +26,9 @@ async function readText(stream: ReadableStream) {
         if (done) {
             break
         }
-        const str = new TextDecoder().decode(value)
-        text += str
+        text += decoder.decode(value, { stream: true })
     }
-    return text
+    return text + decoder.decode()
 }
 
 export async function backgroundFetch(input: string, options: RequestInit) {
