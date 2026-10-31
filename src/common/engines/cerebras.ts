@@ -1,8 +1,32 @@
 /* eslint-disable camelcase */
+import { getUniversalFetch } from '../universal-fetch'
 import { getSettings } from '../utils'
 import { AbstractOpenAI } from './abstract-openai'
+import { IModel } from './interfaces'
 
 export class Cerebras extends AbstractOpenAI {
+    // The inherited listModels would return OpenAI's GPT list when the global
+    // noModelsAPISupport setting is on; Cerebras always has a models endpoint.
+    async listModels(apiKey: string | undefined): Promise<IModel[]> {
+        if (!apiKey) {
+            return []
+        }
+        const fetcher = getUniversalFetch()
+        const resp = await fetcher('https://api.cerebras.ai/v1/models', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+        })
+        if (!resp.ok) {
+            throw new Error(`Failed to fetch models: ${resp.statusText}`)
+        }
+        const data = await resp.json()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return data.data.map((item: any) => ({ id: item.id, name: item.id }))
+    }
+
     async getAPIModel(): Promise<string> {
         const settings = await getSettings()
         return settings.cerebrasAPIModel

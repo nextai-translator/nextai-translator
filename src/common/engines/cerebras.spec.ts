@@ -5,6 +5,8 @@ import { fetchSSE } from '../utils'
 
 vi.mock('../utils', () => {
     return {
+        defaultAPIURL: 'https://api.openai.com',
+        defaultAPIURLPath: '/v1/chat/completions',
         fetchSSE: vi.fn(),
         getSettings: vi.fn().mockResolvedValue({
             cerebrasAPIKey: 'test-api-key',
