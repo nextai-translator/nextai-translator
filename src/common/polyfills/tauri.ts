@@ -4,16 +4,58 @@ import { writeTextFile, rename, BaseDirectory } from '@tauri-apps/plugin-fs'
 import { Proxy, ProxyConfig, fetch } from '@tauri-apps/plugin-http'
 import * as utils from '../utils'
 import { IBrowser, ISettings } from '../types'
-import { commands } from '@/tauri/bindings'
+import { commands, events } from '@/tauri/bindings'
+
+// Reading the config on every `getSettings()` call used to mean one IPC round
+// trip plus a config.json read per call, and a single translation performs
+// ~10 of them (API URL, path, model, key, headers, ...) before the request is
+// even dispatched. The parsed config is cached here instead, and invalidated
+// whenever anything can have changed it: a write from this window, or the
+// `config-updated-event` broadcast by the settings window.
+let cachedConfig: Record<string, any> | null = null
+
+export function invalidateTauriSettingsCache(): void {
+    cachedConfig = null
+}
 
 async function getSettings(): Promise<Record<string, any>> {
-    const settings = await commands.getConfigContent()
-    return JSON.parse(settings)
+    if (!cachedConfig) {
+        const content = await commands.getConfigContent()
+        try {
+            cachedConfig = JSON.parse(content)
+        } catch (e) {
+            // A config written by a newer/older version must not take settings
+            // reads down with it: fall back to the defaults of each field.
+            console.error('Failed to parse config.json', e)
+            cachedConfig = {}
+        }
+    }
+    return cachedConfig as Record<string, any>
+}
+
+// Another window (the settings window) can rewrite config.json, so the cache
+// has to follow its broadcast. Guarded because this module is also reachable
+// from browser/test builds, where the Tauri event API does not exist.
+const isTauriRuntime = typeof window !== 'undefined' && (window as any)['__TAURI__'] !== undefined
+if (isTauriRuntime) {
+    try {
+        events.configUpdatedEvent
+            .listen(() => {
+                invalidateTauriSettingsCache()
+            })
+            .catch((e) => {
+                console.debug('config update listener unavailable', e)
+            })
+    } catch (e) {
+        console.debug('config update listener unavailable', e)
+    }
 }
 
 class BrowserStorageSync {
     async get(keys: string[]): Promise<Record<string, any>> {
         const settings = await getSettings()
+        // A fresh object per call, like the storage API it emulates: callers do
+        // assign defaults onto what they get back.
         return keys.reduce((acc, key) => {
             return {
                 ...acc,
@@ -42,6 +84,7 @@ class BrowserStorageSync {
             oldPathBaseDir: BaseDirectory.AppConfig,
             newPathBaseDir: BaseDirectory.AppConfig,
         })
+        cachedConfig = newSettings
     }
 }
 

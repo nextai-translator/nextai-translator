@@ -33,6 +33,7 @@ import {
     isBrowserExtensionContentScript,
     isMacOS,
 } from '../utils'
+import { beginPerfTrace, finishPerfTrace, markPerfOnce } from '../perf'
 import { InnerSettings } from './Settings'
 import { containerID, popupCardInnerContainerId } from '../../browser-extension/content_script/consts'
 import Dropzone from 'react-dropzone'
@@ -1012,20 +1013,16 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
     useEffect(() => {
         setStoreTranslatedText(translatedText)
+        // The commit that first puts characters on screen closes the
+        // submit->visible gap of the latency trace (see ../perf).
+        if (translatedText) {
+            markPerfOnce('paint')
+        }
     }, [translatedText])
 
     useEffect(() => {
         setStoreIsTranslating(isLoading)
     }, [isLoading])
-
-    // Emit streaming translation to inline lookup window (desktop only)
-    useEffect(() => {
-        if (!isDesktopApp()) return
-        const done = !isLoading && translatedText !== ''
-        import('@tauri-apps/api/event').then(({ emitTo }) => {
-            emitTo('inline_lookup', 'translated-text-chunk', { text: translatedText, done })
-        })
-    }, [translatedText, isLoading])
 
     const [translateDeps, setTranslateDeps] = useState<{
         sourceLang?: LangCode
@@ -1050,11 +1047,15 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
     // Streamed tokens are buffered and flushed on a timer: re-rendering the
     // whole result on every token is a >100ms long task for long texts,
-    // which freezes the UI and makes clicks unresponsive.
+    // which freezes the UI and makes clicks unresponsive. The very first token
+    // bypasses the buffer, because holding it back for the coalescing window is
+    // pure added latency exactly where users notice it most.
     const streamBufferRef = useRef('')
     const streamFlushTimerRef = useRef<number | null>(null)
+    const hasPaintedFirstTokenRef = useRef(false)
     const resetStreamBuffer = useCallback(() => {
         streamBufferRef.current = ''
+        hasPaintedFirstTokenRef.current = false
         if (streamFlushTimerRef.current !== null) {
             window.clearTimeout(streamFlushTimerRef.current)
             streamFlushTimerRef.current = null
@@ -1170,6 +1171,24 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         isWordModeRef.current = isWordMode
     }, [isWordMode])
     const [errorMessage, setErrorMessage] = useState('')
+    // Emit streaming translation to inline lookup window (desktop only). A request is over once it
+    // has stopped loading, with or without text: one that fails or answers nothing must stop the
+    // popup's spinner too, and the popup shows the error, since the main window is hidden (#1938).
+    const inlineLookupLoadedRef = useRef(false)
+    useEffect(() => {
+        if (!isDesktopApp()) return
+        if (isLoading) {
+            inlineLookupLoadedRef.current = true
+        }
+        const done = !isLoading && (inlineLookupLoadedRef.current || translatedText !== '' || errorMessage !== '')
+        if (done) {
+            // The next request starts fresh: a render between two requests is not an end.
+            inlineLookupLoadedRef.current = false
+        }
+        import('@tauri-apps/api/event').then(({ emitTo }) => {
+            emitTo('inline_lookup', 'translated-text-chunk', { text: translatedText, done, error: errorMessage })
+        })
+    }, [translatedText, isLoading, errorMessage])
     const startLoading = useCallback(() => {
         setIsLoading(true)
     }, [])
@@ -1376,9 +1395,29 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     console.error('Failed to persist history', error)
                 }
             }
+            // One trace per submit. It is closed with the trace object rather
+            // than "whatever trace is active", because an aborted request can
+            // settle after the next translation already started its own.
+            let activeTrace: ReturnType<typeof beginPerfTrace> | undefined
+            const finishTrace = (reason: string) => {
+                if (!activeTrace) {
+                    return
+                }
+                finishPerfTrace(reason, { trace: activeTrace })
+                activeTrace = undefined
+            }
             const beforeTranslate = () => {
                 historyEntryIdRef.current = null
                 lastHistoryKeyRef.current = null
+                // Everything from the user's submit to the first painted
+                // character is measured as one trace, so the next "why is this
+                // slow?" question is answered by data instead of guesses.
+                activeTrace = beginPerfTrace('translate', {
+                    mode: actionMode,
+                    provider: translateDeps.provider ?? settings.provider,
+                    target: translateDeps.targetLang,
+                    chars: text.length,
+                })
                 let actionStr = actionStrItem.beforeStr
                 if (actionMode === 'translate' && sourceLang === targetLang) {
                     actionStr = 'Polishing...'
@@ -1427,6 +1466,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 const cachedText = cachedValue as string
                 afterTranslate('stop')
                 setTranslatedText(cachedText)
+                finishTrace('cache-hit')
                 void persistHistory(cachedText)
                 return
             }
@@ -1454,17 +1494,28 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             return
                         }
                         streamBufferRef.current += message.content
-                        if (streamFlushTimerRef.current === null) {
-                            streamFlushTimerRef.current = window.setTimeout(() => {
-                                streamFlushTimerRef.current = null
-                                if (signal.aborted) {
-                                    return
-                                }
-                                const chunk = streamBufferRef.current
-                                streamBufferRef.current = ''
-                                setTranslatedText((translatedText) => translatedText + chunk)
-                            }, 120)
+                        if (streamFlushTimerRef.current !== null) {
+                            return
                         }
+                        const flush = () => {
+                            streamFlushTimerRef.current = null
+                            if (signal.aborted) {
+                                return
+                            }
+                            const chunk = streamBufferRef.current
+                            streamBufferRef.current = ''
+                            setTranslatedText((translatedText) => translatedText + chunk)
+                        }
+                        // The first token is shown as soon as it arrives; only
+                        // the following ones are coalesced. Waiting 120ms to
+                        // "reduce renders" on the first token was pure added
+                        // time-to-first-character.
+                        if (!hasPaintedFirstTokenRef.current) {
+                            hasPaintedFirstTokenRef.current = true
+                            flush()
+                            return
+                        }
+                        streamFlushTimerRef.current = window.setTimeout(flush, 120)
                     },
                     onFinish: (reason) => {
                         const pending = streamBufferRef.current
@@ -1476,6 +1527,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             void persistHistory(result)
                             return result
                         })
+                        finishTrace(reason)
                     },
                     onError: (error) => {
                         setActionStr('Error')
@@ -1487,11 +1539,16 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 // if error is a AbortError then ignore this error
                 if (error.name === 'AbortError') {
                     isStopped = true
+                    finishTrace('aborted')
                     return
                 }
                 setActionStr('Error')
                 setErrorMessage((error as Error).toString())
+                finishTrace('error')
             } finally {
+                // An engine that ends its stream without a finish reason still
+                // gets its trace reported instead of lingering as active.
+                finishTrace('closed')
                 if (!isStopped && translationID === translationIDRef.current) {
                     stopLoading()
                     isStopped = true

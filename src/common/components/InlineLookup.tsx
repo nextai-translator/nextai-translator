@@ -85,6 +85,11 @@ const useStyles = createUseStyles({
         '0%, 100%': { borderColor: '#888' },
         '50%': { borderColor: 'transparent' },
     },
+    'errorMessage': (props: IThemedStyleProps) => ({
+        color: props.themeType === 'dark' ? '#fca5a5' : '#dc2626',
+        fontSize: '13px',
+        wordBreak: 'break-word',
+    }),
     'resizeHandle': {
         position: 'absolute',
         zIndex: 10,
@@ -122,10 +127,16 @@ const useStyles = createUseStyles({
 export interface InlineLookupProps {
     translatedText?: string
     isLoading?: boolean
+    errorMessage?: string
     onClose?: () => void
 }
 
-export function InlineLookup({ translatedText = '', isLoading = false, onClose }: InlineLookupProps) {
+export function InlineLookup({
+    translatedText = '',
+    isLoading = false,
+    errorMessage = '',
+    onClose,
+}: InlineLookupProps) {
     const { t } = useTranslation()
     const { theme, themeType } = useTheme()
     const { settings } = useSettings()
@@ -229,8 +240,9 @@ export function InlineLookup({ translatedText = '', isLoading = false, onClose }
                     </div>
                 ) : (
                     <div>
-                        <Markdown>{translatedText}</Markdown>
+                        {translatedText && <Markdown>{translatedText}</Markdown>}
                         {isLoading && <span className={styles.caret} />}
+                        {!isLoading && errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
                     </div>
                 )}
             </div>
