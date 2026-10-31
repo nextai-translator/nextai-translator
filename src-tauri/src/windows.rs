@@ -448,14 +448,27 @@ pub async fn show_translator_window_command() {
 /// is hidden (rendering paused, timers throttled, process eventually
 /// suspended) while the window is visibly on screen - the UI then looks
 /// frozen. Toggling the view's hidden flag forces WebKit to re-evaluate.
+///
+/// Hiding the first responder hands first-responder status to its next
+/// valid key view, and the webview has none, so the window itself is left
+/// as first responder and unhiding does not give it back. Keystrokes then
+/// stop reaching the page: the input looks focused but typing does nothing
+/// until the user clicks it (#1915). Hand first responder back afterwards.
 #[cfg(target_os = "macos")]
 pub fn nudge_webview_visibility(window: &tauri::WebviewWindow) {
     let _ = window.with_webview(|webview| unsafe {
-        use cocoa::base::{id, NO, YES};
+        use cocoa::base::{id, nil, BOOL, NO, YES};
         use objc::{msg_send, sel, sel_impl};
         let wv = webview.inner() as id;
         let _: () = msg_send![wv, setHidden: YES];
         let _: () = msg_send![wv, setHidden: NO];
+        let ns_window: id = msg_send![wv, window];
+        if ns_window != nil {
+            let first_responder: id = msg_send![ns_window, firstResponder];
+            if first_responder == nil || first_responder == ns_window {
+                let _: BOOL = msg_send![ns_window, makeFirstResponder: wv];
+            }
+        }
     });
 }
 
