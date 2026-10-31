@@ -35,7 +35,7 @@ import {
 } from '../utils'
 import { beginPerfTrace, finishPerfTrace, markPerfOnce } from '../perf'
 import { InnerSettings } from './Settings'
-import { containerID, popupCardInnerContainerId } from '../../browser-extension/content_script/consts'
+import { containerID, popupCardInnerContainerId, zIndex } from '../../browser-extension/content_script/consts'
 import Dropzone from 'react-dropzone'
 import { RecognizeResult, createWorker } from 'tesseract.js'
 import { BsTextareaT } from 'react-icons/bs'
@@ -622,7 +622,7 @@ export function Translator(props: ITranslatorProps) {
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <div>
                 <StyletronProvider value={props.engine}>
-                    <BaseProvider theme={theme}>
+                    <BaseProvider theme={theme} zIndex={isBrowserExtensionContentScript() ? Number(zIndex) : undefined}>
                         <GlobalSuspense>
                             <InnerTranslator {...props} />
                         </GlobalSuspense>
@@ -1238,7 +1238,8 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
         const calculateTranslatedContentMaxHeight = (): number => {
             const { innerHeight } = window
-            const maxHeight = popupCardInnerContainer ? parseInt(popupCardInnerContainer.style.maxHeight) : innerHeight
+            const { height: resizedHeight, maxHeight: availableHeight } = popupCardInnerContainer.style
+            const maxHeight = parseInt(resizedHeight || availableHeight) || innerHeight
 
             const editorHeight = editorContainerRef.current?.offsetHeight || 0
             const actionButtonsHeight = actionButtonsRef.current?.offsetHeight || 0
