@@ -87,7 +87,7 @@ export class Gemini extends AbstractEngine {
         const isPro = /-pro($|[-:])/i.test(model)
         const thinkingConfig = settings.thinkingEnabled
             ? isGen3
-                ? { thinkingLevel: 'medium' } // balanced thinking
+                ? {} // model default (high); 'medium' is not accepted by the 3.x Pro models
                 : { thinkingBudget: -1 } // dynamic thinking
             : isGen3
             ? { thinkingLevel: isPro ? 'low' : 'minimal' }
