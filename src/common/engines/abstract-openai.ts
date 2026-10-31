@@ -222,9 +222,14 @@ export abstract class AbstractOpenAI extends AbstractEngine {
                 }
                 delete body.reasoning_effort
             }
-            if (body.max_tokens !== undefined && body.max_output_tokens === undefined) {
-                body.max_output_tokens = body.max_tokens
-                delete body.max_tokens
+            // The Responses API knows neither Chat Completions token limit, only max_output_tokens.
+            for (const key of ['max_completion_tokens', 'max_tokens']) {
+                if (body[key] !== undefined) {
+                    if (body.max_output_tokens === undefined) {
+                        body.max_output_tokens = body[key]
+                    }
+                    delete body[key]
+                }
             }
             delete body.temperature
             delete body.top_p
