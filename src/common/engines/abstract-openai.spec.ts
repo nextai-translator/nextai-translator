@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AbstractOpenAI } from './abstract-openai'
+import { Ollama } from './ollama'
 import { IMessageRequest } from './interfaces'
-import { fetchSSE } from '../utils'
+import { fetchSSE, getSettings } from '../utils'
 
 vi.mock('../utils', () => {
     return {
@@ -131,6 +132,31 @@ describe('AbstractOpenAI', () => {
         expect(onFinished).toHaveBeenCalledWith('stop')
     })
 
+    it('emits the final text segment when content and finish_reason arrive together in one chunk', async () => {
+        const engine = new TestOpenAIEngine('gpt-4')
+        const { req, onMessage, onFinished } = createMessageRequest()
+
+        vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+            expect(input).toBe('https://api.openai.com/v1/chat/completions')
+
+            // OpenRouter forwarding Gemini emits the last text segment together
+            // with finish_reason in the same SSE chunk instead of sending an
+            // empty delta on a trailing chunk like the OpenAI API does. The
+            // content must still be emitted and must not be dropped.
+            await options.onMessage(
+                JSON.stringify({
+                    // eslint-disable-next-line camelcase
+                    choices: [{ delta: { content: '最后一段', role: 'assistant' }, finish_reason: 'stop' }],
+                })
+            )
+        })
+
+        await engine.sendMessage(req)
+
+        expect(onMessage).toHaveBeenCalledWith({ content: '最后一段', role: 'assistant' })
+        expect(onFinished).toHaveBeenCalledWith('stop')
+    })
+
     it('does not send reasoning_effort for GPT-5 code models', async () => {
         const engine = new TestOpenAIEngine('gpt-5-code')
         const { req } = createMessageRequest()
@@ -219,6 +245,64 @@ describe('AbstractOpenAI', () => {
         await engine.sendMessage(req)
     })
 
+    // Regression tests for #1853: reasoning_effort 'minimal' only exists on
+    // the undotted gpt-5 series; dotted successors (gpt-5.1, gpt-5.6, ...)
+    // must never receive it.
+    describe("reasoning_effort 'minimal' gating", () => {
+        it('sends minimal reasoning effort for GPT-5 nano via Responses API', async () => {
+            const engine = new TestOpenAIEngine('gpt-5-nano')
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                expect(input).toBe('https://api.openai.com/v1/responses')
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('gpt-5-nano')
+                expect(payload.reasoning).toEqual({ effort: 'minimal' })
+
+                await options.onMessage(JSON.stringify({ type: 'response.completed', response: {} }))
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
+        it.each(['gpt-5.6', 'gpt-5.10'])('does not send minimal reasoning effort for %s', async (model) => {
+            vi.mocked(getSettings).mockResolvedValueOnce({ thinkingEnabled: true } as never)
+            const engine = new TestOpenAIEngine(model)
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe(model)
+                expect(payload.reasoning_effort).toBeUndefined()
+                expect(payload.reasoning).toBeUndefined()
+
+                await options.onMessage(JSON.stringify({ type: 'response.completed', response: {} }))
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
+        it('does not send minimal reasoning effort for gpt-5.0 either', async () => {
+            vi.mocked(getSettings).mockResolvedValueOnce({ thinkingEnabled: true } as never)
+            const engine = new TestOpenAIEngine('gpt-5.0')
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('gpt-5.0')
+                expect(payload.reasoning_effort).toBeUndefined()
+                expect(payload.reasoning).toBeUndefined()
+
+                await options.onMessage(JSON.stringify({ type: 'response.completed', response: {} }))
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+    })
+
     describe('modelOverride', () => {
         it('should use modelOverride instead of getAPIModel when provided', async () => {
             const engine = new TestOpenAIEngine('gpt-4o')
@@ -304,6 +388,102 @@ describe('AbstractOpenAI', () => {
             })
 
             await engine.sendMessage(req)
+        })
+    })
+
+    describe('thinkingEnabled reasoning_effort gating', () => {
+        it('does not inject reasoning_effort:none for non-OpenAI providers (e.g. DeepSeek)', async () => {
+            // Regression test for #1879: `reasoning_effort: 'none'` is only valid for OpenAI
+            // GPT-5.1+ models. Other providers (DeepSeek, etc.) reject it.
+            vi.mocked(getSettings).mockResolvedValueOnce({ thinkingEnabled: false } as never)
+            const engine = new TestOpenAIEngine('deepseek-chat', 'https://api.deepseek.com', '/v1/chat/completions')
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('deepseek-chat')
+                expect(payload.reasoning_effort).toBeUndefined()
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
+        it('injects reasoning_effort:none for GPT-5.1+ when thinking is disabled', async () => {
+            vi.mocked(getSettings).mockResolvedValueOnce({ thinkingEnabled: false } as never)
+            const engine = new TestOpenAIEngine('gpt-5.1', 'https://example.com', '/v1/chat/completions')
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('gpt-5.1')
+                expect(payload.reasoning_effort).toBe('none')
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
+        it('does not inject reasoning_effort:none for GPT-5.1+ when thinking is enabled', async () => {
+            vi.mocked(getSettings).mockResolvedValueOnce({ thinkingEnabled: true } as never)
+            const engine = new TestOpenAIEngine('gpt-5.1', 'https://example.com', '/v1/chat/completions')
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                const payload = JSON.parse(options.body as string)
+                expect(payload.reasoning_effort).toBeUndefined()
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
+
+        it('injects reasoning_effort:none for Ollama so thinking can be disabled (#1881)', async () => {
+            // Regression test for #1881: Ollama / LM Studio servers honor `reasoning_effort: 'none'`
+            // to turn off thinking on hybrid models like Qwen3, so the Ollama engine must keep
+            // sending it even though the conservative base default only allows GPT-5.1+.
+            vi.mocked(getSettings).mockResolvedValue({
+                thinkingEnabled: false,
+                ollamaAPIURL: 'http://localhost:11434',
+                ollamaAPIModel: 'qwen3',
+                ollamaModelLifetimeInMemory: '5m',
+            } as never)
+            const engine = new Ollama()
+            const { req } = createMessageRequest()
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                expect(input).toBe('http://localhost:11434/v1/chat/completions')
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('qwen3')
+                expect(payload.reasoning_effort).toBe('none')
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
         })
     })
 })

@@ -17,6 +17,25 @@ import { trackEvent } from '@aptabase/tauri'
 import { UpdateResult, commands, events } from '../bindings'
 import type { UnlistenFn } from '@tauri-apps/api/event'
 
+// Annotated-tag release notes arrive hard-wrapped: a line starting with a
+// bullet marker opens an item and bare lines are continuations of the
+// previous one.
+function parseUpdateItems(body: string): string[] {
+    const items: string[] = []
+    for (const line of body.split('\n')) {
+        const trimmed = line.trim()
+        if (!trimmed) {
+            continue
+        }
+        if (/^[-*]\s+/.test(trimmed) || items.length === 0) {
+            items.push(trimmed.replace(/^[-*]\s+/, ''))
+        } else {
+            items[items.length - 1] += ` ${trimmed}`
+        }
+    }
+    return items
+}
+
 const useStyles = createUseStyles({
     icon: {
         'display': 'block',
@@ -75,10 +94,9 @@ export function UpdaterWindow() {
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                     width: '100%',
                     height: '100vh',
+                    overflowY: 'auto',
                 }}
             >
                 <div
@@ -107,7 +125,7 @@ export function UpdaterWindow() {
                 </div>
                 <div
                     style={{
-                        height: '80px',
+                        height: '90px',
                         width: '100%',
                         flexShrink: 0,
                     }}
@@ -191,12 +209,9 @@ export function UpdaterWindow() {
                                         padding: '0px',
                                     }}
                                 >
-                                    {checkResult.body
-                                        .split('\n')
-                                        .filter((line) => !!line.trim())
-                                        .map((line, idx) => {
-                                            return <li key={idx}>{line}</li>
-                                        })}
+                                    {parseUpdateItems(checkResult.body).map((item, idx) => {
+                                        return <li key={idx}>{item}</li>
+                                    })}
                                 </ul>
                             )}
                         </div>

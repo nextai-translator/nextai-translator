@@ -3,12 +3,14 @@
     windows_subsystem = "windows"
 )]
 
+mod ax_context;
 mod config;
 mod fetch;
 mod insertion;
 mod lang;
 mod ocr;
 mod tray;
+mod tts;
 mod utils;
 mod windows;
 mod writing;
@@ -32,15 +34,19 @@ use tauri_specta::Event;
 use tray::{PinnedFromTrayEvent, PinnedFromWindowEvent};
 use windows::{get_translator_window, CheckUpdateEvent, CheckUpdateResultEvent};
 
+use crate::ax_context::{read_ax_context_narrow, read_ax_context_wide};
 use crate::config::{clear_config_cache, get_config_content, ConfigUpdatedEvent};
-use crate::fetch::fetch_stream;
+use crate::fetch::{fetch_stream, log_perf_line};
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
+use crate::tts::synthesize_local_tts;
 use crate::windows::{
-    get_translator_window_always_on_top, hide_inline_lookup_window, hide_translator_window,
-    show_action_manager_window, show_history_window, show_inline_lookup_window_command,
+    get_translator_window_always_on_top, get_writing_indicator_pending_lang,
+    hide_inline_lookup_window, hide_quick_translator_window, hide_translator_window,
+    hide_writing_indicator, recover_webview_visibility, show_action_manager_window,
+    show_history_window, show_inline_lookup_window_command, show_quick_translator_window_command,
     show_translator_window_command, show_translator_window_with_selected_text_command,
-    show_updater_window, TRANSLATOR_WIN_NAME,
+    show_updater_window, show_writing_indicator, TRANSLATOR_WIN_NAME,
 };
 use crate::writing::{finish_writing, write_to_input, writing_command};
 
@@ -48,7 +54,7 @@ use mouce::{Mouse, MouseActions};
 use once_cell::sync::OnceCell;
 #[cfg(debug_assertions)]
 use specta_typescript::{formatter::prettier, Typescript};
-use tauri::{AppHandle, LogicalPosition, LogicalSize};
+use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize};
 use tauri::{Manager, PhysicalPosition, PhysicalSize};
 use tauri_plugin_notification::NotificationExt;
 use tiny_http::{Response as HttpResponse, Server};
@@ -74,6 +80,11 @@ pub struct UpdateResult {
 }
 
 pub static UPDATE_RESULT: Mutex<Option<Option<UpdateResult>>> = Mutex::new(None);
+
+fn set_update_result(app: &AppHandle, update_result: Option<UpdateResult>) {
+    *UPDATE_RESULT.lock() = Some(update_result.clone());
+    let _ = app.emit("update-status-changed", update_result);
+}
 
 fn init_tokio_runtime() -> &'static TokioRuntime {
     use std::sync::OnceLock;
@@ -336,6 +347,15 @@ fn bind_mouse_hook() {
 }
 
 fn main() {
+    // Without a working WebView2 Runtime not a single window can be created,
+    // so the app would only ever flash a frame and abort (discussion #1907).
+    // Fail up front with an actionable dialog instead.
+    #[cfg(target_os = "windows")]
+    if let Err(err) = tauri::webview_version() {
+        crate::windows::show_webview2_broken_dialog(&err.to_string());
+        std::process::exit(1);
+    }
+
     let _ = init_tokio_runtime();
     let silently = env::args().any(|arg| arg == "--silently");
 
@@ -355,11 +375,16 @@ fn main() {
             show_translator_window_with_selected_text_command,
             show_action_manager_window,
             show_history_window,
+            show_updater_window,
             get_translator_window_always_on_top,
             fetch_stream,
+            log_perf_line,
             writing_command,
             write_to_input,
             finish_writing,
+            show_writing_indicator,
+            hide_writing_indicator,
+            get_writing_indicator_pending_lang,
             insert_translation_into_previous_input,
             remember_active_window_command,
             detect_lang,
@@ -367,9 +392,15 @@ fn main() {
             hide_translator_window,
             hide_inline_lookup_window,
             show_inline_lookup_window_command,
+            show_quick_translator_window_command,
+            hide_quick_translator_window,
+            read_ax_context_narrow,
+            read_ax_context_wide,
             start_ocr,
             finish_ocr,
             cut_image,
+            synthesize_local_tts,
+            recover_webview_visibility,
         ])
         .events(tauri_specta::collect_events![
             CheckUpdateEvent,
@@ -438,6 +469,23 @@ fn main() {
             app_handle.plugin(tauri_plugin_updater::Builder::new().build())?;
             // create thumb window
             let _ = windows::get_thumb_window(0, 0);
+            // Pre-create the Quick Translator and writing-indicator panels —
+            // but ONLY on macOS. There the raw cocoa msg_send calls (setLevel:,
+            // etc.) must run on the AppKit main thread; if we let creation
+            // happen lazily inside an async Tauri command (which runs on a
+            // tokio worker thread), macOS aborts the process with
+            // "Must only be used from the main thread" / EXC_BREAKPOINT.
+            //
+            // On Windows neither constraint applies, and pre-creating these
+            // hidden transparent WebView2 windows kept their renderers
+            // compositing at full frame rate from launch, burning CPU while
+            // the app idled in the tray (#1883, #1886). They are created
+            // lazily on first use instead.
+            #[cfg(target_os = "macos")]
+            {
+                let _ = windows::get_quick_translator_window();
+                let _ = windows::get_writing_indicator_window();
+            }
             if silently {
                 // create translator window
                 let _ = get_translator_window(false, false, false);
@@ -479,27 +527,32 @@ fn main() {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 loop {
-                    std::thread::sleep(std::time::Duration::from_secs(60 * 10));
+                    // MUST be the async sleep: std::thread::sleep here parks a
+                    // tokio runtime worker for 10 minutes, and with enough
+                    // concurrently blocked workers every tauri command (all
+                    // webview IPC) hangs - the app looks frozen while the UI
+                    // process is perfectly healthy.
+                    tokio::time::sleep(std::time::Duration::from_secs(60 * 10)).await;
                     let builder = handle.updater_builder();
                     let updater = builder.build().unwrap();
 
                     match updater.check().await {
                         Ok(Some(update)) => {
-                            *UPDATE_RESULT.lock() = Some(Some(UpdateResult {
-                                version: update.version,
-                                current_version: update.current_version,
-                                body: update.body,
-                            }));
+                            set_update_result(
+                                &handle,
+                                Some(UpdateResult {
+                                    version: update.version,
+                                    current_version: update.current_version,
+                                    body: update.body,
+                                }),
+                            );
                             tray::create_tray(&handle).unwrap();
                         }
                         Ok(None) => {
-                            if UPDATE_RESULT.lock().is_some() {
-                                if let Some(Some(_)) = *UPDATE_RESULT.lock() {
-                                    *UPDATE_RESULT.lock() = Some(None);
-                                    tray::create_tray(&handle).unwrap();
-                                }
-                            } else {
-                                *UPDATE_RESULT.lock() = Some(None);
+                            let had_update = matches!(*UPDATE_RESULT.lock(), Some(Some(_)));
+                            set_update_result(&handle, None);
+                            if had_update {
+                                tray::create_tray(&handle).unwrap();
                             }
                         }
                         Err(_) => {}
@@ -526,7 +579,7 @@ fn main() {
 
     #[cfg(target_os = "macos")]
     {
-        let config = config::get_config_by_app(app.handle()).unwrap();
+        let config = config::get_config_by_app(app.handle()).unwrap_or_default();
         if config.hide_the_icon_in_the_dock.unwrap_or(true) {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
         } else {
@@ -549,11 +602,14 @@ fn main() {
 
                 match updater.check().await {
                     Ok(Some(update)) => {
-                        *UPDATE_RESULT.lock() = Some(Some(UpdateResult {
-                            version: update.version,
-                            current_version: update.current_version,
-                            body: update.body,
-                        }));
+                        set_update_result(
+                            &handle,
+                            Some(UpdateResult {
+                                version: update.version,
+                                current_version: update.current_version,
+                                body: update.body,
+                            }),
+                        );
                         tray::create_tray(&handle).unwrap();
                         let config = get_config().unwrap();
                         if config.automatic_check_for_updates.is_none()
@@ -561,18 +617,15 @@ fn main() {
                                 .automatic_check_for_updates
                                 .is_some_and(|x| x == true)
                         {
-                            std::thread::sleep(std::time::Duration::from_secs(3));
+                            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                             show_updater_window();
                         }
                     }
                     Ok(None) => {
-                        if UPDATE_RESULT.lock().is_some() {
-                            if let Some(Some(_)) = *UPDATE_RESULT.lock() {
-                                *UPDATE_RESULT.lock() = Some(None);
-                                tray::create_tray(&handle).unwrap();
-                            }
-                        } else {
-                            *UPDATE_RESULT.lock() = Some(None);
+                        let had_update = matches!(*UPDATE_RESULT.lock(), Some(Some(_)));
+                        set_update_result(&handle, None);
+                        if had_update {
+                            tray::create_tray(&handle).unwrap();
                         }
                     }
                     Err(_) => {}

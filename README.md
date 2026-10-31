@@ -72,10 +72,11 @@ What began as a translation tool has now evolved to include surprisingly effecti
 7. Available on all platforms (Windows, macOS, and Linux) for both browsers and Desktop
 8. Support screenshot translation
 9. Support for vocabulary books, as well as support for generating memory aids based on the words in the vocabulary books
-10. Supports [OpenAI](https://openai.com/), [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service), [MiniMax](https://www.minimaxi.com/), and other LLM providers
+10. Supports [OpenAI](https://openai.com/), [TeamoRouter](https://teamorouter.com/?utm_source=nextai_translator&utm_medium=referral&utm_campaign=ai_directory), [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service), [MiniMax](https://www.minimaxi.com/), and other LLM providers
 
 # Preparation
 
+-   (recommended) Use [**TeamoRouter**](https://teamorouter.com/?utm_source=nextai_translator&utm_medium=referral&utm_campaign=ai_directory) — an OpenAI-compatible LLM gateway that gives you OpenAI, Claude, Gemini and more through a single API key, at up to 90% off. It's built in: just select **TeamoRouter** as the provider in Settings and paste your API key.
 -   (required) Apply for an OpenAI API key [here](https://platform.openai.com/account/api-keys) or [Azure OpenAI Service API Key](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/chatgpt-quickstart?tabs=command-line&pivots=rest-api#retrieve-key-and-endpoint)
 -   (optional) If you cannot access OpenAI, you can use the OpenAI API Proxy.
 

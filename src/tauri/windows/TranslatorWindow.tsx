@@ -2,7 +2,14 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { Translator } from '../../common/components/Translator'
 import { Client as Styletron } from 'styletron-engine-atomic'
 import { listen, type Event, type UnlistenFn } from '@tauri-apps/api/event'
-import { bindDisplayWindowHotkey, bindHotkey, bindOCRHotkey, bindWritingHotkey, onSettingsSave } from '../utils'
+import {
+    bindDisplayWindowHotkey,
+    bindHotkey,
+    bindOCRHotkey,
+    bindQuickTranslatorHotkey,
+    bindWritingHotkey,
+    onSettingsSave,
+} from '../utils'
 import { v4 as uuidv4 } from 'uuid'
 import { PREFIX } from '../../common/constants'
 import { translate } from '../../common/translate'
@@ -110,19 +117,42 @@ export function TranslatorWindow() {
         let unlisten: UnlistenFn | undefined
         ;(async () => {
             unlisten = await listen('writing-text', async (event: Event<string>) => {
+                // eslint-disable-next-line no-console
+                console.log('[writing] received writing-text event', {
+                    payloadLen: event.payload?.length ?? 0,
+                    writingTargetLanguage: settings?.writingTargetLanguage,
+                })
                 const ensureFinish = () => {
                     writingQueue.current.push(0)
                     writing()
                 }
                 if (!settings?.writingTargetLanguage) {
+                    // eslint-disable-next-line no-console
+                    console.warn(
+                        '[writing] bailing: settings.writingTargetLanguage is not set — ' +
+                            'open Settings → Writing → Target language and pick one'
+                    )
                     commands.finishWriting().catch(console.error)
                     return
                 }
                 const inputText = event.payload
                 if (!inputText) {
+                    // eslint-disable-next-line no-console
+                    console.warn('[writing] bailing: empty input text')
                     commands.finishWriting().catch(console.error)
                     return
                 }
+
+                // Show the floating writing-indicator HUD anchored below the
+                // user's input. Rust's `finish_writing` will emit the matching
+                // "writing-indicator-finish" event to tear it down — so error
+                // and success paths both go through `enqueueFinish`.
+                // eslint-disable-next-line no-console
+                console.log('[writing] calling showWritingIndicator(', settings.writingTargetLanguage, ')')
+                commands.showWritingIndicator(settings.writingTargetLanguage).catch((err) => {
+                    // eslint-disable-next-line no-console
+                    console.error('[writing] showWritingIndicator failed', err)
+                })
 
                 const controller = new AbortController()
                 const { signal } = controller
@@ -226,6 +256,7 @@ export function TranslatorWindow() {
         bindHotkey()
         bindDisplayWindowHotkey()
         bindOCRHotkey()
+        bindQuickTranslatorHotkey()
         bindWritingHotkey()
     }, [])
 

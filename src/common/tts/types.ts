@@ -6,9 +6,10 @@ export interface SpeakOptions {
     signal: AbortSignal
     onFinish?: () => void
     onStartSpeaking?: () => void
+    onWordBoundary?: (wordIndex: number) => void
 }
 
-export type TTSProvider = 'WebSpeech' | 'EdgeTTS'
+export type TTSProvider = 'LocalTTS' | 'WebSpeech' | 'EdgeTTS'
 
 export interface DoSpeakOptions extends SpeakOptions {
     lang: LangCode

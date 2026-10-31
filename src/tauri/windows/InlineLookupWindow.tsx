@@ -20,6 +20,7 @@ export function InlineLookupWindow() {
     const { theme } = useTheme()
     const [translatedText, setTranslatedText] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
     const lastTextRef = useRef('')
 
     useEffect(() => {
@@ -39,6 +40,7 @@ export function InlineLookupWindow() {
                 if (selectedText && selectedText !== lastTextRef.current) {
                     lastTextRef.current = selectedText
                     setTranslatedText('')
+                    setErrorMessage('')
                     setIsLoading(true)
                 }
             })
@@ -52,13 +54,17 @@ export function InlineLookupWindow() {
     useEffect(() => {
         let unlisten: UnlistenFn | undefined
         ;(async () => {
-            unlisten = await listen('translated-text-chunk', (event: Event<{ text: string; done: boolean }>) => {
-                const { text, done } = event.payload
-                setTranslatedText(text)
-                if (done) {
-                    setIsLoading(false)
+            unlisten = await listen(
+                'translated-text-chunk',
+                (event: Event<{ text: string; done: boolean; error?: string }>) => {
+                    const { text, done, error } = event.payload
+                    setTranslatedText(text)
+                    setErrorMessage(error ?? '')
+                    if (done) {
+                        setIsLoading(false)
+                    }
                 }
-            })
+            )
         })()
         return () => {
             unlisten?.()
@@ -97,7 +103,12 @@ export function InlineLookupWindow() {
                             minHeight: '100vh',
                         }}
                     >
-                        <InlineLookup translatedText={translatedText} isLoading={isLoading} onClose={handleClose} />
+                        <InlineLookup
+                            translatedText={translatedText}
+                            isLoading={isLoading}
+                            errorMessage={errorMessage}
+                            onClose={handleClose}
+                        />
                     </div>
                 </BaseProvider>
             </StyletronProvider>

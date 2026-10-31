@@ -24,6 +24,9 @@ export const commands = {
     async showHistoryWindow(): Promise<void> {
         await TAURI_INVOKE('show_history_window')
     },
+    async showUpdaterWindow(): Promise<void> {
+        await TAURI_INVOKE('show_updater_window')
+    },
     async getTranslatorWindowAlwaysOnTop(): Promise<boolean> {
         return await TAURI_INVOKE('get_translator_window_always_on_top')
     },
@@ -35,6 +38,14 @@ export const commands = {
             else return { status: 'error', error: e as any }
         }
     },
+    /**
+     * Receives the renderer's finished latency traces and prints them to the
+     * app's stdout, which is the only observability channel a packaged build
+     * reliably has.
+     */
+    async logPerfLine(line: string): Promise<void> {
+        await TAURI_INVOKE('log_perf_line', { line })
+    },
     async writingCommand(): Promise<void> {
         await TAURI_INVOKE('writing_command')
     },
@@ -43,6 +54,20 @@ export const commands = {
     },
     async finishWriting(): Promise<void> {
         await TAURI_INVOKE('finish_writing')
+    },
+    async showWritingIndicator(targetLanguage: string): Promise<void> {
+        await TAURI_INVOKE('show_writing_indicator', { targetLanguage })
+    },
+    async hideWritingIndicator(): Promise<void> {
+        await TAURI_INVOKE('hide_writing_indicator')
+    },
+    /**
+     * Returns the target language of the currently-showing indicator, if any.
+     * React calls this on mount to recover from the case where the
+     * `writing-indicator-start` event was emitted before its listener was wired.
+     */
+    async getWritingIndicatorPendingLang(): Promise<string | null> {
+        return await TAURI_INVOKE('get_writing_indicator_pending_lang')
     },
     async insertTranslationIntoPreviousInput(text: string): Promise<Result<null, string>> {
         try {
@@ -70,6 +95,18 @@ export const commands = {
     async showInlineLookupWindowCommand(): Promise<void> {
         await TAURI_INVOKE('show_inline_lookup_window_command')
     },
+    async showQuickTranslatorWindowCommand(): Promise<void> {
+        await TAURI_INVOKE('show_quick_translator_window_command')
+    },
+    async hideQuickTranslatorWindow(): Promise<void> {
+        await TAURI_INVOKE('hide_quick_translator_window')
+    },
+    async readAxContextNarrow(): Promise<AxContext> {
+        return await TAURI_INVOKE('read_ax_context_narrow')
+    },
+    async readAxContextWide(): Promise<AxContext> {
+        return await TAURI_INVOKE('read_ax_context_wide')
+    },
     async startOcr(): Promise<void> {
         await TAURI_INVOKE('start_ocr')
     },
@@ -78,6 +115,25 @@ export const commands = {
     },
     async cutImage(left: number, top: number, width: number, height: number): Promise<void> {
         await TAURI_INVOKE('cut_image', { left, top, width, height })
+    },
+    async synthesizeLocalTts(text: string, lang: string, rate: number): Promise<Result<string, string>> {
+        try {
+            return { status: 'ok', data: await TAURI_INVOKE('synthesize_local_tts', { text, lang, rate }) }
+        } catch (e) {
+            if (e instanceof Error) throw e
+            else return { status: 'error', error: e as any }
+        }
+    },
+    /**
+     * Self-healing hook for the page-side visibility watchdog: when a page
+     * believes it is hidden but its window is actually (at least partially)
+     * visible on screen, force WebKit to re-evaluate. WebKit's own recovery
+     * notification is unreliable after occlusion/raise cycles, which left
+     * pages permanently throttled (frozen rendering, crawling async work)
+     * while sitting right in front of the user.
+     */
+    async recoverWebviewVisibility(): Promise<void> {
+        await TAURI_INVOKE('recover_webview_visibility')
     },
 }
 
@@ -101,6 +157,19 @@ export const events = __makeEvents__<{
 
 /** user-defined types **/
 
+export type AxContext = {
+    focusedText: string
+    focusedRole: string
+    selectedText: string
+    hoveredText: string
+    hoveredRole: string
+    appName: string
+    appBundleId: string
+    mouseX: number
+    mouseY: number
+    paragraphs: string[]
+    truncated: boolean
+}
 export type CheckUpdateEvent = null
 export type CheckUpdateResultEvent = UpdateResult
 export type ConfigUpdatedEvent = null

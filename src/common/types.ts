@@ -81,6 +81,7 @@ export interface ISettings {
     hotkey?: string
     displayWindowHotkey?: string
     ocrHotkey?: string
+    quickTranslatorHotkey?: string
     writingTargetLanguage: string
     writingHotkey?: string
     writingNewlineHotkey?: string
@@ -122,6 +123,7 @@ export interface ISettings {
     ollamaAPIModel: string
     ollamaCustomModelName: string
     ollamaModelLifetimeInMemory: string
+    thinkingEnabled: boolean
     groqAPIURL: string
     groqAPIURLPath: string
     groqAPIModel: string
@@ -140,6 +142,13 @@ export interface ISettings {
     cohereAPIModel: string
     cerebrasAPIKey: string
     cerebrasAPIModel: string
+    teamoRouterAPIKey: string
+    teamoRouterAPIModel: string
+    openRouterAPIKey: string
+    openRouterAPIModel: string
+    liteLLMAPIURL: string
+    liteLLMAPIKey: string
+    liteLLMAPIModel: string
     fontSize: number
     uiFontSize: number
     iconSize: number

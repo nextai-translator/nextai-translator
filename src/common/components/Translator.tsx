@@ -7,10 +7,10 @@ import { BaseProvider } from 'baseui-sd'
 import { Textarea } from 'baseui-sd/textarea'
 import { createUseStyles } from 'react-jss'
 import { AiOutlineFileSync } from 'react-icons/ai'
-import { IoSettingsOutline } from 'react-icons/io5'
+import { IoSettingsOutline, IoChevronBackOutline, IoChevronForwardOutline } from 'react-icons/io5'
 import { TiArrowBack } from 'react-icons/ti'
 import { TbArrowsExchange, TbCsv } from 'react-icons/tb'
-import { MdOutlineGrade, MdGrade, MdHistory } from 'react-icons/md'
+import { MdOutlineGrade, MdGrade, MdHistory, MdBrowserUpdated } from 'react-icons/md'
 import * as mdIcons from 'react-icons/md'
 import { StatefulTooltip } from 'baseui-sd/tooltip'
 import {
@@ -40,8 +40,9 @@ import {
     isBrowserExtensionContentScript,
     isMacOS,
 } from '../utils'
+import { beginPerfTrace, finishPerfTrace, markPerfOnce } from '../perf'
 import { InnerSettings } from './Settings'
-import { containerID, popupCardInnerContainerId } from '../../browser-extension/content_script/consts'
+import { containerID, popupCardInnerContainerId, zIndex } from '../../browser-extension/content_script/consts'
 import Dropzone from 'react-dropzone'
 import { RecognizeResult, createWorker } from 'tesseract.js'
 import { BsTextareaT } from 'react-icons/bs'
@@ -82,6 +83,8 @@ import { GlobalSuspense } from './GlobalSuspense'
 import { useLazyEffect } from '../usehooks'
 import LogoWithText, { type LogoWithTextRef } from './LogoWithText'
 import Toaster from './Toaster'
+import { PhoneticText } from './PhoneticText'
+import { segmentSpeechText } from '../tts/speech-segments'
 import { readFile } from '@tauri-apps/plugin-fs'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDeepCompareCallback } from 'use-deep-compare'
@@ -96,6 +99,7 @@ import {
 } from '../services/promotion'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
 import { SpeakerIcon } from './SpeakerIcon'
+import { HoverableText, WordHoverProvider } from './WordHoverCard'
 import { Provider, engineIcons, getEngine, providerToEngine } from '../engines'
 import color from 'color'
 import { useAtom } from 'jotai'
@@ -157,6 +161,39 @@ const useStyles = createUseStyles({
         flexDirection: 'row',
         alignItems: 'center',
         gap: '8px',
+    },
+    'updateButton': (props: IThemedStyleProps) => ({
+        'height': '24px',
+        'padding': '0 11px',
+        'border': 'none',
+        'borderRadius': '999px',
+        'background': props.themeType === 'dark' ? 'rgba(76, 132, 255, 0.16)' : 'rgba(39, 110, 241, 0.09)',
+        'color': props.themeType === 'dark' ? props.theme.colors.accent200 : props.theme.colors.accent,
+        'cursor': 'pointer',
+        'display': 'flex',
+        'alignItems': 'center',
+        'gap': '5px',
+        'fontFamily': 'inherit',
+        'fontSize': '11px',
+        'fontWeight': 500,
+        'lineHeight': 1,
+        'whiteSpace': 'nowrap',
+        'transition': 'background 160ms ease',
+        '&:hover': {
+            background: props.themeType === 'dark' ? 'rgba(76, 132, 255, 0.24)' : 'rgba(39, 110, 241, 0.14)',
+        },
+        '&:active': {
+            background: props.themeType === 'dark' ? 'rgba(76, 132, 255, 0.3)' : 'rgba(39, 110, 241, 0.18)',
+        },
+        '&:focus-visible': {
+            outline: `2px solid ${props.theme.colors.accent}`,
+            outlineOffset: '2px',
+        },
+    }),
+    'updateVersion': {
+        opacity: 0.65,
+        fontWeight: 400,
+        fontVariantNumeric: 'tabular-nums',
     },
     'poweredBy': (props: IThemedStyleProps) => ({
         fontSize: props.theme.sizing.scale300,
@@ -571,6 +608,20 @@ export interface ITranslatorProps extends IInnerTranslatorProps {
     engine: Styletron
 }
 
+// One entry in the in-session back/forward navigation stack: everything
+// needed to restore a translation view without re-running the translation.
+interface INavigationEntry {
+    text: string
+    translatedText: string
+    isWordMode: boolean
+    sourceLang: LangCode
+    targetLang: LangCode
+    actionId?: number
+    actionMode?: string
+    provider?: Provider
+    engineModel?: string
+}
+
 export function Translator(props: ITranslatorProps) {
     const { theme } = useTheme()
 
@@ -578,7 +629,7 @@ export function Translator(props: ITranslatorProps) {
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <div>
                 <StyletronProvider value={props.engine}>
-                    <BaseProvider theme={theme}>
+                    <BaseProvider theme={theme} zIndex={isBrowserExtensionContentScript() ? Number(zIndex) : undefined}>
                         <GlobalSuspense>
                             <InnerTranslator {...props} />
                         </GlobalSuspense>
@@ -623,6 +674,42 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
     const [showActionManager, setShowActionManager] = useState(false)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+    const [availableUpdate, setAvailableUpdate] = useState<{ version: string } | null>(null)
+
+    useEffect(() => {
+        if (!isTauri()) {
+            return undefined
+        }
+
+        let disposed = false
+        let unlistenUpdateStatus: UnlistenFn | undefined
+
+        listen<{ version: string } | null>('update-status-changed', ({ payload }) => {
+            if (!disposed) {
+                setAvailableUpdate(payload)
+            }
+        }).then((unlisten) => {
+            if (disposed) {
+                unlisten()
+                return
+            }
+            unlistenUpdateStatus = unlisten
+        })
+
+        import('@/tauri/bindings')
+            .then(({ commands }) => commands.getUpdateResult())
+            .then(([hasChecked, result]) => {
+                if (!disposed && hasChecked) {
+                    setAvailableUpdate(result)
+                }
+            })
+            .catch((error) => console.error('Failed to read update status', error))
+
+        return () => {
+            disposed = true
+            unlistenUpdateStatus?.()
+        }
+    }, [])
 
     const [translationFlag, forceTranslate] = useReducer((x: number) => x + 1, 0)
     const translationIDRef = useRef(0)
@@ -717,18 +804,24 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     }, [])
 
     const [highlightWords, setHighlightWords] = useState<string[]>([])
+    const [speakingInputRange, setSpeakingInputRange] = useState<[number, number]>()
 
     useEffect(() => {
         if (!highlightRef.current?.highlight) {
             return
         }
-        if (selectedWord) {
+        if (speakingInputRange) {
+            highlightRef.current.highlight.highlight = {
+                highlight: speakingInputRange,
+                className: 'yetone-hit-speaking',
+            }
+        } else if (selectedWord) {
             highlightRef.current.highlight.highlight = [selectedWord]
         } else {
             highlightRef.current.highlight.highlight = [...highlightWords]
         }
         highlightRef.current.handleInput()
-    }, [selectedWord, highlightWords])
+    }, [selectedWord, highlightWords, speakingInputRange])
 
     const [activateAction, setActivateAction] = useState<Action>()
 
@@ -916,6 +1009,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     const [tokenCount, setTokenCount] = useState(0)
     const [translatedText, setTranslatedText] = useState('')
     const [translatedLines, setTranslatedLines] = useState<string[]>([])
+    const [speakingOutputRange, setSpeakingOutputRange] = useState<[number, number]>()
     const [isWordMode, setIsWordMode] = useState(false)
     const isWordModeRef = useRef(false)
     const [isCollectedWord, setIsCollectedWord] = useState(false)
@@ -926,20 +1020,16 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
     useEffect(() => {
         setStoreTranslatedText(translatedText)
+        // The commit that first puts characters on screen closes the
+        // submit->visible gap of the latency trace (see ../perf).
+        if (translatedText) {
+            markPerfOnce('paint')
+        }
     }, [translatedText])
 
     useEffect(() => {
         setStoreIsTranslating(isLoading)
     }, [isLoading])
-
-    // Emit streaming translation to inline lookup window (desktop only)
-    useEffect(() => {
-        if (!isDesktopApp()) return
-        const done = !isLoading && translatedText !== ''
-        import('@tauri-apps/api/event').then(({ emitTo }) => {
-            emitTo('inline_lookup', 'translated-text-chunk', { text: translatedText, done })
-        })
-    }, [translatedText, isLoading])
 
     const [translateDeps, setTranslateDeps] = useState<{
         sourceLang?: LangCode
@@ -957,45 +1047,67 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         engineModel: undefined,
     })
 
+    const translateDepsRef = useRef(translateDeps)
+    useEffect(() => {
+        translateDepsRef.current = translateDeps
+    }, [translateDeps])
+
+    // Streamed tokens are buffered and flushed on a timer: re-rendering the
+    // whole result on every token is a >100ms long task for long texts,
+    // which freezes the UI and makes clicks unresponsive. The very first token
+    // bypasses the buffer, because holding it back for the coalescing window is
+    // pure added latency exactly where users notice it most.
+    const streamBufferRef = useRef('')
+    const streamFlushTimerRef = useRef<number | null>(null)
+    const hasPaintedFirstTokenRef = useRef(false)
+    const resetStreamBuffer = useCallback(() => {
+        streamBufferRef.current = ''
+        hasPaintedFirstTokenRef.current = false
+        if (streamFlushTimerRef.current !== null) {
+            window.clearTimeout(streamFlushTimerRef.current)
+            streamFlushTimerRef.current = null
+        }
+    }, [])
+
+    const targetLangRef = useRef<LangCode | undefined>(undefined)
+
     const getTranslateDeps = useCallback(
         async function (text: string, action: Action): Promise<typeof translateDeps> {
             const newSourceLang = await detectLang(text)
             setSourceLang(newSourceLang)
-            return await new Promise((resolve) => {
-                const isTranslate = action.mode === 'translate'
-                setTargetLang((targetLang_) => {
-                    const newTargetLang = (() => {
-                        if (
-                            isTranslate &&
-                            (!stopAutomaticallyChangeTargetLang.current || newSourceLang === targetLang_)
-                        ) {
-                            return pickTranslateAutoTargetLang(
-                                newSourceLang,
-                                settings?.defaultTargetLanguage,
-                                settings?.writingTargetLanguage
-                            )
-                        }
-                        if (!targetLang_) {
-                            if (settings?.defaultTargetLanguage) {
-                                return settings.defaultTargetLanguage as LangCode
-                            }
-                            return newSourceLang
-                        }
-                        return targetLang_
-                    })()
-                    setTranslateDeps((oldV) => {
-                        const newV: typeof translateDeps = {
-                            ...oldV,
-                            sourceLang: newSourceLang,
-                            targetLang: newTargetLang,
-                            text,
-                        }
-                        resolve(newV)
-                        return oldV
-                    })
-                    return newTargetLang
-                })
-            })
+            // Compute the new deps directly from refs instead of resolving a
+            // promise inside setState updaters: updaters only run when React
+            // renders, and a throttled background page defers renders long
+            // enough that such a promise never settles - which silently
+            // swallowed submits.
+            const isTranslate = action.mode === 'translate'
+            const currentTargetLang = targetLangRef.current
+            const newTargetLang = (() => {
+                if (
+                    isTranslate &&
+                    (!stopAutomaticallyChangeTargetLang.current || newSourceLang === currentTargetLang)
+                ) {
+                    return pickTranslateAutoTargetLang(
+                        newSourceLang,
+                        settings?.defaultTargetLanguage,
+                        settings?.writingTargetLanguage
+                    )
+                }
+                if (!currentTargetLang) {
+                    if (settings?.defaultTargetLanguage) {
+                        return settings.defaultTargetLanguage as LangCode
+                    }
+                    return newSourceLang
+                }
+                return currentTargetLang
+            })()
+            setTargetLang(newTargetLang)
+            return {
+                ...translateDepsRef.current,
+                sourceLang: newSourceLang,
+                targetLang: newTargetLang,
+                text,
+            }
         },
         [settings.defaultTargetLanguage, settings.writingTargetLanguage]
     )
@@ -1066,6 +1178,24 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         isWordModeRef.current = isWordMode
     }, [isWordMode])
     const [errorMessage, setErrorMessage] = useState('')
+    // Emit streaming translation to inline lookup window (desktop only). A request is over once it
+    // has stopped loading, with or without text: one that fails or answers nothing must stop the
+    // popup's spinner too, and the popup shows the error, since the main window is hidden (#1938).
+    const inlineLookupLoadedRef = useRef(false)
+    useEffect(() => {
+        if (!isDesktopApp()) return
+        if (isLoading) {
+            inlineLookupLoadedRef.current = true
+        }
+        const done = !isLoading && (inlineLookupLoadedRef.current || translatedText !== '' || errorMessage !== '')
+        if (done) {
+            // The next request starts fresh: a render between two requests is not an end.
+            inlineLookupLoadedRef.current = false
+        }
+        import('@tauri-apps/api/event').then(({ emitTo }) => {
+            emitTo('inline_lookup', 'translated-text-chunk', { text: translatedText, done, error: errorMessage })
+        })
+    }, [translatedText, isLoading, errorMessage])
     const startLoading = useCallback(() => {
         setIsLoading(true)
     }, [])
@@ -1074,6 +1204,9 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     }, [])
     const [sourceLang, setSourceLang] = useState<LangCode>('en')
     const [targetLang, setTargetLang] = useState<LangCode>()
+    useEffect(() => {
+        targetLangRef.current = targetLang
+    }, [targetLang])
     const stopAutomaticallyChangeTargetLang = useRef(false)
 
     useEffect(() => {
@@ -1112,7 +1245,8 @@ function InnerTranslator(props: IInnerTranslatorProps) {
 
         const calculateTranslatedContentMaxHeight = (): number => {
             const { innerHeight } = window
-            const maxHeight = popupCardInnerContainer ? parseInt(popupCardInnerContainer.style.maxHeight) : innerHeight
+            const { height: resizedHeight, maxHeight: availableHeight } = popupCardInnerContainer.style
+            const maxHeight = parseInt(resizedHeight || availableHeight) || innerHeight
 
             const editorHeight = editorContainerRef.current?.offsetHeight || 0
             const actionButtonsHeight = actionButtonsRef.current?.offsetHeight || 0
@@ -1199,6 +1333,11 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         async (selectedWord: string, signal: AbortSignal) => {
             if (skipNextTranslateRef.current) {
                 skipNextTranslateRef.current = false
+                // The effect cleanup aborts the previous run, and the aborted
+                // run returns before its finally clears the loading state - it
+                // relies on this run taking the state over. A bail out here
+                // must therefore clear it, or the spinner never stops.
+                stopLoading()
                 return
             }
             translationIDRef.current += 1
@@ -1208,6 +1347,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             const translationID = translationIDRef.current
             const { text, sourceLang, targetLang, action } = translateDeps
             if (!text || !sourceLang || !targetLang || !action) {
+                stopLoading()
                 return
             }
             setShowWordbookButtons(false)
@@ -1263,14 +1403,35 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     console.error('Failed to persist history', error)
                 }
             }
+            // One trace per submit. It is closed with the trace object rather
+            // than "whatever trace is active", because an aborted request can
+            // settle after the next translation already started its own.
+            let activeTrace: ReturnType<typeof beginPerfTrace> | undefined
+            const finishTrace = (reason: string) => {
+                if (!activeTrace) {
+                    return
+                }
+                finishPerfTrace(reason, { trace: activeTrace })
+                activeTrace = undefined
+            }
             const beforeTranslate = () => {
                 historyEntryIdRef.current = null
                 lastHistoryKeyRef.current = null
+                // Everything from the user's submit to the first painted
+                // character is measured as one trace, so the next "why is this
+                // slow?" question is answered by data instead of guesses.
+                activeTrace = beginPerfTrace('translate', {
+                    mode: actionMode,
+                    provider: translateDeps.provider ?? settings.provider,
+                    target: translateDeps.targetLang,
+                    chars: text.length,
+                })
                 let actionStr = actionStrItem.beforeStr
                 if (actionMode === 'translate' && sourceLang === targetLang) {
                     actionStr = 'Polishing...'
                 }
                 setActionStr(actionStr)
+                resetStreamBuffer()
                 setTranslatedText('')
                 setErrorMessage('')
                 startLoading()
@@ -1313,6 +1474,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 const cachedText = cachedValue as string
                 afterTranslate('stop')
                 setTranslatedText(cachedText)
+                finishTrace('cache-hit')
                 void persistHistory(cachedText)
                 return
             }
@@ -1334,21 +1496,46 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             return
                         }
                         setIsWordMode(message.isWordMode)
-                        setTranslatedText((translatedText) => {
-                            if (message.isFullText) {
-                                return message.content
+                        if (message.isFullText) {
+                            resetStreamBuffer()
+                            setTranslatedText(message.content)
+                            return
+                        }
+                        streamBufferRef.current += message.content
+                        if (streamFlushTimerRef.current !== null) {
+                            return
+                        }
+                        const flush = () => {
+                            streamFlushTimerRef.current = null
+                            if (signal.aborted) {
+                                return
                             }
-                            return translatedText + message.content
-                        })
+                            const chunk = streamBufferRef.current
+                            streamBufferRef.current = ''
+                            setTranslatedText((translatedText) => translatedText + chunk)
+                        }
+                        // The first token is shown as soon as it arrives; only
+                        // the following ones are coalesced. Waiting 120ms to
+                        // "reduce renders" on the first token was pure added
+                        // time-to-first-character.
+                        if (!hasPaintedFirstTokenRef.current) {
+                            hasPaintedFirstTokenRef.current = true
+                            flush()
+                            return
+                        }
+                        streamFlushTimerRef.current = window.setTimeout(flush, 120)
                     },
                     onFinish: (reason) => {
+                        const pending = streamBufferRef.current
+                        resetStreamBuffer()
                         afterTranslate(reason)
                         setTranslatedText((translatedText) => {
-                            const result = translatedText
+                            const result = translatedText + pending
                             cache.set(cachedKey, result)
                             void persistHistory(result)
                             return result
                         })
+                        finishTrace(reason)
                     },
                     onError: (error) => {
                         setActionStr('Error')
@@ -1360,11 +1547,16 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 // if error is a AbortError then ignore this error
                 if (error.name === 'AbortError') {
                     isStopped = true
+                    finishTrace('aborted')
                     return
                 }
                 setActionStr('Error')
                 setErrorMessage((error as Error).toString())
+                finishTrace('error')
             } finally {
+                // An engine that ends its stream without a finish reason still
+                // gets its trace reported instead of lingering as active.
+                finishTrace('closed')
                 if (!isStopped && translationID === translationIDRef.current) {
                     stopLoading()
                     isStopped = true
@@ -1394,7 +1586,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             }
             historyEntryIdRef.current = item.id ?? null
             lastHistoryKeyRef.current = null
-            skipNextTranslateRef.current = true
             setSourceLang(item.sourceLang)
             setTargetLang(item.targetLang)
             setEditableText(item.text)
@@ -1404,19 +1595,24 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             setShowWordbookButtons(false)
             setSelectedWord('')
             setHighlightWords([])
-            setTranslateDeps((prev) => {
-                const nextAction = matchedAction ?? prev.action
-                const providerFromHistory = isProviderValue(item.provider) ? item.provider : undefined
-                return {
-                    ...prev,
-                    text: item.text,
-                    sourceLang: item.sourceLang,
-                    targetLang: item.targetLang,
-                    action: nextAction,
-                    provider: providerFromHistory ?? prev.provider ?? settings.provider,
-                    engineModel: item.engineModel ?? prev.engineModel,
-                }
-            })
+            const prev = translateDepsRef.current
+            const nextAction = matchedAction ?? prev.action
+            const providerFromHistory = isProviderValue(item.provider) ? item.provider : undefined
+            const next = {
+                ...prev,
+                text: item.text,
+                sourceLang: item.sourceLang,
+                targetLang: item.targetLang,
+                action: nextAction,
+                provider: providerFromHistory ?? prev.provider ?? settings.provider,
+                engineModel: item.engineModel ?? prev.engineModel,
+            }
+            // Only arm the skip flag when the deps actually changed: if they
+            // are deep-equal, the translate effect never re-runs, the flag is
+            // never consumed, and it would silently swallow the user's next
+            // submit instead.
+            skipNextTranslateRef.current = JSON.stringify(prev) !== JSON.stringify(next)
+            setTranslateDeps(next)
         },
         [actions, settings.provider, setActivateAction]
     )
@@ -1435,6 +1631,199 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             unlistenHistory?.()
         }
     }, [handleHistoryRestore])
+
+    // ---- Browser-like back/forward navigation ----
+    // Drilling into a word's details from the hover card replaces the whole
+    // view, so it needs an undo. Every translation view is an entry in a
+    // bounded in-memory stack; back/forward restores the cached result
+    // instead of paying for a re-translation. Persistence across sessions is
+    // the History window's job, not this stack's.
+    const navStackRef = useRef<INavigationEntry[]>([])
+    const navIndexRef = useRef(-1)
+    const [navCan, setNavCan] = useState({ back: false, forward: false })
+    const syncNavCan = useCallback(() => {
+        setNavCan({
+            back: navIndexRef.current > 0,
+            forward: navIndexRef.current < navStackRef.current.length - 1,
+        })
+    }, [])
+
+    const currentNavView = useCallback((): Omit<INavigationEntry, 'translatedText' | 'isWordMode'> | undefined => {
+        const deps = translateDepsRef.current
+        if (!deps.text || !deps.sourceLang || !deps.targetLang || !deps.action) {
+            return undefined
+        }
+        return {
+            text: deps.text,
+            sourceLang: deps.sourceLang,
+            targetLang: deps.targetLang,
+            actionId: deps.action.id,
+            actionMode: deps.action.mode,
+            provider: deps.provider,
+            engineModel: deps.engineModel,
+        }
+    }, [])
+
+    const isSameNavView = useCallback(
+        (
+            entry: INavigationEntry | undefined,
+            view: Omit<INavigationEntry, 'translatedText' | 'isWordMode'>
+        ): entry is INavigationEntry =>
+            !!entry &&
+            entry.text === view.text &&
+            entry.sourceLang === view.sourceLang &&
+            entry.targetLang === view.targetLang &&
+            entry.actionId === view.actionId &&
+            entry.actionMode === view.actionMode,
+        []
+    )
+
+    // A translation starting on a view that is not the current stack entry is
+    // a navigation (word drill-down, new submit, language change, ...):
+    // truncate the forward branch and push it, like a browser address-bar
+    // navigation. Re-translating the current view updates it in place.
+    useEffect(() => {
+        if (!isLoading) {
+            return
+        }
+        const view = currentNavView()
+        if (!view) {
+            return
+        }
+        const stack = navStackRef.current
+        if (isSameNavView(stack[navIndexRef.current], view)) {
+            return
+        }
+        stack.splice(navIndexRef.current + 1)
+        stack.push({ ...view, translatedText: '', isWordMode: false })
+        if (stack.length > 50) {
+            stack.shift()
+        }
+        navIndexRef.current = stack.length - 1
+        syncNavCan()
+    }, [isLoading, currentNavView, isSameNavView, syncNavCan])
+
+    // Once the current view's translation settles, cache the result on its
+    // stack entry so coming back to it later is instant and free.
+    useEffect(() => {
+        if (isLoading || errorMessage || !translatedText) {
+            return
+        }
+        const view = currentNavView()
+        if (!view) {
+            return
+        }
+        const entry = navStackRef.current[navIndexRef.current]
+        if (!isSameNavView(entry, view)) {
+            return
+        }
+        entry.translatedText = translatedText
+        entry.isWordMode = isWordModeRef.current
+    }, [isLoading, translatedText, errorMessage, currentNavView, isSameNavView])
+
+    const applyNavEntry = useCallback(
+        (entry: INavigationEntry) => {
+            // Navigating away from a still-streaming view: drop the stream.
+            translateControllerRef.current?.abort()
+            stopLoading()
+            const matchedAction =
+                actions?.find((action) => action.id === entry.actionId) ??
+                actions?.find((action) => action.mode && action.mode === entry.actionMode)
+            if (matchedAction) {
+                setActivateAction(matchedAction)
+            }
+            historyEntryIdRef.current = null
+            lastHistoryKeyRef.current = null
+            setSourceLang(entry.sourceLang)
+            setTargetLang(entry.targetLang)
+            setEditableText(entry.text)
+            setTranslatedText(entry.translatedText)
+            setIsWordMode(entry.isWordMode)
+            setActionStr('')
+            setErrorMessage('')
+            setShowWordbookButtons(false)
+            setSelectedWord('')
+            setHighlightWords([])
+            const prev = translateDepsRef.current
+            const next = {
+                ...prev,
+                text: entry.text,
+                sourceLang: entry.sourceLang,
+                targetLang: entry.targetLang,
+                action: matchedAction ?? prev.action,
+                provider: entry.provider ?? prev.provider,
+                engineModel: entry.engineModel ?? prev.engineModel,
+            }
+            const depsChanged = JSON.stringify(prev) !== JSON.stringify(next)
+            // An entry with a cached result restores silently (same skip
+            // mechanism as handleHistoryRestore, with the same only-arm-when-
+            // consumed guard); an entry whose translation never finished
+            // (the user navigated away mid-stream) reloads like a browser
+            // reloads an unfinished page.
+            skipNextTranslateRef.current = depsChanged && entry.translatedText !== ''
+            setTranslateDeps(next)
+            if (!depsChanged && entry.translatedText === '') {
+                forceTranslate()
+            }
+        },
+        [actions, setActivateAction, stopLoading, forceTranslate]
+    )
+
+    const goBack = useCallback(() => {
+        if (navIndexRef.current <= 0) {
+            return
+        }
+        navIndexRef.current -= 1
+        applyNavEntry(navStackRef.current[navIndexRef.current])
+        syncNavCan()
+    }, [applyNavEntry, syncNavCan])
+
+    const goForward = useCallback(() => {
+        if (navIndexRef.current >= navStackRef.current.length - 1) {
+            return
+        }
+        navIndexRef.current += 1
+        applyNavEntry(navStackRef.current[navIndexRef.current])
+        syncNavCan()
+    }, [applyNavEntry, syncNavCan])
+
+    const goBackRef = useRef(goBack)
+    const goForwardRef = useRef(goForward)
+    useEffect(() => {
+        goBackRef.current = goBack
+        goForwardRef.current = goForward
+    }, [goBack, goForward])
+
+    // Cmd/Ctrl+[ and ], plus the mouse side buttons, like a browser.
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (!(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) {
+                return
+            }
+            if (event.key === '[') {
+                event.preventDefault()
+                goBackRef.current()
+            } else if (event.key === ']') {
+                event.preventDefault()
+                goForwardRef.current()
+            }
+        }
+        const onMouseUp = (event: MouseEvent) => {
+            if (event.button === 3) {
+                event.preventDefault()
+                goBackRef.current()
+            } else if (event.button === 4) {
+                event.preventDefault()
+                goForwardRef.current()
+            }
+        }
+        document.addEventListener('keydown', onKeyDown)
+        document.addEventListener('mouseup', onMouseUp)
+        return () => {
+            document.removeEventListener('keydown', onKeyDown)
+            document.removeEventListener('mouseup', onMouseUp)
+        }
+    }, [])
 
     useEffect(() => {
         if (!props.defaultShowSettings) {
@@ -1509,8 +1898,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     return
                 }
 
-                const worker = createWorker()
-
                 const binaryFile = await readFile(filePath)
 
                 const file = new Blob([binaryFile.buffer], {
@@ -1531,20 +1918,25 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 })
                 setIsOCRProcessing(true)
 
-                await (await worker).loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
-                await (await worker).initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
+                // Create the worker only after validation and always
+                // terminate it: leaked Tesseract workers keep pumping
+                // messages and pile up listeners, dragging the whole UI.
+                const worker = await createWorker()
+                try {
+                    await worker.loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
+                    await worker.initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
 
-                const { data } = await (await worker).recognize(file)
+                    const { data } = await worker.recognize(file)
 
-                if (activateAction) {
-                    const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
+                    if (activateAction) {
+                        const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
 
-                    setTranslateDeps(newTranslateDeps)
+                        setTranslateDeps(newTranslateDeps)
+                    }
+                } finally {
+                    setIsOCRProcessing(false)
+                    await worker.terminate()
                 }
-
-                setIsOCRProcessing(false)
-
-                await (await worker).terminate()
             })
         })()
 
@@ -1554,16 +1946,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
     }, [activateAction, getTranslateDeps])
 
     const onDrop = async (acceptedFiles: File[]) => {
-        const worker = createWorker()
-
-        setTranslateDeps((v) => {
-            return {
-                ...v,
-                text: '',
-            }
-        })
-        setIsOCRProcessing(true)
-
         if (acceptedFiles.length !== 1) {
             alert('Only one file can be uploaded at a time.')
             return
@@ -1581,19 +1963,32 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             return
         }
 
-        await (await worker).loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
-        await (await worker).initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
+        setTranslateDeps((v) => {
+            return {
+                ...v,
+                text: '',
+            }
+        })
+        setIsOCRProcessing(true)
 
-        const { data } = await (await worker).recognize(file)
+        // Create the worker only after validation and always terminate it:
+        // leaked Tesseract workers keep pumping messages and pile up
+        // listeners, dragging the whole UI.
+        const worker = await createWorker()
+        try {
+            await worker.loadLanguage('eng+chi_sim+chi_tra+jpn+rus+kor')
+            await worker.initialize('eng+chi_sim+chi_tra+jpn+rus+kor')
 
-        if (activateAction) {
-            const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
-            setTranslateDeps(newTranslateDeps)
+            const { data } = await worker.recognize(file)
+
+            if (activateAction) {
+                const newTranslateDeps = await getTranslateDeps(data.text, activateAction)
+                setTranslateDeps(newTranslateDeps)
+            }
+        } finally {
+            setIsOCRProcessing(false)
+            await worker.terminate()
         }
-
-        setIsOCRProcessing(false)
-
-        await (await worker).terminate()
     }
 
     const onCsvExport = async () => {
@@ -1629,7 +2024,6 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         setActionStr('Stopped')
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleInsertTranslatedText = useCallback(async () => {
         if (!translatedText || !isTauri()) {
             return
@@ -1649,6 +2043,59 @@ function InnerTranslator(props: IInnerTranslatorProps) {
             })
         }
     }, [t, translatedText])
+
+    const handleOpenWordDetails = useCallback(
+        async (word: string) => {
+            const translateAction = actions?.find((action) => action.mode === 'translate') ?? activateAction
+            if (!translateAction) {
+                return
+            }
+            setSelectedWord('')
+            setHighlightWords([])
+            setVocabularyType('hide')
+            setShowSettings(false)
+            setEditableText(word)
+            if (translateAction.id !== activateAction?.id || translateAction.mode !== activateAction?.mode) {
+                setActivateAction(translateAction)
+            }
+            const newTranslateDeps = await getTranslateDeps(word, translateAction)
+            setTranslateDeps({
+                ...newTranslateDeps,
+                action: translateAction,
+            })
+            editorRef.current?.focus()
+        },
+        [actions, activateAction, getTranslateDeps, setShowSettings]
+    )
+
+    const renderHoverableText = useCallback((text: string) => <HoverableText>{text}</HoverableText>, [])
+
+    // Window-level keyboard shortcut for "Insert into previous input"
+    // — ⇧⌘↩ on macOS, Ctrl+Shift+Enter elsewhere. Mirrors the toolbar button.
+    useEffect(() => {
+        if (!isTauri()) {
+            return
+        }
+        const handler = (e: KeyboardEvent) => {
+            const accel = isMacOS ? e.metaKey : e.ctrlKey
+            if (!accel || !e.shiftKey) {
+                return
+            }
+            if (e.key !== 'Enter') {
+                return
+            }
+            if (!translatedText) {
+                return
+            }
+            e.preventDefault()
+            e.stopPropagation()
+            handleInsertTranslatedText()
+        }
+        document.addEventListener('keydown', handler)
+        return () => {
+            document.removeEventListener('keydown', handler)
+        }
+    }, [translatedText, handleInsertTranslatedText])
 
     const [isScrolledToTop, setIsScrolledToTop] = useState(false)
     const [isScrolledToBottom, setIsScrolledToBottom] = useState(false)
@@ -1713,19 +2160,50 @@ function InnerTranslator(props: IInnerTranslatorProps) {
         (e: React.SyntheticEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
             e.preventDefault()
             e.stopPropagation()
+            // An explicit submit must never be swallowed: a leftover skip
+            // flag from a history restore whose deps never re-ran the
+            // translate effect would silently eat this submit.
+            skipNextTranslateRef.current = false
             let action = activateAction
             if (!action) {
-                action = actions?.find((action) => action.mode === 'translate')
-                setActivateAction(action)
+                // The built-in translate action can be renamed or deleted, and
+                // on a cold start the action list may not have loaded yet.
+                action = actions?.find((a) => a.mode === 'translate') ?? actions?.[0]
+                if (action) {
+                    setActivateAction(action)
+                }
             }
-            const text = editorRef.current?.value ?? ''
-            if (action) {
-                getTranslateDeps(text, action).then((v) => {
-                    setTranslateDeps(v)
+            const text = editorRef.current?.value ?? editableText
+            if (!action) {
+                // Bailing out here used to be completely silent.
+                toast(t('No available action'), { duration: 5000, icon: '❌' })
+                return
+            }
+            const submittedAction = action
+            getTranslateDeps(text, submittedAction)
+                .then((v) => {
+                    // getTranslateDeps carries the previous action over, which
+                    // is empty on the very first submit; without this the
+                    // translate effect bails on its missing-deps guard.
+                    const deps = { ...v, action: submittedAction }
+                    // translateText compares deps deeply, so resubmitting
+                    // unchanged content would not retrigger it; bump the
+                    // translation flag (same mechanism as the Retry button)
+                    // so an explicit submit always runs.
+                    const unchanged = JSON.stringify(translateDepsRef.current) === JSON.stringify(deps)
+                    setTranslateDeps(deps)
+                    if (unchanged) {
+                        forceTranslate()
+                    }
                 })
-            }
+                .catch((error) => {
+                    // A rejected language detection used to kill the submit
+                    // silently; surface it instead.
+                    console.error('submit failed:', error)
+                    toast(String(error), { duration: 5000, icon: '❌' })
+                })
         },
-        [actions, activateAction, getTranslateDeps]
+        [actions, activateAction, editableText, getTranslateDeps, t]
     )
 
     const { data: promotions, mutate: refetchPromotions } = useSWR<IPromotionResponse>(
@@ -1826,6 +2304,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                 minHeight: vocabularyType !== 'hide' ? '600px' : undefined,
                 background: isDesktopApp() ? 'transparent' : theme.colors.backgroundPrimary,
                 paddingBottom: showSettings || settings.enableBackgroundBlur ? '0px' : '42px',
+                fontSize: settings.uiFontSize,
             }}
         >
             {showSettings && (
@@ -1901,7 +2380,7 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                 }}
                             >
                                 <Tooltip content='Exchange' placement='top'>
-                                    <div>
+                                    <div style={{ display: 'flex' }}>
                                         <TbArrowsExchange />
                                     </div>
                                 </Tooltip>
@@ -2187,6 +2666,20 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                             onChange={(e) => setEditableText(e.target.value)}
                                             onKeyDown={(e) => {
                                                 e.stopPropagation()
+                                                if (e.key !== 'Enter' || e.shiftKey) {
+                                                    return
+                                                }
+                                                // Chrome does not fire keypress
+                                                // while an IME is composing, so
+                                                // submitting from keypress made
+                                                // the Enter that commits a
+                                                // candidate disappear; submit
+                                                // from keydown and skip the
+                                                // composing Enter instead.
+                                                if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229) {
+                                                    return
+                                                }
+                                                handleSubmit(e)
                                             }}
                                             onKeyUp={(e) => {
                                                 e.stopPropagation()
@@ -2194,7 +2687,10 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                             onKeyPress={(e) => {
                                                 e.stopPropagation()
                                                 if (e.key === 'Enter' && !e.shiftKey) {
-                                                    handleSubmit(e)
+                                                    // Submitting already
+                                                    // happened on keydown; keep
+                                                    // the newline out.
+                                                    e.preventDefault()
                                                 }
                                             }}
                                         />
@@ -2339,6 +2835,22 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                     }
                                                     rate={settings.tts?.rate}
                                                     volume={settings.tts?.volume}
+                                                    onWordBoundary={(wordIndex) => {
+                                                        const spokenText = selectedWord || editableText
+                                                        const offset = selectedWord
+                                                            ? editableText.indexOf(selectedWord)
+                                                            : 0
+                                                        const word = segmentSpeechText(spokenText, sourceLang).find(
+                                                            (part) => part.wordIndex === wordIndex
+                                                        )
+                                                        if (word && offset >= 0) {
+                                                            setSpeakingInputRange([
+                                                                offset + word.start,
+                                                                offset + word.end,
+                                                            ])
+                                                        }
+                                                    }}
+                                                    onPlaybackEnd={() => setSpeakingInputRange(undefined)}
                                                 />
                                             </div>
                                         </Tooltip>
@@ -2432,77 +2944,164 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                             width: '100%',
                                         }}
                                     >
-                                        <div
-                                            ref={translatedContentRef}
-                                            className={styles.popupCardTranslatedContentContainer}
-                                            style={{
-                                                fontSize: settings.fontSize,
-                                            }}
-                                        >
-                                            <div>
-                                                {currentTranslateMode === 'explain-code' ||
-                                                activateAction?.outputRenderingFormat === 'markdown' ? (
-                                                    <>
-                                                        <Markdown>{translatedText}</Markdown>
-                                                        {isLoading && <span className={styles.caret} />}
-                                                    </>
-                                                ) : activateAction?.outputRenderingFormat === 'latex' ? (
-                                                    <>
-                                                        <Latex>{translatedText}</Latex>
-                                                        {isLoading && <span className={styles.caret} />}
-                                                    </>
-                                                ) : (
-                                                    translatedLines.map((line, i) => {
-                                                        return (
-                                                            <div className={styles.paragraph} key={`p-${i}`}>
-                                                                {isWordMode && i === 0 ? (
-                                                                    <div
-                                                                        style={{
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            gap: '5px',
-                                                                        }}
-                                                                    >
-                                                                        {line}
-                                                                        {!isLoading && (
-                                                                            <StatefulTooltip
-                                                                                content={
-                                                                                    isCollectedWord
-                                                                                        ? t('Remove from collection')
-                                                                                        : t('Add to collection')
-                                                                                }
-                                                                                showArrow
-                                                                                placement='right'
-                                                                            >
-                                                                                <div
-                                                                                    className={styles.actionButton}
-                                                                                    onClick={() =>
-                                                                                        onWordCollection(
-                                                                                            isCollectedWord
-                                                                                        )
+                                        <WordHoverProvider enabled={!isLoading} onOpenDetails={handleOpenWordDetails}>
+                                            <div
+                                                ref={translatedContentRef}
+                                                className={styles.popupCardTranslatedContentContainer}
+                                                style={{
+                                                    fontSize: settings.fontSize,
+                                                }}
+                                            >
+                                                <div>
+                                                    {currentTranslateMode === 'explain-code' ||
+                                                    activateAction?.outputRenderingFormat === 'markdown' ? (
+                                                        <>
+                                                            <Markdown
+                                                                // Skip per-word hover/phonetic wrapping while
+                                                                // streaming: it multiplies the cost of each
+                                                                // incremental re-render and freezes the UI on
+                                                                // long outputs. The final render restores it.
+                                                                renderText={isLoading ? undefined : renderHoverableText}
+                                                                speechLang={
+                                                                    isLoading
+                                                                        ? undefined
+                                                                        : isWordMode
+                                                                        ? sourceLang
+                                                                        : targetLang ?? 'en'
+                                                                }
+                                                                speechText={editableText}
+                                                                ttsProvider={settings.tts?.provider}
+                                                                ttsVoice={
+                                                                    settings.tts?.voices?.find(
+                                                                        (item) =>
+                                                                            item.lang ===
+                                                                            (isWordMode
+                                                                                ? sourceLang
+                                                                                : targetLang ?? 'en')
+                                                                    )?.voice
+                                                                }
+                                                                ttsRate={settings.tts?.rate}
+                                                                ttsVolume={settings.tts?.volume}
+                                                            >
+                                                                {translatedText}
+                                                            </Markdown>
+                                                            {isLoading && <span className={styles.caret} />}
+                                                        </>
+                                                    ) : activateAction?.outputRenderingFormat === 'latex' ? (
+                                                        <>
+                                                            <Latex>{translatedText}</Latex>
+                                                            {isLoading && <span className={styles.caret} />}
+                                                        </>
+                                                    ) : (
+                                                        translatedLines.map((line, i) => {
+                                                            const lineStart = translatedLines
+                                                                .slice(0, i)
+                                                                .reduce((length, item) => length + item.length + 1, 0)
+                                                            const lineHighlightRange = speakingOutputRange
+                                                                ? ([
+                                                                      Math.max(0, speakingOutputRange[0] - lineStart),
+                                                                      Math.min(
+                                                                          line.length,
+                                                                          speakingOutputRange[1] - lineStart
+                                                                      ),
+                                                                  ] as [number, number])
+                                                                : undefined
+                                                            return (
+                                                                <div className={styles.paragraph} key={`p-${i}`}>
+                                                                    {isWordMode && i === 0 ? (
+                                                                        <div
+                                                                            style={{
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                gap: '5px',
+                                                                            }}
+                                                                        >
+                                                                            {isLoading ? (
+                                                                                line
+                                                                            ) : (
+                                                                                <PhoneticText
+                                                                                    text={line}
+                                                                                    fallbackText={editableText}
+                                                                                    highlightRange={lineHighlightRange}
+                                                                                    lang={sourceLang}
+                                                                                    provider={settings.tts?.provider}
+                                                                                    voice={
+                                                                                        settings.tts?.voices?.find(
+                                                                                            (item) =>
+                                                                                                item.lang === sourceLang
+                                                                                        )?.voice
                                                                                     }
+                                                                                    rate={settings.tts?.rate}
+                                                                                    volume={settings.tts?.volume}
+                                                                                    renderText={renderHoverableText}
+                                                                                />
+                                                                            )}
+                                                                            {!isLoading && (
+                                                                                <StatefulTooltip
+                                                                                    content={
+                                                                                        isCollectedWord
+                                                                                            ? t(
+                                                                                                  'Remove from collection'
+                                                                                              )
+                                                                                            : t('Add to collection')
+                                                                                    }
+                                                                                    showArrow
+                                                                                    placement='right'
                                                                                 >
-                                                                                    {isCollectedWord ? (
-                                                                                        <MdGrade size={15} />
-                                                                                    ) : (
-                                                                                        <MdOutlineGrade size={15} />
-                                                                                    )}
-                                                                                </div>
-                                                                            </StatefulTooltip>
-                                                                        )}
-                                                                    </div>
-                                                                ) : (
-                                                                    line
-                                                                )}
-                                                                {isLoading && i === translatedLines.length - 1 && (
-                                                                    <span className={styles.caret} />
-                                                                )}
-                                                            </div>
-                                                        )
-                                                    })
-                                                )}
+                                                                                    <div
+                                                                                        className={styles.actionButton}
+                                                                                        onClick={() =>
+                                                                                            onWordCollection(
+                                                                                                isCollectedWord
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        {isCollectedWord ? (
+                                                                                            <MdGrade size={15} />
+                                                                                        ) : (
+                                                                                            <MdOutlineGrade size={15} />
+                                                                                        )}
+                                                                                    </div>
+                                                                                </StatefulTooltip>
+                                                                            )}
+                                                                        </div>
+                                                                    ) : isLoading ? (
+                                                                        line
+                                                                    ) : (
+                                                                        <PhoneticText
+                                                                            text={line}
+                                                                            fallbackText={editableText}
+                                                                            highlightRange={lineHighlightRange}
+                                                                            lang={
+                                                                                isWordMode
+                                                                                    ? sourceLang
+                                                                                    : targetLang ?? 'en'
+                                                                            }
+                                                                            provider={settings.tts?.provider}
+                                                                            voice={
+                                                                                settings.tts?.voices?.find(
+                                                                                    (item) =>
+                                                                                        item.lang ===
+                                                                                        (isWordMode
+                                                                                            ? sourceLang
+                                                                                            : targetLang ?? 'en')
+                                                                                )?.voice
+                                                                            }
+                                                                            rate={settings.tts?.rate}
+                                                                            volume={settings.tts?.volume}
+                                                                            renderText={renderHoverableText}
+                                                                        />
+                                                                    )}
+                                                                    {isLoading && i === translatedLines.length - 1 && (
+                                                                        <span className={styles.caret} />
+                                                                    )}
+                                                                </div>
+                                                            )
+                                                        })
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
+                                        </WordHoverProvider>
                                         {translatedText && (
                                             <div ref={actionButtonsRef} className={styles.actionButtonsContainer}>
                                                 <div style={{ marginRight: 'auto' }} />
@@ -2530,6 +3129,16 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                             }
                                                             rate={settings.tts?.rate}
                                                             volume={settings.tts?.volume}
+                                                            onWordBoundary={(wordIndex) => {
+                                                                const word = segmentSpeechText(
+                                                                    translatedText,
+                                                                    targetLang ?? 'en'
+                                                                ).find((part) => part.wordIndex === wordIndex)
+                                                                if (word) {
+                                                                    setSpeakingOutputRange([word.start, word.end])
+                                                                }
+                                                            }}
+                                                            onPlaybackEnd={() => setSpeakingOutputRange(undefined)}
                                                         />
                                                     </div>
                                                 </Tooltip>
@@ -2551,7 +3160,9 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                                 )}
                                                 {isTauri() && (
                                                     <Tooltip
-                                                        content={t('Insert into previous input')}
+                                                        content={`${t('Insert into previous input')} (${
+                                                            isMacOS ? '⇧⌘↩' : 'Ctrl+Shift+Enter'
+                                                        })`}
                                                         placement='bottom'
                                                     >
                                                         <div
@@ -2758,6 +3369,26 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                             </div>
                         </Button>
                     </Tooltip>
+                    {!showSettings && (navCan.back || navCan.forward) && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                            <Tooltip content={t('Back')} placement='top'>
+                                <div
+                                    onClick={goBack}
+                                    className={navCan.back ? styles.actionButton : styles.actionButtonDisabled}
+                                >
+                                    <IoChevronBackOutline size={15} />
+                                </div>
+                            </Tooltip>
+                            <Tooltip content={t('Forward')} placement='top'>
+                                <div
+                                    onClick={goForward}
+                                    className={navCan.forward ? styles.actionButton : styles.actionButtonDisabled}
+                                >
+                                    <IoChevronForwardOutline size={15} />
+                                </div>
+                            </Tooltip>
+                        </div>
+                    )}
                     {!showSettings && (
                         <div className={styles.poweredBy}>
                             Powered by{' '}
@@ -2776,6 +3407,28 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                     )}
                     {!showSettings && (
                         <div className={styles.footerActions}>
+                            {availableUpdate && (
+                                <Tooltip
+                                    content={`${t('A new version is available!')} v${availableUpdate.version}`}
+                                    placement='top'
+                                >
+                                    <button
+                                        type='button'
+                                        className={styles.updateButton}
+                                        aria-label={`${t('Update')} v${availableUpdate.version}`}
+                                        onClick={async (event) => {
+                                            event.stopPropagation()
+                                            event.preventDefault()
+                                            const { commands } = await import('@/tauri/bindings')
+                                            await commands.showUpdaterWindow()
+                                        }}
+                                    >
+                                        <MdBrowserUpdated size={12} />
+                                        <span>{t('Update')}</span>
+                                        <span className={styles.updateVersion}>v{availableUpdate.version}</span>
+                                    </button>
+                                </Tooltip>
+                            )}
                             <Tooltip content={t('History')} placement='top'>
                                 <Button
                                     size='mini'

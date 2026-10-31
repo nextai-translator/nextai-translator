@@ -1,9 +1,10 @@
-import { DoSpeakOptions, SpeakOptions } from './types'
+import { DoSpeakOptions, SpeakOptions, TTSProvider } from './types'
 import { getSettings } from '../utils'
-import { speak as edgeSpeak } from './edge-tts'
+import { isLocalTTSLanguage, speak as localSpeak } from './local-tts'
 import { LangCode } from '../lang'
+import * as utils from '../utils'
 
-export const defaultTTSProvider = 'EdgeTTS'
+export const defaultTTSProvider: TTSProvider = 'LocalTTS'
 
 export const langCode2TTSLang: Partial<Record<LangCode, string>> = {
     'en': 'en-US',
@@ -103,20 +104,28 @@ export async function doSpeak({
     onFinish,
     signal,
     onStartSpeaking,
+    onWordBoundary,
 }: DoSpeakOptions) {
     const rate = (rate_ ?? 10) / 10
 
-    if (provider === 'EdgeTTS') {
-        return edgeSpeak({
-            text,
-            lang,
-            onFinish,
-            voice: voice,
-            rate,
-            volume: volume ?? 100,
-            signal,
-            onStartSpeaking,
-        })
+    // 'EdgeTTS' is treated as 'LocalTTS': the Edge public endpoint no longer
+    // works (getSettings migrates the stored setting; this also covers
+    // callers holding a settings object loaded before the migration).
+    // Languages the local engine cannot speak fall through to the system
+    // voices below instead of the dead Edge service.
+    if (provider === 'LocalTTS' || provider === 'EdgeTTS') {
+        if (utils.isTauri() && isLocalTTSLanguage(lang)) {
+            return localSpeak({
+                text,
+                lang,
+                onFinish,
+                rate,
+                volume: volume ?? 100,
+                signal,
+                onStartSpeaking,
+                onWordBoundary,
+            })
+        }
     }
 
     const ttsLang = langCode2TTSLang[lang] ?? 'en-US'
@@ -130,6 +139,18 @@ export async function doSpeak({
     utterance.lang = ttsLang
     utterance.rate = rate
     utterance.volume = volume ? volume / 100 : 1
+    if (onWordBoundary) {
+        const { findSpeechWordIndex } = await import('./speech-segments')
+        utterance.addEventListener('boundary', (event) => {
+            if (event.name !== 'word') {
+                return
+            }
+            const wordIndex = findSpeechWordIndex(text, lang, event.charIndex)
+            if (wordIndex !== undefined) {
+                onWordBoundary(wordIndex)
+            }
+        })
+    }
 
     const defaultVoice = supportVoices.find((v) => v.lang === ttsLang) ?? null
     const settingsVoice = supportVoices.find((v) => v.voiceURI === voice)
