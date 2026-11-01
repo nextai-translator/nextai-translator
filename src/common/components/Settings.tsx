@@ -924,6 +924,12 @@ export function APIModelSelector({
             >
                 <div style={{ flexGrow: 1 }}>
                     <Combobox
+                        // Every provider's selector is mounted inside a
+                        // display:none block, where baseui's listboxWidth memo
+                        // permanently caches '0px' (the ref identity never
+                        // changes, so it never re-measures). Remounting on
+                        // activation re-measures while the block is visible.
+                        key={provider === currentProvider ? 'active' : 'inactive'}
                         size='compact'
                         value={value ?? ''}
                         onChange={(nextValue, option) => {
