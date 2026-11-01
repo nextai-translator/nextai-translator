@@ -219,3 +219,25 @@ describe('resolveGeminiThinkingConfig', () => {
         })
     })
 })
+
+describe('Gemini capability cache without storage.local', () => {
+    it('never writes the cache into storage.sync (the settings file on desktop)', async () => {
+        vi.resetModules()
+        const syncSet = vi.fn()
+        vi.doMock('../utils', () => ({
+            fetchSSE: vi.fn(),
+            getSettings: vi.fn(async () => ({ geminiAPIURL: 'https://generativelanguage.googleapis.com' })),
+            getBrowser: vi.fn(async () => ({ storage: { sync: { get: vi.fn(), set: syncSet } } })),
+        }))
+        const { Gemini: FreshGemini } = await import('./gemini')
+        fetcher.mockResolvedValue(
+            jsonResponse(200, {
+                models: [{ name: 'models/gemini-2.5-flash', supportedGenerationMethods: ['generateContent'] }],
+            })
+        )
+        const models = await new FreshGemini().listModels('key')
+        expect(models.map((m) => m.id)).toEqual(['gemini-2.5-flash'])
+        expect(syncSet).not.toHaveBeenCalled()
+        vi.doUnmock('../utils')
+    })
+})

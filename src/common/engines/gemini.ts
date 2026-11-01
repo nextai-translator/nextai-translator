@@ -36,26 +36,34 @@ interface IGeminiModelCapabilities {
     }
 }
 
+// Kept in memory as well: the Tauri/Electron/userscript polyfills have no
+// storage.local, and their storage.sync is the settings file itself, where an
+// extra read-modify-write racing a settings save could drop the user's edits.
+let memoryCapabilities: IGeminiModelCapabilities | undefined
+
 async function geminiModelStorage() {
     const browser = await getBrowser()
-    // storage.local is absent in the Tauri/Electron/userscript polyfills
-    return browser.storage.local ?? browser.storage.sync
+    return browser.storage.local
 }
 
 async function saveGeminiModelCapabilities(capabilities: IGeminiModelCapabilities): Promise<void> {
+    memoryCapabilities = capabilities
     try {
         const storage = await geminiModelStorage()
-        await storage.set({ [keyGeminiModelCapabilities]: capabilities })
+        await storage?.set({ [keyGeminiModelCapabilities]: capabilities })
     } catch {
         // best-effort cache; sendMessage falls back to name heuristics
     }
 }
 
 async function getGeminiModelCapabilities(): Promise<IGeminiModelCapabilities | undefined> {
+    if (memoryCapabilities) {
+        return memoryCapabilities
+    }
     try {
         const storage = await geminiModelStorage()
-        const items = await storage.get([keyGeminiModelCapabilities])
-        return items[keyGeminiModelCapabilities]
+        const items = await storage?.get([keyGeminiModelCapabilities])
+        return items?.[keyGeminiModelCapabilities]
     } catch {
         return undefined
     }
