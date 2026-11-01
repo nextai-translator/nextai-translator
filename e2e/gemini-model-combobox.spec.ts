@@ -30,5 +30,6 @@ test('gemini model combobox opens at anchor width after provider switch', async 
     await expect(listbox).toBeVisible({ timeout: 5000 })
     const width = await listbox.evaluate((el) => el.getBoundingClientRect().width)
     expect(width).toBeGreaterThan(0)
-    expect(await page.locator('[role="option"]:visible').count()).toBeGreaterThan(50)
+    // the full list is ~45 models after filtering to generateContent-capable ones
+    expect(await page.locator('[role="option"]:visible').count()).toBeGreaterThan(30)
 })
