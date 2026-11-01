@@ -924,6 +924,12 @@ export function APIModelSelector({
             >
                 <div style={{ flexGrow: 1 }}>
                     <Combobox
+                        // Every provider's selector is mounted inside a
+                        // display:none block, where baseui's listboxWidth memo
+                        // permanently caches '0px' (the ref identity never
+                        // changes, so it never re-measures). Remounting on
+                        // activation re-measures while the block is visible.
+                        key={provider === currentProvider ? 'active' : 'inactive'}
                         size='compact'
                         value={value ?? ''}
                         onChange={(nextValue, option) => {
@@ -977,6 +983,29 @@ export function APIModelSelector({
                                     // bubbles to the combobox container, which
                                     // opens the listbox.
                                     endEnhancer: <ChevronDown size={20} />,
+                                    overrides: {
+                                        // Match the Select rows: baseui pads the
+                                        // enhancer 10px each side and the input 14px,
+                                        // which left a visibly wider gap between the
+                                        // chevron and the input edge than the Select
+                                        // arrow has.
+                                        EndEnhancer: {
+                                            style: {
+                                                paddingLeft: '0',
+                                                paddingRight: '0',
+                                            },
+                                        },
+                                        Root: {
+                                            style: {
+                                                paddingRight: '12px',
+                                            },
+                                        },
+                                        Input: {
+                                            style: {
+                                                paddingLeft: '12px',
+                                            },
+                                        },
+                                    },
                                 },
                             },
                             ListItem: {

@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { urlJoin } from 'url-join-ts'
 import { getUniversalFetch } from '../universal-fetch'
-import { fetchSSE, getSettings } from '../utils'
+import { fetchSSE, getBrowser, getSettings } from '../utils'
 import { AbstractEngine } from './abstract-engine'
 import { IMessageRequest, IModel } from './interfaces'
 import qs from 'qs'
@@ -24,6 +24,97 @@ const SAFETY_SETTINGS = [
         threshold: 'OFF',
     },
 ]
+
+const keyGeminiModelCapabilities = 'gemini-model-capabilities'
+
+// Per-model capabilities reported by /v1beta/models. `thinking` is absent or
+// false on models that reject the thinkingConfig field entirely (TTS,
+// transcribe, embedding, live, Lyria, ...).
+interface IGeminiModelCapabilities {
+    [model: string]: {
+        thinking?: boolean
+    }
+}
+
+// Kept in memory as well: the Tauri/Electron/userscript polyfills have no
+// storage.local, and their storage.sync is the settings file itself, where an
+// extra read-modify-write racing a settings save could drop the user's edits.
+let memoryCapabilities: IGeminiModelCapabilities | undefined
+
+async function geminiModelStorage() {
+    const browser = await getBrowser()
+    return browser.storage.local
+}
+
+async function saveGeminiModelCapabilities(capabilities: IGeminiModelCapabilities): Promise<void> {
+    memoryCapabilities = capabilities
+    try {
+        const storage = await geminiModelStorage()
+        await storage?.set({ [keyGeminiModelCapabilities]: capabilities })
+    } catch {
+        // best-effort cache; sendMessage falls back to name heuristics
+    }
+}
+
+async function getGeminiModelCapabilities(): Promise<IGeminiModelCapabilities | undefined> {
+    if (memoryCapabilities) {
+        return memoryCapabilities
+    }
+    try {
+        const storage = await geminiModelStorage()
+        const items = await storage?.get([keyGeminiModelCapabilities])
+        return items?.[keyGeminiModelCapabilities]
+    } catch {
+        return undefined
+    }
+}
+
+// Resolves the thinkingConfig generation field for a model, per
+// https://ai.google.dev/gemini-api/docs/generate-content/thinking and
+// https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api
+// `capabilityThinking` is the `thinking` flag reported by the models API:
+// false means the model rejects thinkingConfig, undefined means unknown.
+export function resolveGeminiThinkingConfig(
+    model: string,
+    thinkingEnabled: boolean,
+    capabilityThinking?: boolean
+): Record<string, unknown> | undefined {
+    if (capabilityThinking === false) {
+        return undefined
+    }
+    const isGemma = /^gemma-/i.test(model)
+    const major = /^gemini-(\d+)/i.exec(model)?.[1]
+    // generateContent API: 3.x+, Gemini Robotics-ER 2, and Gemma 4 take
+    // thinkingLevel; only 2.x takes thinkingBudget (deprecated on Gemini 4).
+    // *-latest aliases track the newest generation, so use thinkingLevel.
+    const usesThinkingLevel =
+        isGemma || /robotics-er-2/i.test(model) || /-latest$/i.test(model) || (major ? Number(major) >= 3 : false)
+    const usesThinkingBudget = major ? Number(major) < 3 : false
+    // 'minimal' is rejected by Pro, Gemini 4, and Flash >= 3.8; accepted by
+    // 3 Flash, 3.6 Flash, 3.x Flash-Lite (incl. -image), Robotics ER 2, Gemma 4.
+    const supportsMinimal = isGemma || /flash-lite/i.test(model) || /^gemini-3(?:-flash|\.6-flash)/i.test(model)
+    const isPro = /-pro($|[-:])/i.test(model)
+    if (thinkingEnabled) {
+        // Gemma 4 thinks only when told to: docs use 'high' to enable.
+        if (isGemma) {
+            return { thinkingLevel: 'high' }
+        }
+        // level family: empty object = model default. 2.x: dynamic thinking.
+        if (usesThinkingLevel) {
+            return {}
+        }
+        return usesThinkingBudget ? { thinkingBudget: -1 } : undefined
+    }
+    if (usesThinkingLevel) {
+        return { thinkingLevel: supportsMinimal ? 'minimal' : 'low' }
+    }
+    if (usesThinkingBudget) {
+        // 2.5 Pro cannot disable thinking; 128 is its minimum budget.
+        return { thinkingBudget: isPro ? 128 : 0 }
+    }
+    // Unknown family (Omni, Deep Research, agents): don't guess params.
+    return undefined
+}
 
 export class Gemini extends AbstractEngine {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -53,6 +144,13 @@ export class Gemini extends AbstractEngine {
         if (!Array.isArray(jsn?.models)) {
             return []
         }
+        const capabilities: IGeminiModelCapabilities = {}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        jsn.models.forEach((model: any) => {
+            const name = model.name.split('/').pop()
+            capabilities[name] = { thinking: model.thinking === true }
+        })
+        await saveGeminiModelCapabilities(capabilities)
         return (
             jsn.models
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,21 +191,12 @@ export class Gemini extends AbstractEngine {
         }
 
         // Configure thinking based on user preference and model capabilities.
-        // When thinkingEnabled is true: let the model think naturally.
-        // When false: suppress/minimize thinking for faster translations.
-        // Gemini 3.x: use thinkingLevel (minimal/low/medium/high)
-        // Gemini 2.x: use thinkingBudget (legacy, token-based)
+        // Prefer the `thinking` flag reported by /v1beta/models (cached when
+        // the model list was fetched); fall back to name-based rules when the
+        // cache is missing, e.g. for manually typed model names.
         // See: https://ai.google.dev/gemini-api/docs/thinking
-        //      https://ai.google.dev/gemini-api/docs/thinking-mode
-        const isGen3 = /gemini-3/i.test(model)
-        const isPro = /-pro($|[-:])/i.test(model)
-        const thinkingConfig = settings.thinkingEnabled
-            ? isGen3
-                ? {} // model default (high); 'medium' is not accepted by the 3.x Pro models
-                : { thinkingBudget: -1 } // dynamic thinking
-            : isGen3
-            ? { thinkingLevel: isPro ? 'low' : 'minimal' }
-            : { thinkingBudget: isPro ? -1 : 0 }
+        const capabilityThinking = (await getGeminiModelCapabilities())?.[model]?.thinking
+        const thinkingConfig = resolveGeminiThinkingConfig(model, settings.thinkingEnabled, capabilityThinking)
 
         const body = {
             contents: [
@@ -121,9 +210,7 @@ export class Gemini extends AbstractEngine {
                 },
             ],
             safetySettings: SAFETY_SETTINGS,
-            generationConfig: {
-                thinkingConfig,
-            },
+            generationConfig: thinkingConfig ? { thinkingConfig } : {},
         }
 
         let hasError = false

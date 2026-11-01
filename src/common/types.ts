@@ -11,6 +11,9 @@ interface ISync {
 }
 
 interface IStorage {
+    // local exists in the real extension storage but is not implemented by
+    // the Tauri/Electron/userscript polyfills
+    local?: ISync
     sync: ISync
 }
 
