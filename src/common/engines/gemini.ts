@@ -126,8 +126,14 @@ export class Gemini extends AbstractEngine {
                 'Content-Type': 'application/json',
             },
         })
-        const jsn = await resp.json()
-        if (!jsn.models) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const jsn: any = await resp.json().catch(() => undefined)
+        if (!resp.ok) {
+            // Surface the API's own reason (bad key, region, quota...) instead of
+            // an empty list, which leaves the model dropdown silently unopenable.
+            throw new Error(jsn?.error?.message || `Failed to fetch Gemini models: ${resp.status} ${resp.statusText}`)
+        }
+        if (!Array.isArray(jsn?.models)) {
             return []
         }
         const capabilities: IGeminiModelCapabilities = {}
@@ -137,17 +143,21 @@ export class Gemini extends AbstractEngine {
             capabilities[name] = { thinking: model.thinking === true }
         })
         await saveGeminiModelCapabilities(capabilities)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (
             jsn.models
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                .filter((model: any) => model.supportedGenerationMethods?.includes('generateContent'))
+                .filter((model: any) => {
+                    const methods = model.supportedGenerationMethods
+                    // Only models that can actually translate; embedding/AQA models
+                    // can't be used with streamGenerateContent.
+                    return !Array.isArray(methods) || methods.includes('generateContent')
+                })
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .map((model: any) => {
                     const name = model.name.split('/').pop()
                     return {
                         id: name,
-                        name: name,
+                        name,
                     }
                 })
         )
