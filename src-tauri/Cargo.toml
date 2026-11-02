@@ -7,23 +7,23 @@ license = ""
 repository = ""
 default-run = "app"
 edition = "2021"
-rust-version = "1.78"
+rust-version = "1.90"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "2.4.1", features = [] }
+tauri-build = { version = "2.7.0", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = [ "derive" ] }
-tauri = { version = "2.8.5", features = [ "macos-private-api", "protocol-asset", "tray-icon" ] }
+tauri = { version = "2.12.0", features = [ "macos-private-api", "protocol-asset", "tray-icon" ] }
 once_cell = "1.17.1"
 clipboard = "0.5.0"
 enigo = { version = "0.2.0", features = [ "xdo" ] }
 mouse_position = "0.1.3"
 rdev = "0.5.2"
-tauri-utils = { version = "2.7.0", features = [] }
+tauri-utils = { version = "2.10.0", features = [] }
 tauri-plugin-single-instance = "2.3.4"
 tauri-plugin-autostart = "2.5.0"
 cpuid = "0.1.1"
