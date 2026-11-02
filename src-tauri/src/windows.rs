@@ -1178,6 +1178,7 @@ pub fn get_quick_translator_window() -> tauri::WebviewWindow {
             state: Some(WindowEffectState::Active),
             radius: Some(14.0),
             color: None,
+            interactive: false,
         });
     }
     window
@@ -1341,6 +1342,7 @@ pub fn get_writing_indicator_window() -> tauri::WebviewWindow {
             state: Some(WindowEffectState::Active),
             radius: Some(14.0),
             color: None,
+            interactive: false,
         });
     }
 
