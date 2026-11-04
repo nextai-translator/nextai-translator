@@ -1,4 +1,4 @@
-import { RiOpenaiFill } from 'react-icons/ri'
+import { RiOpenaiFill, RiRouteLine } from 'react-icons/ri'
 import { Azure } from './azure'
 import { ChatGPT } from './chatgpt'
 import { Gemini } from './gemini'
@@ -31,6 +31,7 @@ import { TeamoRouterIcon } from '@/common/components/icons/TeamoRouterIcon'
 import { TeamoRouter } from './teamorouter'
 import { OpenRouterIcon } from '@/common/components/icons/OpenRouterIcon'
 import { OpenRouter } from './openrouter'
+import { Requesty } from './requesty'
 import { LiteLLMIcon } from '@/common/components/icons/LiteLLMIcon'
 import { LiteLLM } from './litellm'
 
@@ -51,6 +52,7 @@ export type Provider =
     | 'Cerebras'
     | 'TeamoRouter'
     | 'OpenRouter'
+    | 'Requesty'
     | 'LiteLLM'
 
 export const engineIcons: Record<Provider, IconType> = {
@@ -70,6 +72,7 @@ export const engineIcons: Record<Provider, IconType> = {
     Cerebras: CerebrasIcon,
     TeamoRouter: TeamoRouterIcon,
     OpenRouter: OpenRouterIcon,
+    Requesty: RiRouteLine,
     LiteLLM: LiteLLMIcon,
 }
 
@@ -90,6 +93,7 @@ export const providerToEngine: Record<Provider, { new (): IEngine }> = {
     Cerebras: Cerebras,
     TeamoRouter: TeamoRouter,
     OpenRouter: OpenRouter,
+    Requesty: Requesty,
     LiteLLM: LiteLLM,
 }
 
