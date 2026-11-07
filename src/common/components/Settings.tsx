@@ -1512,6 +1512,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'OpenAI', id: 'OpenAI' },
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
+              { label: 'API Route', id: 'APIRoute' },
               { label: 'LiteLLM', id: 'LiteLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
@@ -1534,6 +1535,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'OpenAI', id: 'OpenAI' },
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
+              { label: 'API Route', id: 'APIRoute' },
               { label: 'LiteLLM', id: 'LiteLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
@@ -3448,6 +3450,45 @@ export function InnerSettings({
                                     provider='OpenRouter'
                                     currentProvider={values.provider}
                                     apiKey={values.openRouterAPIKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'APIRoute' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'APIRoute'}
+                                name='apiRouteAPIKey'
+                                label='API Route API Key'
+                                caption={
+                                    <div>
+                                        {t('Go to the')}{' '}
+                                        <a
+                                            target='_blank'
+                                            href='https://www.api-route.com/api-keys'
+                                            rel='noreferrer'
+                                            style={linkStyle}
+                                        >
+                                            API Route Page
+                                        </a>{' '}
+                                        {t('to get your API Key.')}
+                                    </div>
+                                }
+                            >
+                                <Input autoFocus type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='apiRouteAPIModel'
+                                label={t('API Model')}
+                                required={values.provider === 'APIRoute'}
+                            >
+                                <APIModelSelector
+                                    provider='APIRoute'
+                                    currentProvider={values.provider}
+                                    apiKey={values.apiRouteAPIKey}
                                     onBlur={onBlur}
                                 />
                             </FormItem>

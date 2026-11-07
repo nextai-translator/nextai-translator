@@ -33,6 +33,8 @@ import { OpenRouterIcon } from '@/common/components/icons/OpenRouterIcon'
 import { OpenRouter } from './openrouter'
 import { LiteLLMIcon } from '@/common/components/icons/LiteLLMIcon'
 import { LiteLLM } from './litellm'
+import { APIRouteIcon } from '@/common/components/icons/APIRouteIcon'
+import { APIRoute } from './api-route'
 
 export type Provider =
     | 'OpenAI'
@@ -51,6 +53,7 @@ export type Provider =
     | 'Cerebras'
     | 'TeamoRouter'
     | 'OpenRouter'
+    | 'APIRoute'
     | 'LiteLLM'
 
 export const engineIcons: Record<Provider, IconType> = {
@@ -70,6 +73,7 @@ export const engineIcons: Record<Provider, IconType> = {
     Cerebras: CerebrasIcon,
     TeamoRouter: TeamoRouterIcon,
     OpenRouter: OpenRouterIcon,
+    APIRoute: APIRouteIcon,
     LiteLLM: LiteLLMIcon,
 }
 
@@ -90,6 +94,7 @@ export const providerToEngine: Record<Provider, { new (): IEngine }> = {
     Cerebras: Cerebras,
     TeamoRouter: TeamoRouter,
     OpenRouter: OpenRouter,
+    APIRoute: APIRoute,
     LiteLLM: LiteLLM,
 }
 
