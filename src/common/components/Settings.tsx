@@ -1513,6 +1513,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
               { label: 'LiteLLM', id: 'LiteLLM' },
+              { label: 'Atlas Cloud', id: 'AtlasCloud' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -1535,6 +1536,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
               { label: 'LiteLLM', id: 'LiteLLM' },
+              { label: 'Atlas Cloud', id: 'AtlasCloud' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -3482,6 +3484,45 @@ export function InnerSettings({
                                     provider='LiteLLM'
                                     currentProvider={values.provider}
                                     apiKey={values.liteLLMAPIKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'AtlasCloud' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'AtlasCloud'}
+                                name='atlasCloudAPIKey'
+                                label='Atlas Cloud API Key'
+                                caption={
+                                    <div>
+                                        {t('Go to the')}{' '}
+                                        <a
+                                            target='_blank'
+                                            href='https://www.atlascloud.ai/'
+                                            rel='noreferrer'
+                                            style={linkStyle}
+                                        >
+                                            Atlas Cloud Page
+                                        </a>{' '}
+                                        {t('to get your API Key.')}
+                                    </div>
+                                }
+                            >
+                                <Input type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='atlasCloudAPIModel'
+                                label={t('API Model')}
+                                required={values.provider === 'AtlasCloud'}
+                            >
+                                <APIModelSelector
+                                    provider='AtlasCloud'
+                                    currentProvider={values.provider}
+                                    apiKey={values.atlasCloudAPIKey}
                                     onBlur={onBlur}
                                 />
                             </FormItem>
