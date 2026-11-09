@@ -1,0 +1,7 @@
+{
+  "name": "NextAI Translator",
+  "slug": "nextai-translator",
+  "identifier": "xyz.yetone.apps.openai-translator",
+  "version": "0.1.0",
+  "license": "AGPL-3.0"
+}
