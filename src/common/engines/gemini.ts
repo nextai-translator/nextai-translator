@@ -238,13 +238,20 @@ export class Gemini extends AbstractEngine {
                     req.onError('no candidates')
                     return
                 }
-                if (resp.candidates[0].finishReason && resp.candidates[0].finishReason !== 'STOP') {
-                    finished = true
-                    req.onFinished(resp.candidates[0].finishReason)
-                    return
+                const candidate = resp.candidates[0]
+                // The last candidate often carries both the final text and
+                // finishReason. Reading parts only on STOP dropped that text
+                // for MAX_TOKENS, and a STOP candidate with no content threw.
+                const targetTxt = candidate.content?.parts?.[0]?.text
+                if (typeof targetTxt === 'string' && targetTxt) {
+                    await req.onMessage({ content: targetTxt, role: '' })
                 }
-                const targetTxt = resp.candidates[0].content.parts[0].text
-                await req.onMessage({ content: targetTxt, role: '' })
+                if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+                    finished = true
+                    // The UI treats max_tokens as a length limit, not a failure.
+                    // Gemini spells the same reason MAX_TOKENS.
+                    req.onFinished(candidate.finishReason === 'MAX_TOKENS' ? 'max_tokens' : candidate.finishReason)
+                }
             },
             onError: (err) => {
                 hasError = true
