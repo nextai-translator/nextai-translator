@@ -140,3 +140,14 @@ func TestSettingsAndActionsRender(t *testing.T) {
 		t.Fatal("actions view empty")
 	}
 }
+
+func TestKeepRenewedTokens(t *testing.T) {
+	base := settings.Settings{KimiAccessToken: "a1", KimiRefreshToken: "r1", ChatGLMAccessToken: "g1"}
+	cur := settings.Settings{KimiAccessToken: "a2", KimiRefreshToken: "r2", ChatGLMAccessToken: "g2"}
+	draft := base
+	draft.ChatGLMAccessToken = "typed"
+	keepRenewedTokens(&draft, base, cur)
+	if draft.KimiAccessToken != "a2" || draft.KimiRefreshToken != "r2" || draft.ChatGLMAccessToken != "typed" {
+		t.Fatalf("%+v", draft)
+	}
+}

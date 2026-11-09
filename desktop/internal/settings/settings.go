@@ -52,12 +52,16 @@ type Settings struct {
 	AutomaticCheckForUpdates bool   `json:"automaticCheckForUpdates"`
 	Provider                 string `json:"provider"`
 
-	APIKeys         string `json:"apiKeys"`
-	APIURL          string `json:"apiURL"`
-	APIURLPath      string `json:"apiURLPath"`
-	APIModel        string `json:"apiModel"`
-	ChatGPTModel    string `json:"chatgptModel"`
-	CustomModelName string `json:"customModelName"`
+	APIKeys      string `json:"apiKeys"`
+	APIURL       string `json:"apiURL"`
+	APIURLPath   string `json:"apiURLPath"`
+	APIModel     string `json:"apiModel"`
+	ChatGPTModel string `json:"chatgptModel"`
+	// ChatGPTAccessToken is the desktop app's way into ChatGPT (Web): the
+	// accessToken of chatgpt.com/api/auth/session, as the browser has no
+	// cookies to lend it.
+	ChatGPTAccessToken string `json:"chatgptAccessToken"`
+	CustomModelName    string `json:"customModelName"`
 
 	AzureAPIKeys    string `json:"azureAPIKeys"`
 	AzureAPIURL     string `json:"azureAPIURL"`

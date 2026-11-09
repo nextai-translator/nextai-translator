@@ -92,7 +92,7 @@ func (a *App) actionEditor(c *ui.Context) {
 			})
 		}
 		providers := append([]string{""}, engine.Providers...)
-		labels := append([]string{T("Default")}, engine.Providers...)
+		labels := append([]string{T("Default")}, providerLabels()...)
 		ui.Field(c, T("Service provider"), func() { a.ch.choose(c, "prov"+key, &d.Provider, providers, labels) })
 		if d.Provider != "" {
 			ui.Field(c, T("API Model"), func() { ui.TextInput(c.Key("model"+key), &d.APIModel).Placeholder(T("Default")) })

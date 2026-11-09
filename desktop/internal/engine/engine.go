@@ -6,7 +6,6 @@ package engine
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"math/rand/v2"
@@ -69,15 +68,16 @@ const (
 	LiteLLM     = "LiteLLM"
 )
 
-// Providers are the providers the desktop app offers, in menu order.
+// Providers are the providers the desktop app offers, in the Tauri app's
+// menu order.
 var Providers = []string{
-	OpenAI, Claude, Gemini, DeepSeek, Azure, OpenRouter, Ollama, Groq, MiniMax,
-	Moonshot, Cohere, Cerebras, TeamoRouter, LiteLLM,
+	OpenAI, TeamoRouter, OpenRouter, LiteLLM, Claude, Kimi, ChatGLM, Cohere,
+	Ollama, Gemini, ChatGPT, Azure, MiniMax, Moonshot, Groq, DeepSeek, Cerebras,
 }
 
-// ErrUnsupported is returned for the providers that need a web session in a
-// browser (ChatGPT, Kimi, ChatGLM).
-var ErrUnsupported = errors.New("this provider is only available in the browser extension")
+// SaveTokens stores tokens an engine renewed (Kimi, ChatGLM); main points it
+// at the settings store.
+var SaveTokens = func(func(*settings.Settings)) {}
 
 // New returns the engine for provider, configured from s.
 func New(provider string, s settings.Settings, client *http.Client) (Engine, error) {
@@ -113,8 +113,12 @@ func New(provider string, s settings.Settings, client *http.Client) (Engine, err
 		return newGemini(s, client), nil
 	case Cohere:
 		return newCohere(s, client), nil
-	case ChatGPT, Kimi, ChatGLM:
-		return nil, ErrUnsupported
+	case Kimi:
+		return newKimi(s, client), nil
+	case ChatGLM:
+		return newChatGLM(s, client), nil
+	case ChatGPT:
+		return newChatGPT(s, client), nil
 	}
 	return nil, fmt.Errorf("unknown provider %q", provider)
 }

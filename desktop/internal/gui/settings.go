@@ -15,6 +15,7 @@ import (
 
 type settingsState struct {
 	draft  settings.Settings
+	base   settings.Settings // what draft started from
 	loaded bool
 	tab    int
 
@@ -29,7 +30,8 @@ type settingsState struct {
 // OpenSettings shows the settings window.
 func (a *App) OpenSettings() {
 	if a.settingsWin == nil || a.settingsWin.IsDestroyed() {
-		a.set = settingsState{draft: a.Settings.Get(), loaded: true}
+		cur := a.Settings.Get()
+		a.set = settingsState{draft: cur, base: cur, loaded: true}
 	}
 	a.openWindow(&a.settingsWin, T("Settings"), a.settingsView, 640, 680, "settings")
 }
@@ -75,8 +77,30 @@ func providerFields(s *settings.Settings, p string) (fields []field, model, cust
 		return []field{key(&s.OpenRouterAPIKey)}, &s.OpenRouterAPIModel, nil
 	case engine.LiteLLM:
 		return []field{url(&s.LiteLLMAPIURL), key(&s.LiteLLMAPIKey)}, &s.LiteLLMAPIModel, nil
+	case engine.Kimi:
+		return []field{{"Kimi Refresh Token", &s.KimiRefreshToken, true}, {"Kimi Access Token", &s.KimiAccessToken, true}}, nil, nil
+	case engine.ChatGLM:
+		return []field{{T("ChatGLM") + " Refresh Token", &s.ChatGLMRefreshToken, true}, {T("ChatGLM") + " Token", &s.ChatGLMAccessToken, true}}, nil, nil
+	case engine.ChatGPT:
+		return []field{{"Access Token", &s.ChatGPTAccessToken, true}}, &s.ChatGPTModel, nil
 	}
 	return nil, nil, nil
+}
+
+// keepRenewedTokens keeps the tokens an engine renewed while the settings
+// were open, unless the user typed new ones: the old refresh token would no
+// longer work.
+func keepRenewedTokens(draft *settings.Settings, base, cur settings.Settings) {
+	for _, f := range []func(*settings.Settings) *string{
+		func(s *settings.Settings) *string { return &s.KimiAccessToken },
+		func(s *settings.Settings) *string { return &s.KimiRefreshToken },
+		func(s *settings.Settings) *string { return &s.ChatGLMAccessToken },
+		func(s *settings.Settings) *string { return &s.ChatGLMRefreshToken },
+	} {
+		if *f(draft) == *f(&base) {
+			*f(draft) = *f(&cur)
+		}
+	}
 }
 
 func (a *App) settingsView(c *ui.Context) {
@@ -113,6 +137,7 @@ func (a *App) settingsView(c *ui.Context) {
 			ui.Spacer(c)
 			if ui.Button(c, T("Cancel")).Clicked() {
 				a.set.draft = a.Settings.Get()
+				a.set.base = a.set.draft
 				a.set.saved = false
 				a.settingsWin.Close()
 			}
@@ -124,6 +149,7 @@ func (a *App) settingsView(c *ui.Context) {
 }
 
 func (a *App) saveSettings() {
+	keepRenewedTokens(&a.set.draft, a.set.base, a.Settings.Get())
 	if err := a.Settings.Save(a.set.draft); err != nil {
 		a.set.saved = false
 		if a.settingsWin != nil {
@@ -132,6 +158,7 @@ func (a *App) saveSettings() {
 		return
 	}
 	s := a.Settings.Get()
+	a.set.draft, a.set.base = s, s
 	ApplyAppearance(s)
 	if a.OnSettingsSaved != nil {
 		a.set.hotkeyErrs = a.OnSettingsSaved(s)
@@ -187,7 +214,7 @@ func (a *App) generalSettings(c *ui.Context, d *settings.Settings) {
 
 func (a *App) providerSettings(c *ui.Context, d *settings.Settings) {
 	ui.Field(c, T("Default service provider"), func() {
-		if a.ch.choose(c, "provider", &d.Provider, engine.Providers, engine.Providers) {
+		if a.ch.choose(c, "provider", &d.Provider, engine.Providers, providerLabels()) {
 			a.set.models, a.set.modelsErr = nil, ""
 		}
 	})

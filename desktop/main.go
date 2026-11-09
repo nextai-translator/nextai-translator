@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/egoist/mygo"
+	"github.com/nextai-translator/nextai-translator/desktop/internal/engine"
 	"github.com/nextai-translator/nextai-translator/desktop/internal/gui"
 	"github.com/nextai-translator/nextai-translator/desktop/internal/i18n"
 	"github.com/nextai-translator/nextai-translator/desktop/internal/settings"
@@ -42,6 +43,11 @@ func start() {
 	data, err := store.Open(filepath.Join(filepath.Dir(path), "desktop-data.json"))
 	if err != nil {
 		log.Fatal(err)
+	}
+	engine.SaveTokens = func(fn func(*settings.Settings)) {
+		if err := cfg.Update(fn); err != nil {
+			log.Printf("save tokens: %v", err)
+		}
 	}
 	s := cfg.Get()
 	gui.ApplyAppearance(s)
