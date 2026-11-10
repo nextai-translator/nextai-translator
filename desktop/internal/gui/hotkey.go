@@ -54,47 +54,21 @@ func hotkeyString(mods ui.Modifiers, k ui.Key) string {
 	return strings.Join(append(parts, name), "+")
 }
 
-// hotkeyLabel shows a stored hotkey with the platform's symbols.
-func hotkeyLabel(hk string) string {
-	if hk == "" {
-		return ""
-	}
-	parts := strings.FieldsFunc(hk, func(r rune) bool { return r == '+' })
-	mac := runtime.GOOS == "darwin"
-	for i, p := range parts {
-		switch strings.ToLower(p) {
-		case "commandorcontrol", "commandorctrl", "cmdorctrl", "cmdorcontrol", "meta":
-			parts[i] = map[bool]string{true: "⌘", false: "Ctrl"}[mac]
-		case "command", "cmd":
-			parts[i] = "⌘"
-		case "control", "ctrl":
-			parts[i] = map[bool]string{true: "⌃", false: "Ctrl"}[mac]
-		case "alt", "option":
-			parts[i] = map[bool]string{true: "⌥", false: "Alt"}[mac]
-		case "shift":
-			parts[i] = map[bool]string{true: "⇧", false: "Shift"}[mac]
-		default:
-			if len(p) == 1 {
-				parts[i] = strings.ToUpper(p)
-			}
-		}
-	}
-	if mac {
-		return strings.Join(parts, "")
-	}
-	return strings.Join(parts, "+")
-}
-
 // hotkeyRecorder is a field that takes the next key press with modifiers as
-// the hotkey; Backspace clears it. It writes *value between frames, so
-// value must outlive the frame.
-func hotkeyRecorder(c *ui.Context, key string, value *string) {
-	th := c.Theme()
-	box := ui.Row(c.Key(key)).Focusable().Padding(6, 10).Radius(th.Radius).MinHeight(30).
-		Border(1, th.Border).Background(th.Surface).AlignItems(ui.Center).Cursor(ui.CursorPointer)
+// the hotkey; Backspace or its clear button clears it. It writes *value
+// between frames, so value must outlive the frame. It reports whether it is
+// recording, which is while it has the focus.
+func hotkeyRecorder(c *ui.Context, p palette, key string, value *string) bool {
+	bg := ui.RGB(245, 245, 245)
+	if p.dark {
+		bg = ui.RGB(34, 34, 34)
+	}
+	box := ui.Row(c.Key(key)).Focusable().Width(330).Height(36).Padding(0, 12, 0, 15).Radius(8).
+		Border(2, bg).Background(bg).AlignItems(ui.Center).Cursor(ui.CursorPointer).TextColor(p.text).
+		Label(T("Hotkey"))
 	focused := box.Focused()
 	if focused {
-		box.Border(1, th.Accent)
+		box.BorderColor(p.focus)
 	}
 	box.HandleInput(func(ev ui.InputEvent) bool {
 		if ev.Kind != ui.InputKeyDown {
@@ -116,11 +90,17 @@ func hotkeyRecorder(c *ui.Context, key string, value *string) {
 	}).Children(func() {
 		switch {
 		case focused && *value == "":
-			ui.Text(c, T("Please press the hotkey you want to set.")).TextColor(th.TextMuted)
-		case *value == "":
-			ui.Text(c, T("Click above to set hotkeys.")).TextColor(th.TextMuted)
+			ui.Text(c, T("Please press the hotkey you want to set.")).FontSize(14).TextColor(p.tertiary).SingleLine().Grow(1)
 		default:
-			ui.Text(c, hotkeyLabel(*value))
+			ui.Text(c, hotkeyShown(*value)).FontSize(14).SingleLine().Grow(1)
+		}
+		if *value != "" {
+			b := ui.Row(c.Key("clear")).Size(20, 20).Center().Cursor(ui.CursorPointer).Label(T("Clear"))
+			b.Children(func() { ui.Icon(c, riIoCloseCircle).Size(16, 16) })
+			if b.Clicked() {
+				*value = ""
+			}
 		}
 	})
+	return focused
 }

@@ -52,8 +52,7 @@ type translatorState struct {
 	source   string // "" detects it
 	target   string // "" picks it from the source
 	actionID int64
-	seg      int   // the action control's choice
-	segFor   int64 // the action seg was taken from
+	menuOpen bool // the header's menu of more actions
 
 	detected string // the source of the last run
 	output   string
@@ -64,6 +63,7 @@ type translatorState struct {
 	cancel   context.CancelFunc
 	gen      int
 	copied   bool
+	stopped  bool // the last run was stopped
 }
 
 // New makes the app; Open* show its windows.
@@ -138,7 +138,7 @@ func (a *App) Translate() {
 	a.tr.gen++
 	gen := a.tr.gen
 	a.tr.cancel = cancel
-	a.tr.output, a.tr.err, a.tr.running, a.tr.done, a.tr.copied = "", "", true, false, false
+	a.tr.output, a.tr.err, a.tr.running, a.tr.done, a.tr.copied, a.tr.stopped = "", "", true, false, false, false
 	s := a.Settings.Get()
 	action := a.currentAction()
 	src, tgt := a.tr.source, a.tr.target
@@ -223,7 +223,7 @@ func (a *App) Stop() {
 	}
 	a.tr.gen++
 	if a.tr.running {
-		a.tr.running, a.tr.done = false, true
+		a.tr.running, a.tr.done, a.tr.stopped = false, true, true
 	}
 }
 
@@ -256,15 +256,17 @@ func (a *App) ShowTranslator(byPointer bool) {
 	s := a.Settings.Get()
 	if a.translator == nil || a.translator.IsDestroyed() {
 		a.translator = mygo.NewWindow(mygo.WindowOptions{
-			Title:       "NextAI Translator",
-			Content:     ui.View(a.translatorView),
-			Width:       620,
-			Height:      600,
-			MinWidth:    420,
-			MinHeight:   360,
-			Hidden:      true,
-			AlwaysOnTop: s.Pinned,
-			StateKey:    "translator",
+			Title:          "NextAI Translator",
+			Content:        ui.View(a.translatorView),
+			Width:          620,
+			Height:         700,
+			MinWidth:       540,
+			MinHeight:      600,
+			TitleBarStyle:  mygo.TitleBarHidden,
+			TitleBarHeight: 30,
+			Hidden:         true,
+			AlwaysOnTop:    s.Pinned,
+			StateKey:       "translator",
 		})
 		a.translator.OnClose(func(e *mygo.CloseEvent) {
 			e.PreventDefault()
