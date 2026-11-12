@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"errors"
 	"log"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -44,6 +45,9 @@ func start() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if _, err := data.ImportTauri(filepath.Join(filepath.Dir(path), store.TauriExportFile)); err != nil {
+		log.Printf("import the Tauri app's data: %v", err)
+	}
 	engine.SaveTokens = func(fn func(*settings.Settings)) {
 		if err := cfg.Update(fn); err != nil {
 			log.Printf("save tokens: %v", err)
@@ -56,16 +60,29 @@ func start() {
 
 	var hotkeys sys.Hotkeys
 	actions := map[string]func(){
-		"hotkey":              func() { translateSelection(app) },
-		"displayWindowHotkey": app.ToggleTranslator,
+		"hotkey":                func() { translateSelection(app) },
+		"displayWindowHotkey":   app.ToggleTranslator,
+		"ocrHotkey":             app.StartOCR,
+		"quickTranslatorHotkey": app.ShowQuickTranslator,
+		"writingHotkey":         app.StartWriting,
 	}
 	bind := func(s settings.Settings) map[string]error {
-		return hotkeys.Set(map[string]string{"hotkey": s.Hotkey, "displayWindowHotkey": s.DisplayWindowHotkey}, actions)
+		keys := map[string]string{
+			"hotkey":                s.Hotkey,
+			"displayWindowHotkey":   s.DisplayWindowHotkey,
+			"quickTranslatorHotkey": s.QuickTranslatorHotkey,
+			"writingHotkey":         s.WritingHotkey,
+		}
+		if runtime.GOOS != "linux" {
+			keys["ocrHotkey"] = s.OCRHotkey
+		}
+		return hotkeys.Set(keys, actions)
 	}
 	for name, err := range bind(s) {
 		log.Printf("hotkey %s: %v", name, err)
 	}
 	startup := s.RunAtStartup
+	migrateLoginItem(s.RunAtStartup)
 	app.OnSettingsSaved = func(s settings.Settings) map[string]error {
 		applyDock(s)
 		if s.RunAtStartup != startup {
@@ -77,7 +94,9 @@ func start() {
 		return bind(s)
 	}
 
+	app.OnUpdateFound = func(bool) { makeTray(app) }
 	makeTray(app)
+	app.CheckForUpdates()
 	if _, err := sys.ServeIPC(func(text string) {
 		mygo.RunOnMain(func() {
 			app.SetInput(text, true)
@@ -118,7 +137,17 @@ func makeTray(app *gui.App) {
 	if app.Pinned() {
 		pin = T("Unpin")
 	}
-	menu := mygo.NewMenu([]*mygo.MenuItem{
+	update := T("Check for Updates...")
+	if app.UpdateAvailable() {
+		update = "💡 " + T("New version available!")
+	}
+	items := []*mygo.MenuItem{
+		{Label: update, Click: func(*mygo.MenuItem, *mygo.Window) { app.OpenUpdater() }},
+	}
+	if runtime.GOOS != "linux" {
+		items = append(items, &mygo.MenuItem{Label: "OCR", Click: func(*mygo.MenuItem, *mygo.Window) { app.StartOCR() }})
+	}
+	menu := mygo.NewMenu(append(items, []*mygo.MenuItem{
 		{Label: T("Show"), Click: func(*mygo.MenuItem, *mygo.Window) { app.ShowTranslator(false) }},
 		{Label: T("Hide"), Click: func(*mygo.MenuItem, *mygo.Window) {
 			if app.Shown() {
@@ -135,7 +164,7 @@ func makeTray(app *gui.App) {
 		{Label: T("History"), Click: func(*mygo.MenuItem, *mygo.Window) { app.OpenHistory() }},
 		mygo.Separator(),
 		{Label: T("Quit"), Role: mygo.RoleQuit},
-	})
+	}...))
 	if tray != nil {
 		tray.SetMenu(menu)
 		return
@@ -168,4 +197,27 @@ func translateSelection(app *gui.App) {
 			app.ShowTranslator(true)
 		})
 	}()
+}
+
+// migrateLoginItem moves start-at-login over from the Tauri app. On macOS
+// its LaunchAgent starts Contents/MacOS/app, which the update to this app
+// removed, so the agent goes and this app's own login item takes its place.
+// Elsewhere the installer moved the entry over; this only makes sure the
+// setting and the system agree.
+func migrateLoginItem(want bool) {
+	if runtime.GOOS == "darwin" {
+		if home, err := os.UserHomeDir(); err == nil {
+			p := filepath.Join(home, "Library", "LaunchAgents", "NextAI Translator.plist")
+			if b, err := os.ReadFile(p); err == nil && strings.Contains(string(b), "Contents/MacOS/app") {
+				if err := os.Remove(p); err != nil {
+					log.Printf("remove the Tauri app's login item: %v", err)
+				}
+			}
+		}
+	}
+	if want != mygo.App.OpenAtLogin() {
+		if err := mygo.App.SetOpenAtLogin(want); err != nil {
+			log.Printf("open at login: %v", err)
+		}
+	}
 }

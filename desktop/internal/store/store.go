@@ -92,9 +92,11 @@ type HistoryQuery struct {
 const MaxHistory = 5000
 
 type data struct {
-	NextID  int64         `json:"nextId"`
-	Actions []Action      `json:"actions"`
-	History []HistoryItem `json:"history"`
+	NextID int64 `json:"nextId"`
+	// TauriImport is the exportedAt of the last Tauri export merged in.
+	TauriImport int64         `json:"tauriImport,omitempty"`
+	Actions     []Action      `json:"actions"`
+	History     []HistoryItem `json:"history"`
 }
 
 // Store is safe for concurrent use.

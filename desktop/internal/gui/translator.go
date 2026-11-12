@@ -2,6 +2,7 @@ package gui
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/egoist/mygo/ui"
 	"github.com/egoist/mygo/ui/markdown"
@@ -228,6 +229,20 @@ func (a *App) editor(c *ui.Context, p palette, s settings.Settings) {
 				}
 				return false
 			})
+		// The words selected in the input, read aloud when the settings ask.
+		selected := ""
+		if i, j := ta.TextSelection(); i != j {
+			r := []rune(a.tr.input)
+			i, j = min(max(min(i, j), 0), len(r)), min(max(max(i, j), 0), len(r))
+			selected = strings.TrimSpace(string(r[i:j]))
+		}
+		if !ta.Pressed() && selected != a.tr.selected {
+			a.tr.selected = selected
+			if selected != "" && s.ReadSelectedWordsFromInputElementsText {
+				a.stopSpeaking()
+				a.speak("input", selected, a.inputLang(), s)
+			}
+		}
 		if ta.Focused() {
 			ta.Background(p.input).BorderColor(p.focus)
 		} else {
@@ -245,6 +260,11 @@ func (a *App) editor(c *ui.Context, p palette, s settings.Settings) {
 			} else if ghostButton(c, p, riRxReload, T("Retry"), 27, 15, 8).Clicked() {
 				a.Translate()
 			}
+			spoken := a.tr.input
+			if a.tr.selected != "" {
+				spoken = a.tr.selected
+			}
+			a.speakerButton(c, p, "input", spoken, a.inputLang(), 15)
 			if ghostButton(c.Key("copy-input"), p, riRxCopy, T("Copy to clipboard"), 27, 13, 8).Clicked() {
 				c.WriteClipboardThen(a.tr.input, func(error) {})
 			}
@@ -318,6 +338,7 @@ func (a *App) answer(c *ui.Context, p palette, s settings.Settings, w float32) {
 				if ghostButton(c.Key("out-retry"), p, riRxReload, T("Retry"), 27, 15, 8).Clicked() {
 					a.Translate()
 				}
+				a.speakerButton(c, p, "output", a.tr.output, a.outputLang(s), 15)
 				label := T("Copy to clipboard")
 				if a.tr.copied {
 					label = T("Copied to clipboard")
@@ -440,4 +461,23 @@ func (a *App) swap() {
 		a.tr.input = a.tr.output
 		a.Translate()
 	}
+}
+
+// outputLang is the language the translation is in.
+func (a *App) outputLang(s settings.Settings) string {
+	if a.tr.target != "" {
+		return a.tr.target
+	}
+	if s.DefaultTargetLanguage != "" {
+		return s.DefaultTargetLanguage
+	}
+	return "en"
+}
+
+// inputLang is the language of the input, as chosen or detected.
+func (a *App) inputLang() string {
+	if a.tr.source != "" {
+		return a.tr.source
+	}
+	return a.tr.detected
 }

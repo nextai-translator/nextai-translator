@@ -4,6 +4,7 @@ package gui
 
 import (
 	"context"
+	"image"
 	"net/http"
 	"strings"
 	"sync"
@@ -16,6 +17,7 @@ import (
 	"github.com/nextai-translator/nextai-translator/desktop/internal/lang"
 	"github.com/nextai-translator/nextai-translator/desktop/internal/settings"
 	"github.com/nextai-translator/nextai-translator/desktop/internal/store"
+	"github.com/nextai-translator/nextai-translator/desktop/internal/sys"
 	"github.com/nextai-translator/nextai-translator/desktop/internal/translate"
 )
 
@@ -31,16 +33,40 @@ type App struct {
 	// OnSettingsSaved runs after the settings window saves, as main
 	// re-registers the hotkeys.
 	OnSettingsSaved func(settings.Settings) map[string]error
+	// Voices lists the system's voices and Say reads text aloud; tests
+	// replace them.
+	Voices func() ([]sys.Voice, error)
+	Say    func(ctx context.Context, text, lang, voiceID string, rate, volume float64) error
+	// ReadContext reads the text around the pointer and NewEngine makes the
+	// Quick Translator's picker; tests replace them.
+	ReadContext func(wide bool) sys.AXContext
+	NewEngine   func(provider string, s settings.Settings, client *http.Client) (engine.Engine, error)
+	// Capture takes a picture of the screen and OCR reads its text; tests
+	// replace them.
+	Capture func(x, y, w, h int) (*image.RGBA, error)
+	OCR     func(img image.Image) (string, error)
+	// OnUpdateFound runs when a check finds a new version, or finds none
+	// after one was found, as main shows it in the tray.
+	OnUpdateFound func(found bool)
 	// onMain runs a function on the main thread; tests replace it.
 	onMain func(func())
 
-	translator, settingsWin, actionsWin, historyWin *mygo.Window
+	translator, settingsWin, actionsWin, historyWin, quickWin, ocrWin, updaterWin, writingWin *mygo.Window
 
 	ch   choices
 	tr   translatorState
 	set  settingsState
 	act  actionsState
 	hist historyState
+	sp   speechState
+	qt   quickState
+	ocr  ocrState
+	upd  updaterState
+	wr   writingState
+	// quitting is set while a quit (the tray's Quit, a relaunch after an
+	// update, SIGTERM) closes the windows, which must not keep themselves
+	// open then.
+	quitting bool
 
 	clientMu  sync.Mutex
 	clientFor settings.Proxy
@@ -63,12 +89,15 @@ type translatorState struct {
 	cancel   context.CancelFunc
 	gen      int
 	copied   bool
-	stopped  bool // the last run was stopped
+	stopped  bool   // the last run was stopped
+	selected string // the words selected in the input
 }
 
 // New makes the app; Open* show its windows.
 func New(st *settings.Store, data *store.Store) *App {
-	a := &App{Settings: st, Store: data, Run: translate.Run, Detect: lang.Detect, onMain: mygo.RunOnMain, ch: choices{}}
+	a := &App{Settings: st, Store: data, Run: translate.Run, Detect: lang.Detect, Voices: sys.Voices, Say: sys.Speak, ReadContext: sys.ReadAXContext, NewEngine: engine.New, Capture: sys.CaptureScreen, OCR: sys.RecognizeText, onMain: mygo.RunOnMain, ch: choices{}}
+	mygo.App.OnBeforeQuit(func(*mygo.QuitEvent) { a.quitting = true })
+	mygo.App.OnQuitCanceled(func() { a.quitting = false })
 	s := st.Get()
 	i18n.Set(s.I18n)
 	if act, ok := data.ActionByMode(s.DefaultTranslateMode); ok {
@@ -89,7 +118,7 @@ func (a *App) post(fn func()) {
 }
 
 func (a *App) redraw() {
-	for _, w := range []*mygo.Window{a.translator, a.settingsWin, a.actionsWin, a.historyWin} {
+	for _, w := range []*mygo.Window{a.translator, a.settingsWin, a.actionsWin, a.historyWin, a.quickWin, a.updaterWin} {
 		if w != nil && !w.IsDestroyed() {
 			w.Invalidate()
 		}
@@ -269,6 +298,9 @@ func (a *App) ShowTranslator(byPointer bool) {
 			StateKey:       "translator",
 		})
 		a.translator.OnClose(func(e *mygo.CloseEvent) {
+			if a.quitting {
+				return
+			}
 			e.PreventDefault()
 			a.Stop()
 			a.translator.Hide()

@@ -12,11 +12,16 @@ import (
 var ErrNoPermission = errors.New("accessibility permission required")
 
 // copyBySimulation reads the selection by pressing the copy shortcut in the
-// frontmost app, then puts the clipboard back as it was. press sends the
-// shortcut. It must not run on the main thread, which the copy waits for.
+// frontmost app, then puts the clipboard back as it was, in every format.
+// press sends the shortcut. inputMu must be held. It must not run on the
+// main thread, which the copy waits for.
 func copyBySimulation(press func() error) (string, error) {
-	saved := mygo.Clipboard.ReadText()
+	// A paste that has not put the user's clipboard back yet does it now,
+	// so that it is what is saved below.
+	restoreClipboard()
+	saved := readClipboard()
 	mygo.Clipboard.Clear()
+	defer writeClipboard(saved)
 	if err := press(); err != nil {
 		return "", err
 	}
@@ -26,11 +31,6 @@ func copyBySimulation(press func() error) (string, error) {
 		if text = mygo.Clipboard.ReadText(); text != "" {
 			break
 		}
-	}
-	if saved != "" {
-		mygo.Clipboard.WriteText(saved)
-	} else {
-		mygo.Clipboard.Clear()
 	}
 	return text, nil
 }

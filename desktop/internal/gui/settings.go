@@ -258,6 +258,10 @@ func (a *App) settingsView(c *ui.Context) {
 				case 1:
 					a.proxySettings(c, p, d)
 				case 2:
+					a.ttsSettings(c, p, d)
+				case 3:
+					a.writingSettings(c, p, d)
+				case 4:
 					a.hotkeySettings(c, p, d)
 				}
 			})
@@ -272,7 +276,10 @@ func (a *App) settingsNav(c *ui.Context, p palette, w float32) {
 	tabs := []struct {
 		icon  *ui.SVG
 		label string
-	}{{riIoSettingsOutline, T("General")}, {riTbCloudNetwork, T("Proxy")}, {riBsKeyboard, T("Shortcuts")}}
+	}{
+		{riIoSettingsOutline, T("General")}, {riTbCloudNetwork, T("Proxy")}, {riRxSpeakerLoud, T("TTS")},
+		{riPiTextbox, T("Writing")}, {riBsKeyboard, T("Shortcuts")},
+	}
 	ui.Column(c).Height(136.4).Clip().Children(func() {
 		bw, bh := ui.ImageSize(beams)
 		ui.Image(c, beams).Absolute().Top(0).Left((w-bw)/2).Size(bw, bh)
@@ -462,6 +469,9 @@ func (a *App) generalSettings(c *ui.Context, p palette, d *settings.Settings) {
 	formItem(c, p, T("Auto hide window when out of focus"), false, nil, func() {
 		formCheckbox(c, p, "autohide", &d.AutoHideWindowWhenOutOfFocus)
 	})
+	formItem(c, p, T("Automatic check for updates"), false, nil, func() {
+		formCheckbox(c, p, "updates", &d.AutomaticCheckForUpdates)
+	})
 }
 
 func (a *App) providerSettings(c *ui.Context, p palette, d *settings.Settings) {
@@ -625,25 +635,36 @@ func (a *App) loadModels() {
 }
 
 func (a *App) hotkeySettings(c *ui.Context, p palette, d *settings.Settings) {
-	row := func(label, name string, v *string) {
-		ui.Column(c).Margin(0, 0, 16, 0).Children(func() {
-			ui.Row(c).Height(24.4).AlignItems(ui.Center).Children(func() {
-				ui.Text(c, label).FontSize(16.8).FontWeight(600).TextColor(p.text).SingleLine()
-			})
-			recording := false
-			ui.Column(c).Margin(8, 0, 0, 0).Children(func() { recording = hotkeyRecorder(c, p, name, v) })
-			hint := T("Click above to set hotkeys.")
-			if recording {
-				hint = T("Please press the hotkey you want to set.")
-			}
-			ui.Text(c, hint).Margin(4, 0, 0, 0).FontSize(11).TextColor(p.tertiary)
-			if err := a.set.hotkeyErrs[name]; err != nil {
-				ui.Text(c, err.Error()).FontSize(12).LineHeight(20.0 / 12).TextColor(p.errText).Wrap()
-			}
-		})
+	a.hotkeyItem(c, p, T("Hotkey"), "hotkey", &d.Hotkey, "")
+	a.hotkeyItem(c, p, T("Display window Hotkey"), "displayWindowHotkey", &d.DisplayWindowHotkey, "")
+	if mygoGOOS != "linux" {
+		a.hotkeyItem(c, p, T("OCR Hotkey"), "ocrHotkey", &d.OCRHotkey, "")
 	}
-	row(T("Hotkey"), "hotkey", &d.Hotkey)
-	row(T("Display window Hotkey"), "displayWindowHotkey", &d.DisplayWindowHotkey)
+	a.hotkeyItem(c, p, T("Quick Translator Hotkey"), "quickTranslatorHotkey", &d.QuickTranslatorHotkey,
+		T("Open a non-activating panel that auto-detects the word or sentence you are reading."))
+}
+
+// hotkeyItem is a form item with the hotkey recorder, its hint, an
+// optional caption, and the error registering it gave.
+func (a *App) hotkeyItem(c *ui.Context, p palette, label, name string, v *string, caption string) {
+	ui.Column(c.Key(name)).Margin(0, 0, 16, 0).Children(func() {
+		ui.Row(c).Height(24.4).AlignItems(ui.Center).Children(func() {
+			ui.Text(c, label).FontSize(16.8).FontWeight(600).TextColor(p.text).SingleLine()
+		})
+		recording := false
+		ui.Column(c).Margin(8, 0, 0, 0).Children(func() { recording = hotkeyRecorder(c, p, name, v) })
+		hint := T("Click above to set hotkeys.")
+		if recording {
+			hint = T("Please press the hotkey you want to set.")
+		}
+		ui.Text(c, hint).Margin(4, 0, 0, 0).FontSize(11).TextColor(p.tertiary)
+		if caption != "" {
+			captionText(c, p, plain(caption), 8)
+		}
+		if err := a.set.hotkeyErrs[name]; err != nil {
+			ui.Text(c, err.Error()).FontSize(12).LineHeight(20.0 / 12).TextColor(p.errText).Wrap()
+		}
+	})
 }
 
 func (a *App) proxySettings(c *ui.Context, p palette, d *settings.Settings) {
