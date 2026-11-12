@@ -17,6 +17,9 @@ export const defaultAPIModel = OPENAI_PREFERRED_DEFAULT_MODEL
 export const defaultChatGPTAPIAuthSessionAPIURL = 'https://chat.openai.com/api/auth/session'
 export const defaultChatGPTWebAPI = 'https://chat.openai.com/backend-api'
 export const defaultGeminiAPIURL = 'https://generativelanguage.googleapis.com'
+// MiniMax serves the same API from two hosts; API keys only work on the host of the platform that issued them.
+export const miniMaxGlobalAPIURL = 'https://api.minimax.io'
+export const miniMaxChinaAPIURL = 'https://api.minimaxi.com'
 export const defaultChatGPTModel = 'text-davinci-002-render-sha'
 
 export const defaultAutoTranslate = false
@@ -57,6 +60,7 @@ const settingKeys: Record<keyof ISettings, number> = {
     miniMaxGroupID: 1,
     miniMaxAPIKey: 1,
     miniMaxAPIModel: 1,
+    miniMaxAPIURL: 1,
     moonshotAPIKey: 1,
     moonshotAPIModel: 1,
     geminiAPIURL: 1,
@@ -238,6 +242,9 @@ export async function getSettings(): Promise<ISettings> {
     }
     if (!settings.miniMaxAPIModel) {
         settings.miniMaxAPIModel = 'MiniMax-M3'
+    }
+    if (!settings.miniMaxAPIURL) {
+        settings.miniMaxAPIURL = miniMaxGlobalAPIURL
     }
     if (!settings.groqAPIURL) {
         settings.groqAPIURL = 'https://api.groq.com'

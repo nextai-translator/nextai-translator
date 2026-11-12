@@ -42,6 +42,8 @@
     "Go to the": "이동:",
     "OpenAI page": "OpenAI 페이지",
     "MiniMax page": "MiniMax 페이지",
+    "Global": "글로벌",
+    "Mainland China": "중국 본토",
     "to get your API Key. You can separate multiple API Keys with English commas to achieve quota doubling and load balancing.": "에서 API 키를 발급받으세요. 여러 API 키를 영문 쉼표(,)로 구분하면 할당량을 늘리고 부하를 분산할 수 있습니다.",
     "to get your API Key.": "에서 API 키를 발급받으세요.",
     "to get your Group ID.": "에서 Group ID를 발급받으세요.",
