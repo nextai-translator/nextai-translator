@@ -11,5 +11,5 @@ jobs:
         with:
           identifier: yetone.OpenAITranslator
           max-versions-to-keep: 5 # keep only latest 5 versions
-          installers-regex: '\.msi$' # Only .msi files
+          installers-regex: 'nextai-translator-setup-.*\.exe$' # The Go app's NSIS installers
           token: ${{ secrets.WINGET_TOKEN }}

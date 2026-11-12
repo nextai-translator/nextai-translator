@@ -38,12 +38,23 @@ jobs:
           tag: ${{ steps.get_version.outputs.version }}
           body: "${{ steps.tag.outputs.message }}"
 
-  build-tauri-renderer:
+  # The desktop app is the Go app of desktop/, built with MyGo
+  # (desktop/mygo.json). `mygo build -upload` puts the installers, archives
+  # and MyGo's signed update manifests in the draft release, from which
+  # installed Go apps update. The same files, signed again with the Tauri
+  # updater's key, and the latest.json of the tauri-latest-json job let
+  # installed Tauri apps (0.x) update into the Go app: see
+  # desktop/scripts/tauri-bridge.mjs.
+  #
+  # Each `mygo build -upload` merges its SHA256SUMS with the release's, so
+  # the two builds run one after the other rather than racing on that file.
+  build-desktop:
     needs: create-release
     permissions:
       contents: write
-      packages: write
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -51,62 +62,67 @@ jobs:
         id: get_version
         uses: battila7/get-version-action@v2
 
-      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-go@v5
         with:
-          version: 8.6.0
+          go-version-file: desktop/go.mod
+          cache-dependency-path: desktop/go.sum
 
-      - name: setup node
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'pnpm'
+          node-version: 20
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install NSIS, for the Windows installers
+        run: sudo apt-get update && sudo apt-get install -y nsis
 
-      - name: install frontend dependencies
-        run: pnpm install --no-frozen-lockfile # change this to npm or pnpm depending on which one you use
-
-      - name: Change Version
+      - name: Set the version
+        working-directory: desktop
         env:
-          VERSION: "${{ steps.get_version.outputs.version-without-v }}"
-        run: make change-version change-package-version
+          VERSION: ${{ steps.get_version.outputs.version-without-v }}
+        run: |
+          jq --arg v "$VERSION" '.version = $v' mygo.json > mygo.json.new
+          mv mygo.json.new mygo.json
 
-      - uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{ toJSON(secrets) }}
+      - name: Build and upload the Linux and Windows apps
+        working-directory: desktop
+        env:
+          MYGO_UPDATER_PRIVATE_KEY: ${{ secrets.MYGO_UPDATER_PRIVATE_KEY }}
+        run: go tool mygo build -platform linux/amd64,windows/amd64,windows/arm64 -upload
 
-      - name: build tauri renderer
-        run: pnpm build-tauri-renderer
+      # Tauri's updater on Linux writes the file over the AppImage and runs
+      # it: the launcher installs the Go app the first time, then starts it.
+      - name: Make the files for the Tauri updater
+        working-directory: desktop
+        env:
+          VERSION: ${{ steps.get_version.outputs.version-without-v }}
+          # The key the Tauri builds signed updates with, under the names
+          # `tauri signer sign` reads.
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          mkdir -p tauri-bridge
+          node scripts/tauri-bridge.mjs linux-launcher --version "$VERSION" \
+            --install-sh dist/linux-amd64/install.sh \
+            --archive "dist/linux-amd64/nextai-translator-$VERSION-linux-amd64.tar.gz" \
+            --out "tauri-bridge/nextai-translator-$VERSION-linux-amd64.run"
+          cp "dist/windows-amd64/nextai-translator-setup-$VERSION-amd64.exe" tauri-bridge/
+          for f in tauri-bridge/*; do
+            npx --yes @tauri-apps/cli@2.8.4 signer sign "$f"
+            node scripts/tauri-bridge.mjs verify "$f"
+          done
+          gh release upload "v$VERSION" "tauri-bridge/nextai-translator-$VERSION-linux-amd64.run" --clobber
 
       - uses: actions/upload-artifact@v4
         with:
-          name: tauri-renderer
-          path: dist/tauri/
+          name: tauri-bridge-linux-windows
+          path: desktop/tauri-bridge/
 
-  build-tauri:
-    needs: [create-release, build-tauri-renderer]
+  build-desktop-macos:
+    needs: [create-release, build-desktop]
     permissions:
       contents: write
-      packages: write
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - os: ubuntu-latest
-            arch: x86_64
-            rust_target: x86_64-unknown-linux-gnu
-          - os: macos-latest
-            arch: x86_64
-            rust_target: x86_64-apple-darwin
-          - os: macos-latest
-            arch: aarch64
-            rust_target: aarch64-apple-darwin
-          - os: windows-latest
-            arch: x86_64
-            rust_target: x86_64-pc-windows-msvc
-
-    runs-on: ${{ matrix.config.os }}
+    runs-on: macos-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -114,80 +130,121 @@ jobs:
         id: get_version
         uses: battila7/get-version-action@v2
 
-      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-go@v5
         with:
-          version: 8.6.0
+          go-version-file: desktop/go.mod
+          cache-dependency-path: desktop/go.sum
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'pnpm'
+          node-version: 20
 
-      # Stable, not nightly: nightly's never-type fallback change breaks the
-      # screenshots crate's Linux code (`!: ReadAll`), failing the Linux build.
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.config.rust_target }}
-
-      - name: Install frontend dependencies
-        run: pnpm install --no-frozen-lockfile # change this to npm or pnpm depending on which one you use
-
-      - name: Install dependencies (ubuntu only)
-        if: matrix.config.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libx11-dev libxdo-dev libxcb-shape0-dev libxcb-xfixes0-dev
-          sudo apt-get install -y libunwind-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
-
-      - name: Install dependencies (mac only)
-        if: matrix.config.os == 'macos-latest'
-        run: |
-          rustup target add aarch64-apple-darwin
-
-      - name: Change Version
+      # The Developer ID certificate and the notary credentials the Tauri
+      # builds used, in a keychain of this job.
+      - name: Import the certificate and the notary credentials
         env:
-          VERSION: "${{ steps.get_version.outputs.version-without-v }}"
-        run: make change-version change-package-version
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password="$(openssl rand -base64 24)"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$keychain" \
+            -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/certificate.p12"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain"
+          security list-keychains -d user -s "$keychain" login.keychain
+          xcrun notarytool store-credentials notary --keychain "$keychain" \
+            --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_PASSWORD"
+          echo "NOTARY_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+
+      # mygo.json is plain JSON: the signing settings of this runner go in
+      # here only, so that builds elsewhere stay signed ad hoc.
+      - name: Set the version and the signing settings
+        working-directory: desktop
+        env:
+          VERSION: ${{ steps.get_version.outputs.version-without-v }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: |
+          jq --arg v "$VERSION" --arg id "$APPLE_SIGNING_IDENTITY" --arg kc "$NOTARY_KEYCHAIN" \
+            '.version = $v | .macos.signingIdentity = $id | .macos.notarize = {keychainProfile: "notary", keychain: $kc}' \
+            mygo.json > mygo.json.new
+          mv mygo.json.new mygo.json
+
+      - name: Build, sign, notarize and upload the macOS app
+        working-directory: desktop
+        env:
+          MYGO_UPDATER_PRIVATE_KEY: ${{ secrets.MYGO_UPDATER_PRIVATE_KEY }}
+        run: go tool mygo build -platform darwin/universal -upload
+
+      # Tauri's updater on macOS replaces the .app with the one folder of a
+      # .tar.gz: MyGo's update archive, which holds the stapled app, is one.
+      - name: Sign the macOS archive for the Tauri updater
+        working-directory: desktop
+        env:
+          VERSION: ${{ steps.get_version.outputs.version-without-v }}
+          # The key the Tauri builds signed updates with, under the names
+          # `tauri signer sign` reads.
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          mkdir -p tauri-bridge
+          cp "dist/darwin-universal/nextai-translator-$VERSION-darwin-universal.tar.gz" tauri-bridge/
+          f="tauri-bridge/nextai-translator-$VERSION-darwin-universal.tar.gz"
+          npx --yes @tauri-apps/cli@2.8.4 signer sign "$f"
+          node scripts/tauri-bridge.mjs verify "$f"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tauri-bridge-macos
+          path: desktop/tauri-bridge/
+
+  # The latest.json that installed Tauri apps read
+  # (plugins.updater.endpoints of src-tauri/tauri.conf.json), naming the
+  # files of the Go app in this release.
+  tauri-latest-json:
+    needs: [create-release, build-desktop, build-desktop-macos]
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - uses: actions/download-artifact@v4
         with:
-          name: tauri-renderer
-          path: dist/tauri
+          pattern: tauri-bridge-*
+          path: tauri-bridge
+          merge-multiple: true
 
-      - name: Install Cargo Tauri for info
-        run: cargo install tauri-cli --version "=2.8.4" --locked
-
-      - name: Tauri info
-        run: cargo tauri info
-
-      - uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{ toJSON(secrets) }}
-
-      - name: Build Tauri App
-        uses: tauri-apps/tauri-action@v0
-        if: matrix.config.os != 'macos-latest' || matrix.config.arch != 'aarch64'
+      - name: Write and upload latest.json
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          releaseId: ${{ needs.create-release.outputs.release_id }}
-          releaseBody: ${{ needs.create-release.outputs.release_body }}
-          tauriScript: cargo tauri
-          updaterJsonPreferNsis: true
-
-      - name: Build Tauri App (macOS aarch64)
-        uses: tauri-apps/tauri-action@v0
-        if: matrix.config.os == 'macos-latest' && matrix.config.arch == 'aarch64'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          releaseId: ${{ needs.create-release.outputs.release_id }}
-          releaseBody: ${{ needs.create-release.outputs.release_body }}
-          args: --target aarch64-apple-darwin
-          tauriScript: cargo tauri
-          updaterJsonPreferNsis: true
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.version-without-v }}
+          NOTES: ${{ needs.create-release.outputs.release_body }}
+        run: |
+          b=tauri-bridge
+          node desktop/scripts/tauri-bridge.mjs latest-json --version "$VERSION" --notes "$NOTES" \
+            --base-url "https://github.com/${GITHUB_REPOSITORY}/releases/download/v$VERSION/" \
+            --out "$b/latest.json" \
+            "darwin-aarch64,darwin-x86_64=$b/nextai-translator-$VERSION-darwin-universal.tar.gz" \
+            "windows-x86_64=$b/nextai-translator-setup-$VERSION-amd64.exe" \
+            "linux-x86_64=$b/nextai-translator-$VERSION-linux-amd64.run"
+          cat "$b/latest.json"
+          gh release upload "v$VERSION" "$b/latest.json" --repo "$GITHUB_REPOSITORY" --clobber
 
   build-clip-extension:
     runs-on: ubuntu-22.04
@@ -316,7 +373,7 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-22.04
-    needs: [create-release, build-tauri, build-clip-extension, build-browser-extension]
+    needs: [create-release, build-desktop, build-desktop-macos, tauri-latest-json, build-clip-extension, build-browser-extension]
 
     steps:
       - name: publish release

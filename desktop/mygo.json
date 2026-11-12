@@ -3,5 +3,12 @@
   "slug": "nextai-translator",
   "identifier": "xyz.yetone.apps.openai-translator",
   "version": "0.1.0",
-  "license": "AGPL-3.0"
+  "license": "AGPL-3.0",
+  "updates": {
+    "publicKey": "3nD/ux6e2Oikkau48kP1hYbecwZPU20M5GzUKic2Imo=",
+    "github": "nextai-translator/nextai-translator"
+  },
+  "windows": {
+    "installerInclude": "packaging/windows/tauri-migration.nsh"
+  }
 }
