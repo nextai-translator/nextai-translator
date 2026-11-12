@@ -23,6 +23,7 @@ import { usePinned } from '../../common/hooks/usePinned'
 import { useMemoWindow } from '../../common/hooks/useMemoWindow'
 import { isMacOS } from '@/common/utils'
 import { commands } from '../bindings'
+import { exportLocalDB } from '../export-local-db'
 
 const engine = new Styletron({
     prefix: `${PREFIX}-styletron-`,
@@ -80,6 +81,7 @@ export function TranslatorWindow() {
 
     useEffect(() => {
         setupAnalysis()
+        exportLocalDB()
     }, [])
 
     useEffect(() => {

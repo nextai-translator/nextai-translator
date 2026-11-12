@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Window } from '@/tauri/components/Window'
 import { check } from '@tauri-apps/plugin-updater'
+import { exportLocalDB } from '../export-local-db'
 import { relaunch } from '@tauri-apps/plugin-process'
 import { Button } from 'baseui-sd/button'
 import { useTheme } from '@/common/hooks/useTheme'
@@ -307,6 +308,7 @@ export function UpdaterWindow() {
                                                 })
                                             }, 1500)
                                             const update = await check()
+                                            await exportLocalDB()
                                             await update?.downloadAndInstall((progress) => {
                                                 if (progress.event === 'Finished') {
                                                     window.clearInterval(id)

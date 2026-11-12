@@ -12,6 +12,14 @@ export const commands = {
     async clearConfigCache(): Promise<void> {
         await TAURI_INVOKE('clear_config_cache')
     },
+    async exportLocalDb(content: string): Promise<Result<null, string>> {
+        try {
+            return { status: 'ok', data: await TAURI_INVOKE('export_local_db', { content }) }
+        } catch (e) {
+            if (e instanceof Error) throw e
+            else return { status: 'error', error: e as any }
+        }
+    },
     async showTranslatorWindowCommand(): Promise<void> {
         await TAURI_INVOKE('show_translator_window_command')
     },

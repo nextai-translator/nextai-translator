@@ -92,6 +92,21 @@ pub fn clear_config_cache() {
     CONFIG_CACHE.lock().take();
 }
 
+/// Writes the webview's IndexedDB (actions and history) next to config.json,
+/// where the native Go app imports it on its first launch.
+#[tauri::command]
+#[specta::specta]
+pub fn export_local_db(app: AppHandle, content: String) -> Result<(), String> {
+    let dir = app
+        .path()
+        .resolve("xyz.yetone.apps.openai-translator", BaseDirectory::Config)
+        .map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let tmp = dir.join("tauri-export.json.tmp");
+    std::fs::write(&tmp, content).map_err(|e| e.to_string())?;
+    std::fs::rename(&tmp, dir.join("tauri-export.json")).map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn get_config_content() -> String {

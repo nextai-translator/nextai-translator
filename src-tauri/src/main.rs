@@ -35,7 +35,7 @@ use tray::{PinnedFromTrayEvent, PinnedFromWindowEvent};
 use windows::{get_translator_window, CheckUpdateEvent, CheckUpdateResultEvent};
 
 use crate::ax_context::{read_ax_context_narrow, read_ax_context_wide};
-use crate::config::{clear_config_cache, get_config_content, ConfigUpdatedEvent};
+use crate::config::{clear_config_cache, export_local_db, get_config_content, ConfigUpdatedEvent};
 use crate::fetch::{fetch_stream, log_perf_line};
 use crate::lang::detect_lang;
 use crate::ocr::{cut_image, finish_ocr, screenshot, start_ocr};
@@ -371,6 +371,7 @@ fn main() {
             get_config_content,
             get_update_result,
             clear_config_cache,
+            export_local_db,
             show_translator_window_command,
             show_translator_window_with_selected_text_command,
             show_action_manager_window,
