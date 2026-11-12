@@ -1,4 +1,4 @@
-import { getSettings } from '../utils'
+import { getSettings, miniMaxGlobalAPIURL } from '../utils'
 import { AbstractOpenAI } from './abstract-openai'
 import { IModel } from './interfaces'
 
@@ -21,7 +21,10 @@ export class MiniMax extends AbstractOpenAI {
         return settings.miniMaxAPIKey
     }
     async getAPIURL(): Promise<string> {
-        return 'https://api.minimax.io'
+        const settings = await getSettings()
+        // Global (api.minimax.io) or mainland China (api.minimaxi.com), chosen in the settings
+        const apiURL = settings.miniMaxAPIURL?.trim().replace(/\/+$/, '')
+        return apiURL || miniMaxGlobalAPIURL
     }
     async getAPIURLPath(): Promise<string> {
         return '/v1/chat/completions'
