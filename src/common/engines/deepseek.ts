@@ -4,6 +4,15 @@ import { AbstractOpenAI } from './abstract-openai'
 import { IModel } from './interfaces'
 
 export class DeepSeek extends AbstractOpenAI {
+    async getBaseRequestBody(modelParam?: string) {
+        const body = await super.getBaseRequestBody(modelParam)
+        const settings = await getSettings()
+        return {
+            ...body,
+            thinking: { type: settings.thinkingEnabled ? 'enabled' : 'disabled' },
+        }
+    }
+
     async listModels(apiKey_: string | undefined): Promise<IModel[]> {
         let apiKey = apiKey_
         if (!apiKey) {
