@@ -38,6 +38,16 @@ describe('public phrase lookup', () => {
         expect(isPublicPhrase(`CSS ${'a'.repeat(PUBLIC_PHRASE_MAX_LENGTH)}`)).toBe(false)
     })
 
+    it('accepts technical separators and localized spaces in phrases without allowing URLs', () => {
+        expect(isPublicPhrase('C# async/await')).toBe(true)
+        expect(isPublicPhrase('std::vector iterator')).toBe(true)
+        expect(isPublicPhrase('依存性　注入')).toBe(true)
+        expect(isPublicPhrase('HTTP/1.1 semantics')).toBe(true)
+        expect(isPublicPhrase('https://example.com/docs context')).toBe(false)
+        expect(isPublicPhrase('example.com/docs context')).toBe(false)
+        expect(isPublicPhrase('first\nsecond line')).toBe(false)
+    })
+
     it('sends only the phrase to the fixed endpoint and returns up to three safe source excerpts', async () => {
         const fetcher = vi
             .fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>()

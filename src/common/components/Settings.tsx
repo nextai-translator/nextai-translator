@@ -2116,10 +2116,11 @@ export function InnerSettings({
         [isTauri, onSave, setSettings, refreshThemeType, t, trackTauriEvent]
     )
 
+    const isOptionsPage = utils.isBrowserExtensionOptions()
     const onFinishFailed = useCallback(
         async ({ outOfDate, values: submittedValues }: { outOfDate: boolean; values: ISettings }) => {
             const { enablePublicPhraseLookup } = submittedValues
-            if (!utils.isBrowserExtensionOptions() || outOfDate || enablePublicPhraseLookup === undefined) {
+            if (outOfDate || enablePublicPhraseLookup === undefined) {
                 return
             }
 
@@ -2631,7 +2632,7 @@ export function InnerSettings({
                     paddingBottom: utils.isBrowserExtensionOptions() ? 0 : undefined,
                 }}
                 onFinish={onSubmit}
-                onFinishFailed={onFinishFailed}
+                onFinishFailed={isOptionsPage ? onFinishFailed : undefined}
                 initialValues={values}
                 onValuesChange={onChange}
             >
@@ -3636,7 +3637,7 @@ export function InnerSettings({
                         <FormItem name='autoTranslate' label={t('Auto Translate')}>
                             <AutoTranslateCheckbox onBlur={onBlur} />
                         </FormItem>
-                        {!isDesktopApp && !utils.isUserscript() && (
+                        {isOptionsPage && (
                             <FormItem
                                 name='enablePublicPhraseLookup'
                                 label={t('Public phrase lookup')}

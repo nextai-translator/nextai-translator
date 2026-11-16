@@ -2,7 +2,7 @@ import { getOptionsPageUrl, getPopupPageUrl } from './common'
 import { expect, test } from './fixtures'
 
 const endpoint = 'https://mcp.parallel.ai/mcp'
-const phrase = 'HTTP conditional requests'
+const phrase = 'HTTP/1.1 conditional requests'
 const privateText = 'Private text in the translator'
 const sourceTitle = 'RFC 9110: HTTP Semantics'
 const sourceUrl = 'https://www.rfc-editor.org/rfc/rfc9110.html#name-conditional-requests'
@@ -88,10 +88,12 @@ test('looks up only the public phrase explicitly submitted from the popup', asyn
     await expect(search).toBeDisabled()
     await input.fill('依赖注入')
     await expect(search).toBeEnabled()
+    await input.fill('依存性　注入')
+    await expect(search).toBeEnabled()
     await input.fill(phrase)
     await expect(search).toBeEnabled()
     expect(requestMethods).toEqual([])
-    await search.click()
+    await input.press('Enter')
 
     await expect(dialog.getByRole('link', { name: sourceTitle })).toHaveAttribute('href', sourceUrl)
     await expect(dialog.getByText(excerpt, { exact: true })).toBeVisible()
@@ -115,6 +117,15 @@ test('looks up only the public phrase explicitly submitted from the popup', asyn
     await expect(input).toHaveValue('')
     await expect(dialog.getByText(excerpt, { exact: true })).toHaveCount(0)
     expect(searchBodies).toHaveLength(1)
+})
+
+test('keeps the lookup preference in Options when the popup opens first-run settings', async ({
+    page,
+    extensionId,
+}) => {
+    await page.goto(getPopupPageUrl(extensionId))
+    await expect(page.getByRole('button', { name: 'Go back', exact: true })).toBeVisible()
+    await expect(page.getByRole('checkbox', { name: 'Public phrase lookup', exact: true })).toHaveCount(0)
 })
 
 test('saves the lookup preference without requiring a translation provider key', async ({ page, extensionId }) => {

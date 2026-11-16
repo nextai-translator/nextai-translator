@@ -7,6 +7,8 @@ const ENDPOINT = 'https://mcp.parallel.ai/mcp'
 const PROTOCOL_VERSION = '2025-03-26'
 const CLEANUP_TIMEOUT_MS = 1500
 const SSE_MAX_BYTES = 256 * 1024
+const TERM = /^@?[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*(?:(?:\/|::)[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*)*$/u
+const HOST_WITH_PATH = /[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+\//u
 
 type WordSegmenter = new (
     locales?: string | string[],
@@ -30,14 +32,16 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 
 export function isPublicPhrase(phrase: string): boolean {
     const text = phrase.trim()
+    const terms = text.split(/\p{Zs}+/u)
     if (
         text.length > PUBLIC_PHRASE_MAX_LENGTH ||
-        !/^@?[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*(?: +@?[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*)*$/u.test(text) ||
-        !/\p{L}/u.test(text)
+        /[\r\n\u2028\u2029]/u.test(phrase) ||
+        !/\p{L}/u.test(text) ||
+        terms.some((term) => !TERM.test(term) || HOST_WITH_PATH.test(term))
     ) {
         return false
     }
-    if (text.includes(' ')) {
+    if (terms.length > 1) {
         return true
     }
     // These scripts can form phrases without separating words with spaces.
