@@ -251,5 +251,17 @@
     "{{voice}} is ready": "{{voice}} is ready",
     "Failed to download {{voice}}": "Failed to download {{voice}}",
     "Back": "Back",
-    "Forward": "Forward"
+    "Forward": "Forward",
+    "Public phrase lookup": "Public phrase lookup",
+    "Public phrase lookup preference saved": "Public phrase lookup preference saved",
+    "Could not save the public phrase lookup preference. Try again.": "Could not save the public phrase lookup preference. Try again.",
+    "Show a manual lookup button for short public technical phrases": "Show a manual lookup button for short public technical phrases",
+    "Look up public phrase": "Look up public phrase",
+    "Public phrase": "Public phrase",
+    "Search with Parallel": "Search with Parallel",
+    "Only enter public terms. Search sends this phrase to Parallel.": "Only enter public terms. Search sends this phrase to Parallel.",
+    "Looking up sources…": "Looking up sources…",
+    "No sources found": "No sources found",
+    "Could not look up sources. Try again.": "Could not look up sources. Try again.",
+    "Parallel privacy policy": "Parallel privacy policy"
 }

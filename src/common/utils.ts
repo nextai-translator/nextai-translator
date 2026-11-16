@@ -132,6 +132,7 @@ const settingKeys: Record<keyof ISettings, number> = {
     claudeThinking: 1,
     claudeThinkingLevel: 1,
     useCompactLookup: 1,
+    enablePublicPhraseLookup: 1,
 }
 
 export async function getSettings(): Promise<ISettings> {
