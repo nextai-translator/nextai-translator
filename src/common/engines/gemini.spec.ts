@@ -16,6 +16,7 @@ vi.mock('../utils', () => ({
     })),
 }))
 
+import { fetchSSE } from '../utils'
 import { Gemini, resolveGeminiThinkingConfig } from './gemini'
 
 const jsonResponse = (status: number, body: unknown) => ({
@@ -239,5 +240,76 @@ describe('Gemini capability cache without storage.local', () => {
         expect(models.map((m) => m.id)).toEqual(['gemini-2.5-flash'])
         expect(syncSet).not.toHaveBeenCalled()
         vi.doUnmock('../utils')
+    })
+})
+
+describe('Gemini.sendMessage stream', () => {
+    const eventsFor = (chunks: unknown[]) => {
+        vi.mocked(fetchSSE).mockImplementationOnce(async (_url, options) => {
+            const onMessage = (options as { onMessage: (msg: string) => Promise<void> }).onMessage
+            for (const chunk of chunks) {
+                await onMessage(JSON.stringify(chunk))
+            }
+        })
+    }
+
+    const send = async (chunks: unknown[]) => {
+        eventsFor(chunks)
+        const onMessage = vi.fn().mockResolvedValue(undefined)
+        const onError = vi.fn()
+        const onFinished = vi.fn()
+        await new Gemini().sendMessage({
+            rolePrompt: 'You are a translator',
+            commandPrompt: 'Translate hello',
+            modelOverride: 'gemini-2.5-flash',
+            onMessage,
+            onError,
+            onFinished,
+            signal: new AbortController().signal,
+        })
+        return { onMessage, onError, onFinished }
+    }
+
+    it('keeps a STOP chunk that still carries text, and finishes as stop', async () => {
+        const { onMessage, onError, onFinished } = await send([
+            {
+                candidates: [
+                    {
+                        content: { parts: [{ text: '你好' }], role: 'model' },
+                        finishReason: 'STOP',
+                    },
+                ],
+            },
+        ])
+        expect(onMessage).toHaveBeenCalledWith({ content: '你好', role: '' })
+        expect(onFinished).toHaveBeenCalledWith('stop')
+        expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('emits the last text segment when it shares a chunk with MAX_TOKENS', async () => {
+        const { onMessage, onError, onFinished } = await send([
+            { candidates: [{ content: { parts: [{ text: '你好' }], role: 'model' } }] },
+            {
+                candidates: [
+                    {
+                        content: { parts: [{ text: '世界' }], role: 'model' },
+                        finishReason: 'MAX_TOKENS',
+                    },
+                ],
+            },
+        ])
+        expect(onMessage.mock.calls.map((call) => call[0].content)).toEqual(['你好', '世界'])
+        expect(onFinished).toHaveBeenCalledWith('max_tokens')
+        expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('finishes a STOP candidate that has no content instead of throwing', async () => {
+        const { onMessage, onError, onFinished } = await send([
+            { candidates: [{ content: { parts: [{ text: '你好' }], role: 'model' } }] },
+            { candidates: [{ finishReason: 'STOP', index: 0 }] },
+        ])
+        expect(onMessage).toHaveBeenCalledWith({ content: '你好', role: '' })
+        expect(onFinished).toHaveBeenCalledWith('stop')
+        expect(onError).not.toHaveBeenCalled()
     })
 })
