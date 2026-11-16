@@ -1128,11 +1128,13 @@ interface MyCheckboxProps {
     value?: boolean
     onChange?: (value: boolean) => void
     onBlur?: () => void
+    label?: string
 }
 
-function MyCheckbox({ value, onChange, onBlur }: MyCheckboxProps) {
+function MyCheckbox({ value, onChange, onBlur, label }: MyCheckboxProps) {
     return (
         <Checkbox
+            aria-label={label}
             checkmarkType='toggle_round'
             checked={value}
             onChange={(e) => {
@@ -3604,6 +3606,15 @@ export function InnerSettings({
                         <FormItem name='autoTranslate' label={t('Auto Translate')}>
                             <AutoTranslateCheckbox onBlur={onBlur} />
                         </FormItem>
+                        {!isDesktopApp && !utils.isUserscript() && (
+                            <FormItem
+                                name='enablePublicPhraseLookup'
+                                label={t('Public phrase lookup')}
+                                caption={t('Show a manual lookup button for short public technical phrases')}
+                            >
+                                <MyCheckbox onBlur={onBlur} label={t('Public phrase lookup')} />
+                            </FormItem>
+                        )}
                         <FormItem
                             style={{
                                 display: isDesktopApp ? 'block' : 'none',

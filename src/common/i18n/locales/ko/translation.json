@@ -248,5 +248,15 @@
     "Preview unavailable": "미리보기를 사용할 수 없습니다",
     "Source: Wiktionary": "출처: 위키낱말사전",
     "Back": "뒤로",
-    "Forward": "앞으로"
+    "Forward": "앞으로",
+    "Public phrase lookup": "공개 용어 검색",
+    "Show a manual lookup button for short public technical phrases": "짧은 공개 기술 용어를 직접 검색하는 버튼을 표시합니다",
+    "Look up public phrase": "공개 용어 찾아보기",
+    "Public phrase": "공개 용어",
+    "Search with Parallel": "Parallel로 검색",
+    "Only enter public terms. Search sends this phrase to Parallel.": "공개된 용어만 입력하세요. 검색하면 이 용어가 Parallel로 전송됩니다.",
+    "Looking up sources…": "출처 검색 중…",
+    "No sources found": "출처를 찾지 못했습니다",
+    "Could not look up sources. Try again.": "출처를 검색할 수 없습니다. 다시 시도해 주세요.",
+    "Parallel privacy policy": "Parallel 개인정보 처리방침"
 }

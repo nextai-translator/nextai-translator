@@ -251,5 +251,15 @@
     "{{voice}} is ready": "{{voice}}已就绪",
     "Failed to download {{voice}}": "{{voice}}下载失败",
     "Back": "后退",
-    "Forward": "前进"
+    "Forward": "前进",
+    "Public phrase lookup": "公开术语查询",
+    "Show a manual lookup button for short public technical phrases": "显示用于手动查询简短公开技术术语的按钮",
+    "Look up public phrase": "查询公开术语",
+    "Public phrase": "公开术语",
+    "Search with Parallel": "使用 Parallel 搜索",
+    "Only enter public terms. Search sends this phrase to Parallel.": "请仅输入公开术语。搜索时会将该术语发送给 Parallel。",
+    "Looking up sources…": "正在查找来源…",
+    "No sources found": "未找到来源",
+    "Could not look up sources. Try again.": "无法查找来源，请重试。",
+    "Parallel privacy policy": "Parallel 隐私政策"
 }

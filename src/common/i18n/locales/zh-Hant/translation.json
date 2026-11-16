@@ -249,5 +249,15 @@
     "{{voice}} is ready": "{{voice}}已就緒",
     "Failed to download {{voice}}": "{{voice}}下載失敗",
     "Back": "後退",
-    "Forward": "前進"
+    "Forward": "前進",
+    "Public phrase lookup": "公開術語查詢",
+    "Show a manual lookup button for short public technical phrases": "顯示用於手動查詢簡短公開技術術語的按鈕",
+    "Look up public phrase": "查詢公開術語",
+    "Public phrase": "公開術語",
+    "Search with Parallel": "使用 Parallel 搜尋",
+    "Only enter public terms. Search sends this phrase to Parallel.": "請僅輸入公開術語。搜尋時會將該術語傳送給 Parallel。",
+    "Looking up sources…": "正在尋找來源…",
+    "No sources found": "找不到來源",
+    "Could not look up sources. Try again.": "無法尋找來源，請再試一次。",
+    "Parallel privacy policy": "Parallel 隱私權政策"
 }

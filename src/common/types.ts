@@ -160,4 +160,5 @@ export interface ISettings {
     claudeThinking: boolean
     claudeThinkingLevel: 'low' | 'medium' | 'high'
     useCompactLookup?: boolean
+    enablePublicPhraseLookup?: boolean
 }

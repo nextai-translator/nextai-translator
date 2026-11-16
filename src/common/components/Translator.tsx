@@ -99,6 +99,7 @@ import {
 } from '../services/promotion'
 import { usePromotionShowed } from '../hooks/usePromotionShowed'
 import { SpeakerIcon } from './SpeakerIcon'
+import { PublicPhraseLookupButton } from './PublicPhraseLookup'
 import { HoverableText, WordHoverProvider } from './WordHoverCard'
 import { Provider, engineIcons, getEngine, providerToEngine } from '../engines'
 import color from 'color'
@@ -595,6 +596,7 @@ export interface IInnerTranslatorProps {
     writing?: boolean
     autoFocus?: boolean
     showSettingsIcon?: boolean
+    showPublicPhraseLookup?: boolean
     showSettings?: boolean
     defaultShowSettings?: boolean
     containerStyle?: React.CSSProperties
@@ -2745,6 +2747,9 @@ function InnerTranslator(props: IInnerTranslatorProps) {
                                 )}
                             </Dropzone>
                             <div className={styles.actionButtonsContainer}>
+                                {!showSettings &&
+                                    props.showPublicPhraseLookup &&
+                                    settings.enablePublicPhraseLookup === true && <PublicPhraseLookupButton />}
                                 <>
                                     <Tooltip content={t('Upload an image for OCR translation')} placement='bottom'>
                                         <Dropzone onDrop={onDrop}>
