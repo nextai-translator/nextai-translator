@@ -253,6 +253,8 @@
     "Back": "Back",
     "Forward": "Forward",
     "Public phrase lookup": "Public phrase lookup",
+    "Public phrase lookup preference saved": "Public phrase lookup preference saved",
+    "Could not save the public phrase lookup preference. Try again.": "Could not save the public phrase lookup preference. Try again.",
     "Show a manual lookup button for short public technical phrases": "Show a manual lookup button for short public technical phrases",
     "Look up public phrase": "Look up public phrase",
     "Public phrase": "Public phrase",

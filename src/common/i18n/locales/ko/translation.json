@@ -250,6 +250,8 @@
     "Back": "뒤로",
     "Forward": "앞으로",
     "Public phrase lookup": "공개 용어 검색",
+    "Public phrase lookup preference saved": "공개 용어 검색 설정을 저장했습니다",
+    "Could not save the public phrase lookup preference. Try again.": "공개 용어 검색 설정을 저장할 수 없습니다. 다시 시도해 주세요.",
     "Show a manual lookup button for short public technical phrases": "짧은 공개 기술 용어를 직접 검색하는 버튼을 표시합니다",
     "Look up public phrase": "공개 용어 찾아보기",
     "Public phrase": "공개 용어",

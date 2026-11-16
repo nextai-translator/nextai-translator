@@ -231,6 +231,8 @@
     "Back": "Geri",
     "Forward": "İleri",
     "Public phrase lookup": "Herkese açık terim arama",
+    "Public phrase lookup preference saved": "Herkese açık terim arama tercihi kaydedildi",
+    "Could not save the public phrase lookup preference. Try again.": "Herkese açık terim arama tercihi kaydedilemedi. Tekrar deneyin.",
     "Show a manual lookup button for short public technical phrases": "Herkese açık kısa teknik terimleri elle aramak için bir düğme göster",
     "Look up public phrase": "Herkese açık terim ara",
     "Public phrase": "Herkese açık terim",

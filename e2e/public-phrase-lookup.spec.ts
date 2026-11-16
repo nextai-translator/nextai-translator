@@ -86,6 +86,8 @@ test('looks up only the public phrase explicitly submitted from the popup', asyn
     const search = dialog.getByRole('button', { name: 'Search with Parallel', exact: true })
     await expect(input).toHaveValue('')
     await expect(search).toBeDisabled()
+    await input.fill('依赖注入')
+    await expect(search).toBeEnabled()
     await input.fill(phrase)
     await expect(search).toBeEnabled()
     expect(requestMethods).toEqual([])
@@ -113,4 +115,36 @@ test('looks up only the public phrase explicitly submitted from the popup', asyn
     await expect(input).toHaveValue('')
     await expect(dialog.getByText(excerpt, { exact: true })).toHaveCount(0)
     expect(searchBodies).toHaveLength(1)
+})
+
+test('saves the lookup preference without requiring a translation provider key', async ({ page, extensionId }) => {
+    await page.goto(getOptionsPageUrl(extensionId))
+    const toggle = page.getByRole('checkbox', { name: 'Public phrase lookup', exact: true })
+    const save = page.getByRole('button', { name: 'Save', exact: true })
+    const readSettings = () => page.evaluate(() => chrome.storage.sync.get(['apiKeys', 'enablePublicPhraseLookup']))
+
+    await expect(toggle).not.toBeChecked()
+    expect(await readSettings()).toEqual({})
+    await toggle.locator('..').click()
+    await expect(toggle).toBeChecked()
+    expect(await readSettings()).toEqual({})
+    await save.click()
+
+    await expect(page.getByText('API Key is required', { exact: true })).toBeVisible()
+    await expect.poll(readSettings).toEqual({ enablePublicPhraseLookup: true })
+
+    await page.goto(getPopupPageUrl(extensionId))
+    await page.getByRole('button', { name: 'Go back', exact: true }).click()
+    await page.getByRole('button', { name: 'Look up public phrase', exact: true }).click()
+    await expect(page.getByRole('dialog').getByLabel('Public phrase', { exact: true })).toHaveValue('')
+
+    await page.goto(getOptionsPageUrl(extensionId))
+    await expect(toggle).toBeChecked()
+    await toggle.locator('..').click()
+    await save.click()
+    await expect.poll(readSettings).toEqual({ enablePublicPhraseLookup: false })
+
+    await page.goto(getPopupPageUrl(extensionId))
+    await page.getByRole('button', { name: 'Go back', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Look up public phrase', exact: true })).toHaveCount(0)
 })

@@ -230,6 +230,8 @@
     "Back": "ย้อนกลับ",
     "Forward": "ไปข้างหน้า",
     "Public phrase lookup": "ค้นหาคำศัพท์ที่เผยแพร่สาธารณะ",
+    "Public phrase lookup preference saved": "บันทึกการตั้งค่าการค้นหาคำศัพท์สาธารณะแล้ว",
+    "Could not save the public phrase lookup preference. Try again.": "บันทึกการตั้งค่าการค้นหาคำศัพท์สาธารณะไม่ได้ โปรดลองอีกครั้ง",
     "Show a manual lookup button for short public technical phrases": "แสดงปุ่มสำหรับค้นหาคำศัพท์ทางเทคนิคสั้น ๆ ที่เผยแพร่สาธารณะด้วยตนเอง",
     "Look up public phrase": "ค้นหาคำศัพท์ที่เผยแพร่สาธารณะ",
     "Public phrase": "คำศัพท์ที่เผยแพร่สาธารณะ",

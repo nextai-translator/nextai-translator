@@ -2116,10 +2116,39 @@ export function InnerSettings({
         [isTauri, onSave, setSettings, refreshThemeType, t, trackTauriEvent]
     )
 
+    const onFinishFailed = useCallback(
+        async ({ outOfDate, values: submittedValues }: { outOfDate: boolean; values: ISettings }) => {
+            const { enablePublicPhraseLookup } = submittedValues
+            if (!utils.isBrowserExtensionOptions() || outOfDate || enablePublicPhraseLookup === undefined) {
+                return
+            }
+
+            // Lookup works before a translation provider is configured. Keep
+            // invalid provider settings unsaved and persist only this preference.
+            try {
+                const oldSettings = await utils.getSettings()
+                if ((oldSettings.enablePublicPhraseLookup === true) === enablePublicPhraseLookup) {
+                    return
+                }
+                await utils.setSettings({ enablePublicPhraseLookup })
+                setPrevValues((previous) => ({ ...previous, enablePublicPhraseLookup }))
+                setSettings({ ...oldSettings, enablePublicPhraseLookup })
+                toast.success(t('Public phrase lookup preference saved'))
+            } catch {
+                toast.error(t('Could not save the public phrase lookup preference. Try again.'))
+            }
+        },
+        [setSettings, t]
+    )
+
     const onBlur = useCallback(async () => {
-        if (values.apiKeys && !_.isEqual(values, prevValues)) {
-            await utils.setSettings(values)
-            setPrevValues(values)
+        const autoSaveValues = _.omit(values, 'enablePublicPhraseLookup')
+        if (values.apiKeys && !_.isEqual(autoSaveValues, _.omit(prevValues, 'enablePublicPhraseLookup'))) {
+            await utils.setSettings(autoSaveValues)
+            setPrevValues((previous) => ({
+                ...autoSaveValues,
+                enablePublicPhraseLookup: previous.enablePublicPhraseLookup,
+            }))
         }
     }, [prevValues, values])
 
@@ -2602,6 +2631,7 @@ export function InnerSettings({
                     paddingBottom: utils.isBrowserExtensionOptions() ? 0 : undefined,
                 }}
                 onFinish={onSubmit}
+                onFinishFailed={onFinishFailed}
                 initialValues={values}
                 onValuesChange={onChange}
             >
@@ -3612,7 +3642,7 @@ export function InnerSettings({
                                 label={t('Public phrase lookup')}
                                 caption={t('Show a manual lookup button for short public technical phrases')}
                             >
-                                <MyCheckbox onBlur={onBlur} label={t('Public phrase lookup')} />
+                                <MyCheckbox label={t('Public phrase lookup')} />
                             </FormItem>
                         )}
                         <FormItem

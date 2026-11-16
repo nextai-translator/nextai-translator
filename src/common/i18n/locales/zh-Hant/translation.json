@@ -251,6 +251,8 @@
     "Back": "後退",
     "Forward": "前進",
     "Public phrase lookup": "公開術語查詢",
+    "Public phrase lookup preference saved": "公開術語查詢設定已儲存",
+    "Could not save the public phrase lookup preference. Try again.": "無法儲存公開術語查詢設定，請再試一次。",
     "Show a manual lookup button for short public technical phrases": "顯示用於手動查詢簡短公開技術術語的按鈕",
     "Look up public phrase": "查詢公開術語",
     "Public phrase": "公開術語",

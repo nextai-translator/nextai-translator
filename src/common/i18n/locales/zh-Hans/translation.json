@@ -253,6 +253,8 @@
     "Back": "后退",
     "Forward": "前进",
     "Public phrase lookup": "公开术语查询",
+    "Public phrase lookup preference saved": "公开术语查询设置已保存",
+    "Could not save the public phrase lookup preference. Try again.": "无法保存公开术语查询设置，请重试。",
     "Show a manual lookup button for short public technical phrases": "显示用于手动查询简短公开技术术语的按钮",
     "Look up public phrase": "查询公开术语",
     "Public phrase": "公开术语",

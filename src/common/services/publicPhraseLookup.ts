@@ -8,6 +8,14 @@ const PROTOCOL_VERSION = '2025-03-26'
 const CLEANUP_TIMEOUT_MS = 1500
 const SSE_MAX_BYTES = 256 * 1024
 
+type WordSegmenter = new (
+    locales?: string | string[],
+    options?: { granularity: 'word' }
+) => { segment: (text: string) => Iterable<{ isWordLike?: boolean }> }
+
+const Segmenter = (Intl as unknown as { Segmenter?: WordSegmenter }).Segmenter
+const wordSegmenter = Segmenter && new Segmenter(undefined, { granularity: 'word' })
+
 interface PublicPhraseSource {
     url: string
     title: string
@@ -22,11 +30,22 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 
 export function isPublicPhrase(phrase: string): boolean {
     const text = phrase.trim()
-    return (
-        text.length <= PUBLIC_PHRASE_MAX_LENGTH &&
-        /^@?[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*(?: +@?[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*)+$/u.test(text) &&
-        /\p{L}/u.test(text)
-    )
+    if (
+        text.length > PUBLIC_PHRASE_MAX_LENGTH ||
+        !/^@?[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*(?: +@?[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*)*$/u.test(text) ||
+        !/\p{L}/u.test(text)
+    ) {
+        return false
+    }
+    if (text.includes(' ')) {
+        return true
+    }
+    // These scripts can form phrases without separating words with spaces.
+    if (!wordSegmenter || !/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}]/u.test(text)) {
+        return false
+    }
+    const words = wordSegmenter.segment(text)
+    return Array.from(words).filter(({ isWordLike }) => isWordLike).length > 1
 }
 
 function readSources(value: unknown): PublicPhraseSource[] {
