@@ -38,14 +38,42 @@ describe('public phrase lookup', () => {
         expect(isPublicPhrase(`CSS ${'a'.repeat(PUBLIC_PHRASE_MAX_LENGTH)}`)).toBe(false)
     })
 
-    it('accepts technical separators and localized spaces in phrases without allowing URLs', () => {
-        expect(isPublicPhrase('C# async/await')).toBe(true)
-        expect(isPublicPhrase('std::vector iterator')).toBe(true)
-        expect(isPublicPhrase('依存性　注入')).toBe(true)
-        expect(isPublicPhrase('HTTP/1.1 semantics')).toBe(true)
-        expect(isPublicPhrase('https://example.com/docs context')).toBe(false)
-        expect(isPublicPhrase('example.com/docs context')).toBe(false)
-        expect(isPublicPhrase('first\nsecond line')).toBe(false)
+    it.each([
+        'C# async/await',
+        'std::vector iterator',
+        '依存性　注入',
+        'HTTP/1.1 semantics',
+        '.NET runtime',
+        'ASP.NET Core',
+        'Node.js streams',
+        'std::vector<T> iterator',
+        '@scope/package exports',
+        'C++: smart pointers',
+        'What is dependency injection?',
+        'l’injection de dépendances',
+        '「依存性注入」とは？',
+        `CSS ${'a'.repeat(PUBLIC_PHRASE_MAX_LENGTH - 4)}`,
+    ])('accepts the technical phrase %s', (phrase) => {
+        expect(isPublicPhrase(phrase)).toBe(true)
+    })
+
+    it.each([
+        'https://example.com/docs context',
+        'https:example.com context',
+        'read,https:example.com context',
+        'example.com/docs context',
+        'example.com./docs context',
+        'example.com:8080/docs context',
+        'example.com#section context',
+        '//example.com/docs context',
+        '/docs context',
+        '../docs context',
+        'first\nsecond line',
+        'first\u2028second line',
+        'container ++',
+        '.NET',
+    ])('rejects restricted phrase input %j', (phrase) => {
+        expect(isPublicPhrase(phrase)).toBe(false)
     })
 
     it('sends only the phrase to the fixed endpoint and returns up to three safe source excerpts', async () => {
@@ -142,6 +170,26 @@ describe('public phrase lookup', () => {
         ])
         expect(cancel).toHaveBeenCalledOnce()
         expect(fetcher).toHaveBeenCalledTimes(3)
+    })
+
+    it.each(['application/json', 'text/event-stream'])('bounds the bytes read for %s responses', async (type) => {
+        const result = { structuredContent: { results: [{ ...source, excerpts: ['é'.repeat(140_000)] }] } }
+        const json = JSON.stringify({ jsonrpc: '2.0', id: 2, result })
+        const bytes = new TextEncoder().encode(type === 'text/event-stream' ? `data: ${json}\n\n` : json)
+        const body = new ReadableStream({
+            start(controller) {
+                controller.enqueue(bytes.slice(0, 150_000))
+                controller.enqueue(bytes.slice(150_000))
+                controller.close()
+            },
+        })
+        const fetcher = vi
+            .fn<Parameters<typeof fetch>, ReturnType<typeof fetch>>()
+            .mockResolvedValueOnce(initialized())
+            .mockResolvedValueOnce(new Response(null, { status: 202 }))
+            .mockResolvedValueOnce(new Response(body, { headers: { 'Content-Type': type } }))
+
+        await expect(lookupPublicPhrase(PHRASE, new AbortController().signal, fetcher)).rejects.toThrow('too large')
     })
 
     it('does not start a request for invalid input or an already-aborted search', async () => {

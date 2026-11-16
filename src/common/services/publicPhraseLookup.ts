@@ -6,9 +6,11 @@ export const PUBLIC_PHRASE_MAX_LENGTH = 100
 const ENDPOINT = 'https://mcp.parallel.ai/mcp'
 const PROTOCOL_VERSION = '2025-03-26'
 const CLEANUP_TIMEOUT_MS = 1500
-const SSE_MAX_BYTES = 256 * 1024
-const TERM = /^@?[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*(?:(?:\/|::)[\p{L}\p{N}][\p{L}\p{N}\p{M}._+#-]*)*$/u
-const HOST_WITH_PATH = /[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+\//u
+const RESPONSE_MAX_BYTES = 256 * 1024
+const NON_PHRASE_CHARACTER = /[^\p{L}\p{N}\p{M}\p{Zs}\p{Ps}\p{Pe}\p{Pi}\p{Pf}._+#@/:'"!?¿¡,，、。！？：・<>-]/u
+const URL_PREFIX = /\/\/|(?:^|[\p{Zs}\p{Ps}\p{Pi}<'",])\.{0,2}\/|[a-z][a-z\d+.-]*:(?![:\p{Zs}]|$)/iu
+const HOST_WITH_URL_SUFFIX = /[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+\.?(?:\/|:\d|[?#](?=[\p{L}\p{N}]))/u
+const EMAIL_LIKE = /[\p{L}\p{N}._+-]+@[\p{L}\p{N}-]+\.[\p{L}\p{N}-]+/u
 
 type WordSegmenter = new (
     locales?: string | string[],
@@ -32,16 +34,17 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 
 export function isPublicPhrase(phrase: string): boolean {
     const text = phrase.trim()
-    const terms = text.split(/\p{Zs}+/u)
     if (
         text.length > PUBLIC_PHRASE_MAX_LENGTH ||
-        /[\r\n\u2028\u2029]/u.test(phrase) ||
+        NON_PHRASE_CHARACTER.test(phrase) ||
         !/\p{L}/u.test(text) ||
-        terms.some((term) => !TERM.test(term) || HOST_WITH_PATH.test(term))
+        URL_PREFIX.test(text) ||
+        HOST_WITH_URL_SUFFIX.test(text) ||
+        EMAIL_LIKE.test(text)
     ) {
         return false
     }
-    if (terms.length > 1) {
+    if (text.split(/\p{Zs}+/u).filter((part) => /[\p{L}\p{N}]/u.test(part)).length > 1) {
         return true
     }
     // These scripts can form phrases without separating words with spaces.
@@ -100,21 +103,30 @@ function readSources(value: unknown): PublicPhraseSource[] {
     return sources
 }
 
-async function readSseResponse(response: Response, id: number): Promise<unknown> {
+async function readResult(response: Response, id: number): Promise<unknown> {
+    const type = response.headers.get('content-type')?.split(';')[0].trim().toLowerCase()
+    if (type !== 'application/json' && type !== 'text/event-stream') {
+        void response.body?.cancel().catch(() => undefined)
+        throw new Error('Unexpected public phrase search response type')
+    }
     const reader = response.body?.getReader()
     if (!reader) {
         throw new Error('Missing public phrase search response')
     }
     const decoder = new TextDecoder()
+    let json = ''
     let message: Record<string, unknown> | undefined
-    const parser = createParser((event) => {
-        if (event.type === 'event' && !message) {
-            const candidate = asRecord(JSON.parse(event.data))
-            if (candidate?.id === id) {
-                message = candidate
-            }
-        }
-    })
+    const parser =
+        type === 'text/event-stream'
+            ? createParser((event) => {
+                  if (event.type === 'event' && !message) {
+                      const candidate = asRecord(JSON.parse(event.data))
+                      if (candidate?.id === id) {
+                          message = candidate
+                      }
+                  }
+              })
+            : undefined
     let bytes = 0
     try {
         while (!message) {
@@ -123,25 +135,24 @@ async function readSseResponse(response: Response, id: number): Promise<unknown>
                 break
             }
             bytes += value.byteLength
-            if (bytes > SSE_MAX_BYTES) {
+            if (bytes > RESPONSE_MAX_BYTES) {
                 throw new Error('Public phrase search response was too large')
             }
-            parser.feed(decoder.decode(value, { stream: true }))
+            const chunk = decoder.decode(value, { stream: true })
+            if (parser) {
+                parser.feed(chunk)
+            } else {
+                json += chunk
+            }
         }
-        return message
     } finally {
         void reader.cancel().catch(() => undefined)
         reader.releaseLock()
     }
-}
 
-async function readResult(response: Response, id: number): Promise<unknown> {
-    const type = response.headers.get('content-type')?.split(';')[0].toLowerCase()
-    if (type !== 'application/json' && type !== 'text/event-stream') {
-        void response.body?.cancel().catch(() => undefined)
-        throw new Error('Unexpected public phrase search response type')
+    if (!parser) {
+        message = asRecord(JSON.parse(json + decoder.decode()))
     }
-    const message = asRecord(type === 'application/json' ? await response.json() : await readSseResponse(response, id))
     if (message?.jsonrpc !== '2.0' || message.id !== id || 'error' in message || !('result' in message)) {
         throw new Error('Invalid public phrase search response')
     }
