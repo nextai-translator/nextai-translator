@@ -61,8 +61,10 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+      # Pinned: Rust 1.100 no longer compiles screenshots 0.7.3 on Linux (never-type
+      # inference change, rust-lang/rust#148922). Unpin once that dependency is replaced.
+      - name: Install Rust 1.99.1
+        uses: dtolnay/rust-toolchain@1.99.1
 
       - name: install frontend dependencies
         run: pnpm install --no-frozen-lockfile # change this to npm or pnpm depending on which one you use
@@ -124,10 +126,11 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
-      # Stable, not nightly: nightly's never-type fallback change breaks the
-      # screenshots crate's Linux code (`!: ReadAll`), failing the Linux build.
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+      # Pinned: the never-type fallback change that reached stable in Rust 1.100
+      # (rust-lang/rust#148922) breaks screenshots 0.7.3 on Linux (`!: ReadAll`).
+      # Unpin once that dependency is replaced.
+      - name: Install Rust 1.99.1
+        uses: dtolnay/rust-toolchain@1.99.1
         with:
           targets: ${{ matrix.config.rust_target }}
 
@@ -253,8 +256,10 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+      # Pinned: Rust 1.100 no longer compiles screenshots 0.7.3 on Linux (never-type
+      # inference change, rust-lang/rust#148922). Unpin once that dependency is replaced.
+      - name: Install Rust 1.99.1
+        uses: dtolnay/rust-toolchain@1.99.1
 
       - name: Get version
         id: get_version
