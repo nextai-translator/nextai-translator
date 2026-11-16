@@ -34,9 +34,11 @@ export class Ollama extends AbstractOpenAI {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async getBaseRequestBody(): Promise<Record<string, any>> {
+    async getBaseRequestBody(modelParam?: string): Promise<Record<string, any>> {
         const settings = await getSettings()
-        const body = await super.getBaseRequestBody()
+        // sendMessage passes the per-action model here. Dropping the argument
+        // made every action use settings.ollamaAPIModel.
+        const body = await super.getBaseRequestBody(modelParam)
         return {
             ...body,
             // eslint-disable-next-line camelcase

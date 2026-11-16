@@ -485,5 +485,35 @@ describe('AbstractOpenAI', () => {
             await engine.sendMessage(req)
             expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
         })
+
+        it('sends the per-action model instead of the saved Ollama model', async () => {
+            // Action Model is passed as modelOverride. Ollama's request body
+            // used to ignore it and keep settings.ollamaAPIModel.
+            vi.mocked(getSettings).mockResolvedValue({
+                thinkingEnabled: false,
+                ollamaAPIURL: 'http://localhost:11434',
+                ollamaAPIModel: 'llama2',
+                ollamaModelLifetimeInMemory: '5m',
+            } as never)
+            const engine = new Ollama()
+            const { req } = createMessageRequest()
+            req.modelOverride = 'qwen3'
+
+            vi.mocked(fetchSSE).mockImplementationOnce(async (input: string, options: MockFetchSSEOptions) => {
+                expect(input).toBe('http://localhost:11434/v1/chat/completions')
+                const payload = JSON.parse(options.body as string)
+                expect(payload.model).toBe('qwen3')
+                expect(payload.keep_alive).toBe('5m')
+                await options.onMessage(
+                    JSON.stringify({
+                        // eslint-disable-next-line camelcase
+                        choices: [{ delta: {}, finish_reason: 'stop' }],
+                    })
+                )
+            })
+
+            await engine.sendMessage(req)
+            expect(vi.mocked(fetchSSE)).toHaveBeenCalled()
+        })
     })
 })
