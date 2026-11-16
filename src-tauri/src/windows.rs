@@ -265,7 +265,8 @@ pub fn get_thumb_window(x: i32, y: i32) -> tauri::WebviewWindow {
                 use windows::Win32::UI::WindowsAndMessaging::{
                     SetWindowLongPtrW, GWL_STYLE, WS_POPUP,
                 };
-                let hwnd = window.hwnd().unwrap();
+                // Tauri's hwnd() comes from its own `windows` version, which may differ from ours.
+                let hwnd = windows::Win32::Foundation::HWND(window.hwnd().unwrap().0);
                 unsafe {
                     // let mut style = GetWindowLongPtrW(hwnd, GWL_STYLE);
                     // style = style & !(0x00020000 | 0x00010000 | 0x00080000); // WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU
