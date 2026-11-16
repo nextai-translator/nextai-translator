@@ -47,6 +47,8 @@
     "Go to the": "前往",
     "OpenAI page": "OpenAI 頁面",
     "MiniMax page": "MiniMax 頁面",
+    "Global": "國際",
+    "Mainland China": "中國大陸",
     "to get your API Key. You can separate multiple API Keys with English commas to achieve quota doubling and load balancing.": "以取得您的 API 金鑰。您可以使用英文逗號來分隔多個 API 金鑰，進而達到配額加倍和負載平衡的效果。",
     "to get your API Key.": "以取得您的 API 金鑰。",
     "to get your Group ID.": "以取得您的群組 ID。",

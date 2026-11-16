@@ -40,6 +40,8 @@
     "Go to the": "",
     "OpenAI page": "OpenAIのページ",
     "MiniMax page": "MiniMaxのページ",
+    "Global": "グローバル",
+    "Mainland China": "中国本土",
     "to get your API Key. You can separate multiple API Keys with English commas to achieve quota doubling and load balancing.": "にアクセスして、APIキーを取得してください。複数のAPIキーをカンマで区切ることで、利用制限を緩和し、システムへの負荷を軽減することができます。",
     "to get your API Key.": "にアクセスして、APIキーを取得してください。",
     "to get your Group ID.": "にアクセスして、グループIDを取得してください。",

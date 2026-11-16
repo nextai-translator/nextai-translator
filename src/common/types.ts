@@ -70,6 +70,7 @@ export interface ISettings {
     miniMaxGroupID: string
     miniMaxAPIKey: string
     miniMaxAPIModel: string
+    miniMaxAPIURL: string
     geminiAPIURL: string
     geminiAPIKey: string
     geminiAPIModel: string

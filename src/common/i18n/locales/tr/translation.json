@@ -40,6 +40,8 @@
     "Go to the": "Şuraya git:",
     "OpenAI page": "OpenAI sayfası",
     "MiniMax page": "MiniMax sayfası",
+    "Global": "Küresel",
+    "Mainland China": "Çin anakarası",
     "to get your API Key. You can separate multiple API Keys with English commas to achieve quota doubling and load balancing.": "API Anahtarınızı almak için. Kota ikiye katlamak ve yük dengelemesi için birden fazla API Anahtarını İngilizce virgüllerle ayırabilirsiniz.",
     "to get your API Key.": "API Anahtarınızı almak için.",
     "to get your Group ID.": "Grup Kimliğinizi almak için.",

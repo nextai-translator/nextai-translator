@@ -39,6 +39,8 @@
     "Go to the": "ไปยัง",
     "OpenAI page": "หน้า OpenAI",
     "MiniMax page": "หน้า MiniMax",
+    "Global": "ทั่วโลก",
+    "Mainland China": "จีนแผ่นดินใหญ่",
     "to get your API Key. You can separate multiple API Keys with English commas to achieve quota doubling and load balancing.": "ในการรับ API Key ของคุณ คุณสามารถแยก API Key หลายคีย์ ด้วยเครื่องหมายจุลภาคหรือคอมม่า (,) เพื่อทำให้ได้รับโควต้าสองเท่าและการจัดสรรภาระงาน",
     "to get your API Key.": "ในการรับ API Key ของคุณ",
     "to get your Group ID.": "ในการรับ Group ID ของคุณ",

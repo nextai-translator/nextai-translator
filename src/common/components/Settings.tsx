@@ -234,6 +234,33 @@ function LanguageDetectionEngineSelector({ value, onChange, onBlur }: ILanguageD
     )
 }
 
+interface IMiniMaxAPIURLSelectorProps {
+    value?: string
+    onChange?: (value: string) => void
+    onBlur?: () => void
+}
+
+function MiniMaxAPIURLSelector({ value, onChange, onBlur }: IMiniMaxAPIURLSelectorProps) {
+    const { t } = useTranslation()
+
+    return (
+        <Select
+            size='compact'
+            onBlur={onBlur}
+            searchable={false}
+            clearable={false}
+            value={[{ id: value || utils.miniMaxGlobalAPIURL }]}
+            onChange={(params) => {
+                onChange?.(params.value[0].id as string)
+            }}
+            options={[
+                { label: `${t('Global')} (api.minimax.io)`, id: utils.miniMaxGlobalAPIURL },
+                { label: `${t('Mainland China')} (api.minimaxi.com)`, id: utils.miniMaxChinaAPIURL },
+            ]}
+        />
+    )
+}
+
 interface IThinkingLevelSelectorProps {
     value?: string
     onChange?: (value: string) => void
@@ -3263,6 +3290,13 @@ export function InnerSettings({
                             }}
                         >
                             <FormItem
+                                name='miniMaxAPIURL'
+                                label={t('API URL')}
+                                required={values.provider === 'MiniMax'}
+                            >
+                                <MiniMaxAPIURLSelector onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
                                 required={values.provider === 'MiniMax'}
                                 name='miniMaxAPIKey'
                                 label='MiniMax API Key'
@@ -3271,7 +3305,11 @@ export function InnerSettings({
                                         {t('Go to the')}{' '}
                                         <a
                                             target='_blank'
-                                            href='https://platform.minimaxi.com/user-center/basic-information/interface-key'
+                                            href={
+                                                values.miniMaxAPIURL === utils.miniMaxChinaAPIURL
+                                                    ? 'https://platform.minimaxi.com/user-center/basic-information/interface-key'
+                                                    : 'https://platform.minimax.io/user-center/basic-information/interface-key'
+                                            }
                                             rel='noreferrer'
                                             style={linkStyle}
                                         >
