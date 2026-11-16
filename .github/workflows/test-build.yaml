@@ -25,8 +25,9 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+      # Pinned with release.yaml: Rust 1.100 no longer compiles screenshots 0.7.3 on Linux.
+      - name: install Rust 1.99.1
+        uses: dtolnay/rust-toolchain@1.99.1
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-latest'
