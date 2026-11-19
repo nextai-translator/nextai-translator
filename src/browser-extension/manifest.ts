@@ -52,6 +52,8 @@ export function getManifest(browser: 'firefox' | 'chromium') {
         },
 
         host_permissions: [
+            'http://127.0.0.1/*',
+            'http://localhost/*',
             'https://*.openai.com/',
             'https://*.openai.azure.com/',
             'https://*.ingest.sentry.io/',
