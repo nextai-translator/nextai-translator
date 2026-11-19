@@ -1540,6 +1540,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
               { label: 'LiteLLM', id: 'LiteLLM' },
+              { label: `Rapid-MLX (${t('Local Model')})`, id: 'RapidMLX' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -1562,6 +1563,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
               { label: 'LiteLLM', id: 'LiteLLM' },
+              { label: `Rapid-MLX (${t('Local Model')})`, id: 'RapidMLX' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -2115,7 +2117,7 @@ export function InnerSettings({
     )
 
     const onBlur = useCallback(async () => {
-        if (values.apiKeys && !_.isEqual(values, prevValues)) {
+        if ((values.apiKeys || values.provider === 'RapidMLX') && !_.isEqual(values, prevValues)) {
             await utils.setSettings(values)
             setPrevValues(values)
         }
@@ -3520,6 +3522,39 @@ export function InnerSettings({
                                     provider='LiteLLM'
                                     currentProvider={values.provider}
                                     apiKey={values.liteLLMAPIKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'RapidMLX' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'RapidMLX'}
+                                name='rapidMLXAPIURL'
+                                label={t('API URL')}
+                                caption='Rapid-MLX base URL including /v1, e.g. http://127.0.0.1:8000/v1'
+                            >
+                                <Input autoFocus size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='rapidMLXAPIKey'
+                                label={t('API Key')}
+                                caption='Optional: leave blank unless Rapid-MLX was started with --api-key.'
+                            >
+                                <Input type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='rapidMLXAPIModel'
+                                label={t('API Model')}
+                                required={values.provider === 'RapidMLX'}
+                            >
+                                <APIModelSelector
+                                    provider='RapidMLX'
+                                    currentProvider={values.provider}
+                                    apiKey={values.rapidMLXAPIKey}
                                     onBlur={onBlur}
                                 />
                             </FormItem>
