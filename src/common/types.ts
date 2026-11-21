@@ -153,6 +153,9 @@ export interface ISettings {
     liteLLMAPIURL: string
     liteLLMAPIKey: string
     liteLLMAPIModel: string
+    openLLMAPIURL: string
+    openLLMAPIKey: string
+    openLLMAPIModel: string
     fontSize: number
     uiFontSize: number
     iconSize: number

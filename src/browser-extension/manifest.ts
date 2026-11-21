@@ -71,6 +71,7 @@ export function getManifest(browser: 'firefox' | 'chromium') {
             'https://*.cohere.ai/',
             'https://*.deepseek.com/',
             'https://api.dictionaryapi.dev/',
+            'https://www.openllm.sh/',
         ],
     }
 
