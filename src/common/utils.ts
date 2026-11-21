@@ -125,6 +125,9 @@ const settingKeys: Record<keyof ISettings, number> = {
     liteLLMAPIURL: 1,
     liteLLMAPIKey: 1,
     liteLLMAPIModel: 1,
+    openLLMAPIURL: 1,
+    openLLMAPIKey: 1,
+    openLLMAPIModel: 1,
     fontSize: 1,
     uiFontSize: 1,
     iconSize: 1,
@@ -254,6 +257,9 @@ export async function getSettings(): Promise<ISettings> {
     }
     if (!settings.liteLLMAPIURL) {
         settings.liteLLMAPIURL = 'http://localhost:4000'
+    }
+    if (!settings.openLLMAPIURL) {
+        settings.openLLMAPIURL = 'https://www.openllm.sh'
     }
     if (!settings.claudeAPIURL) {
         settings.claudeAPIURL = 'https://api.anthropic.com'
@@ -681,6 +687,8 @@ export function getAPIKeyForProvider(provider: string, settings: ISettings): str
             return settings.openRouterAPIKey
         case 'LiteLLM':
             return settings.liteLLMAPIKey
+        case 'OpenLLM':
+            return settings.openLLMAPIKey
         case 'Moonshot':
             return settings.moonshotAPIKey
         case 'MiniMax':
