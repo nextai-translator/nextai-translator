@@ -1540,6 +1540,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
               { label: 'LiteLLM', id: 'LiteLLM' },
+              { label: 'OpenLLM', id: 'OpenLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -1562,6 +1563,7 @@ export function ProviderSelector({ value, onChange, hasPromotion }: IProviderSel
               { label: 'TeamoRouter', id: 'TeamoRouter' },
               { label: 'OpenRouter', id: 'OpenRouter' },
               { label: 'LiteLLM', id: 'LiteLLM' },
+              { label: 'OpenLLM', id: 'OpenLLM' },
               { label: 'Claude', id: 'Claude' },
               { label: `Kimi (${t('Free')})`, id: 'Kimi' },
               { label: `${t('ChatGLM')} (${t('Free')})`, id: 'ChatGLM' },
@@ -3520,6 +3522,39 @@ export function InnerSettings({
                                     provider='LiteLLM'
                                     currentProvider={values.provider}
                                     apiKey={values.liteLLMAPIKey}
+                                    onBlur={onBlur}
+                                />
+                            </FormItem>
+                        </div>
+                        <div
+                            style={{
+                                display: values.provider === 'OpenLLM' ? 'block' : 'none',
+                            }}
+                        >
+                            <FormItem
+                                required={values.provider === 'OpenLLM'}
+                                name='openLLMAPIURL'
+                                label={t('API URL')}
+                                caption='https://www.openllm.sh for the cloud endpoint, or http://127.0.0.1:8787 for the local OpenLLM daemon'
+                            >
+                                <Input autoFocus size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='openLLMAPIKey'
+                                label='OpenLLM API Key'
+                                caption='Your sk-llm-... key from openllm.sh. Leave blank for the local daemon.'
+                            >
+                                <Input type='password' size='compact' onBlur={onBlur} />
+                            </FormItem>
+                            <FormItem
+                                name='openLLMAPIModel'
+                                label={t('API Model')}
+                                required={values.provider === 'OpenLLM'}
+                            >
+                                <APIModelSelector
+                                    provider='OpenLLM'
+                                    currentProvider={values.provider}
+                                    apiKey={values.openLLMAPIKey}
                                     onBlur={onBlur}
                                 />
                             </FormItem>

@@ -33,6 +33,8 @@ import { OpenRouterIcon } from '@/common/components/icons/OpenRouterIcon'
 import { OpenRouter } from './openrouter'
 import { LiteLLMIcon } from '@/common/components/icons/LiteLLMIcon'
 import { LiteLLM } from './litellm'
+import { OpenLLMIcon } from '@/common/components/icons/OpenLLMIcon'
+import { OpenLLM } from './openllm'
 
 export type Provider =
     | 'OpenAI'
@@ -52,6 +54,7 @@ export type Provider =
     | 'TeamoRouter'
     | 'OpenRouter'
     | 'LiteLLM'
+    | 'OpenLLM'
 
 export const engineIcons: Record<Provider, IconType> = {
     OpenAI: RiOpenaiFill,
@@ -71,6 +74,7 @@ export const engineIcons: Record<Provider, IconType> = {
     TeamoRouter: TeamoRouterIcon,
     OpenRouter: OpenRouterIcon,
     LiteLLM: LiteLLMIcon,
+    OpenLLM: OpenLLMIcon,
 }
 
 export const providerToEngine: Record<Provider, { new (): IEngine }> = {
@@ -91,6 +95,7 @@ export const providerToEngine: Record<Provider, { new (): IEngine }> = {
     TeamoRouter: TeamoRouter,
     OpenRouter: OpenRouter,
     LiteLLM: LiteLLM,
+    OpenLLM: OpenLLM,
 }
 
 export function getEngine(provider: Provider): IEngine {
