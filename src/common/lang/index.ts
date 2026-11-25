@@ -102,18 +102,22 @@ export function getLangName(langCode: string): string {
 /**
  * Target language when the UI follows "default target language" for translate mode.
  * Avoids source === target (e.g. Japanese input with Japanese as default → Japanese output).
- * Chinese variants still map to English. If source equals default target, uses
- * {@link writingTargetLanguage} when it differs from source, otherwise English.
+ * Chinese input uses English when the configured default is also Chinese.
+ * Other matching source and default languages use {@link writingTargetLanguage}
+ * when it differs from source, otherwise English.
  */
 export function pickTranslateAutoTargetLang(
     sourceLang: LangCode,
     defaultTargetLanguage: LangCode | string | undefined,
     writingTargetLanguage: LangCode | string | undefined
 ): LangCode {
-    if (sourceLang === 'zh-Hans' || sourceLang === 'zh-Hant') {
+    const defaultTarget = (defaultTargetLanguage as LangCode | undefined) ?? 'en'
+    if (
+        (sourceLang === 'zh-Hans' || sourceLang === 'zh-Hant') &&
+        (defaultTarget === 'zh-Hans' || defaultTarget === 'zh-Hant')
+    ) {
         return 'en'
     }
-    const defaultTarget = (defaultTargetLanguage as LangCode | undefined) ?? 'en'
     if (sourceLang !== defaultTarget) {
         return defaultTarget
     }

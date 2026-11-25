@@ -2,9 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { pickTranslateAutoTargetLang } from './index'
 
 describe('pickTranslateAutoTargetLang', () => {
-    it('maps Chinese variants to English', () => {
-        expect(pickTranslateAutoTargetLang('zh-Hans', 'ja', 'ja')).toBe('en')
-        expect(pickTranslateAutoTargetLang('zh-Hant', 'ja', 'ja')).toBe('en')
+    it.each(['zh-Hans', 'zh-Hant'] as const)('uses the configured Korean target for %s', (sourceLang) => {
+        expect(pickTranslateAutoTargetLang(sourceLang, 'ko', 'ja')).toBe('ko')
+    })
+
+    it.each(['zh-Hans', 'zh-Hant'] as const)('uses English for Chinese input with a %s default', (defaultTarget) => {
+        expect(pickTranslateAutoTargetLang('zh-Hans', defaultTarget, 'ja')).toBe('en')
+        expect(pickTranslateAutoTargetLang('zh-Hant', defaultTarget, 'ja')).toBe('en')
     })
 
     it('uses default target when source differs', () => {
