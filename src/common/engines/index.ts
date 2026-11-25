@@ -33,6 +33,8 @@ import { OpenRouterIcon } from '@/common/components/icons/OpenRouterIcon'
 import { OpenRouter } from './openrouter'
 import { LiteLLMIcon } from '@/common/components/icons/LiteLLMIcon'
 import { LiteLLM } from './litellm'
+import { AtlasCloudIcon } from '@/common/components/icons/AtlasCloudIcon'
+import { AtlasCloud } from './atlascloud'
 
 export type Provider =
     | 'OpenAI'
@@ -52,6 +54,7 @@ export type Provider =
     | 'TeamoRouter'
     | 'OpenRouter'
     | 'LiteLLM'
+    | 'AtlasCloud'
 
 export const engineIcons: Record<Provider, IconType> = {
     OpenAI: RiOpenaiFill,
@@ -71,6 +74,7 @@ export const engineIcons: Record<Provider, IconType> = {
     TeamoRouter: TeamoRouterIcon,
     OpenRouter: OpenRouterIcon,
     LiteLLM: LiteLLMIcon,
+    AtlasCloud: AtlasCloudIcon,
 }
 
 export const providerToEngine: Record<Provider, { new (): IEngine }> = {
@@ -91,6 +95,7 @@ export const providerToEngine: Record<Provider, { new (): IEngine }> = {
     TeamoRouter: TeamoRouter,
     OpenRouter: OpenRouter,
     LiteLLM: LiteLLM,
+    AtlasCloud: AtlasCloud,
 }
 
 export function getEngine(provider: Provider): IEngine {
