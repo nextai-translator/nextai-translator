@@ -251,5 +251,17 @@
     "{{voice}} is ready": "{{voice}} está pronta",
     "Failed to download {{voice}}": "Falha ao baixar {{voice}}",
     "Back": "Voltar",
-    "Forward": "Avançar"
+    "Forward": "Avançar",
+    "Public phrase lookup": "Busca de termos públicos",
+    "Public phrase lookup preference saved": "Preferência de busca de termos públicos salva",
+    "Could not save the public phrase lookup preference. Try again.": "Não foi possível salvar a preferência de busca de termos públicos. Tente novamente.",
+    "Show a manual lookup button for short public technical phrases": "Mostra um botão para pesquisar manualmente termos técnicos públicos e curtos",
+    "Look up public phrase": "Pesquisar termo público",
+    "Public phrase": "Termo público",
+    "Search with Parallel": "Pesquisar com o Parallel",
+    "Only enter public terms. Search sends this phrase to Parallel.": "Digite apenas termos públicos. A pesquisa envia este termo ao Parallel.",
+    "Looking up sources…": "Buscando fontes…",
+    "No sources found": "Nenhuma fonte encontrada",
+    "Could not look up sources. Try again.": "Não foi possível buscar fontes. Tente novamente.",
+    "Parallel privacy policy": "Política de privacidade do Parallel"
 }

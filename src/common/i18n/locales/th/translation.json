@@ -228,5 +228,17 @@
     "{{voice}} is ready": "{{voice}} พร้อมใช้งานแล้ว",
     "Failed to download {{voice}}": "ดาวน์โหลด {{voice}} ไม่สำเร็จ",
     "Back": "ย้อนกลับ",
-    "Forward": "ไปข้างหน้า"
+    "Forward": "ไปข้างหน้า",
+    "Public phrase lookup": "ค้นหาคำศัพท์ที่เผยแพร่สาธารณะ",
+    "Public phrase lookup preference saved": "บันทึกการตั้งค่าการค้นหาคำศัพท์สาธารณะแล้ว",
+    "Could not save the public phrase lookup preference. Try again.": "บันทึกการตั้งค่าการค้นหาคำศัพท์สาธารณะไม่ได้ โปรดลองอีกครั้ง",
+    "Show a manual lookup button for short public technical phrases": "แสดงปุ่มสำหรับค้นหาคำศัพท์ทางเทคนิคสั้น ๆ ที่เผยแพร่สาธารณะด้วยตนเอง",
+    "Look up public phrase": "ค้นหาคำศัพท์ที่เผยแพร่สาธารณะ",
+    "Public phrase": "คำศัพท์ที่เผยแพร่สาธารณะ",
+    "Search with Parallel": "ค้นหาด้วย Parallel",
+    "Only enter public terms. Search sends this phrase to Parallel.": "ป้อนเฉพาะคำศัพท์ที่เผยแพร่สาธารณะเท่านั้น เมื่อค้นหา ระบบจะส่งคำศัพท์นี้ไปยัง Parallel",
+    "Looking up sources…": "กำลังค้นหาแหล่งอ้างอิง…",
+    "No sources found": "ไม่พบแหล่งอ้างอิง",
+    "Could not look up sources. Try again.": "ไม่สามารถค้นหาแหล่งอ้างอิงได้ โปรดลองอีกครั้ง",
+    "Parallel privacy policy": "นโยบายความเป็นส่วนตัวของ Parallel"
 }

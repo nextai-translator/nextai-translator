@@ -229,5 +229,17 @@
     "{{voice}} is ready": "{{voice}} hazır",
     "Failed to download {{voice}}": "{{voice}} indirilemedi",
     "Back": "Geri",
-    "Forward": "İleri"
+    "Forward": "İleri",
+    "Public phrase lookup": "Herkese açık terim arama",
+    "Public phrase lookup preference saved": "Herkese açık terim arama tercihi kaydedildi",
+    "Could not save the public phrase lookup preference. Try again.": "Herkese açık terim arama tercihi kaydedilemedi. Tekrar deneyin.",
+    "Show a manual lookup button for short public technical phrases": "Herkese açık kısa teknik terimleri elle aramak için bir düğme göster",
+    "Look up public phrase": "Herkese açık terim ara",
+    "Public phrase": "Herkese açık terim",
+    "Search with Parallel": "Parallel ile ara",
+    "Only enter public terms. Search sends this phrase to Parallel.": "Yalnızca herkese açık terimler girin. Arama yaptığınızda bu terim Parallel’e gönderilir.",
+    "Looking up sources…": "Kaynaklar aranıyor…",
+    "No sources found": "Kaynak bulunamadı",
+    "Could not look up sources. Try again.": "Kaynaklar aranamadı. Tekrar deneyin.",
+    "Parallel privacy policy": "Parallel gizlilik politikası"
 }

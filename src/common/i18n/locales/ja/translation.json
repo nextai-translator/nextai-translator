@@ -229,5 +229,17 @@
     "{{voice}} is ready": "{{voice}}の準備ができました",
     "Failed to download {{voice}}": "{{voice}}のダウンロードに失敗しました",
     "Back": "戻る",
-    "Forward": "進む"
+    "Forward": "進む",
+    "Public phrase lookup": "公開されている用語の検索",
+    "Public phrase lookup preference saved": "公開用語の検索設定を保存しました",
+    "Could not save the public phrase lookup preference. Try again.": "公開用語の検索設定を保存できませんでした。もう一度お試しください。",
+    "Show a manual lookup button for short public technical phrases": "公開されている短い技術用語を手動で検索するボタンを表示します",
+    "Look up public phrase": "公開されている用語を調べる",
+    "Public phrase": "公開されている用語",
+    "Search with Parallel": "Parallel で検索",
+    "Only enter public terms. Search sends this phrase to Parallel.": "公開されている用語のみを入力してください。検索すると、入力した用語が Parallel に送信されます。",
+    "Looking up sources…": "出典を検索しています…",
+    "No sources found": "出典が見つかりませんでした",
+    "Could not look up sources. Try again.": "出典を検索できませんでした。もう一度お試しください。",
+    "Parallel privacy policy": "Parallel のプライバシーポリシー"
 }
