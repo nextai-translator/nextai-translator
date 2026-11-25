@@ -125,6 +125,9 @@ const settingKeys: Record<keyof ISettings, number> = {
     liteLLMAPIURL: 1,
     liteLLMAPIKey: 1,
     liteLLMAPIModel: 1,
+    rapidMLXAPIURL: 1,
+    rapidMLXAPIKey: 1,
+    rapidMLXAPIModel: 1,
     fontSize: 1,
     uiFontSize: 1,
     iconSize: 1,
@@ -251,6 +254,9 @@ export async function getSettings(): Promise<ISettings> {
     }
     if (!settings.groqAPIURLPath) {
         settings.groqAPIURLPath = '/openai/v1/chat/completions'
+    }
+    if (!settings.rapidMLXAPIURL) {
+        settings.rapidMLXAPIURL = 'http://127.0.0.1:8000/v1'
     }
     if (!settings.liteLLMAPIURL) {
         settings.liteLLMAPIURL = 'http://localhost:4000'
@@ -679,6 +685,8 @@ export function getAPIKeyForProvider(provider: string, settings: ISettings): str
             return settings.teamoRouterAPIKey
         case 'OpenRouter':
             return settings.openRouterAPIKey
+        case 'RapidMLX':
+            return settings.rapidMLXAPIKey
         case 'LiteLLM':
             return settings.liteLLMAPIKey
         case 'Moonshot':

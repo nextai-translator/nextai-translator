@@ -154,6 +154,10 @@ For details, see [Desktop Clip Extension](./CLIP-EXTENSIONS.md)
 
 3. Refresh the page in the browser to enjoy the smooth translation experience 🎉!
 
+## Configure Rapid-MLX
+
+Use a local Apple Silicon model with no API key. See the [Rapid-MLX setup guide](docs/rapid-mlx.md), including the required browser extension CORS flag.
+
 ## Configure Azure OpenAI Service
 
 ```ts
