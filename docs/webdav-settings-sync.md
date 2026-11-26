@@ -1,7 +1,7 @@
 # WebDAV settings sync
 
 1. Open **Settings → WebDAV Sync** in the desktop app or on the browser extension's options page.
-2. Enter the full URL of a settings file in an existing WebDAV folder, such as `https://dav.example.com/remote.php/dav/files/me/nextai-settings.json`. If your server requires Basic authentication, enter the username and password or app password.
+2. Enter the full URL of a settings file in an existing WebDAV folder. For example, the [Nutstore WebDAV endpoint](https://help.jianguoyun.com/?p=5677) is `https://dav.jianguoyun.com/dav/`. If your sync folder is named `NextAI`, enter `https://dav.jianguoyun.com/dav/NextAI/nextai-settings.json` and use your Nutstore email and [third-party app password](https://help.jianguoyun.com/?p=2064).
 3. Enter an encryption passphrase and select **Sync now**. In the browser, grant access to the WebDAV host when prompted.
 4. Use the same file URL and passphrase on every device. Select **Sync now** after saving changes or to pull settings changed elsewhere.
 
@@ -14,7 +14,7 @@ The server must support HTTPS, `GET`, conditional `PUT`, and strong `ETag` respo
 # WebDAV 设置同步
 
 1. 在桌面端设置或浏览器扩展的选项页中打开 **设置 → WebDAV 同步**。
-2. 输入现有 WebDAV 目录中设置文件的完整 URL，例如 `https://dav.example.com/remote.php/dav/files/me/nextai-settings.json`。服务器如需 Basic 身份验证，请填写用户名和密码或应用专用密码。
+2. 输入现有 WebDAV 目录中设置文件的完整 URL。[坚果云的 WebDAV 入口](https://help.jianguoyun.com/?p=5677)是 `https://dav.jianguoyun.com/dav/`。例如，同步文件夹名为 `NextAI` 时，填写 `https://dav.jianguoyun.com/dav/NextAI/nextai-settings.json`，并使用坚果云账号邮箱和[第三方应用密码](https://help.jianguoyun.com/?p=2064)。
 3. 输入加密口令并点击 **立即同步**。浏览器弹出权限提示时，允许访问 WebDAV 服务器。
 4. 在每台设备上使用相同的文件 URL 和口令。保存设置后或需要获取其他设备的修改时，点击 **立即同步**。
 

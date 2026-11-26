@@ -138,7 +138,7 @@ export function WebDAVSettings({ disabled, applySettings }: Props) {
                     id='webdav-url'
                     type='url'
                     value={connection.url}
-                    placeholder='https://dav.example.com/nextai-settings.json'
+                    placeholder='https://dav.jianguoyun.com/dav/NextAI/nextai-settings.json'
                     onChange={(event) => edit('url', event.currentTarget.value)}
                     disabled={loading}
                 />
