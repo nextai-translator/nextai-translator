@@ -72,6 +72,10 @@ import { CUSTOM_MODEL_ID } from '../constants'
 import { filterModelOptions } from './model-option-filter'
 import { isMacOS } from '../utils'
 import NumberInput from './NumberInput'
+import { WebDAVSettings } from './WebDAVSettings'
+import { settingKeys } from '../settings-schema'
+import { SyncError, type SettingsSnapshot } from '../webdav-sync'
+import { isActionSettings } from '../webdav-action-settings'
 import { DurationPicker } from './DurationPicker'
 import {
     getRecommendedOpenAIAPIPath,
@@ -1999,7 +2003,7 @@ export function InnerSettings({
 
     const { refreshThemeType } = useThemeType()
 
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
 
     const [loading, setLoading] = useState(false)
     const { settings, setSettings } = useSettings()
@@ -2114,6 +2118,36 @@ export function InnerSettings({
         [isTauri, onSave, setSettings, refreshThemeType, t, trackTauriEvent]
     )
 
+    const applySyncedSettings = useCallback(
+        async ({ actionSettings, ...changes }: SettingsSnapshot) => {
+            if (!_.isEqual(valuesRef.current, prevValuesRef.current)) {
+                throw new SyncError('local-changed')
+            }
+            const oldSettings = await utils.getSettings()
+            if (isActionSettings(actionSettings)) {
+                changes.defaultTranslateMode = await actionService.applySyncedActions(actionSettings)
+            }
+            if (isTauri && Object.prototype.hasOwnProperty.call(changes, 'runAtStartup')) {
+                const { enable, disable } = await import('@tauri-apps/plugin-autostart')
+                await (changes.runAtStartup ? enable() : disable())
+            }
+            await utils.setSettings(changes)
+            const synced = await utils.getSettings()
+            // The form's usual merge would retain members deleted from nested settings.
+            form.setFields(settingKeys.map((name) => ({ name, value: synced[name] })))
+            setValues(synced)
+            setPrevValues(synced)
+            setSettings(synced)
+            refreshThemeType()
+            if (synced.i18n !== oldSettings.i18n) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await (i18n as any).changeLanguage(synced.i18n)
+            }
+            onSave?.(oldSettings)
+        },
+        [form, i18n, isTauri, onSave, refreshThemeType, setSettings]
+    )
+
     const onBlur = useCallback(async () => {
         if (values.apiKeys && !_.isEqual(values, prevValues)) {
             await utils.setSettings(values)
@@ -2164,6 +2198,7 @@ export function InnerSettings({
     const [showBuyMeACoffee, setShowBuyMeACoffee] = useState(false)
 
     const [activeTab, setActiveTab] = useState('general')
+    const showWebDAV = isTauri || utils.isBrowserExtensionOptions()
 
     const [isScrolled, setIsScrolled] = useState(window.scrollY > 0)
 
@@ -2522,6 +2557,7 @@ export function InnerSettings({
                             },
                         }}
                     />
+                    {showWebDAV && <Tab title={t('WebDAV Sync')} key='webdav' overrides={tabOverrides} />}
                 </Tabs>
             </nav>
             {headerPromotion && !headerPromotionNeverDisplay && (
@@ -2591,11 +2627,20 @@ export function InnerSettings({
                     </a>
                 </div>
             )}
+            {showWebDAV && (
+                <div hidden={activeTab !== 'webdav'} style={{ padding: '20px 25px' }}>
+                    <WebDAVSettings
+                        disabled={loading || !_.isEqual(values, prevValues)}
+                        applySettings={applySyncedSettings}
+                    />
+                </div>
+            )}
             <Form
                 autoComplete='off'
                 autoCapitalize='off'
                 form={form}
                 style={{
+                    display: activeTab === 'webdav' ? 'none' : undefined,
                     padding: '20px 25px',
                     paddingBottom: utils.isBrowserExtensionOptions() ? 0 : undefined,
                 }}

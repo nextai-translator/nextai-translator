@@ -165,6 +165,10 @@ const API_URL_PATH = `/openai/deployments/${deployName}/chat/completions?api-ver
 - deployName: Your Azure OpenAI Service model deploy name, you can change your model here.
 - api-version: 2023-05-15, or newer. (supported api-version can be found at [Azure's official doc](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference#completions))
 
+## WebDAV settings sync
+
+Sync settings and custom actions from the desktop app or browser extension options. See the [WebDAV setup guide](docs/webdav-settings-sync.md).
+
 # License
 
 [LICENSE](./LICENSE)

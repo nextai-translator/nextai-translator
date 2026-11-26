@@ -8,6 +8,7 @@ import { parse as bestEffortJSONParse } from 'best-effort-json-parser'
 import { commands } from '@/tauri/bindings'
 import { OPENAI_CHAT_COMPLETIONS_API_PATH, OPENAI_PREFERRED_DEFAULT_MODEL } from './openai-api-path'
 import { FetchStreamTimings, markPerf, recordPerfServerTimings } from './perf'
+import { settingKeys } from './settings-schema'
 
 export const defaultAPIURL = 'https://api.openai.com'
 export const defaultAPIURLPath = OPENAI_CHAT_COMPLETIONS_API_PATH
@@ -41,104 +42,13 @@ export async function getAzureApiKey(): Promise<string> {
     return apiKeys[Math.floor(Math.random() * apiKeys.length)] ?? ''
 }
 
-// In order to let the type system remind you that all keys have been passed to browser.storage.sync.get(keys)
-const settingKeys: Record<keyof ISettings, number> = {
-    automaticCheckForUpdates: 1,
-    apiKeys: 1,
-    apiURL: 1,
-    apiURLPath: 1,
-    apiModel: 1,
-    provider: 1,
-    chatgptModel: 1,
-    azureAPIKeys: 1,
-    azureAPIURL: 1,
-    azureAPIURLPath: 1,
-    azureAPIModel: 1,
-    azMaxWords: 1,
-    enableMica: 1,
-    enableBackgroundBlur: 1,
-    miniMaxGroupID: 1,
-    miniMaxAPIKey: 1,
-    miniMaxAPIModel: 1,
-    miniMaxAPIURL: 1,
-    moonshotAPIKey: 1,
-    moonshotAPIModel: 1,
-    geminiAPIURL: 1,
-    geminiAPIKey: 1,
-    geminiAPIModel: 1,
-    autoTranslate: 1,
-    defaultTranslateMode: 1,
-    defaultTargetLanguage: 1,
-    alwaysShowIcons: 1,
-    hotkey: 1,
-    displayWindowHotkey: 1,
-    ocrHotkey: 1,
-    quickTranslatorHotkey: 1,
-    writingTargetLanguage: 1,
-    writingHotkey: 1,
-    writingNewlineHotkey: 1,
-    themeType: 1,
-    i18n: 1,
-    tts: 1,
-    restorePreviousPosition: 1,
-    runAtStartup: 1,
-    selectInputElementsText: 1,
-    readSelectedWordsFromInputElementsText: 1,
-    disableCollectingStatistics: 1,
-    allowUsingClipboardWhenSelectedTextNotAvailable: 1,
-    pinned: 1,
-    autoCollect: 1,
-    hideTheIconInTheDock: 1,
-    languageDetectionEngine: 1,
-    autoHideWindowWhenOutOfFocus: 1,
-    proxy: 1,
-    customModelName: 1,
-    ollamaAPIURL: 1,
-    ollamaAPIModel: 1,
-    ollamaCustomModelName: 1,
-    ollamaModelLifetimeInMemory: 1,
-    thinkingEnabled: 1,
-    groqAPIURL: 1,
-    groqAPIURLPath: 1,
-    groqAPIModel: 1,
-    groqAPIKey: 1,
-    groqCustomModelName: 1,
-    claudeAPIURL: 1,
-    claudeAPIURLPath: 1,
-    claudeAPIModel: 1,
-    claudeAPIKey: 1,
-    claudeCustomModelName: 1,
-    kimiRefreshToken: 1,
-    kimiAccessToken: 1,
-    chatglmAccessToken: 1,
-    chatglmRefreshToken: 1,
-    cohereAPIKey: 1,
-    cohereAPIModel: 1,
-    deepSeekAPIKey: 1,
-    deepSeekAPIModel: 1,
-    cerebrasAPIKey: 1,
-    cerebrasAPIModel: 1,
-    teamoRouterAPIKey: 1,
-    teamoRouterAPIModel: 1,
-    openRouterAPIKey: 1,
-    openRouterAPIModel: 1,
-    liteLLMAPIURL: 1,
-    liteLLMAPIKey: 1,
-    liteLLMAPIModel: 1,
-    fontSize: 1,
-    uiFontSize: 1,
-    iconSize: 1,
-    noModelsAPISupport: 1,
-    claudeThinking: 1,
-    claudeThinkingLevel: 1,
-    useCompactLookup: 1,
-}
-
 export async function getSettings(): Promise<ISettings> {
     const browser = await getBrowser()
-    const items = await browser.storage.sync.get(Object.keys(settingKeys))
+    const items = await browser.storage.sync.get(settingKeys)
 
-    const settings = items as ISettings
+    const settings = Object.fromEntries(
+        Object.entries(items).filter(([, value]) => value !== null && value !== undefined)
+    ) as unknown as ISettings
     if (!settings.apiKeys) {
         settings.apiKeys = ''
     }
