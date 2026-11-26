@@ -16,6 +16,7 @@ export type ActionOutputRenderingFormat = 'text' | 'markdown' | 'latex'
 
 export interface Action {
     id?: number
+    syncId?: string
     idx: number
     mode?: TranslateMode
     name: string

@@ -34,24 +34,9 @@ import { OpenRouter } from './openrouter'
 import { LiteLLMIcon } from '@/common/components/icons/LiteLLMIcon'
 import { LiteLLM } from './litellm'
 
-export type Provider =
-    | 'OpenAI'
-    | 'ChatGPT'
-    | 'Azure'
-    | 'MiniMax'
-    | 'Moonshot'
-    | 'Gemini'
-    | 'Ollama'
-    | 'Groq'
-    | 'Claude'
-    | 'Kimi'
-    | 'ChatGLM'
-    | 'Cohere'
-    | 'DeepSeek'
-    | 'Cerebras'
-    | 'TeamoRouter'
-    | 'OpenRouter'
-    | 'LiteLLM'
+import type { providers } from '../constants'
+
+export type Provider = (typeof providers)[number]
 
 export const engineIcons: Record<Provider, IconType> = {
     OpenAI: RiOpenaiFill,

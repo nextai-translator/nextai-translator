@@ -74,6 +74,8 @@ export function getManifest(browser: 'firefox' | 'chromium') {
         ],
     }
 
+    const webdavHosts = ['https://*/*', 'http://localhost/*', 'http://127.0.0.1/*']
+    Object.assign(manifest, { optional_host_permissions: webdavHosts })
     if (browser === 'firefox') {
         manifest.browser_specific_settings = {
             gecko: {

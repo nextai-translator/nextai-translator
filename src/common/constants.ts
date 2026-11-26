@@ -2,6 +2,26 @@ import { TranslateMode } from './translate'
 
 export const CUSTOM_MODEL_ID = '__custom__'
 export const PREFIX = '__yetone-nextai-translator'
+export const providers = [
+    'OpenAI',
+    'ChatGPT',
+    'Azure',
+    'MiniMax',
+    'Moonshot',
+    'Gemini',
+    'Ollama',
+    'Groq',
+    'Claude',
+    'Kimi',
+    'ChatGLM',
+    'Cohere',
+    'DeepSeek',
+    'Cerebras',
+    'TeamoRouter',
+    'OpenRouter',
+    'LiteLLM',
+] as const
+
 export const builtinActionModes: { name: string; mode: Exclude<TranslateMode, 'big-bang'>; icon: string }[] = [
     {
         name: 'Translate',

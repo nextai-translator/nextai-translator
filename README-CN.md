@@ -163,6 +163,10 @@ const API_URL_PATH = `/openai/deployments/${deployName}/chat/completions?api-ver
 - deployName: 你的 Azure OpenAI Service 模型部署名称，更改部署名称以切换模型。
 - api-version: 2023-05-15，或者更新的版本。（受支持的API version列表可以在[Azure官方文档](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference#completions)查找）
 
+## WebDAV 设置同步
+
+在桌面端或浏览器扩展的选项页同步设置与自定义操作。参见 [WebDAV 配置指南](docs/webdav-settings-sync.md#webdav-设置同步)。
+
 # License
 
 [LICENSE](./LICENSE)

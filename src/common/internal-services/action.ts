@@ -1,7 +1,9 @@
+import { v4 as uuidv4 } from 'uuid'
 import { builtinActionModes } from '../constants'
 import { Provider } from '../engines'
 import { TranslateMode } from '../translate'
 import { Action, ActionOutputRenderingFormat, getLocalDB } from './db'
+import { actionSyncId, isActionSettings, type ActionSettingsSnapshot } from '../webdav-action-settings'
 
 export interface ICreateActionOption {
     name: string
@@ -34,6 +36,7 @@ export interface IActionInternalService {
     create(opt: ICreateActionOption): Promise<Action>
     update(action: Action, opt: IUpdateActionOption): Promise<Action>
     bulkPut(actions: Action[]): Promise<void>
+    applySyncedActions(snapshot: ActionSettingsSnapshot): Promise<string | null>
     get(id: number): Promise<Action | undefined>
     getByMode(mode: string): Promise<Action | undefined>
     delete(id: number): Promise<void>
@@ -56,6 +59,7 @@ class ActionInternalService implements IActionInternalService {
                 idx: await this.db.action.count(),
                 name: opt.name,
                 mode: opt.mode,
+                syncId: opt.mode ? undefined : `custom:${uuidv4()}`,
                 icon: opt.icon,
                 rolePrompt: opt.rolePrompt,
                 commandPrompt: opt.commandPrompt,
@@ -101,6 +105,34 @@ class ActionInternalService implements IActionInternalService {
 
     async bulkPut(actions: Action[]): Promise<void> {
         await this.db.action.bulkPut(actions)
+    }
+
+    async applySyncedActions(snapshot: ActionSettingsSnapshot): Promise<string | null> {
+        if (!isActionSettings(snapshot)) {
+            throw new Error('Invalid synced actions')
+        }
+        return this.db.transaction('rw', this.db.action, async () => {
+            const existing = new Map((await this.db.action.toArray()).map((action) => [actionSyncId(action), action]))
+            const now = Date.now().toString()
+            const actions = snapshot.actions.map((action, idx): Action => {
+                const previous = existing.get(action.syncId)
+                existing.delete(action.syncId)
+                return {
+                    ...action,
+                    idx,
+                    id: previous?.id,
+                    createdAt: previous?.createdAt ?? now,
+                    updatedAt: now,
+                }
+            })
+            await this.db.action.bulkDelete(Array.from(existing.values(), (action) => action.id!))
+            const ids = await this.db.action.bulkPut(actions, { allKeys: true })
+            const selected = snapshot.actions.findIndex(({ syncId }) => syncId === snapshot.defaultAction)
+            if (selected < 0) {
+                return snapshot.defaultAction
+            }
+            return actions[selected].mode ?? String(ids[selected])
+        })
     }
 
     async get(id: number): Promise<Action | undefined> {
